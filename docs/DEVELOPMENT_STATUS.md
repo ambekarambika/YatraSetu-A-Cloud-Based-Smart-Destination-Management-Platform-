@@ -12,11 +12,14 @@ Sprint 1 — Frontend Foundation & Landing Page Setup
 * Created project root configuration and documentation (`README.md`, `.gitignore`).
 * Moved project context documentation to `docs/YatraSetu_Project_Context.md`.
 * Implemented Sprint 1 Landing Page using Vanilla HTML5, CSS3, and JavaScript (`frontend/index.html`, `frontend/css/style.css`, `frontend/js/main.js`).
-* Implemented Phase 2 Hero UI Redesign:
-  * High-resolution Kerala Indian tourism photography background (`frontend/assets/images/hero-india.jpg`).
-  * Editorial typography pairing Plus Jakarta Sans and Cormorant Garamond font.
-  * Integrated glassmorphism search bar with popular trending tags (*Maharashtra*, *Kashmir*, *Kerala*, *Rajasthan*).
-  * Refined minimal navigation bar and ecosystem snapshot stats card.
+* Implemented Phase 2 Maharashtra Cinematic Hero Redesign matching Visual Reference:
+  * Full-screen cinematic Rajgad Fort Sahyadri mountain photography background (`frontend/assets/images/hero-maharashtra.jpg`).
+  * Transparent overlay navigation bar directly over the image.
+  * Editorial destination typography (`INCREDIBLE INDIA`, `Maharashtra`, `Land of Forts, Festivals & Endless Discoveries`).
+  * Floating translucent frosted glass search bar (`Search`, `Location`, `Travel Dates`, `Travelers`, `Explore →`).
+  * Popular destination pills (`Maharashtra` active, `Kerala`, `Kashmir`, `Rajasthan`, `Goa`, `Tamil Nadu`, `Uttarakhand`, `Assam`).
+  * Bottom destination thumbnail strip (`Rajgad Fort`, `Mumbai`, `Lonavala`, `Ajanta Caves`, `Konkan`).
+  * Right-side vertical regional slide indicator (`01 Maharashtra` active, `02 South India`, `03 North India`, `04 East India`, `05 West India`).
 * Tested local HTTP serving of the landing page on `http://localhost:8000`.
 
 ## In Progress
