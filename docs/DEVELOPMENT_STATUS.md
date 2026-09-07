@@ -12,12 +12,18 @@ Sprint 1 — Frontend Foundation & Landing Page Setup
 * Created project root configuration and documentation (`README.md`, `.gitignore`).
 * Moved project context documentation to `docs/YatraSetu_Project_Context.md`.
 * Implemented Sprint 1 Landing Page using Vanilla HTML5, CSS3, and JavaScript (`frontend/index.html`, `frontend/css/style.css`, `frontend/js/main.js`).
+* Implemented Phase 2 Hero UI Redesign:
+  * High-resolution Kerala Indian tourism photography background (`frontend/assets/images/hero-india.jpg`).
+  * Editorial typography pairing Plus Jakarta Sans and Cormorant Garamond font.
+  * Integrated glassmorphism search bar with popular trending tags (*Maharashtra*, *Kashmir*, *Kerala*, *Rajasthan*).
+  * Refined minimal navigation bar and ecosystem snapshot stats card.
 * Tested local HTTP serving of the landing page on `http://localhost:8000`.
 
 ## In Progress
-* Sprint 1 frontend foundation and environment setup tracking.
+* Sprint 1 landing page visual refinement (Phase 2 Hero completed).
 
 ## Next Planned Work
+* Phase 3 / Landing Page section refinements.
 * Creation of Navigation and Login/Register UI (`frontend/login.html`, `frontend/register.html`).
 * Creation of initial Role Dashboard UI structures (`frontend/dashboards/`).
 * ER Diagram & Database Design planning before PostgreSQL implementation.

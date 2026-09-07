@@ -7,10 +7,10 @@
     <meta name="keywords" content="YatraSetu, Smart Tourism, Destination Management Platform, Cloud Tourism, Trip Planning, Visitor Analytics, Heritage Tourism">
     <title>YatraSetu — Cloud-Based Smart Destination Management Platform</title>
     
-    <!-- Google Fonts: Plus Jakarta Sans -->
+    <!-- Google Fonts: Plus Jakarta Sans & Cormorant Garamond (Editorial Travel) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- FontAwesome Icons CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -33,16 +33,17 @@
             </a>
 
             <nav class="nav-menu" id="navMenu">
-                <a href="#home" class="nav-link active">Home</a>
-                <a href="#about" class="nav-link">About</a>
-                <a href="#features" class="nav-link">Features</a>
-                <a href="#destinations" class="nav-link">Explore</a>
-                <a href="#how-it-works" class="nav-link">How It Works</a>
+                <a href="#destinations" class="nav-link">Destinations</a>
+                <a href="#features" class="nav-link">Experiences</a>
+                <a href="#how-it-works" class="nav-link">Plan Trip</a>
+                <a href="#destinations" class="nav-link">Events</a>
+                <a href="#about" class="nav-link">About Us</a>
             </nav>
 
             <div class="nav-actions">
+                <a href="#home" class="btn btn-ghost btn-sm nav-search-trigger" id="navSearchBtn"><i class="fa-solid fa-magnifying-glass"></i> Search</a>
                 <a href="login.html" class="btn btn-outline btn-sm">Log In</a>
-                <a href="register.html" class="btn btn-primary btn-sm">Get Started</a>
+                <a href="register.html" class="btn btn-primary btn-sm">Sign Up</a>
             </div>
 
             <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation menu">
@@ -58,19 +59,20 @@
         <div class="container">
             <div class="hero-grid">
                 <div class="hero-content">
-                    <div class="hero-badge">
-                        <i class="fa-solid fa-cloud"></i> Cloud-Based Smart Tourism Ecosystem
+                    <div class="hero-eyebrow">
+                        <i class="fa-solid fa-compass"></i> DISCOVER INDIA
                     </div>
                     <h1 class="hero-title">
-                        Connecting Tourists, Managers & Stakeholders in a <span class="highlight">Unified Platform</span>
+                        More than a journey,
+                        <span class="hero-subheadline">a deeper connection.</span>
                     </h1>
                     <p class="hero-description">
-                        YatraSetu addresses fragmentation in modern tourism by integrating destination management, attraction discovery, event updates, trip planning, feedback, and real-time visitor analytics.
+                        A cloud-based Smart Destination Management Platform unifying Tourists, Destination Managers, and Tourism Stakeholders into a single connected ecosystem.
                     </p>
 
                     <!-- Quick Search Box -->
                     <div class="hero-search-box">
-                        <i class="fa-solid fa-magnifying-glass" style="color: #64748B;"></i>
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
                         <input type="text" id="heroSearchInput" class="hero-search-input" placeholder="Search destinations, heritage sites, attractions...">
                         <select id="heroSearchSelect" class="hero-search-select" aria-label="Filter by destination category">
                             <option value="all">All Categories</option>
@@ -79,27 +81,40 @@
                             <option value="coastal">Coastal & Beach</option>
                             <option value="nature">Nature & Wildlife</option>
                         </select>
-                        <button id="heroSearchBtn" class="btn btn-secondary btn-sm">Search</button>
+                        <button id="heroSearchBtn" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-right"></i> Explore</button>
                     </div>
 
-                    <div class="hero-buttons" style="margin-top: 1.5rem;">
+                    <!-- Popular Trending Tags -->
+                    <div class="hero-trending">
+                        <span class="trending-label">Popular:</span>
+                        <button class="trending-tag" data-tag="Maharashtra">Maharashtra</button>
+                        <button class="trending-tag" data-tag="Kashmir">Kashmir</button>
+                        <button class="trending-tag" data-tag="Kerala">Kerala</button>
+                        <button class="trending-tag" data-tag="Rajasthan">Rajasthan</button>
+                    </div>
+
+                    <!-- Hero CTAs -->
+                    <div class="hero-buttons">
                         <a href="#destinations" class="btn btn-primary btn-lg">
-                            <i class="fa-solid fa-route"></i> Explore Destinations
+                            <i class="fa-solid fa-compass"></i> Explore Destinations
                         </a>
-                        <a href="#about" class="btn btn-outline btn-lg" style="color: white; border-color: rgba(255,255,255,0.3);">
-                            <i class="fa-solid fa-circle-info"></i> Learn Platform Scope
+                        <a href="#how-it-works" class="btn btn-outline btn-lg hero-btn-secondary">
+                            <i class="fa-solid fa-map-location-dot"></i> Plan Your Trip
                         </a>
                     </div>
                 </div>
 
-                <!-- Hero Interactive Stats Card -->
+                <!-- Hero Right-Side Showcase Card -->
                 <div class="hero-image-wrapper">
-                    <div class="hero-card-preview">
+                    <div class="hero-showcase-card">
+                        <div class="showcase-badge-top">
+                            <i class="fa-solid fa-location-dot"></i> Kerala Backwaters Highlight
+                        </div>
                         <div class="hero-card-header">
                             <div class="hero-card-title">
-                                <i class="fa-solid fa-chart-line" style="color: #2DD4BF;"></i> Live Ecosystem Snapshot
+                                <i class="fa-solid fa-chart-line" style="color: #2DD4BF;"></i> Ecosystem Snapshot
                             </div>
-                            <span class="hero-pill" style="font-size: 0.75rem; background: rgba(45, 212, 191, 0.2); color: #2DD4BF; padding: 0.2rem 0.6rem; border-radius: 99px; font-weight:700;">ACTIVE</span>
+                            <span class="hero-pill">LIVE PLATFORM</span>
                         </div>
                         <div class="hero-stats-grid">
                             <div class="hero-stat-box">
@@ -116,7 +131,7 @@
                             </div>
                             <div class="hero-stat-box">
                                 <div class="hero-stat-number">98%</div>
-                                <div class="hero-stat-label">Feedback Score</div>
+                                <div class="hero-stat-label">Verified Ratings</div>
                             </div>
                         </div>
                     </div>

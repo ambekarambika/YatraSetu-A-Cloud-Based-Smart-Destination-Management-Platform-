@@ -311,12 +311,16 @@ button, input, select {
 }
 
 /* --------------------------------------------------------------------------
-   4. Hero Section
+   4. Hero Section — Premium Indian Tourism Editorial Design
    -------------------------------------------------------------------------- */
 .hero {
     position: relative;
-    padding: 9.5rem 0 5.5rem 0;
-    background: linear-gradient(135deg, #0F172A 0%, #0F4C81 50%, #0D9488 100%);
+    padding: 9.5rem 0 6rem 0;
+    min-height: 85vh;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(to right, rgba(11, 37, 69, 0.92) 0%, rgba(15, 23, 42, 0.75) 55%, rgba(15, 23, 42, 0.45) 100%), 
+                url('../assets/images/hero-india.jpg') center/cover no-repeat;
     color: var(--text-white);
     overflow: hidden;
 }
@@ -328,56 +332,265 @@ button, input, select {
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at 80% 20%, rgba(13, 148, 136, 0.25) 0%, transparent 60%),
-                radial-gradient(circle at 20% 80%, rgba(217, 119, 6, 0.15) 0%, transparent 50%);
+    background: radial-gradient(circle at 85% 15%, rgba(217, 119, 6, 0.15) 0%, transparent 55%),
+                radial-gradient(circle at 15% 85%, rgba(13, 148, 136, 0.2) 0%, transparent 60%);
     pointer-events: none;
 }
 
 .hero-grid {
     display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
+    grid-template-columns: 1.15fr 0.85fr;
     gap: 3.5rem;
     align-items: center;
     position: relative;
     z-index: 2;
 }
 
-.hero-badge {
+/* Hero Eyebrow Tag */
+.hero-eyebrow {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background-color: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 0.4rem 1rem;
-    border-radius: var(--radius-full);
     font-size: 0.85rem;
-    font-weight: 600;
-    color: #93C5FD;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-gold);
+    background-color: rgba(217, 119, 6, 0.15);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(217, 119, 6, 0.3);
+    padding: 0.35rem 1rem;
+    border-radius: var(--radius-full);
     margin-bottom: 1.5rem;
 }
 
-.hero-badge i {
-    color: var(--accent-gold);
-}
-
+/* Hero Headline & Editorial Subheadline */
 .hero-title {
-    font-size: 3rem;
+    font-size: 3.25rem;
     font-weight: 800;
-    line-height: 1.15;
+    line-height: 1.1;
     letter-spacing: -0.03em;
     margin-bottom: 1.25rem;
+    color: var(--text-white);
 }
 
-.hero-title .highlight {
-    background: linear-gradient(120deg, #60A5FA, #2DD4BF);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+.hero-subheadline {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 2.65rem;
+    color: var(--accent-gold-light);
+    line-height: 1.2;
+    display: block;
+    margin-top: 0.35rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .hero-description {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
+    color: #E2E8F0;
+    margin-bottom: 2rem;
+    max-width: 580px;
+    line-height: 1.65;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Glassmorphism Hero Search Box */
+.hero-search-box {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(14px);
+    padding: 0.6rem 0.6rem 0.6rem 1.25rem;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.35);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    max-width: 600px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.hero-search-box .search-icon {
+    color: #64748B;
+    font-size: 1.1rem;
+}
+
+.hero-search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.hero-search-input::placeholder {
+    color: var(--text-muted);
+}
+
+.hero-search-select {
+    border: none;
+    outline: none;
+    background: #F1F5F9;
+    color: var(--text-main);
+    padding: 0.55rem 0.85rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.hero-search-select:hover {
+    background: #E2E8F0;
+}
+
+/* Hero Popular Trending Tags */
+.hero-trending {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.trending-label {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.75);
+    margin-right: 0.2rem;
+}
+
+.trending-tag {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-white);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.trending-tag:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: var(--accent-gold);
+    color: var(--accent-gold-light);
+    transform: translateY(-1px);
+}
+
+/* Hero Buttons */
+.hero-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.hero-btn-secondary {
+    color: var(--text-white) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(8px);
+}
+
+.hero-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: var(--text-white) !important;
+}
+
+/* Hero Showcase Glassmorphism Card */
+.hero-image-wrapper {
+    position: relative;
+}
+
+.hero-showcase-card {
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: var(--radius-lg);
+    padding: 2.25rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+.showcase-badge-top {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.hero-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.hero-card-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-white);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.hero-pill {
+    font-size: 0.75rem;
+    background: rgba(45, 212, 191, 0.18);
+    color: #2DD4BF;
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(45, 212, 191, 0.3);
+}
+
+.hero-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+}
+
+.hero-stat-box {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.25rem;
+    border-radius: var(--radius-md);
+    text-align: center;
+    transition: var(--transition);
+}
+
+.hero-stat-box:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+}
+
+.hero-stat-number {
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: #2DD4BF;
+    line-height: 1;
+    margin-bottom: 0.35rem;
+}
+
+.hero-stat-label {
+    font-size: 0.85rem;
     color: #CBD5E1;
+    font-weight: 500;
+}
     margin-bottom: 2.25rem;
     max-width: 580px;
     line-height: 1.7;

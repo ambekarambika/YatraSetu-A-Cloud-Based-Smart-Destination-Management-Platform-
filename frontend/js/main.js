@@ -266,5 +266,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ----------------------------------------------------------------------
+    // 7. Hero Popular Trending Tags Click Handler
+    // ----------------------------------------------------------------------
+    const trendingTags = document.querySelectorAll('.trending-tag');
+    trendingTags.forEach(tag => {
+        tag.addEventListener('click', () => {
+            const tagValue = tag.getAttribute('data-tag');
+            if (heroSearchInput) {
+                heroSearchInput.value = tagValue;
+                if (heroSearchBtn) heroSearchBtn.click();
+            }
+        });
+    });
+
     console.log("YatraSetu Landing Page Script Initialized Successfully.");
 });
+
