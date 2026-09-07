@@ -267,12 +267,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------------------------
-    // 7. Hero Popular Trending Tags Click Handler
+    // 7. Hero Popular Destination Pills & Thumbnail Strip Click Handler
     // ----------------------------------------------------------------------
-    const trendingTags = document.querySelectorAll('.trending-tag');
-    trendingTags.forEach(tag => {
-        tag.addEventListener('click', () => {
-            const tagValue = tag.getAttribute('data-tag');
+    const destPills = document.querySelectorAll('.dest-pill');
+    destPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            destPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+
+            const tagValue = pill.getAttribute('data-tag');
             if (heroSearchInput) {
                 heroSearchInput.value = tagValue;
                 if (heroSearchBtn) heroSearchBtn.click();
@@ -280,6 +283,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    const thumbnailItems = document.querySelectorAll('.thumbnail-item');
+    thumbnailItems.forEach(item => {
+        item.addEventListener('click', () => {
+            thumbnailItems.forEach(t => t.classList.remove('active'));
+            item.classList.add('active');
+
+            const destKey = item.getAttribute('data-dest');
+            const previewBtn = document.querySelector(`.dest-preview-btn[data-dest="${destKey}"]`);
+            if (previewBtn) {
+                previewBtn.click();
+            } else {
+                const destSection = document.getElementById('destinations');
+                if (destSection) destSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+
     console.log("YatraSetu Landing Page Script Initialized Successfully.");
 });
+
 

@@ -23,7 +23,7 @@
     <!-- ====================================================================
          1. NAVBAR
          ==================================================================== -->
-    <header class="navbar" id="navbar">
+    <header class="navbar navbar-transparent" id="navbar">
         <div class="container">
             <a href="index.html" class="nav-brand">
                 <div class="brand-icon">
@@ -42,7 +42,7 @@
 
             <div class="nav-actions">
                 <a href="#home" class="btn btn-ghost btn-sm nav-search-trigger" id="navSearchBtn"><i class="fa-solid fa-magnifying-glass"></i> Search</a>
-                <a href="login.html" class="btn btn-outline btn-sm">Log In</a>
+                <a href="login.html" class="btn btn-outline btn-sm nav-btn-outline">Log In</a>
                 <a href="register.html" class="btn btn-primary btn-sm">Sign Up</a>
             </div>
 
@@ -53,87 +53,156 @@
     </header>
 
     <!-- ====================================================================
-         2. HERO SECTION
+         2. HERO SECTION — CINEMATIC REGIONAL SLIDER (01 — MAHARASHTRA)
          ==================================================================== -->
-    <section class="hero" id="home">
-        <div class="container">
-            <div class="hero-grid">
-                <div class="hero-content">
-                    <div class="hero-eyebrow">
-                        <i class="fa-solid fa-compass"></i> DISCOVER INDIA
-                    </div>
-                    <h1 class="hero-title">
-                        More than a journey,
-                        <span class="hero-subheadline">a deeper connection.</span>
-                    </h1>
-                    <p class="hero-description">
-                        A cloud-based Smart Destination Management Platform unifying Tourists, Destination Managers, and Tourism Stakeholders into a single connected ecosystem.
-                    </p>
+    <section class="hero hero-cinematic" id="home">
+        <!-- Background Hero Image Overlay -->
+        <div class="hero-bg-overlay"></div>
 
-                    <!-- Quick Search Box -->
-                    <div class="hero-search-box">
-                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                        <input type="text" id="heroSearchInput" class="hero-search-input" placeholder="Search destinations, heritage sites, attractions...">
-                        <select id="heroSearchSelect" class="hero-search-select" aria-label="Filter by destination category">
-                            <option value="all">All Categories</option>
-                            <option value="heritage">Heritage & Culture</option>
-                            <option value="mountain">Mountain Retreats</option>
-                            <option value="coastal">Coastal & Beach</option>
-                            <option value="nature">Nature & Wildlife</option>
+        <!-- Vertical Regional Slide Indicator (Right Side) -->
+        <div class="regional-slide-indicator">
+            <div class="slide-indicator-item active" data-slide="01">
+                <span class="slide-num">01</span>
+                <span class="slide-name">Maharashtra</span>
+            </div>
+            <div class="slide-indicator-item" data-slide="02">
+                <span class="slide-num">02</span>
+                <span class="slide-name">South India</span>
+            </div>
+            <div class="slide-indicator-item" data-slide="03">
+                <span class="slide-num">03</span>
+                <span class="slide-name">North India</span>
+            </div>
+            <div class="slide-indicator-item" data-slide="04">
+                <span class="slide-num">04</span>
+                <span class="slide-name">East India</span>
+            </div>
+            <div class="slide-indicator-item" data-slide="05">
+                <span class="slide-num">05</span>
+                <span class="slide-name">West India</span>
+            </div>
+        </div>
+
+        <div class="container hero-container">
+            <div class="hero-content-wrapper">
+                <!-- Eyebrow -->
+                <div class="hero-eyebrow">
+                    <i class="fa-solid fa-compass"></i> INCREDIBLE INDIA
+                </div>
+
+                <!-- Main Editorial Destination Title -->
+                <h1 class="hero-main-title">
+                    Maharashtra
+                    <span class="hero-subheading">Land of Forts, Festivals & Endless Discoveries</span>
+                </h1>
+
+                <!-- Supporting Description -->
+                <p class="hero-description">
+                    Explore majestic Sahyadri hill citadels, vibrant cultural heritage, ancient cave architecture, and pristine Konkan coastlines in a single connected platform.
+                </p>
+
+                <!-- Floating Translucent Glass Search Bar -->
+                <div class="hero-search-glass">
+                    <div class="search-field flex-grow">
+                        <i class="fa-solid fa-magnifying-glass field-icon"></i>
+                        <input type="text" id="heroSearchInput" class="glass-input" placeholder="Search destinations, attractions, events...">
+                    </div>
+
+                    <div class="search-field">
+                        <i class="fa-solid fa-location-dot field-icon"></i>
+                        <select id="heroSearchSelect" class="glass-select" aria-label="Location Region">
+                            <option value="all">All Locations</option>
+                            <option value="heritage">Sahyadri Forts</option>
+                            <option value="coastal">Konkan Coast</option>
+                            <option value="mountain">Western Ghats</option>
+                            <option value="heritage">Ajanta & Ellora</option>
                         </select>
-                        <button id="heroSearchBtn" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-right"></i> Explore</button>
                     </div>
 
-                    <!-- Popular Trending Tags -->
-                    <div class="hero-trending">
-                        <span class="trending-label">Popular:</span>
-                        <button class="trending-tag" data-tag="Maharashtra">Maharashtra</button>
-                        <button class="trending-tag" data-tag="Kashmir">Kashmir</button>
-                        <button class="trending-tag" data-tag="Kerala">Kerala</button>
-                        <button class="trending-tag" data-tag="Rajasthan">Rajasthan</button>
+                    <div class="search-field">
+                        <i class="fa-solid fa-calendar-days field-icon"></i>
+                        <input type="text" class="glass-input date-input" placeholder="Travel Dates" readonly onclick="this.type='date'">
                     </div>
 
-                    <!-- Hero CTAs -->
-                    <div class="hero-buttons">
-                        <a href="#destinations" class="btn btn-primary btn-lg">
-                            <i class="fa-solid fa-compass"></i> Explore Destinations
-                        </a>
-                        <a href="#how-it-works" class="btn btn-outline btn-lg hero-btn-secondary">
-                            <i class="fa-solid fa-map-location-dot"></i> Plan Your Trip
-                        </a>
+                    <div class="search-field">
+                        <i class="fa-solid fa-users field-icon"></i>
+                        <select class="glass-select" aria-label="Travelers">
+                            <option value="1">1 Traveler</option>
+                            <option value="2">2 Travelers</option>
+                            <option value="group">Family / Group</option>
+                        </select>
+                    </div>
+
+                    <button id="heroSearchBtn" class="btn btn-primary glass-search-btn">
+                        Explore <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Popular Destination Pills -->
+                <div class="popular-pills-bar">
+                    <span class="pills-label">Popular:</span>
+                    <div class="pills-scroll">
+                        <button class="dest-pill active" data-tag="Maharashtra">Maharashtra</button>
+                        <button class="dest-pill" data-tag="Kerala">Kerala</button>
+                        <button class="dest-pill" data-tag="Kashmir">Kashmir</button>
+                        <button class="dest-pill" data-tag="Rajasthan">Rajasthan</button>
+                        <button class="dest-pill" data-tag="Goa">Goa</button>
+                        <button class="dest-pill" data-tag="Tamil Nadu">Tamil Nadu</button>
+                        <button class="dest-pill" data-tag="Uttarakhand">Uttarakhand</button>
+                        <button class="dest-pill" data-tag="Assam">Assam</button>
                     </div>
                 </div>
 
-                <!-- Hero Right-Side Showcase Card -->
-                <div class="hero-image-wrapper">
-                    <div class="hero-showcase-card">
-                        <div class="showcase-badge-top">
-                            <i class="fa-solid fa-location-dot"></i> Kerala Backwaters Highlight
-                        </div>
-                        <div class="hero-card-header">
-                            <div class="hero-card-title">
-                                <i class="fa-solid fa-chart-line" style="color: #2DD4BF;"></i> Ecosystem Snapshot
-                            </div>
-                            <span class="hero-pill">LIVE PLATFORM</span>
-                        </div>
-                        <div class="hero-stats-grid">
-                            <div class="hero-stat-box">
-                                <div class="hero-stat-number">50+</div>
-                                <div class="hero-stat-label">Smart Destinations</div>
-                            </div>
-                            <div class="hero-stat-box">
-                                <div class="hero-stat-number">250+</div>
-                                <div class="hero-stat-label">Key Attractions</div>
-                            </div>
-                            <div class="hero-stat-box">
-                                <div class="hero-stat-number">120+</div>
-                                <div class="hero-stat-label">Cultural Events</div>
-                            </div>
-                            <div class="hero-stat-box">
-                                <div class="hero-stat-number">98%</div>
-                                <div class="hero-stat-label">Verified Ratings</div>
-                            </div>
-                        </div>
+                <!-- Primary CTAs -->
+                <div class="hero-actions">
+                    <a href="#destinations" class="btn btn-primary btn-lg cta-primary">
+                        Explore Maharashtra <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                    <a href="#how-it-works" class="btn btn-outline btn-lg cta-secondary">
+                        <i class="fa-solid fa-map-location-dot"></i> Plan Your Trip
+                    </a>
+                </div>
+            </div>
+
+            <!-- Bottom Destination Thumbnail Strip -->
+            <div class="bottom-thumbnail-strip">
+                <div class="thumbnail-item active" data-dest="rajgad">
+                    <img src="assets/images/thumb-rajgad.jpg" alt="Rajgad Fort" class="thumb-img">
+                    <div class="thumb-info">
+                        <span class="thumb-title">Rajgad Fort</span>
+                        <span class="thumb-sub">Sahyadri Citadel</span>
+                    </div>
+                </div>
+
+                <div class="thumbnail-item" data-dest="mumbai">
+                    <img src="assets/images/thumb-mumbai.jpg" alt="Mumbai Coast" class="thumb-img">
+                    <div class="thumb-info">
+                        <span class="thumb-title">Mumbai</span>
+                        <span class="thumb-sub">Coastal Gateway</span>
+                    </div>
+                </div>
+
+                <div class="thumbnail-item" data-dest="lonavala">
+                    <img src="assets/images/thumb-lonavala.jpg" alt="Lonavala Hills" class="thumb-img">
+                    <div class="thumb-info">
+                        <span class="thumb-title">Lonavala</span>
+                        <span class="thumb-sub">Western Ghats</span>
+                    </div>
+                </div>
+
+                <div class="thumbnail-item" data-dest="ajanta">
+                    <img src="assets/images/thumb-ajanta.jpg" alt="Ajanta Caves" class="thumb-img">
+                    <div class="thumb-info">
+                        <span class="thumb-title">Ajanta Caves</span>
+                        <span class="thumb-sub">UNESCO Heritage</span>
+                    </div>
+                </div>
+
+                <div class="thumbnail-item" data-dest="konkan">
+                    <img src="assets/images/thumb-konkan.jpg" alt="Konkan Coast" class="thumb-img">
+                    <div class="thumb-info">
+                        <span class="thumb-title">Konkan Coast</span>
+                        <span class="thumb-sub">Pristine Beaches</span>
                     </div>
                 </div>
             </div>
