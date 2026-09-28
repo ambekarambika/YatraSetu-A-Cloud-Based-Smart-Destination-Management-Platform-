@@ -7,10 +7,10 @@
     <meta name="keywords" content="YatraSetu, Smart Tourism, Destination Management Platform, Cloud Tourism, Trip Planning, Visitor Analytics, Heritage Tourism">
     <title>YatraSetu — Cloud-Based Smart Destination Management Platform</title>
     
-    <!-- Google Fonts: Plus Jakarta Sans & Cormorant Garamond (Editorial Travel) -->
+    <!-- Google Fonts: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- FontAwesome Icons CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -29,15 +29,15 @@
                 <div class="brand-icon">
                     <i class="fa-solid fa-compass"></i>
                 </div>
-                Yatra<span>Setu</span>
+                <span>YatraSetu</span>
             </a>
 
             <nav class="nav-menu" id="navMenu">
-                <a href="#destinations" class="nav-link">Destinations</a>
-                <a href="#features" class="nav-link">Experiences</a>
-                <a href="#how-it-works" class="nav-link">Plan Trip</a>
-                <a href="#destinations" class="nav-link">Events</a>
-                <a href="#about" class="nav-link">About Us</a>
+                <a href="#destinations" class="nav-link">Explore India</a>
+                <a href="#ecosystem" class="nav-link">Ecosystem</a>
+                <a href="#managers" class="nav-link nav-highlight">Managers</a>
+                <a href="#stakeholders" class="nav-link nav-highlight">Stakeholders</a>
+                <a href="#feedback-insights" class="nav-link">Feedback</a>
             </nav>
 
             <div class="nav-actions">
@@ -56,49 +56,57 @@
          2. HERO SECTION — CINEMATIC REGIONAL SLIDER (01 — MAHARASHTRA)
          ==================================================================== -->
     <section class="hero hero-cinematic" id="home">
-        <!-- Background Hero Image Overlay -->
         <div class="hero-bg-overlay"></div>
 
         <!-- Vertical Regional Slide Indicator (Right Side) -->
         <div class="regional-slide-indicator">
-            <div class="slide-indicator-item active" data-slide="01">
+            <div class="slide-indicator-item active" data-slide="0">
                 <span class="slide-num">01</span>
                 <span class="slide-name">Maharashtra</span>
             </div>
-            <div class="slide-indicator-item" data-slide="02">
+            <div class="slide-indicator-item" data-slide="1">
                 <span class="slide-num">02</span>
-                <span class="slide-name">South India</span>
+                <span class="slide-name">Kerala</span>
             </div>
-            <div class="slide-indicator-item" data-slide="03">
+            <div class="slide-indicator-item" data-slide="2">
                 <span class="slide-num">03</span>
-                <span class="slide-name">North India</span>
+                <span class="slide-name">Kashmir</span>
             </div>
-            <div class="slide-indicator-item" data-slide="04">
+            <div class="slide-indicator-item" data-slide="3">
                 <span class="slide-num">04</span>
-                <span class="slide-name">East India</span>
+                <span class="slide-name">Rajasthan</span>
             </div>
-            <div class="slide-indicator-item" data-slide="05">
+            <div class="slide-indicator-item" data-slide="4">
                 <span class="slide-num">05</span>
-                <span class="slide-name">West India</span>
+                <span class="slide-name">Goa</span>
+            </div>
+            <div class="slide-indicator-item" data-slide="5">
+                <span class="slide-num">06</span>
+                <span class="slide-name">Tamil Nadu</span>
+            </div>
+            <div class="slide-indicator-item" data-slide="6">
+                <span class="slide-num">07</span>
+                <span class="slide-name">Uttarakhand</span>
+            </div>
+            <div class="slide-indicator-item" data-slide="7">
+                <span class="slide-num">08</span>
+                <span class="slide-name">Assam</span>
             </div>
         </div>
 
         <div class="container hero-container">
             <div class="hero-content-wrapper">
-                <!-- Eyebrow -->
                 <div class="hero-eyebrow">
                     <i class="fa-solid fa-compass"></i> INCREDIBLE INDIA
                 </div>
 
-                <!-- Main Editorial Destination Title -->
                 <h1 class="hero-main-title">
                     Maharashtra
                     <span class="hero-subheading">Land of Forts, Festivals & Endless Discoveries</span>
                 </h1>
 
-                <!-- Supporting Description -->
                 <p class="hero-description">
-                    Explore majestic Sahyadri hill citadels, vibrant cultural heritage, ancient cave architecture, and pristine Konkan coastlines in a single connected platform.
+                    Discover destinations, connect with local tourism, and experience India through one connected platform.
                 </p>
 
                 <!-- Floating Translucent Glass Search Bar -->
@@ -120,16 +128,13 @@
                     </div>
 
                     <div class="search-field">
-                        <i class="fa-solid fa-calendar-days field-icon"></i>
-                        <input type="text" class="glass-input date-input" placeholder="Travel Dates" readonly onclick="this.type='date'">
-                    </div>
-
-                    <div class="search-field">
-                        <i class="fa-solid fa-users field-icon"></i>
-                        <select class="glass-select" aria-label="Travelers">
-                            <option value="1">1 Traveler</option>
-                            <option value="2">2 Travelers</option>
-                            <option value="group">Family / Group</option>
+                        <i class="fa-solid fa-layer-group field-icon"></i>
+                        <select id="heroSearchCategory" class="glass-select" aria-label="Category">
+                            <option value="all">All Categories</option>
+                            <option value="heritage">Heritage & Forts</option>
+                            <option value="nature">Nature & Wildlife</option>
+                            <option value="coastal">Coastal & Beaches</option>
+                            <option value="events">Cultural Events</option>
                         </select>
                     </div>
 
@@ -153,13 +158,12 @@
                     </div>
                 </div>
 
-                <!-- Primary CTAs -->
                 <div class="hero-actions">
                     <a href="#destinations" class="btn btn-primary btn-lg cta-primary">
                         Explore Maharashtra <i class="fa-solid fa-arrow-right"></i>
                     </a>
-                    <a href="#how-it-works" class="btn btn-outline btn-lg cta-secondary">
-                        <i class="fa-solid fa-map-location-dot"></i> Plan Your Trip
+                    <a href="#ecosystem" class="btn btn-outline btn-lg cta-secondary">
+                        <i class="fa-solid fa-network-wired"></i> Discover YatraSetu →
                     </a>
                 </div>
             </div>
@@ -210,172 +214,177 @@
     </section>
 
     <!-- ====================================================================
-         3. ABOUT YATRASETU
+         02. TOURISM ECOSYSTEM (CLEAN REALISTIC ROLE CARDS)
          ==================================================================== -->
-    <section class="about-section" id="about">
+    <section class="ecosystem-section" id="ecosystem">
         <div class="container">
-            <div class="about-grid">
-                <div class="about-content-left">
-                    <span class="section-tag">About YatraSetu</span>
-                    <h2>Addressing Tourism Fragmentation Through Cloud Integration</h2>
-                    <p class="about-lead">
-                        Current tourism ecosystems often separate destination information, event updates, stakeholder coordination, and visitor analytics across disconnected platforms.
-                    </p>
-                    <p class="about-paragraph">
-                        YatraSetu bridges this gap by serving as a <strong>centralized cloud-based platform</strong> that brings together all four key pillars of destination management into a single, cohesive digital experience.
-                    </p>
-
-                    <div class="about-features-list">
-                        <div class="about-feature-item">
-                            <div class="about-feature-icon"><i class="fa-solid fa-check"></i></div>
-                            <div class="about-feature-text">Unified Tourism Information</div>
-                        </div>
-                        <div class="about-feature-item">
-                            <div class="about-feature-icon"><i class="fa-solid fa-check"></i></div>
-                            <div class="about-feature-text">Role-Based Access Control</div>
-                        </div>
-                        <div class="about-feature-item">
-                            <div class="about-feature-icon"><i class="fa-solid fa-check"></i></div>
-                            <div class="about-feature-text">Data-Driven Decision Support</div>
-                        </div>
-                        <div class="about-feature-item">
-                            <div class="about-feature-icon"><i class="fa-solid fa-check"></i></div>
-                            <div class="about-feature-text">Seamless Stakeholder Sync</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 4 User Roles Cards -->
-                <div class="roles-grid">
-                    <div class="role-card tourist">
-                        <div class="role-icon-box">
-                            <i class="fa-solid fa-person-walking-luggage"></i>
-                        </div>
-                        <h3>Tourists</h3>
-                        <p>Discover destinations, attractions, and cultural events; build trip plans and share feedback.</p>
-                    </div>
-
-                    <div class="role-card manager">
-                        <div class="role-icon-box">
-                            <i class="fa-solid fa-user-gear"></i>
-                        </div>
-                        <h3>Destination Managers</h3>
-                        <p>Manage listings, track visitor statistics, review feedback, and access decision-support analytics.</p>
-                    </div>
-
-                    <div class="role-card stakeholder">
-                        <div class="role-icon-box">
-                            <i class="fa-solid fa-handshake"></i>
-                        </div>
-                        <h3>Tourism Stakeholders</h3>
-                        <p>Share facility updates, local services, and coordinate directly with destination authorities.</p>
-                    </div>
-
-                    <div class="role-card admin">
-                        <div class="role-icon-box">
-                            <i class="fa-solid fa-shield-halved"></i>
-                        </div>
-                        <h3>Administrators</h3>
-                        <p>Oversee user authentication, platform content, system security, and role permissions.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ====================================================================
-         4. KEY FEATURES
-         ==================================================================== -->
-    <section class="features-section" id="features">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Core System Capabilities</span>
-                <h2 class="section-title">Designed for End-to-End Destination Intelligence</h2>
+            <div class="section-header text-center">
+                <span class="section-tag"><i class="fa-solid fa-circle-nodes"></i> SMART TOURISM PLATFORM</span>
+                <h2 class="section-title">One Platform. An Entire Tourism Ecosystem.</h2>
                 <p class="section-subtitle">
-                    YatraSetu combines essential tourist-facing tools with powerful managerial and analytical capabilities.
+                    YatraSetu centralizes tourism information, destination management, and stakeholder coordination into a unified cloud ecosystem.
                 </p>
             </div>
 
-            <div class="features-grid">
-                <!-- Feature 1 -->
-                <div class="feature-card">
-                    <div class="feature-icon-wrapper">
-                        <i class="fa-solid fa-map-location-dot"></i>
+            <!-- 4 Clean Realistic Role Cards -->
+            <div class="ecosystem-cards-grid">
+                <div class="role-card">
+                    <div class="role-card-header">
+                        <div class="role-icon-box icon-tourist"><i class="fa-solid fa-person-walking-luggage"></i></div>
+                        <div>
+                            <span class="role-badge badge-blue">Public User Layer</span>
+                            <h3 class="role-title">Tourists</h3>
+                        </div>
                     </div>
-                    <h3>Destination & Attraction Management</h3>
-                    <p>Centralized repository for managers to create, update, and showcase destination profiles, historical context, and points of interest.</p>
-                    <div class="feature-tags">
-                        <span class="feature-pill">Destinations</span>
-                        <span class="feature-pill">Attractions</span>
-                        <span class="feature-pill">Media</span>
+                    <p class="role-desc">Discover verified destinations, attractions, and cultural events with interactive trip planning and authentic feedback.</p>
+                    <ul class="role-features">
+                        <li><i class="fa-solid fa-check feature-check"></i> Explore Destinations & Attractions</li>
+                        <li><i class="fa-solid fa-check feature-check"></i> View Live Events & Guidelines</li>
+                        <li><i class="fa-solid fa-check feature-check"></i> Submit Authentic Tourist Feedback</li>
+                    </ul>
+                </div>
+
+                <div class="role-card card-highlight">
+                    <div class="role-card-header">
+                        <div class="role-icon-box icon-manager"><i class="fa-solid fa-user-gear"></i></div>
+                        <div>
+                            <span class="role-badge badge-gold">Management Portal</span>
+                            <h3 class="role-title">Destination Managers</h3>
+                        </div>
+                    </div>
+                    <p class="role-desc">Manage destination profiles, publish attractions & events, track visitor flow density, and generate decision reports.</p>
+                    <ul class="role-features">
+                        <li><i class="fa-solid fa-check feature-check"></i> Onboard & Manage Destinations</li>
+                        <li><i class="fa-solid fa-check feature-check"></i> Monitor Visitor Density Trends</li>
+                        <li><i class="fa-solid fa-check feature-check"></i> Decision-Support & Analytics</li>
+                    </ul>
+                </div>
+
+                <div class="role-card">
+                    <div class="role-card-header">
+                        <div class="role-icon-box icon-stakeholder"><i class="fa-solid fa-handshake"></i></div>
+                        <div>
+                            <span class="role-badge badge-teal">Local Service Layer</span>
+                            <h3 class="role-title">Tourism Stakeholders</h3>
+                        </div>
+                    </div>
+                    <p class="role-desc">Connect local hotels, tour guides, transport, activity providers, and cultural organizations directly with authorities.</p>
+                    <ul class="role-features">
+                        <li><i class="fa-solid fa-check feature-check"></i> Share Operating Hours & Services</li>
+                        <li><i class="fa-solid fa-check feature-check"></i> Coordinate with Destination Managers</li>
+                        <li><i class="fa-solid fa-check feature-check"></i> Support Sustainable Tourism Flow</li>
+                    </ul>
+                </div>
+
+                <div class="role-card">
+                    <div class="role-card-header">
+                        <div class="role-icon-box icon-admin"><i class="fa-solid fa-shield-halved"></i></div>
+                        <div>
+                            <span class="role-badge badge-dark">System Governance</span>
+                            <h3 class="role-title">Administrators</h3>
+                        </div>
+                    </div>
+                    <p class="role-desc">Enforce role-based access control, manage platform users, configure system security, and oversee cloud infrastructure.</p>
+                    <ul class="role-features">
+                        <li><i class="fa-solid fa-check feature-check"></i> Role-Based Access Control (RBAC)</li>
+                        <li><i class="fa-solid fa-check feature-check"></i> System Oversight & Verification</li>
+                        <li><i class="fa-solid fa-check feature-check"></i> Secure Cloud Architecture</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====================================================================
+         03. DESTINATION MANAGEMENT (REALISTIC WORKSPACE CANVAS)
+         ==================================================================== -->
+    <section class="manager-portal-section" id="managers">
+        <div class="container">
+            <div class="section-split-container">
+                <div class="section-info-col">
+                    <span class="section-tag"><i class="fa-solid fa-user-gear"></i> DESTINATION MANAGEMENT</span>
+                    <h2 class="section-title">Manage Your Destination.<br>Understand Your Visitors.</h2>
+                    <p class="section-subtitle">
+                        Empowering destination authorities to manage attractions, coordinate cultural events, track visitor flow density, and make data-informed policy decisions.
+                    </p>
+
+                    <div class="capability-cards-stack">
+                        <div class="cap-card">
+                            <div class="cap-icon-circle"><i class="fa-solid fa-map-location-dot"></i></div>
+                            <div>
+                                <h4>Destination Profiles</h4>
+                                <p>Onboard heritage sites, update public guidelines, and maintain location profiles.</p>
+                            </div>
+                        </div>
+                        <div class="cap-card">
+                            <div class="cap-icon-circle"><i class="fa-solid fa-landmark"></i></div>
+                            <div>
+                                <h4>Attractions & Events</h4>
+                                <p>Publish points of interest, schedule festival calendars, and push alerts.</p>
+                            </div>
+                        </div>
+                        <div class="cap-card">
+                            <div class="cap-icon-circle"><i class="fa-solid fa-chart-line"></i></div>
+                            <div>
+                                <h4>Analytics & Insights</h4>
+                                <p>Analyze crowd movement, tourist satisfaction, and generate sustainable reports.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Feature 2 -->
-                <div class="feature-card">
-                    <div class="feature-icon-wrapper">
-                        <i class="fa-solid fa-calendar-check"></i>
-                    </div>
-                    <h3>Tourism Event Publishing</h3>
-                    <p>Keep tourists updated with real-time cultural festival schedules, local fairs, guided heritage walks, and seasonal events.</p>
-                    <div class="feature-tags">
-                        <span class="feature-pill">Events</span>
-                        <span class="feature-pill">Festivals</span>
-                        <span class="feature-pill">Schedules</span>
-                    </div>
-                </div>
+                <!-- Realistic White Workspace Preview Window -->
+                <div class="section-preview-col">
+                    <div class="clean-workspace-window">
+                        <div class="window-top-bar">
+                            <div class="window-dots">
+                                <span class="dot dot-r"></span>
+                                <span class="dot dot-y"></span>
+                                <span class="dot dot-g"></span>
+                            </div>
+                            <span class="window-title">MAHARASHTRA WORKSPACE</span>
+                            <span class="sample-pill-badge"><i class="fa-solid fa-database"></i> SAMPLE DESTINATION DATA</span>
+                        </div>
 
-                <!-- Feature 3 -->
-                <div class="feature-card">
-                    <div class="feature-icon-wrapper">
-                        <i class="fa-solid fa-suitcase-rolling"></i>
-                    </div>
-                    <h3>Basic Trip Planning</h3>
-                    <p>Empowers tourists to build customized, simple itinerary schedules combining destinations, attractions, and event dates.</p>
-                    <div class="feature-tags">
-                        <span class="feature-pill">Itineraries</span>
-                        <span class="feature-pill">Saved Trips</span>
-                    </div>
-                </div>
+                        <div class="window-content-body">
+                            <div class="metrics-stat-row">
+                                <div class="stat-box">
+                                    <span class="s-label">Monthly Visitors</span>
+                                    <span class="s-val">12,450</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="s-label">Active Attractions</span>
+                                    <span class="s-val">28</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="s-label">Events Scheduled</span>
+                                    <span class="s-val">16</span>
+                                </div>
+                            </div>
 
-                <!-- Feature 4 -->
-                <div class="feature-card">
-                    <div class="feature-icon-wrapper">
-                        <i class="fa-solid fa-comments"></i>
-                    </div>
-                    <h3>Tourist Feedback & Ratings</h3>
-                    <p>Structured feedback loop allowing tourists to submit ratings and comments, providing valuable insights for managers.</p>
-                    <div class="feature-tags">
-                        <span class="feature-pill">Reviews</span>
-                        <span class="feature-pill">Ratings</span>
-                        <span class="feature-pill">Feedback Loop</span>
-                    </div>
-                </div>
+                            <div class="dashboard-panels-grid">
+                                <div class="panel-box">
+                                    <h5><i class="fa-solid fa-chart-area"></i> Visitor Density Trends</h5>
+                                    <div class="trend-bars-wrap">
+                                        <div class="bar-col"><div class="b-fill" style="height: 40%;"></div><span>Mon</span></div>
+                                        <div class="bar-col"><div class="b-fill" style="height: 50%;"></div><span>Tue</span></div>
+                                        <div class="bar-col"><div class="b-fill" style="height: 60%;"></div><span>Wed</span></div>
+                                        <div class="bar-col"><div class="b-fill" style="height: 75%;"></div><span>Thu</span></div>
+                                        <div class="bar-col"><div class="b-fill b-active" style="height: 98%;"></div><span>Sat</span></div>
+                                        <div class="bar-col"><div class="b-fill b-active" style="height: 88%;"></div><span>Sun</span></div>
+                                    </div>
+                                </div>
 
-                <!-- Feature 5 -->
-                <div class="feature-card">
-                    <div class="feature-icon-wrapper">
-                        <i class="fa-solid fa-users-rectangle"></i>
-                    </div>
-                    <h3>Stakeholder Coordination</h3>
-                    <p>Facilitates information exchange between local business stakeholders (hospitality, guides, transport) and destination managers.</p>
-                    <div class="feature-tags">
-                        <span class="feature-pill">Coordination</span>
-                        <span class="feature-pill">Services</span>
-                    </div>
-                </div>
-
-                <!-- Feature 6 -->
-                <div class="feature-card">
-                    <div class="feature-icon-wrapper">
-                        <i class="fa-solid fa-chart-pie"></i>
-                    </div>
-                    <h3>Analytics & Decision Support</h3>
-                    <p>Provides destination managers with data-backed insights into visitor activity, ratings, popular spots, and management reports.</p>
-                    <div class="feature-tags">
-                        <span class="feature-pill">Visitor Trends</span>
-                        <span class="feature-pill">Reports</span>
-                        <span class="feature-pill">Insights</span>
+                                <div class="panel-box">
+                                    <h5><i class="fa-solid fa-fire"></i> Top Attractions</h5>
+                                    <ul class="top-attr-list">
+                                        <li><span>Rajgad Citadel</span> <span class="tag-high">High</span></li>
+                                        <li><span>Lonavala Valley</span> <span class="tag-med">Medium</span></li>
+                                        <li><span>Ajanta Caves</span> <span class="tag-norm">Normal</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -383,146 +392,233 @@
     </section>
 
     <!-- ====================================================================
-         5. EXPLORE DESTINATIONS
+         04. STAKEHOLDER NETWORK (REALISTIC COLLABORATION GRID)
+         ==================================================================== -->
+    <section class="stakeholder-section" id="stakeholders">
+        <div class="container">
+            <div class="section-header text-center">
+                <span class="section-tag"><i class="fa-solid fa-handshake"></i> STAKEHOLDER COORDINATION</span>
+                <h2 class="section-title">Connect the People Behind Every Destination.</h2>
+                <p class="section-subtitle">
+                    Empowering local tourism businesses, tour guides, activity providers, and cultural organizations to coordinate with destination authorities.
+                </p>
+            </div>
+
+            <div class="stakeholder-canvas">
+                <div class="stakeholder-nodes-grid">
+                    <div class="stake-card">
+                        <i class="fa-solid fa-store stake-icon"></i>
+                        <h4>Local Businesses</h4>
+                        <p>Hotels, restaurants, and handicraft stores.</p>
+                    </div>
+                    <div class="stake-card">
+                        <i class="fa-solid fa-user-ninja stake-icon"></i>
+                        <h4>Tour Guides</h4>
+                        <p>Verified heritage & trekking guides.</p>
+                    </div>
+                    <div class="stake-card">
+                        <i class="fa-solid fa-taxi stake-icon"></i>
+                        <h4>Transport Providers</h4>
+                        <p>Local cabs, buses, and boat services.</p>
+                    </div>
+                    <div class="stake-card">
+                        <i class="fa-solid fa-person-hiking stake-icon"></i>
+                        <h4>Activity Providers</h4>
+                        <p>Water sports, trekking & safari operators.</p>
+                    </div>
+                    <div class="stake-card">
+                        <i class="fa-solid fa-masks-theater stake-icon"></i>
+                        <h4>Cultural Groups</h4>
+                        <p>Folk artists, dancers & festival committees.</p>
+                    </div>
+                    <div class="stake-card">
+                        <i class="fa-solid fa-people-roof stake-icon"></i>
+                        <h4>Local Communities</h4>
+                        <p>Community eco-tourism representatives.</p>
+                    </div>
+                </div>
+
+                <div class="workflow-flow-bar">
+                    <div class="flow-pill-item">SHARE INFORMATION</div>
+                    <i class="fa-solid fa-arrow-right flow-arrow"></i>
+                    <div class="flow-pill-item">COORDINATE</div>
+                    <i class="fa-solid fa-arrow-right flow-arrow"></i>
+                    <div class="flow-pill-item flow-highlight">COLLABORATE WITH DESTINATION MANAGERS</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====================================================================
+         05. FEEDBACK → INSIGHTS (CLEAN PROCESS STEPPING)
+         ==================================================================== -->
+    <section class="feedback-cycle-section" id="feedback-insights">
+        <div class="container">
+            <div class="section-header text-center">
+                <span class="section-tag"><i class="fa-solid fa-comments"></i> CONTINUOUS IMPROVEMENT</span>
+                <h2 class="section-title">Your Experience Can Shape Better Destinations.</h2>
+                <p class="section-subtitle">
+                    A continuous feedback loop turning visitor ratings into actionable intelligence for destination managers.
+                </p>
+            </div>
+
+            <div class="process-steps-row">
+                <div class="p-step-box">
+                    <span class="p-num">01</span>
+                    <h4>Tourist</h4>
+                    <p>Visits destination</p>
+                </div>
+                <i class="fa-solid fa-angle-right p-arrow"></i>
+
+                <div class="p-step-box">
+                    <span class="p-num">02</span>
+                    <h4>Experience</h4>
+                    <p>Attractions & events</p>
+                </div>
+                <i class="fa-solid fa-angle-right p-arrow"></i>
+
+                <div class="p-step-box">
+                    <span class="p-num">03</span>
+                    <h4>Feedback</h4>
+                    <p>Ratings & reviews</p>
+                </div>
+                <i class="fa-solid fa-angle-right p-arrow"></i>
+
+                <div class="p-step-box highlight-step">
+                    <span class="p-num">04</span>
+                    <h4>Analytics</h4>
+                    <p>Data aggregation</p>
+                </div>
+                <i class="fa-solid fa-angle-right p-arrow"></i>
+
+                <div class="p-step-box">
+                    <span class="p-num">05</span>
+                    <h4>Manager Insights</h4>
+                    <p>Trend reporting</p>
+                </div>
+                <i class="fa-solid fa-angle-right p-arrow"></i>
+
+                <div class="p-step-box highlight-step">
+                    <span class="p-num">06</span>
+                    <h4>Data-Informed Decisions</h4>
+                    <p>Better management</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====================================================================
+         06. EXPLORE INDIA (REALISTIC PHOTOGRAPHY DESTINATION CARDS)
          ==================================================================== -->
     <section class="destinations-section" id="destinations">
         <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Featured Destinations</span>
-                <h2 class="section-title">Explore Smart Tourism Destinations</h2>
+            <div class="section-header text-center">
+                <span class="section-tag"><i class="fa-solid fa-compass"></i> DESTINATION DISCOVERY</span>
+                <h2 class="section-title">Discover India’s Timeless Destinations.</h2>
                 <p class="section-subtitle">
-                    Preview popular cultural, heritage, and nature destinations managed within the YatraSetu platform.
+                    Explore verified heritage sites, coastal ecosystems, and mountain sanctuaries across India.
                 </p>
             </div>
 
-            <!-- Category Filter Buttons -->
-            <div class="dest-filters">
+            <div class="dest-filter-bar">
                 <button class="filter-btn active" data-filter="all">All Destinations</button>
-                <button class="filter-btn" data-filter="heritage">Heritage & Culture</button>
+                <button class="filter-btn" data-filter="heritage">Heritage & Forts</button>
                 <button class="filter-btn" data-filter="mountain">Mountain Retreats</button>
                 <button class="filter-btn" data-filter="coastal">Coastal & Beach</button>
                 <button class="filter-btn" data-filter="nature">Nature & Wildlife</button>
             </div>
 
-            <!-- Destinations Cards Grid -->
-            <div class="destinations-grid">
-                <!-- Destination 1 -->
-                <div class="dest-card" data-category="heritage">
-                    <div class="dest-image-box">
-                        <div class="dest-image-placeholder" style="background: linear-gradient(135deg, #1E3A8A, #0F4C81); display:flex; align-items:center; justify-content:center; color:white; font-size:3rem;">
-                            <i class="fa-solid fa-gopuram"></i>
-                        </div>
-                        <span class="dest-badge">Heritage Hub</span>
-                        <span class="dest-rating"><i class="fa-solid fa-star"></i> 4.9</span>
+            <div class="clean-dest-grid">
+                <!-- Featured Maharashtra Card -->
+                <div class="clean-card featured-card" data-category="heritage">
+                    <div class="card-img-wrapper">
+                        <img src="assets/images/hero-maharashtra.jpg" alt="Maharashtra Sahyadri Citadels" class="card-img">
+                        <span class="card-tag-badge">Featured Destination</span>
                     </div>
-                    <div class="dest-content">
-                        <div class="dest-location"><i class="fa-solid fa-location-dot"></i> Uttar Pradesh, India</div>
-                        <h3 class="dest-title">Varanasi Heritage Hub</h3>
-                        <p class="dest-description">Ancient spiritual realm featuring live Ganga Aarti event schedules, ghat walks, and temple circuits.</p>
-                        <div class="dest-footer">
-                            <span class="dest-attractions-count"><i class="fa-solid fa-landmark"></i> 18 Attractions</span>
-                            <button class="btn btn-outline btn-sm dest-preview-btn" data-dest="varanasi">Quick Preview</button>
-                        </div>
+                    <div class="card-body">
+                        <span class="card-location"><i class="fa-solid fa-location-dot"></i> Maharashtra</span>
+                        <h3 class="card-title">Sahyadri Forts & Konkan Coast</h3>
+                        <p class="card-desc">Ancient hill citadels, UNESCO Ajanta caves, and pristine coastal heritage in a single connected platform.</p>
+                        <button class="btn btn-outline btn-sm dest-preview-btn" data-dest="rajgad">Explore Maharashtra</button>
                     </div>
                 </div>
 
-                <!-- Destination 2 -->
-                <div class="dest-card" data-category="mountain">
-                    <div class="dest-image-box">
-                        <div class="dest-image-placeholder" style="background: linear-gradient(135deg, #0F766E, #0D9488); display:flex; align-items:center; justify-content:center; color:white; font-size:3rem;">
-                            <i class="fa-solid fa-mountain"></i>
-                        </div>
-                        <span class="dest-badge">Alpine Retreat</span>
-                        <span class="dest-rating"><i class="fa-solid fa-star"></i> 4.8</span>
+                <!-- Secondary Cards -->
+                <div class="clean-card" data-category="heritage">
+                    <div class="card-img-wrapper">
+                        <img src="assets/images/dest-varanasi.jpg" alt="Varanasi Heritage" class="card-img">
+                        <span class="card-tag-badge">Heritage Hub</span>
                     </div>
-                    <div class="dest-content">
-                        <div class="dest-location"><i class="fa-solid fa-location-dot"></i> Himachal Pradesh, India</div>
-                        <h3 class="dest-title">Manali Alpine Sanctuary</h3>
-                        <p class="dest-description">Himalayan valley offering adventure sports, Solang excursions, and eco-tourism management guidelines.</p>
-                        <div class="dest-footer">
-                            <span class="dest-attractions-count"><i class="fa-solid fa-landmark"></i> 14 Attractions</span>
-                            <button class="btn btn-outline btn-sm dest-preview-btn" data-dest="manali">Quick Preview</button>
-                        </div>
+                    <div class="card-body">
+                        <span class="card-location"><i class="fa-solid fa-location-dot"></i> Uttar Pradesh</span>
+                        <h3 class="card-title">Varanasi Heritage Realm</h3>
+                        <p class="card-desc">Ganga Aarti schedules and heritage walks.</p>
+                        <button class="btn btn-outline btn-sm dest-preview-btn" data-dest="varanasi">Quick Preview</button>
                     </div>
                 </div>
 
-                <!-- Destination 3 -->
-                <div class="dest-card" data-category="coastal">
-                    <div class="dest-image-box">
-                        <div class="dest-image-placeholder" style="background: linear-gradient(135deg, #D97706, #B45309); display:flex; align-items:center; justify-content:center; color:white; font-size:3rem;">
-                            <i class="fa-solid fa-umbrella-beach"></i>
-                        </div>
-                        <span class="dest-badge">Coastal Ecosystem</span>
-                        <span class="dest-rating"><i class="fa-solid fa-star"></i> 4.7</span>
+                <div class="clean-card" data-category="mountain">
+                    <div class="card-img-wrapper">
+                        <img src="assets/images/dest-manali.jpg" alt="Manali Alpine Sanctuary" class="card-img">
+                        <span class="card-tag-badge">Alpine Retreat</span>
                     </div>
-                    <div class="dest-content">
-                        <div class="dest-location"><i class="fa-solid fa-location-dot"></i> Goa, India</div>
-                        <h3 class="dest-title">Goa Coastal Ecosystem</h3>
-                        <p class="dest-description">Pristine beaches, historic Portuguese architecture, and synchronized local water sports stakeholders.</p>
-                        <div class="dest-footer">
-                            <span class="dest-attractions-count"><i class="fa-solid fa-landmark"></i> 22 Attractions</span>
-                            <button class="btn btn-outline btn-sm dest-preview-btn" data-dest="goa">Quick Preview</button>
-                        </div>
+                    <div class="card-body">
+                        <span class="card-location"><i class="fa-solid fa-location-dot"></i> Himachal Pradesh</span>
+                        <h3 class="card-title">Manali Alpine Sanctuary</h3>
+                        <p class="card-desc">Solang valley and eco-tourism guidelines.</p>
+                        <button class="btn btn-outline btn-sm dest-preview-btn" data-dest="manali">Quick Preview</button>
                     </div>
                 </div>
 
-                <!-- Destination 4 -->
-                <div class="dest-card" data-category="heritage">
-                    <div class="dest-image-box">
-                        <div class="dest-image-placeholder" style="background: linear-gradient(135deg, #475569, #1E293B); display:flex; align-items:center; justify-content:center; color:white; font-size:3rem;">
-                            <i class="fa-solid fa-monument"></i>
-                        </div>
-                        <span class="dest-badge">UNESCO Site</span>
-                        <span class="dest-rating"><i class="fa-solid fa-star"></i> 4.95</span>
+                <div class="clean-card" data-category="coastal">
+                    <div class="card-img-wrapper">
+                        <img src="assets/images/dest-goa.jpg" alt="Goa Coastal Ecosystem" class="card-img">
+                        <span class="card-tag-badge">Coastal Ecosystem</span>
                     </div>
-                    <div class="dest-content">
-                        <div class="dest-location"><i class="fa-solid fa-location-dot"></i> Karnataka, India</div>
-                        <h3 class="dest-title">Hampi UNESCO Realm</h3>
-                        <p class="dest-description">Surreal stone architecture of Vijayanagara Empire ruins with verified guide and monument schedules.</p>
-                        <div class="dest-footer">
-                            <span class="dest-attractions-count"><i class="fa-solid fa-landmark"></i> 25 Attractions</span>
-                            <button class="btn btn-outline btn-sm dest-preview-btn" data-dest="hampi">Quick Preview</button>
-                        </div>
+                    <div class="card-body">
+                        <span class="card-location"><i class="fa-solid fa-location-dot"></i> Goa</span>
+                        <h3 class="card-title">Goa Coastal Ecosystem</h3>
+                        <p class="card-desc">Pristine beaches and local water sports.</p>
+                        <button class="btn btn-outline btn-sm dest-preview-btn" data-dest="goa">Quick Preview</button>
                     </div>
                 </div>
 
-                <!-- Destination 5 -->
-                <div class="dest-card" data-category="nature">
-                    <div class="dest-image-box">
-                        <div class="dest-image-placeholder" style="background: linear-gradient(135deg, #15803D, #047857); display:flex; align-items:center; justify-content:center; color:white; font-size:3rem;">
-                            <i class="fa-solid fa-tree"></i>
-                        </div>
-                        <span class="dest-badge">Nature Reserve</span>
-                        <span class="dest-rating"><i class="fa-solid fa-star"></i> 4.85</span>
+                <div class="clean-card" data-category="heritage">
+                    <div class="card-img-wrapper">
+                        <img src="assets/images/dest-hampi.jpg" alt="Hampi UNESCO Realm" class="card-img">
+                        <span class="card-tag-badge">UNESCO Site</span>
                     </div>
-                    <div class="dest-content">
-                        <div class="dest-location"><i class="fa-solid fa-location-dot"></i> Kerala, India</div>
-                        <h3 class="dest-title">Munnar Tea Estates</h3>
-                        <p class="dest-description">Mist-covered Western Ghats tea gardens, rare Neelakurinji trail maps, and eco-conservation tracking.</p>
-                        <div class="dest-footer">
-                            <span class="dest-attractions-count"><i class="fa-solid fa-landmark"></i> 12 Attractions</span>
-                            <button class="btn btn-outline btn-sm dest-preview-btn" data-dest="munnar">Quick Preview</button>
-                        </div>
+                    <div class="card-body">
+                        <span class="card-location"><i class="fa-solid fa-location-dot"></i> Karnataka</span>
+                        <h3 class="card-title">Hampi UNESCO Realm</h3>
+                        <p class="card-desc">Vijayanagara empire stone ruins.</p>
+                        <button class="btn btn-outline btn-sm dest-preview-btn" data-dest="hampi">Quick Preview</button>
                     </div>
                 </div>
 
-                <!-- Destination 6 -->
-                <div class="dest-card" data-category="heritage">
-                    <div class="dest-image-box">
-                        <div class="dest-image-placeholder" style="background: linear-gradient(135deg, #9333EA, #6B21A8); display:flex; align-items:center; justify-content:center; color:white; font-size:3rem;">
-                            <i class="fa-solid fa-chess-rook"></i>
-                        </div>
-                        <span class="dest-badge">Royal Forts</span>
-                        <span class="dest-rating"><i class="fa-solid fa-star"></i> 4.75</span>
+                <div class="clean-card" data-category="nature">
+                    <div class="card-img-wrapper">
+                        <img src="assets/images/dest-munnar.jpg" alt="Munnar Tea Estates" class="card-img">
+                        <span class="card-tag-badge">Nature Reserve</span>
                     </div>
-                    <div class="dest-content">
-                        <div class="dest-location"><i class="fa-solid fa-location-dot"></i> Rajasthan, India</div>
-                        <h3 class="dest-title">Jaipur Pink City Realm</h3>
-                        <p class="dest-description">Royal Amer Fort, Hawa Mahal, handicraft bazaars, and city heritage stakeholder coordination.</p>
-                        <div class="dest-footer">
-                            <span class="dest-attractions-count"><i class="fa-solid fa-landmark"></i> 30 Attractions</span>
-                            <button class="btn btn-outline btn-sm dest-preview-btn" data-dest="jaipur">Quick Preview</button>
-                        </div>
+                    <div class="card-body">
+                        <span class="card-location"><i class="fa-solid fa-location-dot"></i> Kerala</span>
+                        <h3 class="card-title">Munnar Tea Estates</h3>
+                        <p class="card-desc">Western Ghats tea flora & fauna.</p>
+                        <button class="btn btn-outline btn-sm dest-preview-btn" data-dest="munnar">Quick Preview</button>
+                    </div>
+                </div>
+
+                <div class="clean-card" data-category="heritage">
+                    <div class="card-img-wrapper">
+                        <img src="assets/images/dest-jaipur.jpg" alt="Jaipur Pink City" class="card-img">
+                        <span class="card-tag-badge">Royal Forts</span>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-location"><i class="fa-solid fa-location-dot"></i> Rajasthan</span>
+                        <h3 class="card-title">Jaipur Pink City Realm</h3>
+                        <p class="card-desc">Amer Fort and handicraft bazaars.</p>
+                        <button class="btn btn-outline btn-sm dest-preview-btn" data-dest="jaipur">Quick Preview</button>
                     </div>
                 </div>
             </div>
@@ -530,76 +626,27 @@
     </section>
 
     <!-- ====================================================================
-         6. HOW IT WORKS
+         07. FINAL CTA (CLEAN BLUE BANNER)
          ==================================================================== -->
-    <section class="how-it-works-section" id="how-it-works">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">System Workflow</span>
-                <h2 class="section-title">How YatraSetu Works</h2>
-                <p class="section-subtitle">
-                    Streamlined workflow tailored for each user role in the Smart Destination Management Ecosystem.
+    <section class="cta-section" id="cta">
+        <div class="container text-center">
+            <div class="cta-banner-card">
+                <span class="section-tag tag-white"><i class="fa-solid fa-compass"></i> JOIN THE PLATFORM</span>
+                <h2 class="cta-title">Be Part of India’s Smart Tourism Ecosystem.</h2>
+                <p class="cta-subtitle">
+                    Whether you are a tourist discovering destinations, a manager overseeing attractions, or a stakeholder serving visitors — YatraSetu connects you.
                 </p>
-            </div>
-
-            <!-- Role Selector Tabs -->
-            <div class="role-tab-nav">
-                <button class="role-tab-btn active" data-role="tourist">
-                    <i class="fa-solid fa-person-walking-luggage"></i> For Tourists
-                </button>
-                <button class="role-tab-btn" data-role="manager">
-                    <i class="fa-solid fa-user-gear"></i> For Managers
-                </button>
-                <button class="role-tab-btn" data-role="stakeholder">
-                    <i class="fa-solid fa-handshake"></i> For Stakeholders
-                </button>
-            </div>
-
-            <!-- Dynamic Steps Container -->
-            <div class="steps-grid" id="stepsContainer">
-                <div class="step-card">
-                    <div class="step-number">01</div>
-                    <h3>Explore & Search</h3>
-                    <p>Discover verified heritage, cultural, and nature destinations with real-time attraction information and event schedules.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">02</div>
-                    <h3>Plan Your Itinerary</h3>
-                    <p>Select attractions, upcoming tourism events, and local services to build a personalized, interactive trip plan.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">03</div>
-                    <h3>Experience & Review</h3>
-                    <p>Visit destinations with confidence and submit authentic feedback to help improve tourism management.</p>
+                <div class="cta-buttons-row">
+                    <a href="#destinations" class="btn btn-gold btn-lg">Explore India</a>
+                    <a href="#managers" class="btn btn-outline-light btn-lg">For Destination Managers</a>
+                    <a href="#stakeholders" class="btn btn-outline-light btn-lg">For Tourism Stakeholders</a>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ====================================================================
-         7. CALL TO ACTION (CTA)
-         ==================================================================== -->
-    <section class="cta-section">
-        <div class="container">
-            <div class="cta-box">
-                <h2 class="cta-title">Ready to Experience Smart Destination Management?</h2>
-                <p class="cta-description">
-                    Join YatraSetu today to explore destinations, manage tourism resources, share facility updates, and support sustainable tourism decision-making.
-                </p>
-                <div class="cta-buttons">
-                    <a href="register.html" class="btn btn-secondary btn-lg">
-                        <i class="fa-solid fa-user-plus"></i> Register Free Account
-                    </a>
-                    <a href="login.html" class="btn btn-outline btn-lg" style="color: white; border-color: rgba(255,255,255,0.4);">
-                        <i class="fa-solid fa-right-to-bracket"></i> Access User Portal
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ====================================================================
-         8. FOOTER
+         08. PRODUCTION FOOTER (DEEP NAVY FOOTER)
          ==================================================================== -->
     <footer class="footer">
         <div class="container">
@@ -611,55 +658,41 @@
                         </div>
                         Yatra<span>Setu</span>
                     </a>
-                    <p>
-                        A Cloud-Based Smart Destination Management Platform addressing tourism service fragmentation by connecting Tourists, Destination Managers, Stakeholders, and Administrators.
+                    <p class="footer-tagline">Explore • Connect • Conserve</p>
+                    <p class="footer-desc">
+                        A Cloud-Based Smart Destination Management Platform unifying Tourists, Destination Managers, Tourism Stakeholders, and Administrators.
                     </p>
-                    <div class="footer-tech-stack">
-                        <span class="tech-badge">HTML5</span>
-                        <span class="tech-badge">CSS3</span>
-                        <span class="tech-badge">Vanilla JS</span>
-                        <span class="tech-badge">FastAPI</span>
-                        <span class="tech-badge">PostgreSQL</span>
-                        <span class="tech-badge">GCP / Render</span>
-                    </div>
                 </div>
 
                 <div>
-                    <h4 class="footer-heading">Navigation</h4>
+                    <h4 class="footer-heading">Platform</h4>
                     <ul class="footer-links">
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#about">About YatraSetu</a></li>
-                        <li><a href="#features">Key Features</a></li>
-                        <li><a href="#destinations">Explore Destinations</a></li>
-                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#destinations">Explore India</a></li>
+                        <li><a href="#destinations">Destinations</a></li>
+                        <li><a href="#destinations">Events</a></li>
                     </ul>
                 </div>
 
                 <div>
-                    <h4 class="footer-heading">User Portals</h4>
+                    <h4 class="footer-heading">For Partners</h4>
                     <ul class="footer-links">
-                        <li><a href="login.html">Tourist Login</a></li>
-                        <li><a href="login.html">Destination Manager</a></li>
-                        <li><a href="login.html">Tourism Stakeholder</a></li>
-                        <li><a href="login.html">System Administrator</a></li>
-                        <li><a href="register.html">Create Account</a></li>
+                        <li><a href="#managers">Destination Managers</a></li>
+                        <li><a href="#stakeholders">Tourism Stakeholders</a></li>
+                        <li><a href="login.html">Partner Login</a></li>
                     </ul>
                 </div>
 
                 <div>
-                    <h4 class="footer-heading">Project viva Info</h4>
-                    <p style="font-size: 0.85rem; line-height: 1.6; color: #94A3B8; margin-bottom: 0.75rem;">
-                        Senior Capstone Engineering Project focusing on Cloud Computing & Smart Tourism Destination Management.
-                    </p>
-                    <p style="font-size: 0.8rem; color: #64748B;">
-                        Repository: YatraSetu Platform
-                    </p>
+                    <h4 class="footer-heading">Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
                 </div>
             </div>
 
             <div class="footer-bottom">
-                <div>&copy; 2026 YatraSetu Project Team. All Rights Reserved.</div>
-                <div style="color: #64748B;">Built with HTML5, CSS3 & Vanilla JavaScript</div>
+                <div>&copy; 2026 YatraSetu Platform. All Rights Reserved.</div>
             </div>
         </div>
     </footer>

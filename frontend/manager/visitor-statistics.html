@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitor Statistics — YatraSetu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body class="app-body" data-theme="maharashtra">
+
+    <div class="app-shell">
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar" id="app-sidebar">
+            <div class="app-sidebar-header">
+                <a href="dashboard.html" class="app-brand-link">
+                    <div class="app-brand-crest">Y</div>
+                    <div class="app-brand-info">
+                        <span class="app-brand-name">Yatra<span>Setu</span></span>
+                        <span class="app-role-label">Destination Manager</span>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="app-sidebar-nav">
+                <div class="app-nav-section-title">WORKSPACE</div>
+                <a href="dashboard.html" class="app-nav-item">
+                    <span class="app-nav-icon">📊</span>
+                    <span>Overview</span>
+                </a>
+                <a href="destinations.html" class="app-nav-item">
+                    <span class="app-nav-icon">📍</span>
+                    <span>Destinations</span>
+                </a>
+                <a href="attractions.html" class="app-nav-item">
+                    <span class="app-nav-icon">🏛️</span>
+                    <span>Attractions</span>
+                </a>
+                <a href="events.html" class="app-nav-item">
+                    <span class="app-nav-icon">📅</span>
+                    <span>Events</span>
+                </a>
+                <a href="stakeholders.html" class="app-nav-item">
+                    <span class="app-nav-icon">🤝</span>
+                    <span>Stakeholders</span>
+                </a>
+                <a href="visitor-statistics.html" class="app-nav-item active">
+                    <span class="app-nav-icon">📈</span>
+                    <span>Visitor Statistics</span>
+                </a>
+                <a href="feedback.html" class="app-nav-item">
+                    <span class="app-nav-icon">💬</span>
+                    <span>Feedback</span>
+                </a>
+                <a href="analytics.html" class="app-nav-item">
+                    <span class="app-nav-icon">📉</span>
+                    <span>Analytics</span>
+                </a>
+                <a href="reports.html" class="app-nav-item">
+                    <span class="app-nav-icon">📄</span>
+                    <span>Reports</span>
+                </a>
+                <a href="decision-support.html" class="app-nav-item">
+                    <span class="app-nav-icon">⚡</span>
+                    <span>Decision Support</span>
+                </a>
+            </nav>
+
+            <div class="app-sidebar-footer">
+                <a href="#" class="app-nav-item">
+                    <span class="app-nav-icon">👤</span>
+                    <span>Profile</span>
+                </a>
+                <a href="../login.html" class="app-nav-item">
+                    <span class="app-nav-icon">🚪</span>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="app-main">
+            <!-- Topbar -->
+            <header class="app-topbar">
+                <div class="topbar-left">
+                    <button class="mobile-menu-toggle" id="sidebar-toggle-btn">☰</button>
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" placeholder="Search statistics...">
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="destination-selector">
+                        <select id="destination-context-select" class="destination-select-dropdown" aria-label="Select State Context">
+                            <option value="maharashtra">☀️ Maharashtra</option>
+                            <option value="kerala">🌴 Kerala</option>
+                            <option value="kashmir">🏔️ Kashmir</option>
+                            <option value="rajasthan">🏰 Rajasthan</option>
+                            <option value="goa">🏖️ Goa</option>
+                            <option value="tamilnadu">🛕 Tamil Nadu</option>
+                            <option value="uttarakhand">🌲 Uttarakhand</option>
+                            <option value="assam">🦏 Assam</option>
+                        </select>
+                    </div>
+
+                    <div class="user-profile-badge">
+                        <div class="user-avatar">AM</div>
+                        <span class="user-name">Ambika Ambekar</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="app-content">
+                <!-- Page Header Row -->
+                <div class="page-header-row">
+                    <div class="page-title-group">
+                        <h1>Visitor Statistics</h1>
+                        <p>Detailed analysis of footfall volume, peak visiting hours, and visitor origins.</p>
+                    </div>
+                    <span class="demo-data-badge">SAMPLE DESTINATION DATA</span>
+                </div>
+
+                <!-- 3 Metric Cards -->
+                <section class="metrics-grid-4" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">Total Monthly Influx</span>
+                            <span class="metric-icon">👥</span>
+                        </div>
+                        <div class="metric-value">12,450</div>
+                        <div class="metric-footer">Across all 28 active attractions</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">Peak Daily Volume</span>
+                            <span class="metric-icon">📊</span>
+                        </div>
+                        <div class="metric-value">1,850</div>
+                        <div class="metric-footer">Recorded on Sunday weekends</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">Avg. Length of Stay</span>
+                            <span class="metric-icon">⏱️</span>
+                        </div>
+                        <div class="metric-value">1.8 Days</div>
+                        <div class="metric-footer">+0.3 days vs previous quarter</div>
+                    </div>
+                </section>
+
+                <!-- Workspace Two Column -->
+                <div class="workspace-two-col">
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <h3 class="section-title">Weekly Footfall Distribution</h3>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Day of Week</th>
+                                    <th>Avg Daily Visitors</th>
+                                    <th>Peak Hours</th>
+                                    <th>Capacity Strain</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Monday</td>
+                                    <td>1,120</td>
+                                    <td>11:00 AM – 02:00 PM</td>
+                                    <td><span class="badge badge-success">Low</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Wednesday</td>
+                                    <td>1,450</td>
+                                    <td>10:30 AM – 03:00 PM</td>
+                                    <td><span class="badge badge-success">Moderate</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Saturday</td>
+                                    <td>2,240</td>
+                                    <td>10:00 AM – 04:30 PM</td>
+                                    <td><span class="badge badge-warning">High</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Sunday</td>
+                                    <td>2,680</td>
+                                    <td>09:30 AM – 05:00 PM</td>
+                                    <td><span class="badge badge-danger">Peak Watch</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <h3 class="section-title">Visitor Origin Breakdown</h3>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Origin Region</th>
+                                    <th>Share (%)</th>
+                                    <th>Primary Travel Mode</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Intra-State (Maharashtra)</td>
+                                    <td>62%</td>
+                                    <td>Private Vehicle / Bus</td>
+                                </tr>
+                                <tr>
+                                    <td>Interstate (Gujarat, MP, KA)</td>
+                                    <td>31%</td>
+                                    <td>Rail / Highway</td>
+                                </tr>
+                                <tr>
+                                    <td>International Tourists</td>
+                                    <td>7%</td>
+                                    <td>Flight (Mumbai/Pune Airports)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/dashboard.js"></script>
+    <script src="../js/manager.js"></script>
+</body>
+</html>

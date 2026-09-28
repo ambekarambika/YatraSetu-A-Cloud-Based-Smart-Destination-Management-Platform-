@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Destination Manager Overview — YatraSetu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body class="app-body" data-theme="maharashtra">
+
+    <div class="app-shell">
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar" id="app-sidebar">
+            <div class="app-sidebar-header">
+                <a href="dashboard.html" class="app-brand-link">
+                    <div class="app-brand-crest">Y</div>
+                    <div class="app-brand-info">
+                        <span class="app-brand-name">Yatra<span>Setu</span></span>
+                        <span class="app-role-label">Destination Manager</span>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="app-sidebar-nav">
+                <div class="app-nav-section-title">WORKSPACE</div>
+                <a href="dashboard.html" class="app-nav-item active">
+                    <span class="app-nav-icon">📊</span>
+                    <span>Overview</span>
+                </a>
+                <a href="destinations.html" class="app-nav-item">
+                    <span class="app-nav-icon">📍</span>
+                    <span>Destinations</span>
+                </a>
+                <a href="attractions.html" class="app-nav-item">
+                    <span class="app-nav-icon">🏛️</span>
+                    <span>Attractions</span>
+                </a>
+                <a href="events.html" class="app-nav-item">
+                    <span class="app-nav-icon">📅</span>
+                    <span>Events</span>
+                </a>
+                <a href="stakeholders.html" class="app-nav-item">
+                    <span class="app-nav-icon">🤝</span>
+                    <span>Stakeholders</span>
+                </a>
+                <a href="visitor-statistics.html" class="app-nav-item">
+                    <span class="app-nav-icon">📈</span>
+                    <span>Visitor Statistics</span>
+                </a>
+                <a href="feedback.html" class="app-nav-item">
+                    <span class="app-nav-icon">💬</span>
+                    <span>Feedback</span>
+                </a>
+                <a href="analytics.html" class="app-nav-item">
+                    <span class="app-nav-icon">📉</span>
+                    <span>Analytics</span>
+                </a>
+                <a href="reports.html" class="app-nav-item">
+                    <span class="app-nav-icon">📄</span>
+                    <span>Reports</span>
+                </a>
+                <a href="decision-support.html" class="app-nav-item">
+                    <span class="app-nav-icon">⚡</span>
+                    <span>Decision Support</span>
+                </a>
+            </nav>
+
+            <div class="app-sidebar-footer">
+                <a href="#" class="app-nav-item">
+                    <span class="app-nav-icon">👤</span>
+                    <span>Profile</span>
+                </a>
+                <a href="../login.html" class="app-nav-item">
+                    <span class="app-nav-icon">🚪</span>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="app-main">
+            <!-- Topbar -->
+            <header class="app-topbar">
+                <div class="topbar-left">
+                    <button class="mobile-menu-toggle" id="sidebar-toggle-btn">☰</button>
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" placeholder="Search destination, attractions, events...">
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="destination-selector">
+                        <select id="destination-context-select" class="destination-select-dropdown" aria-label="Select State Context">
+                            <option value="maharashtra">☀️ Maharashtra</option>
+                            <option value="kerala">🌴 Kerala</option>
+                            <option value="kashmir">🏔️ Kashmir</option>
+                            <option value="rajasthan">🏰 Rajasthan</option>
+                            <option value="goa">🏖️ Goa</option>
+                            <option value="tamilnadu">🛕 Tamil Nadu</option>
+                            <option value="uttarakhand">🌲 Uttarakhand</option>
+                            <option value="assam">🦏 Assam</option>
+                        </select>
+                    </div>
+
+                    <div class="user-profile-badge">
+                        <div class="user-avatar">AM</div>
+                        <span class="user-name">Ambika Ambekar</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="app-content">
+                <!-- Destination Hero Context Banner -->
+                <section class="destination-hero-banner">
+                    <div class="destination-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1627894483216-2138af692e32?auto=format&fit=crop&w=1600&q=80');"></div>
+                    <div class="destination-hero-overlay"></div>
+                    <div class="destination-hero-body">
+                        <div>
+                            <div class="hero-eyebrow" id="hero-tagline">MAHARASHTRA DESTINATION MANAGEMENT</div>
+                            <h1 class="hero-title" id="hero-heading">Maharashtra Workspace</h1>
+                            <p class="hero-subtitle" id="hero-subtitle">Manage tourism activity, monitor visitor influx, and coordinate destination stakeholders efficiently.</p>
+                        </div>
+                        <div class="hero-actions">
+                            <span class="demo-data-badge">SAMPLE DESTINATION DATA</span>
+                            <a href="destinations.html" class="btn-primary">Manage Destination</a>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Overview Metrics (Max 4 Focused Cards) -->
+                <section class="metrics-grid-4">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">Monthly Visitors</span>
+                            <span class="metric-icon">👥</span>
+                        </div>
+                        <div class="metric-value">12,450</div>
+                        <div class="metric-footer">
+                            <span class="metric-trend-positive">↑ 8.4%</span> vs previous month
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">Active Attractions</span>
+                            <span class="metric-icon">🏛️</span>
+                        </div>
+                        <div class="metric-value">28</div>
+                        <div class="metric-footer">
+                            4 under capacity watch
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">Scheduled Events</span>
+                            <span class="metric-icon">📅</span>
+                        </div>
+                        <div class="metric-value">16</div>
+                        <div class="metric-footer">
+                            3 upcoming this week
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">Tourist Rating</span>
+                            <span class="metric-icon">⭐</span>
+                        </div>
+                        <div class="metric-value">4.8 / 5</div>
+                        <div class="metric-footer">
+                            Based on 1,420 verified reviews
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Two-Column Workspace -->
+                <div class="workspace-two-col">
+                    <!-- Left Column: Activity & Stakeholders -->
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <!-- Destination Activity -->
+                        <div class="section-card">
+                            <div class="section-card-header">
+                                <h3 class="section-title">Destination Activity</h3>
+                                <span class="demo-data-badge">DEMO FEED</span>
+                            </div>
+                            <div class="activity-list">
+                                <div class="activity-item">
+                                    <div class="activity-dot"></div>
+                                    <div class="activity-content">
+                                        <span class="activity-desc">Raigad Fort visitor capacity updated for monsoon season</span>
+                                        <span class="activity-time">2 hours ago</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-dot"></div>
+                                    <div class="activity-content">
+                                        <span class="activity-desc">New attraction registered: Karla Caves Heritage Site</span>
+                                        <span class="activity-time">5 hours ago</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-dot"></div>
+                                    <div class="activity-content">
+                                        <span class="activity-desc">Tourism event scheduled: Pune Heritage Walk (Oct 12)</span>
+                                        <span class="activity-time">Yesterday</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-dot"></div>
+                                    <div class="activity-content">
+                                        <span class="activity-desc">Stakeholder update received from Konkan Homestay Network</span>
+                                        <span class="activity-time">2 days ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stakeholder Activity -->
+                        <div class="section-card">
+                            <div class="section-card-header">
+                                <h3 class="section-title">Stakeholder Activity</h3>
+                                <a href="stakeholders.html" class="section-link">View All Stakeholders →</a>
+                            </div>
+                            <div class="activity-list">
+                                <div class="activity-item">
+                                    <div class="activity-dot" style="background-color: var(--info-color);"></div>
+                                    <div class="activity-content">
+                                        <span class="activity-desc"><strong>Sahyadri Resort Alliance</strong> updated seasonal room availability</span>
+                                        <span class="activity-time">3 hours ago</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-dot" style="background-color: var(--info-color);"></div>
+                                    <div class="activity-content">
+                                        <span class="activity-desc"><strong>Certified Heritage Guides Guild</strong> submitted guide roster</span>
+                                        <span class="activity-time">6 hours ago</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-dot" style="background-color: var(--info-color);"></div>
+                                    <div class="activity-content">
+                                        <span class="activity-desc"><strong>Konkan Cultural Folk Troupe</strong> submitted event proposal</span>
+                                        <span class="activity-time">1 day ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Events & Feedback Preview -->
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <!-- Upcoming Events -->
+                        <div class="section-card">
+                            <div class="section-card-header">
+                                <h3 class="section-title">Upcoming Tourism Events</h3>
+                                <a href="events.html" class="section-link">View All Events →</a>
+                            </div>
+                            <div class="event-mini-list" id="upcoming-events-list">
+                                <div class="event-mini-card">
+                                    <div class="event-mini-info">
+                                        <h4>Pune Heritage Walk</h4>
+                                        <p>Pune, Maharashtra • Shaniwar Wada Circuit</p>
+                                    </div>
+                                    <span class="event-mini-date">12 OCT</span>
+                                </div>
+                                <div class="event-mini-card">
+                                    <div class="event-mini-info">
+                                        <h4>Ajanta Ellora Festival</h4>
+                                        <p>Chhatrapati Sambhajinagar, Maharashtra</p>
+                                    </div>
+                                    <span class="event-mini-date">18 OCT</span>
+                                </div>
+                                <div class="event-mini-card">
+                                    <div class="event-mini-info">
+                                        <h4>Konkan Food & Spice Fest</h4>
+                                        <p>Ratnagiri Coastal Corridor</p>
+                                    </div>
+                                    <span class="event-mini-date">25 OCT</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tourist Feedback Preview -->
+                        <div class="section-card">
+                            <div class="section-card-header">
+                                <h3 class="section-title">Recent Tourist Feedback</h3>
+                                <a href="feedback.html" class="section-link">View All Feedback →</a>
+                            </div>
+                            <div class="feedback-mini-list">
+                                <div class="feedback-mini-item">
+                                    <div class="feedback-mini-stars">★★★★★</div>
+                                    <div class="feedback-mini-text">"The ropeway facility and historical information boards at Raigad Fort were exceptional!"</div>
+                                    <div class="feedback-mini-author">— Rohan Deshmukh (Visited Sept 2025)</div>
+                                </div>
+                                <div class="feedback-mini-item">
+                                    <div class="feedback-mini-stars">★★★★☆</div>
+                                    <div class="feedback-mini-text">"Konkan coastal route signages were clear and helpful. Great digital coordination."</div>
+                                    <div class="feedback-mini-author">— Ananya Sharma (Visited Sept 2025)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sustainability Banner -->
+                <div class="destination-care-banner">
+                    <div class="care-content">
+                        <h4>DESTINATION CARE & SUSTAINABILITY</h4>
+                        <p>Support responsible tourism management through capacity control, eco-preservation, and community engagement.</p>
+                    </div>
+                    <a href="analytics.html" class="btn-secondary">View Sustainability Metrics</a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/dashboard.js"></script>
+    <script src="../js/manager.js"></script>
+</body>
+</html>

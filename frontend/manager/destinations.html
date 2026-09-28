@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Destination Management — YatraSetu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body class="app-body" data-theme="maharashtra">
+
+    <div class="app-shell">
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar" id="app-sidebar">
+            <div class="app-sidebar-header">
+                <a href="dashboard.html" class="app-brand-link">
+                    <div class="app-brand-crest">Y</div>
+                    <div class="app-brand-info">
+                        <span class="app-brand-name">Yatra<span>Setu</span></span>
+                        <span class="app-role-label">Destination Manager</span>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="app-sidebar-nav">
+                <div class="app-nav-section-title">WORKSPACE</div>
+                <a href="dashboard.html" class="app-nav-item">
+                    <span class="app-nav-icon">📊</span>
+                    <span>Overview</span>
+                </a>
+                <a href="destinations.html" class="app-nav-item active">
+                    <span class="app-nav-icon">📍</span>
+                    <span>Destinations</span>
+                </a>
+                <a href="attractions.html" class="app-nav-item">
+                    <span class="app-nav-icon">🏛️</span>
+                    <span>Attractions</span>
+                </a>
+                <a href="events.html" class="app-nav-item">
+                    <span class="app-nav-icon">📅</span>
+                    <span>Events</span>
+                </a>
+                <a href="stakeholders.html" class="app-nav-item">
+                    <span class="app-nav-icon">🤝</span>
+                    <span>Stakeholders</span>
+                </a>
+                <a href="visitor-statistics.html" class="app-nav-item">
+                    <span class="app-nav-icon">📈</span>
+                    <span>Visitor Statistics</span>
+                </a>
+                <a href="feedback.html" class="app-nav-item">
+                    <span class="app-nav-icon">💬</span>
+                    <span>Feedback</span>
+                </a>
+                <a href="analytics.html" class="app-nav-item">
+                    <span class="app-nav-icon">📉</span>
+                    <span>Analytics</span>
+                </a>
+                <a href="reports.html" class="app-nav-item">
+                    <span class="app-nav-icon">📄</span>
+                    <span>Reports</span>
+                </a>
+                <a href="decision-support.html" class="app-nav-item">
+                    <span class="app-nav-icon">⚡</span>
+                    <span>Decision Support</span>
+                </a>
+            </nav>
+
+            <div class="app-sidebar-footer">
+                <a href="#" class="app-nav-item">
+                    <span class="app-nav-icon">👤</span>
+                    <span>Profile</span>
+                </a>
+                <a href="../login.html" class="app-nav-item">
+                    <span class="app-nav-icon">🚪</span>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="app-main">
+            <!-- Topbar -->
+            <header class="app-topbar">
+                <div class="topbar-left">
+                    <button class="mobile-menu-toggle" id="sidebar-toggle-btn">☰</button>
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input table-search-input" placeholder="Search destination profiles...">
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="destination-selector">
+                        <select id="destination-context-select" class="destination-select-dropdown" aria-label="Select State Context">
+                            <option value="maharashtra">☀️ Maharashtra</option>
+                            <option value="kerala">🌴 Kerala</option>
+                            <option value="kashmir">🏔️ Kashmir</option>
+                            <option value="rajasthan">🏰 Rajasthan</option>
+                            <option value="goa">🏖️ Goa</option>
+                            <option value="tamilnadu">🛕 Tamil Nadu</option>
+                            <option value="uttarakhand">🌲 Uttarakhand</option>
+                            <option value="assam">🦏 Assam</option>
+                        </select>
+                    </div>
+
+                    <div class="user-profile-badge">
+                        <div class="user-avatar">AM</div>
+                        <span class="user-name">Ambika Ambekar</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="app-content">
+                <!-- Page Header Row -->
+                <div class="page-header-row">
+                    <div class="page-title-group">
+                        <h1>Destination Profiles</h1>
+                        <p>Manage official destination records, capacity limits, and operational status.</p>
+                    </div>
+                    <button class="btn-primary" data-modal-target="addDestinationModal">+ Add Destination</button>
+                </div>
+
+                <!-- Filter Bar -->
+                <div class="filter-bar">
+                    <input type="text" class="filter-input table-search-input" placeholder="Filter by name or location..." style="flex: 1; min-width: 200px;">
+                    <select class="filter-select table-filter-select" data-filter="category">
+                        <option value="all">All Categories</option>
+                        <option value="heritage">Heritage Fort</option>
+                        <option value="unesco">UNESCO Site</option>
+                        <option value="hill">Hill Station</option>
+                        <option value="pilgrimage">Pilgrimage</option>
+                    </select>
+                    <select class="filter-select table-filter-select" data-filter="status">
+                        <option value="all">All Statuses</option>
+                        <option value="active">Active</option>
+                        <option value="peak">Peak Season</option>
+                        <option value="maintenance">Maintenance</option>
+                    </select>
+                </div>
+
+                <!-- Destination Data Table -->
+                <div class="table-container">
+                    <table class="data-table app-table">
+                        <thead>
+                            <tr>
+                                <th>Destination Name</th>
+                                <th>Category</th>
+                                <th>Region</th>
+                                <th>Daily Capacity</th>
+                                <th>Monthly Visitors</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-category="heritage" data-status="active">
+                                <td><strong>Raigad Fort</strong></td>
+                                <td>Heritage Fort</td>
+                                <td>Raigad, Maharashtra</td>
+                                <td>5,000 / day</td>
+                                <td>12,450</td>
+                                <td><span class="badge badge-success">Active</span></td>
+                                <td><button class="btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Edit</button></td>
+                            </tr>
+                            <tr data-category="unesco" data-status="active">
+                                <td><strong>Ajanta Caves</strong></td>
+                                <td>UNESCO Site</td>
+                                <td>Chhatrapati Sambhajinagar</td>
+                                <td>8,000 / day</td>
+                                <td>18,900</td>
+                                <td><span class="badge badge-success">Active</span></td>
+                                <td><button class="btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Edit</button></td>
+                            </tr>
+                            <tr data-category="unesco" data-status="active">
+                                <td><strong>Ellora Caves</strong></td>
+                                <td>UNESCO Site</td>
+                                <td>Chhatrapati Sambhajinagar</td>
+                                <td>10,000 / day</td>
+                                <td>16,300</td>
+                                <td><span class="badge badge-success">Active</span></td>
+                                <td><button class="btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Edit</button></td>
+                            </tr>
+                            <tr data-category="hill" data-status="peak">
+                                <td><strong>Lonavala Hills</strong></td>
+                                <td>Hill Station</td>
+                                <td>Pune District</td>
+                                <td>15,000 / day</td>
+                                <td>24,100</td>
+                                <td><span class="badge badge-warning">Peak Season</span></td>
+                                <td><button class="btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Edit</button></td>
+                            </tr>
+                            <tr data-category="pilgrimage" data-status="active">
+                                <td><strong>Shirdi Temple Complex</strong></td>
+                                <td>Pilgrimage</td>
+                                <td>Ahilya Nagar</td>
+                                <td>25,000 / day</td>
+                                <td>32,000</td>
+                                <td><span class="badge badge-success">Active</span></td>
+                                <td><button class="btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Edit</button></td>
+                            </tr>
+                            <tr data-category="heritage" data-status="maintenance">
+                                <td><strong>Kaas Plateau Eco Reserve</strong></td>
+                                <td>Eco Reserve</td>
+                                <td>Satara District</td>
+                                <td>3,000 / day</td>
+                                <td>6,200</td>
+                                <td><span class="badge badge-info">Restricted</span></td>
+                                <td><button class="btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Edit</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Dialog: Add Destination -->
+    <div class="modal-overlay app-modal" id="addDestinationModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Destination Profile</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Destination Name</label>
+                    <input type="text" class="form-control" placeholder="e.g. Pratapgad Fort">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select class="form-control">
+                        <option>Heritage Fort</option>
+                        <option>UNESCO World Heritage Site</option>
+                        <option>Hill Station</option>
+                        <option>Pilgrimage Site</option>
+                        <option>Eco & Wildlife Reserve</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Region / District</label>
+                    <input type="text" class="form-control" placeholder="e.g. Satara, Maharashtra">
+                </div>
+                <div class="form-group">
+                    <label>Recommended Daily Visitor Capacity</label>
+                    <input type="number" class="form-control" placeholder="e.g. 4000">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary modal-close">Cancel</button>
+                <button class="btn-primary modal-close">Save Destination</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/dashboard.js"></script>
+    <script src="../js/manager.js"></script>
+</body>
+</html>

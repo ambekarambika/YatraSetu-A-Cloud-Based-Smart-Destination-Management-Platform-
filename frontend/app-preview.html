@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YatraSetu Application UI — Shared Workspace Components Showcase</title>
+    <meta name="description" content="YatraSetu Shared Application UI System — Demonstration of unified application shell, sidebar navigation, metric cards, tables, and forms.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body class="app-body" data-theme="maharashtra">
+
+    <div class="app-shell">
+
+        <!-- ====================================================================
+             1. REUSABLE APPLICATION SIDEBAR
+             ==================================================================== -->
+        <aside class="app-sidebar" id="app-sidebar">
+            <div>
+                <!-- Sidebar Header -->
+                <div class="app-sidebar-header">
+                    <a href="index.html" class="app-brand-link" id="sidebar-logo">
+                        <div class="app-brand-logo">Y</div>
+                        <div class="app-brand-title">Yatra<span>Setu</span></div>
+                    </a>
+                </div>
+
+                <!-- Role Badge Context -->
+                <div class="app-sidebar-role-badge">
+                    <span class="role-badge-label">Active Role</span>
+                    <span class="role-badge-val" id="current-role-badge">MANAGER</span>
+                </div>
+
+                <!-- Sidebar Navigation Items (Destination Manager Source of Truth Default) -->
+                <nav class="app-sidebar-nav" id="app-sidebar-nav">
+                    <div class="nav-section-title">MANAGER WORKSPACE</div>
+                    <a href="#" class="app-nav-item active" data-title="Overview">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        <span>Overview</span>
+                    </a>
+                    <a href="#" class="app-nav-item" data-title="Destinations">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        <span>Destinations</span>
+                    </a>
+                    <a href="#" class="app-nav-item" data-title="Attractions">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18"></path><path d="M5 21V7l8-4 8 4v14"></path></svg>
+                        <span>Attractions</span>
+                    </a>
+                    <a href="#" class="app-nav-item" data-title="Events">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        <span>Events</span>
+                    </a>
+                    <a href="#" class="app-nav-item" data-title="Stakeholders">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        <span>Stakeholders</span>
+                    </a>
+                    <a href="#" class="app-nav-item" data-title="Visitor Statistics">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                        <span>Visitor Statistics</span>
+                    </a>
+                    <a href="#" class="app-nav-item" data-title="Feedback">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <span>Feedback</span>
+                    </a>
+                    <a href="#" class="app-nav-item" data-title="Analytics">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                        <span>Analytics</span>
+                    </a>
+                    <a href="#" class="app-nav-item" data-title="Reports">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                        <span>Reports</span>
+                    </a>
+                    <a href="#" class="app-nav-item" data-title="Decision Support">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        <span>Decision Support</span>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Sidebar User Profile Footer -->
+            <div class="app-sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="sidebar-avatar">YS</div>
+                    <div class="sidebar-user-info">
+                        <span class="user-name">YatraSetu System</span>
+                        <span class="user-role">UI Component Showcase</span>
+                    </div>
+                </div>
+                <a href="login.html" class="btn-sidebar-logout" title="Sign Out" aria-label="Sign Out">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </a>
+            </div>
+        </aside>
+
+        <!-- ====================================================================
+             2. MAIN APPLICATION WORKSPACE & TOPBAR
+             ==================================================================== -->
+        <main class="app-main">
+            
+            <!-- Topbar Navigation -->
+            <header class="app-topbar">
+                <div class="topbar-left">
+                    <button type="button" class="btn-sidebar-toggle" id="sidebar-toggle-btn" aria-label="Toggle Sidebar Navigation">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+
+                    <div class="breadcrumbs">
+                        <a href="index.html" class="breadcrumb-item">YatraSetu</a>
+                        <span>/</span>
+                        <span class="breadcrumb-item" id="breadcrumb-role">Manager Nav Demonstration</span>
+                        <span>/</span>
+                        <span class="breadcrumb-item active" id="breadcrumb-active">Overview</span>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <!-- Role Switcher Test Pills (Demonstration Helper for Sidebar Nav) -->
+                    <div style="display:flex; align-items:center; gap:0.4rem; background:var(--bg-surface-subtle); padding:0.25rem 0.5rem; border-radius:8px; border:1px solid var(--border-light);">
+                        <span style="font-size:0.7rem; font-weight:700; color:var(--text-muted);">ROLE PREVIEW:</span>
+                        <button type="button" class="btn-app btn-app-secondary role-switcher-pill active" data-role="manager" style="padding:0.2rem 0.5rem; font-size:0.75rem;">Manager</button>
+                        <button type="button" class="btn-app btn-app-secondary role-switcher-pill" data-role="tourist" style="padding:0.2rem 0.5rem; font-size:0.75rem;">Tourist</button>
+                        <button type="button" class="btn-app btn-app-secondary role-switcher-pill" data-role="stakeholder" style="padding:0.2rem 0.5rem; font-size:0.75rem;">Stakeholder</button>
+                        <button type="button" class="btn-app btn-app-secondary role-switcher-pill" data-role="admin" style="padding:0.2rem 0.5rem; font-size:0.75rem;">Admin</button>
+                    </div>
+
+                    <div class="topbar-search">
+                        <svg class="topbar-search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" class="topbar-search-input" placeholder="Search workspace...">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main App Content Showcase -->
+            <div class="app-content">
+
+                <!-- 3. PAGE HEADER BANNER COMPONENT SHOWCASE -->
+                <div class="page-header-banner">
+                    <div class="page-header-info">
+                        <div class="page-eyebrow" id="context-eyebrow">
+                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                            DEMONSTRATION CONTEXT: MANAGER WORKSPACE
+                        </div>
+                        <h1 class="page-title">Shared Application UI Showcase</h1>
+                        <p class="page-subtitle">Demonstration of reusable application shell, navigation drawer, metric cards, tables, activity feeds, and form controls.</p>
+                    </div>
+
+                    <div class="page-header-actions">
+                        <button type="button" class="btn-app btn-app-secondary">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Export Showcase
+                        </button>
+                        <button type="button" class="btn-app btn-app-primary">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Sample Action
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4. REUSABLE METRIC CARDS SHOWCASE -->
+                <div class="metric-grid">
+                    <div class="metric-card accent-card">
+                        <div class="metric-card-top">
+                            <div class="metric-icon-box">
+                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                            </div>
+                            <span class="sample-badge">SAMPLE COMPONENT DATA</span>
+                        </div>
+                        <div class="metric-value">4 Roles</div>
+                        <div class="metric-label">Supported Workspace Roles</div>
+                        <div class="metric-trend up">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span>Tourist, Manager, Stakeholder, Admin</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-card-top">
+                            <div class="metric-icon-box">
+                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                            </div>
+                            <span class="sample-badge">SAMPLE COMPONENT DATA</span>
+                        </div>
+                        <div class="metric-value">India-Wide</div>
+                        <div class="metric-label">Destination Architecture</div>
+                        <div class="metric-trend up">
+                            <span>Data-driven expandable model</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-card-top">
+                            <div class="metric-icon-box">
+                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline></svg>
+                            </div>
+                            <span class="sample-badge">SAMPLE COMPONENT DATA</span>
+                        </div>
+                        <div class="metric-value">Sahyadri Saffron</div>
+                        <div class="metric-label">Cultural Palette System</div>
+                        <div class="metric-trend up">
+                            <span>--state-accent integration</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-card-top">
+                            <div class="metric-icon-box">
+                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            </div>
+                            <span class="sample-badge">SAMPLE COMPONENT DATA</span>
+                        </div>
+                        <div class="metric-value">100% Responsive</div>
+                        <div class="metric-label">Mobile Drawer & Layout</div>
+                        <div class="metric-trend up">
+                            <span>Desktop, Tablet, Mobile (375px)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. REUSABLE DATA TABLE SYSTEM SHOWCASE -->
+                <div class="table-card">
+                    <div class="table-header-bar">
+                        <h3 class="table-title">Sample Component Data Table Showcase</h3>
+                        <div style="display:flex; gap:0.5rem;">
+                            <button type="button" class="btn-app btn-app-secondary" style="padding:0.35rem 0.75rem; font-size:0.8rem;">Filter Records</button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="app-table">
+                            <thead>
+                                <tr>
+                                    <th>Item Title</th>
+                                    <th>Category Context</th>
+                                    <th>Attributes</th>
+                                    <th>Update Frequency</th>
+                                    <th>Status Pill Badge</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Rajgad & Sahyadri Forts</strong></td>
+                                    <td>Maharashtra Context</td>
+                                    <td>8 Heritage Trails</td>
+                                    <td>Daily Updates</td>
+                                    <td><span class="status-pill active">● Active</span></td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <button type="button" class="btn-icon-table" title="View Item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+                                            <button type="button" class="btn-icon-table" title="Edit Item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Alleppey Backwater Eco Tour</strong></td>
+                                    <td>Kerala Context</td>
+                                    <td>12 Houseboat Routes</td>
+                                    <td>Weekly Sync</td>
+                                    <td><span class="status-pill pending">● Pending Review</span></td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <button type="button" class="btn-icon-table" title="View Item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+                                            <button type="button" class="btn-icon-table" title="Edit Item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Jaipur City Palace Heritage Draft</strong></td>
+                                    <td>Rajasthan Context</td>
+                                    <td>4 Cultural Pavilions</td>
+                                    <td>Monthly Audit</td>
+                                    <td><span class="status-pill draft">● Draft State</span></td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <button type="button" class="btn-icon-table" title="View Item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+                                            <button type="button" class="btn-icon-table" title="Edit Item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="table-footer-bar">
+                        <span>Showing 3 sample component table rows</span>
+                        <span>Shared Table Design System</span>
+                    </div>
+                </div>
+
+                <!-- 6. ACTIVITY FEED SHOWCASE -->
+                <div class="activity-card">
+                    <h3 class="table-title">Sample Activity Feed Component</h3>
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon-box">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            </div>
+                            <div class="activity-details">
+                                <span class="activity-title">Shared UI component styling initialized</span>
+                                <span class="activity-time">Platform Design System • Just now</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon-box">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path></svg>
+                            </div>
+                            <div class="activity-details">
+                                <span class="activity-title">Role-based navigation menu switching verified</span>
+                                <span class="activity-time">YatraSetu System Audit • 10 minutes ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. REUSABLE FORM COMPONENTS SHOWCASE -->
+                <div class="app-form-card">
+                    <h3 class="table-title" style="margin-bottom:1.25rem;">Sample Form Controls Component</h3>
+                    <form class="app-form-grid" onsubmit="event.preventDefault(); alert('Sample form submission validated (Frontend Demo).');">
+                        <div class="app-form-group">
+                            <label class="app-label" for="sample-title">Title / Name Field</label>
+                            <input type="text" id="sample-title" class="app-input" placeholder="e.g. Sample Input Control">
+                        </div>
+
+                        <div class="app-form-group">
+                            <label class="app-label" for="sample-select">Category / Select Control</label>
+                            <select id="sample-select" class="app-select">
+                                <option value="Option 1">Option 1 — Standard Input</option>
+                                <option value="Option 2">Option 2 — Filter Control</option>
+                                <option value="Option 3">Option 3 — Selection State</option>
+                            </select>
+                        </div>
+
+                        <div class="app-form-group full-width">
+                            <label class="app-label" for="sample-desc">Description / Textarea Field</label>
+                            <textarea id="sample-desc" class="app-textarea" rows="3" placeholder="Sample textarea control demonstrating focus rings and typography..."></textarea>
+                        </div>
+
+                        <div class="app-form-group full-width" style="display:flex; justify-content:flex-end; gap:0.75rem;">
+                            <button type="reset" class="btn-app btn-app-secondary">Reset Form</button>
+                            <button type="submit" class="btn-app btn-app-primary">Submit Form Control</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

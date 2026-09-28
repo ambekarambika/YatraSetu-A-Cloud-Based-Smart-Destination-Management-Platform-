@@ -1,0 +1,606 @@
+/* ==========================================================================
+   YatraSetu — Smart Destination Management Platform
+   Cinematic Glassmorphism Authentication System (login.html & register.html)
+   ========================================================================== */
+
+/* Full Screen Background & Theme System */
+body.auth-cinematic-body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: var(--font-family, 'Plus Jakarta Sans', system-ui, sans-serif);
+    color: #FFFFFF;
+    background-color: #0B192C;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Cinematic Photo Backdrop */
+.auth-bg-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+    background-image: linear-gradient(180deg, rgba(11, 25, 44, 0.65) 0%, rgba(11, 25, 44, 0.88) 100%), url('../assets/images/hero-maharashtra.jpg');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    filter: brightness(0.95);
+}
+
+/* Translucent Navigation Header */
+.auth-glass-header {
+    position: relative;
+    z-index: 10;
+    padding: 1.25rem 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.auth-brand-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+}
+
+.auth-brand-logo {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, var(--state-accent, #E67E22) 0%, #D35400 100%);
+    color: #FFFFFF;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 12px rgba(230, 126, 34, 0.35);
+}
+
+.auth-brand-text {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    letter-spacing: -0.02em;
+}
+
+.auth-brand-text span {
+    color: var(--state-accent, #E67E22);
+}
+
+.auth-back-link {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 9999px;
+    backdrop-filter: blur(8px);
+    transition: var(--transition, all 0.25s);
+}
+
+.auth-back-link:hover {
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateX(-2px);
+}
+
+/* Main Auth Layout Grid */
+.auth-glass-main {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem 3rem;
+}
+
+.auth-glass-container {
+    width: 100%;
+    max-width: 1080px;
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 3rem;
+    align-items: center;
+}
+
+/* Left Brand Story Column */
+.auth-story-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-right: 1rem;
+}
+
+.auth-tagline-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.775rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--state-accent, #E67E22);
+    background: rgba(230, 126, 34, 0.15);
+    border: 1px solid rgba(230, 126, 34, 0.3);
+    padding: 0.4rem 0.9rem;
+    border-radius: 9999px;
+    width: fit-content;
+}
+
+.auth-story-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1.18;
+    color: #FFFFFF;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.auth-story-desc {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.82);
+    margin: 0;
+}
+
+/* 3 Small Highlights */
+.auth-highlights-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.auth-highlight-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+}
+
+.auth-highlight-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: var(--state-accent, #E67E22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.auth-highlight-text h4 {
+    font-size: 0.925rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin: 0 0 0.15rem;
+}
+
+.auth-highlight-text p {
+    font-size: 0.825rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Right Column: Frosted Glass Panel */
+.auth-glass-panel {
+    background: rgba(15, 23, 42, 0.58);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 2.75rem 2.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+.auth-panel-header {
+    margin-bottom: 1.75rem;
+}
+
+.auth-panel-title {
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    margin: 0 0 0.35rem;
+    letter-spacing: -0.01em;
+}
+
+.auth-panel-subtitle {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 0;
+}
+
+/* Alert Notification Box */
+.auth-glass-alert {
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 1.25rem;
+    display: none;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.auth-glass-alert.show {
+    display: flex;
+}
+
+.auth-glass-alert-info {
+    background: rgba(15, 76, 129, 0.4);
+    border: 1px solid rgba(15, 76, 129, 0.6);
+    color: #93C5FD;
+}
+
+.auth-glass-alert-error {
+    background: rgba(153, 27, 27, 0.4);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    color: #FCA5A5;
+}
+
+.auth-glass-alert-success {
+    background: rgba(22, 101, 52, 0.4);
+    border: 1px solid rgba(34, 197, 94, 0.5);
+    color: #86EFAC;
+}
+
+/* Compact Glass Role Selector (Login Pills & Register Cards) */
+.glass-role-selector {
+    margin-bottom: 1.5rem;
+}
+
+.glass-role-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Login Compact Pills */
+.glass-role-pills {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+}
+
+.glass-role-pill {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 0.6rem 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.825rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: var(--transition, all 0.2s);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.glass-role-pill:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #FFFFFF;
+}
+
+.glass-role-pill.active {
+    background: rgba(230, 126, 34, 0.2);
+    border-color: var(--state-accent, #E67E22);
+    color: #FFFFFF;
+    box-shadow: 0 0 12px rgba(230, 126, 34, 0.25);
+}
+
+.glass-role-pill svg {
+    color: rgba(255, 255, 255, 0.7);
+    transition: var(--transition, all 0.2s);
+}
+
+.glass-role-pill.active svg {
+    color: var(--state-accent, #E67E22);
+}
+
+/* Register Compact Role Cards (with description) */
+.glass-role-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.65rem;
+}
+
+.glass-role-card {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 0.75rem 0.6rem;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    text-align: center;
+    transition: var(--transition, all 0.2s);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.glass-role-card:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #FFFFFF;
+}
+
+.glass-role-card.active {
+    background: rgba(230, 126, 34, 0.2);
+    border-color: var(--state-accent, #E67E22);
+    color: #FFFFFF;
+    box-shadow: 0 0 14px rgba(230, 126, 34, 0.25);
+}
+
+.glass-role-card-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.4rem;
+    transition: var(--transition, all 0.2s);
+}
+
+.glass-role-card.active .glass-role-card-icon {
+    background: var(--state-accent, #E67E22);
+    color: #FFFFFF;
+}
+
+.glass-role-card-title {
+    font-size: 0.825rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 0.15rem;
+}
+
+.glass-role-card-desc {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.65);
+    line-height: 1.25;
+}
+
+/* Glass Form Components */
+.glass-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.glass-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.glass-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.glass-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.glass-input-icon {
+    position: absolute;
+    left: 0.9rem;
+    color: rgba(255, 255, 255, 0.5);
+    pointer-events: none;
+}
+
+.glass-input {
+    width: 100%;
+    padding: 0.725rem 1rem 0.725rem 2.6rem;
+    font-size: 0.925rem;
+    font-family: inherit;
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    transition: var(--transition, all 0.2s);
+    box-sizing: border-box;
+}
+
+.glass-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.glass-input:focus {
+    outline: none;
+    border-color: var(--state-accent, #E67E22);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.2);
+}
+
+.glass-toggle-password {
+    position: absolute;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    padding: 0.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.glass-toggle-password:hover {
+    color: #FFFFFF;
+}
+
+/* Checkbox & Options */
+.glass-options-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.85rem;
+}
+
+.glass-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+}
+
+.glass-checkbox-label input[type="checkbox"] {
+    accent-color: var(--state-accent, #E67E22);
+}
+
+.glass-forgot-link {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition, all 0.2s);
+}
+
+.glass-forgot-link:hover {
+    color: var(--state-accent, #E67E22);
+    text-decoration: underline;
+}
+
+/* Primary Glass Submit Button */
+.btn-glass-submit {
+    width: 100%;
+    padding: 0.85rem 1.5rem;
+    background: linear-gradient(135deg, var(--state-accent, #E67E22) 0%, #D35400 100%);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.975rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition, all 0.25s);
+    box-shadow: 0 4px 16px rgba(230, 126, 34, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.btn-glass-submit:hover {
+    background: linear-gradient(135deg, #F39C12 0%, var(--state-accent, #E67E22) 100%);
+    box-shadow: 0 6px 20px rgba(230, 126, 34, 0.5);
+    transform: translateY(-1px);
+}
+
+/* Form Switch Footer */
+.glass-switch-text {
+    text-align: center;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.75);
+    margin-top: 1.25rem;
+}
+
+.glass-switch-text a {
+    color: var(--state-accent, #E67E22);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.glass-switch-text a:hover {
+    text-decoration: underline;
+}
+
+/* Subtle Demo Quick Helper Trigger */
+.subtle-demo-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.775rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.subtle-demo-link {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.85);
+    padding: 0.25rem 0.65rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: var(--transition, all 0.2s);
+}
+
+.subtle-demo-link:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #FFFFFF;
+}
+
+/* Responsive Breakdown */
+@media (max-width: 960px) {
+    .auth-glass-container {
+        grid-template-columns: 1fr;
+        max-width: 500px;
+        gap: 2rem;
+    }
+    
+    .auth-story-col {
+        padding-right: 0;
+        text-align: center;
+        align-items: center;
+    }
+    
+    .auth-story-title {
+        font-size: 1.95rem;
+    }
+    
+    .auth-highlights-grid {
+        display: none;
+    }
+    
+    .auth-glass-header {
+        padding: 1rem 1.25rem;
+    }
+}
+
+@media (max-width: 520px) {
+    .auth-glass-panel {
+        padding: 2rem 1.5rem;
+    }
+    
+    .glass-role-pills, .glass-role-cards-grid {
+        grid-template-columns: 1fr;
+    }
+}

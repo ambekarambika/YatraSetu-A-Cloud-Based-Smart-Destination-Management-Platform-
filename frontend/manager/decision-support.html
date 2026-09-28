@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decision Support — YatraSetu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body class="app-body" data-theme="maharashtra">
+
+    <div class="app-shell">
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar" id="app-sidebar">
+            <div class="app-sidebar-header">
+                <a href="dashboard.html" class="app-brand-link">
+                    <div class="app-brand-crest">Y</div>
+                    <div class="app-brand-info">
+                        <span class="app-brand-name">Yatra<span>Setu</span></span>
+                        <span class="app-role-label">Destination Manager</span>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="app-sidebar-nav">
+                <div class="app-nav-section-title">WORKSPACE</div>
+                <a href="dashboard.html" class="app-nav-item">
+                    <span class="app-nav-icon">📊</span>
+                    <span>Overview</span>
+                </a>
+                <a href="destinations.html" class="app-nav-item">
+                    <span class="app-nav-icon">📍</span>
+                    <span>Destinations</span>
+                </a>
+                <a href="attractions.html" class="app-nav-item">
+                    <span class="app-nav-icon">🏛️</span>
+                    <span>Attractions</span>
+                </a>
+                <a href="events.html" class="app-nav-item">
+                    <span class="app-nav-icon">📅</span>
+                    <span>Events</span>
+                </a>
+                <a href="stakeholders.html" class="app-nav-item">
+                    <span class="app-nav-icon">🤝</span>
+                    <span>Stakeholders</span>
+                </a>
+                <a href="visitor-statistics.html" class="app-nav-item">
+                    <span class="app-nav-icon">📈</span>
+                    <span>Visitor Statistics</span>
+                </a>
+                <a href="feedback.html" class="app-nav-item">
+                    <span class="app-nav-icon">💬</span>
+                    <span>Feedback</span>
+                </a>
+                <a href="analytics.html" class="app-nav-item">
+                    <span class="app-nav-icon">📉</span>
+                    <span>Analytics</span>
+                </a>
+                <a href="reports.html" class="app-nav-item">
+                    <span class="app-nav-icon">📄</span>
+                    <span>Reports</span>
+                </a>
+                <a href="decision-support.html" class="app-nav-item active">
+                    <span class="app-nav-icon">⚡</span>
+                    <span>Decision Support</span>
+                </a>
+            </nav>
+
+            <div class="app-sidebar-footer">
+                <a href="#" class="app-nav-item">
+                    <span class="app-nav-icon">👤</span>
+                    <span>Profile</span>
+                </a>
+                <a href="../login.html" class="app-nav-item">
+                    <span class="app-nav-icon">🚪</span>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="app-main">
+            <!-- Topbar -->
+            <header class="app-topbar">
+                <div class="topbar-left">
+                    <button class="mobile-menu-toggle" id="sidebar-toggle-btn">☰</button>
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" placeholder="Search decision signals...">
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="destination-selector">
+                        <select id="destination-context-select" class="destination-select-dropdown" aria-label="Select State Context">
+                            <option value="maharashtra">☀️ Maharashtra</option>
+                            <option value="kerala">🌴 Kerala</option>
+                            <option value="kashmir">🏔️ Kashmir</option>
+                            <option value="rajasthan">🏰 Rajasthan</option>
+                            <option value="goa">🏖️ Goa</option>
+                            <option value="tamilnadu">🛕 Tamil Nadu</option>
+                            <option value="uttarakhand">🌲 Uttarakhand</option>
+                            <option value="assam">🦏 Assam</option>
+                        </select>
+                    </div>
+
+                    <div class="user-profile-badge">
+                        <div class="user-avatar">AM</div>
+                        <span class="user-name">Ambika Ambekar</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="app-content">
+                <!-- Page Header Row -->
+                <div class="page-header-row">
+                    <div class="page-title-group">
+                        <h1>Decision Support System</h1>
+                        <p>Structured management considerations based on tourist footfall signals and capacity indicators.</p>
+                    </div>
+                    <span class="demo-data-badge">OPERATIONAL SIGNALS</span>
+                </div>
+
+                <!-- Signal 1 -->
+                <div class="section-card">
+                    <div class="section-card-header">
+                        <h3 class="section-title">⚡ Weekend Influx Surge — Ajanta & Ellora Caves Circuit</h3>
+                        <span class="badge badge-warning">Action Recommended</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <div>
+                            <strong style="color: var(--state-accent); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Data Signal</strong>
+                            <p style="font-size: 0.9rem; color: var(--text-primary);">2,680 peak daily visitors recorded on Sundays (+28% over weekday baseline).</p>
+                        </div>
+                        <div>
+                            <strong style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Observation</strong>
+                            <p style="font-size: 0.9rem; color: var(--text-secondary);">Parking bay occupancy reached 94% between 11:30 AM and 02:30 PM, causing temporary traffic bottleneck at access road.</p>
+                        </div>
+                        <div style="background-color: var(--bg-page); padding: 0.85rem 1rem; border-radius: var(--radius-sm); border-left: 3px solid var(--state-accent);">
+                            <strong style="color: var(--text-primary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Management Consideration</strong>
+                            <p style="font-size: 0.875rem; color: var(--text-primary); margin-top: 0.25rem;">Implement staggered time-slot ticketing for tour buses and enable shuttle services from satellite parking lots during weekend peak hours.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Signal 2 -->
+                <div class="section-card">
+                    <div class="section-card-header">
+                        <h3 class="section-title">⚡ Trail Safety Advisory — Raigad Fort Citadel</h3>
+                        <span class="badge badge-info">Monitoring</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <div>
+                            <strong style="color: var(--state-accent); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Data Signal</strong>
+                            <p style="font-size: 0.9rem; color: var(--text-primary);">Heavy rainfall forecast along the upper fortification walking paths.</p>
+                        </div>
+                        <div>
+                            <strong style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Observation</strong>
+                            <p style="font-size: 0.9rem; color: var(--text-secondary);">Stairway slipperiness index raised to High near Maha Darwaja.</p>
+                        </div>
+                        <div style="background-color: var(--bg-page); padding: 0.85rem 1rem; border-radius: var(--radius-sm); border-left: 3px solid var(--info-color);">
+                            <strong style="color: var(--text-primary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Management Consideration</strong>
+                            <p style="font-size: 0.875rem; color: var(--text-primary); margin-top: 0.25rem;">Deploy safety marshals along steep steps, temporarily limit ropeway queue to 150 visitors at a time, and display cautionary notices.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Signal 3 -->
+                <div class="section-card">
+                    <div class="section-card-header">
+                        <h3 class="section-title">⚡ Accommodation Demand — Lonavala Scenic Belt</h3>
+                        <span class="badge badge-success">High Influx Opportunity</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <div>
+                            <strong style="color: var(--state-accent); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Data Signal</strong>
+                            <p style="font-size: 0.9rem; color: var(--text-primary);">Registered weekend homestay occupancy reached 92%.</p>
+                        </div>
+                        <div>
+                            <strong style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Observation</strong>
+                            <p style="font-size: 0.9rem; color: var(--text-secondary);">Surge in unbooked weekend day-trippers seeking overnight lodging.</p>
+                        </div>
+                        <div style="background-color: var(--bg-page); padding: 0.85rem 1rem; border-radius: var(--radius-sm); border-left: 3px solid var(--success-color);">
+                            <strong style="color: var(--text-primary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Management Consideration</strong>
+                            <p style="font-size: 0.875rem; color: var(--text-primary); margin-top: 0.25rem;">Issue real-time accommodation availability notifications on YatraSetu and notify regional homestay associations to list overflow capacity.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/dashboard.js"></script>
+    <script src="../js/manager.js"></script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tourism Stakeholder Hub — YatraSetu</title>
+    <meta name="description" content="YatraSetu Tourism Stakeholder Hub — Maintain tourism services, share information with destination managers, and participate in local destination coordination.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body class="app-body" data-theme="maharashtra">
+
+    <div class="app-shell">
+
+        <!-- ====================================================================
+             1. STAKEHOLDER SIDEBAR NAVIGATION (6 SOURCE OF TRUTH ITEMS)
+             ==================================================================== -->
+        <aside class="app-sidebar" id="app-sidebar">
+            <div>
+                <!-- Sidebar Header -->
+                <div class="app-sidebar-header">
+                    <a href="../index.html" class="app-brand-link" id="sidebar-logo">
+                        <div class="app-brand-logo">Y</div>
+                        <div class="app-brand-title">Yatra<span>Setu</span></div>
+                    </a>
+                </div>
+
+                <!-- Role Badge Context -->
+                <div class="app-sidebar-role-badge">
+                    <span class="role-badge-label">Active Role</span>
+                    <span class="role-badge-val">STAKEHOLDER</span>
+                </div>
+
+                <!-- Stakeholder Navigation Items -->
+                <nav class="app-sidebar-nav" id="app-sidebar-nav">
+                    <div class="nav-section-title">STAKEHOLDER HUB</div>
+                    <a href="dashboard.html" class="app-nav-item active" data-title="Stakeholder Overview">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        <span>Overview</span>
+                    </a>
+                    <a href="#" class="app-nav-item" data-title="Stakeholder Profile">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <span>My Profile</span>
+                    </a>
+                    <a href="#" class="app-nav-item" data-title="My Tourism Services & Info">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        <span>My Information / Services</span>
+                    </a>
+                    <a href="#" class="app-nav-item" data-title="Shared Information Directory">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                        <span>Shared Information</span>
+                    </a>
+                    <a href="#" class="app-nav-item" data-title="Destination Updates">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                        <span>Destination Updates</span>
+                    </a>
+                    <a href="#" class="app-nav-item" data-title="Manager Coordination">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path></svg>
+                        <span>Coordination</span>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Sidebar User Profile Footer -->
+            <div class="app-sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="sidebar-avatar">SH</div>
+                    <div class="sidebar-user-info">
+                        <span class="user-name">Local Stakeholder</span>
+                        <span class="user-role">Tourism Operator</span>
+                    </div>
+                </div>
+                <a href="../login.html" class="btn-sidebar-logout" title="Sign Out" aria-label="Sign Out">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </a>
+            </div>
+        </aside>
+
+        <!-- ====================================================================
+             2. MAIN STAKEHOLDER WORKSPACE & TOPBAR
+             ==================================================================== -->
+        <main class="app-main">
+            
+            <!-- Topbar Navigation -->
+            <header class="app-topbar">
+                <div class="topbar-left">
+                    <button type="button" class="btn-sidebar-toggle" id="sidebar-toggle-btn" aria-label="Toggle Sidebar Navigation">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+
+                    <div class="breadcrumbs">
+                        <a href="../index.html" class="breadcrumb-item">YatraSetu</a>
+                        <span>/</span>
+                        <span class="breadcrumb-item">Stakeholder Hub</span>
+                        <span>/</span>
+                        <span class="breadcrumb-item active" id="breadcrumb-active">Overview</span>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="topbar-search">
+                        <svg class="topbar-search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" class="topbar-search-input" placeholder="Search services & notices...">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main App Content -->
+            <div class="app-content">
+
+                <!-- 3. PAGE HEADER BANNER -->
+                <div class="page-header-banner">
+                    <div class="page-header-info">
+                        <div class="page-eyebrow">
+                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                            LOCAL TOURISM STAKEHOLDER HUB
+                        </div>
+                        <h1 class="page-title" id="active-page-title">Services & Manager Coordination</h1>
+                        <p class="page-subtitle">Publish operating information, update local services, and coordinate directly with destination authorities.</p>
+                    </div>
+
+                    <div class="page-header-actions">
+                        <button type="button" class="btn-app btn-app-primary">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Share New Service Update
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4. METRIC CARDS SYSTEM -->
+                <div class="metric-grid">
+                    <div class="metric-card accent-card">
+                        <div class="metric-card-top">
+                            <div class="metric-icon-box">
+                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line></svg>
+                            </div>
+                            <span class="sample-badge">SAMPLE DATA</span>
+                        </div>
+                        <div class="metric-value">4 Services</div>
+                        <div class="metric-label">Registered Local Services</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-card-top">
+                            <div class="metric-icon-box">
+                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path></svg>
+                            </div>
+                            <span class="sample-badge">SAMPLE DATA</span>
+                        </div>
+                        <div class="metric-value">12 Updates</div>
+                        <div class="metric-label">Shared Info Submissions</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-card-top">
+                            <div class="metric-icon-box">
+                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path></svg>
+                            </div>
+                            <span class="sample-badge">SAMPLE DATA</span>
+                        </div>
+                        <div class="metric-value">3 Active</div>
+                        <div class="metric-label">Authority Coordination Logs</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-card-top">
+                            <div class="metric-icon-box">
+                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path></svg>
+                            </div>
+                            <span class="sample-badge">SAMPLE DATA</span>
+                        </div>
+                        <div class="metric-value">Verified</div>
+                        <div class="metric-label">Stakeholder Account Status</div>
+                    </div>
+                </div>
+
+                <!-- 5. REGISTERED SERVICES TABLE -->
+                <div class="table-card">
+                    <div class="table-header-bar">
+                        <h3 class="table-title">Registered Services & Information</h3>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="app-table">
+                            <thead>
+                                <tr>
+                                    <th>Service Name</th>
+                                    <th>Category</th>
+                                    <th>Destination Context</th>
+                                    <th>Operating Schedule</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Sahyadri Trekking Guides Co-op</strong></td>
+                                    <td>Tour Guides</td>
+                                    <td>Rajgad / Pune</td>
+                                    <td>Mon–Sun (06:00 - 18:00)</td>
+                                    <td><span class="status-pill active">● Shared with Manager</span></td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <button type="button" class="btn-icon-table" title="Edit Service"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path></svg></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Konkan Coastal Boat Safaris</strong></td>
+                                    <td>Transport / Activity</td>
+                                    <td>Konkan Coast</td>
+                                    <td>Seasonal (Nov–April)</td>
+                                    <td><span class="status-pill active">● Shared with Manager</span></td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <button type="button" class="btn-icon-table" title="Edit Service"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path></svg></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+    <!-- JavaScript -->
+    <script src="../js/dashboard.js"></script>
+</body>
+</html>

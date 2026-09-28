@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Generator — YatraSetu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body class="app-body" data-theme="maharashtra">
+
+    <div class="app-shell">
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar" id="app-sidebar">
+            <div class="app-sidebar-header">
+                <a href="dashboard.html" class="app-brand-link">
+                    <div class="app-brand-crest">Y</div>
+                    <div class="app-brand-info">
+                        <span class="app-brand-name">Yatra<span>Setu</span></span>
+                        <span class="app-role-label">Destination Manager</span>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="app-sidebar-nav">
+                <div class="app-nav-section-title">WORKSPACE</div>
+                <a href="dashboard.html" class="app-nav-item">
+                    <span class="app-nav-icon">📊</span>
+                    <span>Overview</span>
+                </a>
+                <a href="destinations.html" class="app-nav-item">
+                    <span class="app-nav-icon">📍</span>
+                    <span>Destinations</span>
+                </a>
+                <a href="attractions.html" class="app-nav-item">
+                    <span class="app-nav-icon">🏛️</span>
+                    <span>Attractions</span>
+                </a>
+                <a href="events.html" class="app-nav-item">
+                    <span class="app-nav-icon">📅</span>
+                    <span>Events</span>
+                </a>
+                <a href="stakeholders.html" class="app-nav-item">
+                    <span class="app-nav-icon">🤝</span>
+                    <span>Stakeholders</span>
+                </a>
+                <a href="visitor-statistics.html" class="app-nav-item">
+                    <span class="app-nav-icon">📈</span>
+                    <span>Visitor Statistics</span>
+                </a>
+                <a href="feedback.html" class="app-nav-item">
+                    <span class="app-nav-icon">💬</span>
+                    <span>Feedback</span>
+                </a>
+                <a href="analytics.html" class="app-nav-item">
+                    <span class="app-nav-icon">📉</span>
+                    <span>Analytics</span>
+                </a>
+                <a href="reports.html" class="app-nav-item active">
+                    <span class="app-nav-icon">📄</span>
+                    <span>Reports</span>
+                </a>
+                <a href="decision-support.html" class="app-nav-item">
+                    <span class="app-nav-icon">⚡</span>
+                    <span>Decision Support</span>
+                </a>
+            </nav>
+
+            <div class="app-sidebar-footer">
+                <a href="#" class="app-nav-item">
+                    <span class="app-nav-icon">👤</span>
+                    <span>Profile</span>
+                </a>
+                <a href="../login.html" class="app-nav-item">
+                    <span class="app-nav-icon">🚪</span>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="app-main">
+            <!-- Topbar -->
+            <header class="app-topbar">
+                <div class="topbar-left">
+                    <button class="mobile-menu-toggle" id="sidebar-toggle-btn">☰</button>
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" placeholder="Search report templates...">
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="destination-selector">
+                        <select id="destination-context-select" class="destination-select-dropdown" aria-label="Select State Context">
+                            <option value="maharashtra">☀️ Maharashtra</option>
+                            <option value="kerala">🌴 Kerala</option>
+                            <option value="kashmir">🏔️ Kashmir</option>
+                            <option value="rajasthan">🏰 Rajasthan</option>
+                            <option value="goa">🏖️ Goa</option>
+                            <option value="tamilnadu">🛕 Tamil Nadu</option>
+                            <option value="uttarakhand">🌲 Uttarakhand</option>
+                            <option value="assam">🦏 Assam</option>
+                        </select>
+                    </div>
+
+                    <div class="user-profile-badge">
+                        <div class="user-avatar">AM</div>
+                        <span class="user-name">Ambika Ambekar</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="app-content">
+                <!-- Page Header Row -->
+                <div class="page-header-row">
+                    <div class="page-title-group">
+                        <h1>Report Generator</h1>
+                        <p>Generate official destination management reports, visitor summaries, and compliance audits.</p>
+                    </div>
+                </div>
+
+                <!-- Report Selection Card -->
+                <div class="section-card">
+                    <div class="section-card-header">
+                        <h3 class="section-title">Configure Report Parameters</h3>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                        <div class="form-group">
+                            <label>Report Type</label>
+                            <select class="form-control" id="report-type-select">
+                                <option value="visitor">Monthly Visitor Summary Report</option>
+                                <option value="capacity">Destination Capacity & Carrying Limit Audit</option>
+                                <option value="feedback">Tourist Feedback & Rating Analysis Digest</option>
+                                <option value="stakeholder">Stakeholder Coordination & Service Audit</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Reporting Period</label>
+                            <select class="form-control" id="report-period-select">
+                                <option value="m1">Current Month (September 2025)</option>
+                                <option value="q3">Q3 2025 (July - September)</option>
+                                <option value="y2025">Full Year 2025</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+                        <button class="btn-primary" id="btn-generate-report">Generate Report Preview</button>
+                    </div>
+                </div>
+
+                <!-- Report Preview Container -->
+                <div class="section-card" id="report-preview-container" style="display: none;">
+                    <div class="section-card-header">
+                        <div>
+                            <h3 class="section-title" id="preview-report-title">Monthly Visitor Summary — September 2025</h3>
+                            <p style="font-size: 0.75rem; color: var(--text-muted);" id="preview-report-date">Generated on 08 Sep 2026</p>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn-secondary" style="font-size: 0.75rem;">Download PDF</button>
+                            <button class="btn-secondary" style="font-size: 0.75rem;">Export CSV</button>
+                        </div>
+                    </div>
+
+                    <div style="padding: 1rem 0;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Recorded Value</th>
+                                    <th>Baseline Target</th>
+                                    <th>Compliance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Total Monthly Visitors</td>
+                                    <td>12,450</td>
+                                    <td>10,000</td>
+                                    <td><span class="badge badge-success">Target Exceeded</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Peak Day Carrying Strain</td>
+                                    <td>2,680 / day</td>
+                                    <td>3,000 max threshold</td>
+                                    <td><span class="badge badge-success">Within Safe Limit</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Overall Tourist Satisfaction</td>
+                                    <td>4.8 / 5.0</td>
+                                    <td>4.5 / 5.0</td>
+                                    <td><span class="badge badge-success">High Satisfaction</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/dashboard.js"></script>
+    <script src="../js/manager.js"></script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tourist Attractions — YatraSetu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body class="app-body" data-theme="maharashtra">
+
+    <div class="app-shell">
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar" id="app-sidebar">
+            <div class="app-sidebar-header">
+                <a href="dashboard.html" class="app-brand-link">
+                    <div class="app-brand-crest">Y</div>
+                    <div class="app-brand-info">
+                        <span class="app-brand-name">Yatra<span>Setu</span></span>
+                        <span class="app-role-label">Destination Manager</span>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="app-sidebar-nav">
+                <div class="app-nav-section-title">WORKSPACE</div>
+                <a href="dashboard.html" class="app-nav-item">
+                    <span class="app-nav-icon">📊</span>
+                    <span>Overview</span>
+                </a>
+                <a href="destinations.html" class="app-nav-item">
+                    <span class="app-nav-icon">📍</span>
+                    <span>Destinations</span>
+                </a>
+                <a href="attractions.html" class="app-nav-item active">
+                    <span class="app-nav-icon">🏛️</span>
+                    <span>Attractions</span>
+                </a>
+                <a href="events.html" class="app-nav-item">
+                    <span class="app-nav-icon">📅</span>
+                    <span>Events</span>
+                </a>
+                <a href="stakeholders.html" class="app-nav-item">
+                    <span class="app-nav-icon">🤝</span>
+                    <span>Stakeholders</span>
+                </a>
+                <a href="visitor-statistics.html" class="app-nav-item">
+                    <span class="app-nav-icon">📈</span>
+                    <span>Visitor Statistics</span>
+                </a>
+                <a href="feedback.html" class="app-nav-item">
+                    <span class="app-nav-icon">💬</span>
+                    <span>Feedback</span>
+                </a>
+                <a href="analytics.html" class="app-nav-item">
+                    <span class="app-nav-icon">📉</span>
+                    <span>Analytics</span>
+                </a>
+                <a href="reports.html" class="app-nav-item">
+                    <span class="app-nav-icon">📄</span>
+                    <span>Reports</span>
+                </a>
+                <a href="decision-support.html" class="app-nav-item">
+                    <span class="app-nav-icon">⚡</span>
+                    <span>Decision Support</span>
+                </a>
+            </nav>
+
+            <div class="app-sidebar-footer">
+                <a href="#" class="app-nav-item">
+                    <span class="app-nav-icon">👤</span>
+                    <span>Profile</span>
+                </a>
+                <a href="../login.html" class="app-nav-item">
+                    <span class="app-nav-icon">🚪</span>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="app-main">
+            <!-- Topbar -->
+            <header class="app-topbar">
+                <div class="topbar-left">
+                    <button class="mobile-menu-toggle" id="sidebar-toggle-btn">☰</button>
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input table-search-input" placeholder="Search attractions...">
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="destination-selector">
+                        <select id="destination-context-select" class="destination-select-dropdown" aria-label="Select State Context">
+                            <option value="maharashtra">☀️ Maharashtra</option>
+                            <option value="kerala">🌴 Kerala</option>
+                            <option value="kashmir">🏔️ Kashmir</option>
+                            <option value="rajasthan">🏰 Rajasthan</option>
+                            <option value="goa">🏖️ Goa</option>
+                            <option value="tamilnadu">🛕 Tamil Nadu</option>
+                            <option value="uttarakhand">🌲 Uttarakhand</option>
+                            <option value="assam">🦏 Assam</option>
+                        </select>
+                    </div>
+
+                    <div class="user-profile-badge">
+                        <div class="user-avatar">AM</div>
+                        <span class="user-name">Ambika Ambekar</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="app-content">
+                <!-- Page Header Row -->
+                <div class="page-header-row">
+                    <div class="page-title-group">
+                        <h1>Attraction Directory</h1>
+                        <p>Manage tourist points of interest, visiting hours, and crowd capacity controls.</p>
+                    </div>
+                    <button class="btn-primary" data-modal-target="addAttractionModal">+ Add Attraction</button>
+                </div>
+
+                <!-- Filter Bar -->
+                <div class="filter-bar">
+                    <input type="text" class="filter-input table-search-input" placeholder="Filter by attraction name..." style="flex: 1; min-width: 200px;">
+                    <select class="filter-select table-filter-select" data-filter="category">
+                        <option value="all">All Destinations</option>
+                        <option value="raigad">Raigad Fort</option>
+                        <option value="ellora">Ellora Caves</option>
+                        <option value="ajanta">Ajanta Caves</option>
+                        <option value="lonavala">Lonavala</option>
+                    </select>
+                </div>
+
+                <!-- Data Table -->
+                <div class="table-container">
+                    <table class="data-table app-table">
+                        <thead>
+                            <tr>
+                                <th>Attraction Name</th>
+                                <th>Parent Destination</th>
+                                <th>Type</th>
+                                <th>Operating Hours</th>
+                                <th>Crowd Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-category="raigad">
+                                <td><strong>Maha Darwaja & Citadel</strong></td>
+                                <td>Raigad Fort</td>
+                                <td>Historic Gateway</td>
+                                <td>07:00 AM – 06:00 PM</td>
+                                <td><span class="badge badge-success">Optimal Influx</span></td>
+                                <td><button class="btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Manage</button></td>
+                            </tr>
+                            <tr data-category="ellora">
+                                <td><strong>Kailasa Temple (Cave 16)</strong></td>
+                                <td>Ellora Caves</td>
+                                <td>Monolith Rock Temple</td>
+                                <td>06:00 AM – 06:00 PM</td>
+                                <td><span class="badge badge-warning">High Influx</span></td>
+                                <td><button class="btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Manage</button></td>
+                            </tr>
+                            <tr data-category="ajanta">
+                                <td><strong>Cave 1 Frescoes & Murals</strong></td>
+                                <td>Ajanta Caves</td>
+                                <td>Ancient Gallery</td>
+                                <td>09:00 AM – 05:00 PM</td>
+                                <td><span class="badge badge-info">Controlled Influx</span></td>
+                                <td><button class="btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Manage</button></td>
+                            </tr>
+                            <tr data-category="lonavala">
+                                <td><strong>Tiger's Leap Point</strong></td>
+                                <td>Lonavala Hills</td>
+                                <td>Scenic Cliff Lookout</td>
+                                <td>24 Hours Open</td>
+                                <td><span class="badge badge-success">Normal Influx</span></td>
+                                <td><button class="btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Manage</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Dialog: Add Attraction -->
+    <div class="modal-overlay app-modal" id="addAttractionModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Tourist Attraction</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Attraction Name</label>
+                    <input type="text" class="form-control" placeholder="e.g. Hirakani Buruj Viewpoint">
+                </div>
+                <div class="form-group">
+                    <label>Parent Destination</label>
+                    <select class="form-control">
+                        <option>Raigad Fort</option>
+                        <option>Ellora Caves</option>
+                        <option>Ajanta Caves</option>
+                        <option>Lonavala Hills</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Attraction Type</label>
+                    <input type="text" class="form-control" placeholder="e.g. Viewpoint / Monument">
+                </div>
+                <div class="form-group">
+                    <label>Operating Hours</label>
+                    <input type="text" class="form-control" placeholder="e.g. 06:00 AM - 06:00 PM">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary modal-close">Cancel</button>
+                <button class="btn-primary modal-close">Save Attraction</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/dashboard.js"></script>
+    <script src="../js/manager.js"></script>
+</body>
+</html>
