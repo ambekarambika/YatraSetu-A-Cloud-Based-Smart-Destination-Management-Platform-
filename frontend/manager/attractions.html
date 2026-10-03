@@ -170,8 +170,8 @@
 
                 <div class="topbar-right">
                     <div class="destination-selector">
-                        <select id="destination-context-select" class="destination-select-dropdown"
-                            aria-label="Select State Context">
+                        <select id="destination-context-select" disabled class="destination-select-dropdown"
+                            aria-label="Select State Context" title="State context is managed from the Dashboard">
                             <option value="maharashtra">📍 Maharashtra</option>
                             <option value="kerala">🌴 Kerala</option>
                             <option value="kashmir">🏔️ Kashmir</option>
@@ -231,7 +231,7 @@
                                 <th style="text-align: right;">Action</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="attractions-table-body">
                             <tr>
                                 <td>
                                     <div class="poi-cell">

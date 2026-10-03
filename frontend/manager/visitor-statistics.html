@@ -169,8 +169,8 @@
 
                 <div class="topbar-right">
                     <div class="destination-selector">
-                        <select id="destination-context-select" class="destination-select-dropdown"
-                            aria-label="Select State Context">
+                        <select id="destination-context-select" disabled class="destination-select-dropdown"
+                            aria-label="Select State Context" title="State context is managed from the Dashboard">
                             <option value="maharashtra">📍 Maharashtra</option>
                             <option value="kerala">🌴 Kerala</option>
                             <option value="kashmir">🏔️ Kashmir</option>
@@ -224,9 +224,9 @@
                             <span class="metric-label">Total Visitors</span>
                             <span class="metric-icon">👥</span>
                         </div>
-                        <div class="metric-value">1,24,500</div>
+                        <div class="metric-value">--</div>
                         <div class="metric-footer">
-                            <span class="metric-trend-positive">↑ 12%</span> vs last year
+                            No statistics recorded
                         </div>
                     </div>
                     <div class="metric-card">
@@ -234,9 +234,9 @@
                             <span class="metric-label">Domestic Visitors</span>
                             <span class="metric-icon">🇮🇳</span>
                         </div>
-                        <div class="metric-value">98,400</div>
+                        <div class="metric-value">--</div>
                         <div class="metric-footer">
-                            <span class="metric-trend-positive">↑ 10%</span> vs last year
+                            No statistics recorded
                         </div>
                     </div>
                     <div class="metric-card">
@@ -244,9 +244,9 @@
                             <span class="metric-label">International Visitors</span>
                             <span class="metric-icon">✈️</span>
                         </div>
-                        <div class="metric-value">26,100</div>
+                        <div class="metric-value">--</div>
                         <div class="metric-footer">
-                            <span class="metric-trend-positive">↑ 15%</span> vs last year
+                            No statistics recorded
                         </div>
                     </div>
                     <div class="metric-card">
@@ -254,9 +254,9 @@
                             <span class="metric-label">Avg. Stay Duration</span>
                             <span class="metric-icon">⏱️</span>
                         </div>
-                        <div class="metric-value">2.8 Days</div>
-                        <div class="metric-footer" style="color: #EF4444;">
-                            ↓ 0.4 days vs previous month
+                        <div class="metric-value">--</div>
+                        <div class="metric-footer">
+                            No statistics recorded
                         </div>
                     </div>
                 </section>
@@ -293,13 +293,6 @@
                                 <!-- Domestic Line -->
                                 <path d="M0,165 Q100,140 200,155 T400,85 T600,110" fill="none" stroke="#3B82F6"
                                     stroke-width="2" stroke-dasharray="4,4" />
-
-                                <!-- Peak Callout Marker -->
-                                <circle cx="400" cy="60" r="5" fill="var(--state-accent)" stroke="#FFF"
-                                    stroke-width="2" />
-                                <rect x="340" y="15" width="120" height="34" rx="6" fill="#0F172A" opacity="0.9" />
-                                <text x="400" y="30" fill="#FFF" font-size="10" font-weight="700"
-                                    text-anchor="middle">Aug 2024: 1,45,200 (+18%)</text>
                             </svg>
                         </div>
                         <div
@@ -321,29 +314,20 @@
                                     <path
                                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                                         fill="none" stroke="#F1F5F9" stroke-width="4" />
-                                    <!-- Maharashtra 42% -->
-                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 15.1 21.0" fill="none"
-                                        stroke="var(--state-accent)" stroke-width="4.5" stroke-linecap="round" />
-                                    <!-- Other States 38% -->
-                                    <path d="M33.1 23.0845 a 15.9155 15.9155 0 0 1 -24.5 9.5" fill="none"
-                                        stroke="#3B82F6" stroke-width="4.5" stroke-linecap="round" />
-                                    <!-- International 20% -->
-                                    <path d="M8.6 32.5845 a 15.9155 15.9155 0 0 1 9.4 -30.5" fill="none"
-                                        stroke="#10B981" stroke-width="4.5" stroke-linecap="round" />
                                 </svg>
                                 <div
                                     style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
                                     <span
                                         style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700;">TOTAL</span>
                                     <span
-                                        style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">1,24,500</span>
+                                        style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">--</span>
                                 </div>
                             </div>
 
                             <div
                                 style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%; font-size: 0.8rem;">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span><span class="legend-dot" style="background: var(--state-accent);"></span>
+                                    <span id="visitor-origin-state-label"><span class="legend-dot" style="background: var(--state-accent);"></span>
                                         Maharashtra</span>
                                     <strong>42%</strong>
                                 </div>

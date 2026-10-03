@@ -170,8 +170,8 @@
 
                 <div class="topbar-right">
                     <div class="destination-selector">
-                        <select id="destination-context-select" class="destination-select-dropdown"
-                            aria-label="Select State Context">
+                        <select id="destination-context-select" disabled class="destination-select-dropdown"
+                            aria-label="Select State Context" title="State context is managed from the Dashboard">
                             <option value="maharashtra">📍 Maharashtra</option>
                             <option value="kerala">🌴 Kerala</option>
                             <option value="kashmir">🏔️ Kashmir</option>
@@ -228,9 +228,9 @@
                         <span
                             style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Overall
                             Rating</span>
-                        <div class="overall-score">4.6</div>
-                        <div style="color: #F59E0B; font-size: 1.1rem; margin: 0.25rem 0;">★★★★★</div>
-                        <span style="font-size: 0.75rem; color: var(--text-muted);">1,240 reviews</span>
+                        <div class="overall-score">--</div>
+                        <div style="color: #94A3B8; font-size: 1.1rem; margin: 0.25rem 0;">☆☆☆☆☆</div>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">0 reviews recorded</span>
                     </div>
 
                     <!-- Rating Distribution Card -->
@@ -242,37 +242,37 @@
                             <div class="rating-bar-item">
                                 <span style="width: 20px;">5★</span>
                                 <div class="rating-bar-track">
-                                    <div class="rating-bar-fill" style="width: 64%;"></div>
+                                    <div class="rating-bar-fill" style="width: 0%;"></div>
                                 </div>
-                                <span style="width: 32px; text-align: right; font-weight: 600;">64%</span>
+                                <span style="width: 32px; text-align: right; font-weight: 600;">0%</span>
                             </div>
                             <div class="rating-bar-item">
                                 <span style="width: 20px;">4★</span>
                                 <div class="rating-bar-track">
-                                    <div class="rating-bar-fill" style="width: 20%;"></div>
+                                    <div class="rating-bar-fill" style="width: 0%;"></div>
                                 </div>
-                                <span style="width: 32px; text-align: right; font-weight: 600;">20%</span>
+                                <span style="width: 32px; text-align: right; font-weight: 600;">0%</span>
                             </div>
                             <div class="rating-bar-item">
                                 <span style="width: 20px;">3★</span>
                                 <div class="rating-bar-track">
-                                    <div class="rating-bar-fill" style="width: 10%;"></div>
+                                    <div class="rating-bar-fill" style="width: 0%;"></div>
                                 </div>
-                                <span style="width: 32px; text-align: right; font-weight: 600;">10%</span>
+                                <span style="width: 32px; text-align: right; font-weight: 600;">0%</span>
                             </div>
                             <div class="rating-bar-item">
                                 <span style="width: 20px;">2★</span>
                                 <div class="rating-bar-track">
-                                    <div class="rating-bar-fill" style="width: 3%;"></div>
+                                    <div class="rating-bar-fill" style="width: 0%;"></div>
                                 </div>
-                                <span style="width: 32px; text-align: right; font-weight: 600;">3%</span>
+                                <span style="width: 32px; text-align: right; font-weight: 600;">0%</span>
                             </div>
                             <div class="rating-bar-item">
                                 <span style="width: 20px;">1★</span>
                                 <div class="rating-bar-track">
-                                    <div class="rating-bar-fill" style="width: 3%;"></div>
+                                    <div class="rating-bar-fill" style="width: 0%;"></div>
                                 </div>
-                                <span style="width: 32px; text-align: right; font-weight: 600;">3%</span>
+                                <span style="width: 32px; text-align: right; font-weight: 600;">0%</span>
                             </div>
                         </div>
                     </div>
@@ -286,23 +286,23 @@
                             <div style="display: flex; justify-content: space-between;">
                                 <span><span class="legend-dot" style="background: var(--state-accent);"></span>
                                     Experience</span>
-                                <strong>36%</strong>
+                                <strong>--</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
                                 <span><span class="legend-dot" style="background: #3B82F6;"></span> Facilities</span>
-                                <strong>28%</strong>
+                                <strong>--</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
                                 <span><span class="legend-dot" style="background: #10B981;"></span> Cleanliness</span>
-                                <strong>18%</strong>
+                                <strong>--</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
                                 <span><span class="legend-dot" style="background: #F59E0B;"></span> Accessibility</span>
-                                <strong>10%</strong>
+                                <strong>--</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
                                 <span><span class="legend-dot" style="background: #8B5CF6;"></span> Other</span>
-                                <strong>8%</strong>
+                                <strong>--</strong>
                             </div>
                         </div>
                     </div>
@@ -313,71 +313,8 @@
                     <h2 class="section-title">Recent Feedback</h2>
                 </div>
 
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div class="feedback-item-card">
-                        <div class="feedback-author-row">
-                            <div class="author-info">
-                                <div class="author-avatar">RS</div>
-                                <div>
-                                    <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">Rohit
-                                        Sharma</h4>
-                                    <span style="font-size: 0.75rem; color: var(--text-muted);">2 days ago • Ajanta
-                                        Caves</span>
-                                </div>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <span style="color: #F59E0B; font-size: 0.85rem;">★★★★★</span>
-                                <span class="badge badge-success">Positive</span>
-                            </div>
-                        </div>
-                        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
-                            "Amazing experience at Ajanta Caves! The historical significance and artwork are absolutely
-                            stunning. Well maintained."
-                        </p>
-                    </div>
-
-                    <div class="feedback-item-card">
-                        <div class="feedback-author-row">
-                            <div class="author-info">
-                                <div class="author-avatar">PP</div>
-                                <div>
-                                    <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">Priya
-                                        Patel</h4>
-                                    <span style="font-size: 0.75rem; color: var(--text-muted);">5 days ago •
-                                        Lonavala</span>
-                                </div>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <span style="color: #F59E0B; font-size: 0.85rem;">★★★☆☆</span>
-                                <span class="badge badge-warning">Suggestion</span>
-                            </div>
-                        </div>
-                        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
-                            "Facilities can be improved. The location is great but need more restrooms and better
-                            signboards."
-                        </p>
-                    </div>
-
-                    <div class="feedback-item-card">
-                        <div class="feedback-author-row">
-                            <div class="author-info">
-                                <div class="author-avatar">KM</div>
-                                <div>
-                                    <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">Karan
-                                        Mehta</h4>
-                                    <span style="font-size: 0.75rem; color: var(--text-muted);">1 week ago • Raigad
-                                        Fort</span>
-                                </div>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <span style="color: #F59E0B; font-size: 0.85rem;">★★★★☆</span>
-                                <span class="badge badge-info">Mixed</span>
-                            </div>
-                        </div>
-                        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
-                            "Beautiful location but crowded. Amazing views but too many people during weekends."
-                        </p>
-                    </div>
+                <div style="display: flex; flex-direction: column; gap: 1rem;" id="feedback-list-container">
+                    <div style="padding: 2.5rem; text-align: center; color: #64748b; font-weight: 500;">No visitor feedback recorded for Maharashtra.</div>
                 </div>
             </div>
         </main>

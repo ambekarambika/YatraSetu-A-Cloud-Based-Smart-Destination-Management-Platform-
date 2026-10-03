@@ -170,8 +170,8 @@
 
                 <div class="topbar-right">
                     <div class="destination-selector">
-                        <select id="destination-context-select" class="destination-select-dropdown"
-                            aria-label="Select State Context">
+                        <select id="destination-context-select" disabled class="destination-select-dropdown"
+                            aria-label="Select State Context" title="State context is managed from the Dashboard">
                             <option value="maharashtra">📍 Maharashtra</option>
                             <option value="kerala">🌴 Kerala</option>
                             <option value="kashmir">🏔️ Kashmir</option>
@@ -259,7 +259,7 @@
                 </div>
 
                 <!-- Destination Grid -->
-                <div class="destination-grid-4">
+                <div class="destination-grid-4" id="destinations-cards-grid">
                     <div class="dest-card">
                         <div class="dest-card-media"
                             style="background-image: url('../assets/images/thumb-ajanta.jpg');">

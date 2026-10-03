@@ -170,8 +170,8 @@
 
                 <div class="topbar-right">
                     <div class="destination-selector">
-                        <select id="destination-context-select" class="destination-select-dropdown"
-                            aria-label="Select State Context">
+                        <select id="destination-context-select" disabled class="destination-select-dropdown"
+                            aria-label="Select State Context" title="State context is managed from the Dashboard">
                             <option value="maharashtra">📍 Maharashtra</option>
                             <option value="kerala">🌴 Kerala</option>
                             <option value="kashmir">🏔️ Kashmir</option>
@@ -270,7 +270,7 @@
                         Calendar →</a>
                 </div>
 
-                <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                <div style="display: flex; flex-direction: column; gap: 0.85rem;" id="upcoming-events-container">
                     <div class="event-timeline-card">
                         <div style="display: flex; align-items: center; gap: 1rem;">
                             <div class="event-date-box">

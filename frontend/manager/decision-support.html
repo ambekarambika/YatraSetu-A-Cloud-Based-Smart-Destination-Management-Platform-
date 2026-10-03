@@ -169,8 +169,8 @@
 
                 <div class="topbar-right">
                     <div class="destination-selector">
-                        <select id="destination-context-select" class="destination-select-dropdown"
-                            aria-label="Select State Context">
+                        <select id="destination-context-select" disabled class="destination-select-dropdown"
+                            aria-label="Select State Context" title="State context is managed from the Dashboard">
                             <option value="maharashtra">📍 Maharashtra</option>
                             <option value="kerala">🌴 Kerala</option>
                             <option value="kashmir">🏔️ Kashmir</option>
@@ -202,7 +202,7 @@
                 <div class="page-header-row">
                     <div class="page-title-group">
                         <h1>Decision Support</h1>
-                        <p>Data-driven insights for better tourism management</p>
+                        <p>Data-driven insights for better tourism management in Maharashtra</p>
                     </div>
                 </div>
 
@@ -215,7 +215,7 @@
                 </div>
 
                 <!-- Decision Signal Cards Stack -->
-                <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                <div style="display: flex; flex-direction: column; gap: 1.25rem;" id="decision-support-signals-container">
                     <!-- Signal Card 1 -->
                     <div class="decision-signal-card" style="border-left-color: #3B82F6;">
                         <div class="signal-header">

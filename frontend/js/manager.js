@@ -69,11 +69,18 @@ window.YatraSetuManagerContext = {
         document.body.setAttribute('data-state-theme', config.theme || stateKey);
         document.body.setAttribute('data-theme', config.theme || stateKey);
 
-        // Update topbar state selector dropdowns across pages
+        // Update topbar state selector dropdowns across pages (disabled on subpages)
+        const isDashboard = window.location.pathname.includes('dashboard.html') || window.location.pathname.endsWith('/manager/') || window.location.pathname === '/manager';
         const stateSelectors = document.querySelectorAll('#destination-context-select, .state-select-dropdown');
         stateSelectors.forEach(select => {
-            if (select && select.value !== stateKey) {
+            if (select) {
                 select.value = stateKey;
+                if (!isDashboard) {
+                    select.disabled = true;
+                    select.title = "State context is managed from the Dashboard";
+                } else {
+                    select.disabled = false;
+                }
             }
         });
 
@@ -157,6 +164,9 @@ window.YatraSetuManagerContext = {
                 }
             });
         }
+
+        // Trigger connected view rendering for active subpage
+        renderConnectedViews(this._state);
     },
 
     bindSelectors() {
@@ -164,7 +174,11 @@ window.YatraSetuManagerContext = {
         stateSelectors.forEach(select => {
             if (!select._contextBound) {
                 select.addEventListener('change', (e) => {
-                    this.setState(e.target.value);
+                    // Only allow state changing on Dashboard
+                    const isDashboard = window.location.pathname.includes('dashboard.html') || window.location.pathname.endsWith('/manager/') || window.location.pathname === '/manager';
+                    if (isDashboard && !select.disabled) {
+                        this.setState(e.target.value);
+                    }
                 });
                 select._contextBound = true;
             }
@@ -202,6 +216,324 @@ window.YatraSetuManagerContext = {
         });
     }
 };
+
+/**
+ * Connected View Renderer Engine for Manager Subpages
+ */
+async function renderConnectedViews(context) {
+    if (!context || typeof window.YatraSetuManagerStore === 'undefined') return;
+    const { activeStateId, activeDestinationId } = context;
+    const config = STATE_CONFIGS[activeStateId] || STATE_CONFIGS['maharashtra'];
+
+    const formattedStateName = config.badge.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    const destLabel = activeDestinationId !== 'all' ? activeDestinationId.replace(/-/g, ' ').toUpperCase() : formattedStateName;
+
+    // Update subpage header subtitles to reflect active state/destination context
+    const pageSubtitles = document.querySelectorAll('.page-title-group p');
+    pageSubtitles.forEach(p => {
+        const text = p.textContent || '';
+        if (text.match(/in|across|for/i)) {
+            p.textContent = text.replace(/(in|across|for)\s+[\w\s&]+/i, `$1 ${destLabel}`);
+        } else {
+            p.textContent = `${text} for ${destLabel}`;
+        }
+    });
+
+    // 0. DASHBOARD OVERVIEW VIEW (dashboard.html)
+    const dashboardDestGrid = document.querySelector('.destinations-directory-grid');
+    if (dashboardDestGrid) {
+        const destinations = await window.YatraSetuManagerStore.getDestinations(activeStateId);
+        if (destinations && destinations.length > 0) {
+            dashboardDestGrid.innerHTML = destinations.slice(0, 4).map((dest, i) => `
+                <div class="dest-directory-card" data-destination-id="${dest.id}" data-state-id="${activeStateId}" style="cursor: pointer;">
+                    <div class="dest-card-thumb" style="background-image: url('${config.heroImg}'); background-size: cover; background-position: center; height: 160px;"></div>
+                    <div class="dest-card-body" style="padding: 1rem;">
+                        <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">${dest.name}</h4>
+                        <p style="font-size: 0.8rem; color: var(--text-muted);">${formattedStateName} Destination • Rank #${dest.rank}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+
+    const metricCards = document.querySelectorAll('.metrics-grid-4 .metric-card');
+    if (metricCards && metricCards.length >= 4) {
+        const destinations = await window.YatraSetuManagerStore.getDestinations(activeStateId);
+        const events = await window.YatraSetuManagerStore.getEvents(activeStateId, activeDestinationId);
+        const activeDestVal = metricCards[2].querySelector('.metric-value');
+        if (activeDestVal) activeDestVal.textContent = destinations.length;
+        const upcomingEventsVal = metricCards[3].querySelector('.metric-value');
+        if (upcomingEventsVal) upcomingEventsVal.textContent = events.length;
+    }
+
+    // 1. DESTINATIONS VIEW (destinations.html)
+    const destHeroTitle = document.querySelector('.destination-hero-banner .hero-title');
+    const destHeroSub = document.querySelector('.destination-hero-banner .hero-subtitle');
+    const destHeroBg = document.querySelector('.destination-hero-banner .destination-hero-bg');
+    if (destHeroTitle && config.topDestinations && config.topDestinations.length > 0) {
+        destHeroTitle.textContent = config.topDestinations[0].name;
+        if (destHeroSub) destHeroSub.textContent = `${config.topDestinations[0].name}, ${formattedStateName} • Scenic destination in ${formattedStateName}`;
+        if (destHeroBg && config.heroImg) destHeroBg.style.backgroundImage = `url('${config.heroImg}')`;
+    }
+
+    const destGrid = document.querySelector('#destinations-cards-grid');
+    if (destGrid) {
+        const destinations = await window.YatraSetuManagerStore.getDestinations(activeStateId);
+        if (destinations && destinations.length > 0) {
+            destGrid.innerHTML = destinations.map(dest => `
+                <div class="dest-card" data-destination-id="${dest.id}" data-state-id="${activeStateId}" style="cursor: pointer;">
+                    <div class="dest-card-media" style="background-image: url('${config.heroImg}');">
+                        <span class="dest-card-tag">Heritage • Tourism</span>
+                        <span class="dest-card-rating">--</span>
+                    </div>
+                    <div class="dest-card-body">
+                        <h3 class="dest-card-title">${dest.name}</h3>
+                        <span class="dest-card-loc">${formattedStateName} • Destination</span>
+                        <div class="dest-card-stats">
+                            <span>🏛️ Rank #${dest.rank}</span>
+                            <span>📅 Active</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            destGrid.innerHTML = `<div style="grid-column: 1 / -1; padding: 2.5rem; text-align: center; color: #64748b; font-weight: 500;">No destination records available for ${formattedStateName}.</div>`;
+        }
+    }
+
+    // 2. ATTRACTIONS VIEW (attractions.html)
+    const attractionsTableBody = document.querySelector('#attractions-table-body');
+    if (attractionsTableBody) {
+        const attractions = await window.YatraSetuManagerStore.getAttractions(activeStateId, activeDestinationId);
+        if (attractions && attractions.length > 0) {
+            attractionsTableBody.innerHTML = attractions.map(attr => `
+                <tr data-category="${attr.category.toLowerCase()}" data-status="open">
+                    <td>
+                        <div class="poi-cell">
+                            <img src="${config.heroImg}" alt="${attr.name}" class="poi-thumb">
+                            <div>
+                                <div class="poi-name">${attr.name}</div>
+                                <div class="poi-meta">${formattedStateName}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${attr.destination_id}</td>
+                    <td>${attr.category}</td>
+                    <td>--</td>
+                    <td><span class="status-pill active">Open</span></td>
+                    <td style="text-align: right;"><button class="btn-sm btn-outline">Manage</button></td>
+                </tr>
+            `).join('');
+        } else {
+            attractionsTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2.5rem; color: #64748b; font-weight: 500;">No attraction records available for ${activeDestinationId !== 'all' ? activeDestinationId : formattedStateName}.</td></tr>`;
+        }
+    }
+
+    // 3. EVENTS VIEW (events.html)
+    const featuredEventTitle = document.querySelector('.event-featured-card h2');
+    const featuredEventP = document.querySelector('.event-featured-card p');
+    const featuredEventMedia = document.querySelector('.event-featured-media');
+    if (featuredEventTitle && config.events && config.events.length > 0) {
+        featuredEventTitle.textContent = config.events[0].title;
+        if (featuredEventP) featuredEventP.innerHTML = `📍 <strong>${config.events[0].dateNum} ${config.events[0].dateMonth}</strong> • ${config.events[0].loc}`;
+        if (featuredEventMedia && config.events[0].img) featuredEventMedia.style.backgroundImage = `url('${config.events[0].img}')`;
+    }
+
+    const upcomingEventsContainer = document.querySelector('#upcoming-events-container');
+    if (upcomingEventsContainer) {
+        const events = await window.YatraSetuManagerStore.getEvents(activeStateId, activeDestinationId);
+        if (events && events.length > 0) {
+            upcomingEventsContainer.innerHTML = events.map(ev => `
+                <div class="event-timeline-card">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div class="event-date-box">
+                            <span class="event-date-num">${ev.dateNum}</span>
+                            <span class="event-date-month">${ev.dateMonth}</span>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">${ev.title}</h4>
+                            <span style="font-size: 0.78rem; color: var(--text-muted);">${ev.location}</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span class="status-pill ${ev.statusClass}">${ev.status}</span>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            upcomingEventsContainer.innerHTML = `<div style="padding: 2.5rem; text-align: center; color: #64748b; font-weight: 500;">No event records available for ${activeDestinationId !== 'all' ? activeDestinationId : formattedStateName}.</div>`;
+        }
+    }
+
+    // 4. STAKEHOLDERS VIEW (stakeholders.html)
+    const stakeholdersTableBody = document.querySelector('#stakeholders-table-body');
+    if (stakeholdersTableBody) {
+        const stakeholders = await window.YatraSetuManagerStore.getStakeholders(activeStateId, activeDestinationId);
+        if (stakeholders && stakeholders.length > 0) {
+            stakeholdersTableBody.innerHTML = stakeholders.map(sh => `
+                <tr>
+                    <td><strong>${sh.name}</strong></td>
+                    <td>${sh.category}</td>
+                    <td>${sh.destination}</td>
+                    <td>${sh.contact}</td>
+                    <td><span class="status-pill active">Active</span></td>
+                    <td style="text-align: right;"><button class="btn-sm btn-outline">View</button></td>
+                </tr>
+            `).join('');
+        } else {
+            stakeholdersTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2.5rem; color: #64748b; font-weight: 500;">No stakeholder records available for ${activeDestinationId !== 'all' ? activeDestinationId : formattedStateName}.</td></tr>`;
+        }
+    }
+
+    // 5. VISITOR STATISTICS VIEW (visitor-statistics.html)
+    const visitorOriginLabel = document.getElementById('visitor-origin-state-label');
+    if (visitorOriginLabel) {
+        visitorOriginLabel.innerHTML = `<span class="legend-dot" style="background: var(--state-accent);"></span> ${formattedStateName}`;
+    }
+
+    // 6. FEEDBACK VIEW (feedback.html)
+    const feedbackContainer = document.querySelector('#feedback-list-container');
+    if (feedbackContainer) {
+        const feedback = await window.YatraSetuManagerStore.getFeedback(activeStateId, activeDestinationId);
+        if (feedback && feedback.length > 0) {
+            feedbackContainer.innerHTML = feedback.map(fb => `
+                <div class="feedback-item-card">
+                    <div class="feedback-author-row">
+                        <div class="author-info">
+                            <div class="author-avatar">${fb.author ? fb.author.slice(0, 2).toUpperCase() : 'VS'}</div>
+                            <div>
+                                <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">${fb.author || 'Visitor'}</h4>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">${fb.date || 'Recently'} • ${fb.destination}</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <span style="color: #F59E0B; font-size: 0.85rem;">★★★★★</span>
+                            <span class="badge badge-success">Positive</span>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">${fb.text}</p>
+                </div>
+            `).join('');
+        } else {
+            feedbackContainer.innerHTML = `<div style="padding: 2.5rem; text-align: center; color: #64748b; font-weight: 500;">No visitor feedback records available for ${activeDestinationId !== 'all' ? activeDestinationId : formattedStateName}.</div>`;
+        }
+    }
+
+    // 7. ANALYTICS VIEW (analytics.html)
+    const analyticsTopList = document.querySelector('#analytics-top-destinations-list');
+    if (analyticsTopList && config.topDestinations && config.topDestinations.length > 0) {
+        analyticsTopList.innerHTML = config.topDestinations.map((dest, i) => `
+            <div class="ranking-item">
+                <div class="ranking-meta">
+                    <span>${dest.name}</span>
+                    <span>Rank #${dest.num || i + 1}</span>
+                </div>
+                <div class="ranking-track">
+                    <div class="ranking-fill" style="width: ${Math.max(30, 85 - i * 14)}%;"></div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // 8. REPORTS VIEW (reports.html)
+    const reportCardDescs = document.querySelectorAll('#reports-card-grid .report-item-card p');
+    if (reportCardDescs && reportCardDescs.length >= 5) {
+        const reportTemplates = [
+            `Comprehensive tourism statistics and insights across ${formattedStateName} state circuits.`,
+            `Individual destination footfall analysis, carrying capacity, and visitor density for ${formattedStateName}.`,
+            `Visitor origin, stay duration, and demographic analysis for ${formattedStateName} state planning.`,
+            `Event statistics, visitor turnout, and economic impact analysis for ${formattedStateName} festivals.`,
+            `Tourism ecosystem analysis, partner registration status, and service coverage in ${formattedStateName}.`
+        ];
+        reportCardDescs.forEach((p, idx) => {
+            if (reportTemplates[idx]) {
+                p.textContent = reportTemplates[idx];
+            }
+        });
+    }
+
+    // 9. DECISION SUPPORT VIEW (decision-support.html)
+    const signalsContainer = document.querySelector('#decision-support-signals-container');
+    if (signalsContainer) {
+        const firstEvent = (config.events && config.events[0]) ? config.events[0] : { title: `${formattedStateName} Cultural Festival`, loc: formattedStateName };
+        const dest1 = (config.topDestinations && config.topDestinations[0]) ? config.topDestinations[0].name : formattedStateName;
+        const dest2 = (config.topDestinations && config.topDestinations[1]) ? config.topDestinations[1].name : dest1;
+
+        signalsContainer.innerHTML = `
+            <div class="decision-signal-card" style="border-left-color: #3B82F6;">
+                <div class="signal-header">
+                    <div style="display: flex; align-items: center; gap: 0.65rem;">
+                        <span style="font-size: 1.2rem;">📈</span>
+                        <h3 class="signal-title">Visitor Activity Surge</h3>
+                    </div>
+                    <span class="badge badge-info">Festival Event</span>
+                </div>
+                <div class="signal-grid">
+                    <div class="signal-box">
+                        <span class="signal-box-lbl" style="color: #3B82F6;">DATA SIGNAL</span>
+                        <p class="signal-box-txt">Visitor numbers increased by 32% during the ${firstEvent.title} period.</p>
+                    </div>
+                    <div class="signal-box">
+                        <span class="signal-box-lbl">OBSERVATION</span>
+                        <p class="signal-box-txt">Overcrowding spike in visitors across ${firstEvent.loc}.</p>
+                    </div>
+                    <div class="signal-box" style="background: #EFF6FF; border-color: #BFDBFE;">
+                        <span class="signal-box-lbl" style="color: #1D4ED8;">MANAGEMENT CONSIDERATION</span>
+                        <p class="signal-box-txt" style="color: #1E3A8A; font-weight: 500;">Review crowd-management arrangements, transport facilities, and waste-management for future event periods in ${formattedStateName}.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="decision-signal-card" style="border-left-color: #8B5CF6;">
+                <div class="signal-header">
+                    <div style="display: flex; align-items: center; gap: 0.65rem;">
+                        <span style="font-size: 1.2rem;">⚡</span>
+                        <h3 class="signal-title">Emerging Destination Interest</h3>
+                    </div>
+                    <span class="badge badge-warning">High Growth</span>
+                </div>
+                <div class="signal-grid">
+                    <div class="signal-box">
+                        <span class="signal-box-lbl" style="color: #8B5CF6;">DATA SIGNAL</span>
+                        <p class="signal-box-txt">Interest in ${dest1} increased by 45% in the last quarter.</p>
+                    </div>
+                    <div class="signal-box">
+                        <span class="signal-box-lbl">OBSERVATION</span>
+                        <p class="signal-box-txt">Growing popularity among travelers visiting ${formattedStateName}.</p>
+                    </div>
+                    <div class="signal-box" style="background: #F5F3FF; border-color: #DDD6FE;">
+                        <span class="signal-box-lbl" style="color: #6D28D9;">MANAGEMENT CONSIDERATION</span>
+                        <p class="signal-box-txt" style="color: #4C1D95; font-weight: 500;">Consider infrastructure improvements and additional tourism services in ${dest1}.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="decision-signal-card" style="border-left-color: var(--state-accent);">
+                <div class="signal-header">
+                    <div style="display: flex; align-items: center; gap: 0.65rem;">
+                        <span style="font-size: 1.2rem;">🏔️</span>
+                        <h3 class="signal-title">Seasonal Transition Signal</h3>
+                    </div>
+                    <span class="badge badge-success">Seasonal Trend</span>
+                </div>
+                <div class="signal-grid">
+                    <div class="signal-box">
+                        <span class="signal-box-lbl" style="color: var(--state-accent);">DATA SIGNAL</span>
+                        <p class="signal-box-txt">Queries for ${dest2} up by 58% for the upcoming seasonal window.</p>
+                    </div>
+                    <div class="signal-box">
+                        <span class="signal-box-lbl">OBSERVATION</span>
+                        <p class="signal-box-txt">Higher demand for heritage and eco-trails across ${formattedStateName}.</p>
+                    </div>
+                    <div class="signal-box" style="background: var(--state-accent-light); border-color: var(--state-accent-border);">
+                        <span class="signal-box-lbl" style="color: var(--state-accent-hover);">MANAGEMENT CONSIDERATION</span>
+                        <p class="signal-box-txt" style="color: var(--text-primary); font-weight: 500;">Deploy safety marshals and coordinate with local tourism operators in ${dest2}.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     initDestinationStateContext();

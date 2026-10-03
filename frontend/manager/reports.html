@@ -169,8 +169,8 @@
 
                 <div class="topbar-right">
                     <div class="destination-selector">
-                        <select id="destination-context-select" class="destination-select-dropdown"
-                            aria-label="Select State Context">
+                        <select id="destination-context-select" disabled class="destination-select-dropdown"
+                            aria-label="Select State Context" title="State context is managed from the Dashboard">
                             <option value="maharashtra">📍 Maharashtra</option>
                             <option value="kerala">🌴 Kerala</option>
                             <option value="kashmir">🏔️ Kashmir</option>
@@ -202,7 +202,7 @@
                 <div class="page-header-row">
                     <div class="page-title-group">
                         <h1>Reports</h1>
-                        <p>Generate and view tourism reports</p>
+                        <p>Generate and view tourism reports for Maharashtra</p>
                     </div>
                 </div>
 
@@ -240,7 +240,7 @@
                     <h2 class="section-title">Available Reports</h2>
                 </div>
 
-                <div class="report-card-grid">
+                <div class="report-card-grid" id="reports-card-grid">
                     <div class="report-item-card">
                         <div style="display: flex; gap: 0.85rem; align-items: flex-start;">
                             <div class="report-icon-box">📄</div>

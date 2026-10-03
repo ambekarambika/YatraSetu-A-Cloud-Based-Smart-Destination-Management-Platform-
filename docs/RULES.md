@@ -202,3 +202,24 @@ If a new file is genuinely required:
 3. Wait for approval before creating it.
 
 Never silently create, rename, move, or delete files.
+
+## 12. MINIMAL IMPLEMENTATION / NO UNNECESSARY DATA RULE
+
+YatraSetu must implement only what is required by the approved project scope and current development task.
+
+Reuse existing code and files before creating new ones.
+
+Do not add unnecessary code, files, abstractions, dependencies, APIs, UI elements, features, or data.
+
+Do not create fake/demo tourism domain data merely to populate screens.
+
+Do not create fabricated fallback values or KPIs.
+
+If required data does not exist, display an appropriate empty state rather than inventing information.
+
+States and destinations are data/context, not separate pages or codebases.
+
+Any new file or significant architectural structure must have a clear responsibility and justification.
+
+The goal is a minimal, maintainable, understandable, PostgreSQL-ready implementation — not maximum code or maximum populated UI.
+
