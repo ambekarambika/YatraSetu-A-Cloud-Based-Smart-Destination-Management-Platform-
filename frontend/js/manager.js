@@ -1,8 +1,198 @@
 /**
- * YatraSetu — Destination Manager Workspace JavaScript
- * Handles state-dynamic theme switching (Maharashtra, Rajasthan, Kerala),
- * table search/filter controls, modal popups, and report generation.
+ * Central YatraSetu Manager Context Engine
+ * Manages activeStateId, activeDestinationId, managerScope, managerRole.
+ * Persists context across page reloads via sessionStorage.
  */
+window.YatraSetuManagerContext = {
+    _state: {
+        activeStateId: 'maharashtra',
+        activeDestinationId: 'all',
+        managerScope: 'state',
+        managerRole: 'state_manager'
+    },
+    _listeners: [],
+
+    init() {
+        const savedState = sessionStorage.getItem('yatrasetu_active_state_id') || sessionStorage.getItem('yatrasetu_state_theme') || 'maharashtra';
+        const savedDest = sessionStorage.getItem('yatrasetu_active_dest_id') || 'all';
+        const savedScope = sessionStorage.getItem('yatrasetu_manager_scope') || 'state';
+        const savedRole = sessionStorage.getItem('yatrasetu_manager_role') || 'state_manager';
+
+        this._state.activeStateId = STATE_CONFIGS[savedState] ? savedState : 'maharashtra';
+        this._state.activeDestinationId = savedDest;
+        this._state.managerScope = savedScope;
+        this._state.managerRole = savedRole;
+
+        this.applyContextToDOM();
+        this.bindSelectors();
+        this.bindDestinationCards();
+    },
+
+    getActiveContext() {
+        return { ...this._state };
+    },
+
+    setState(stateId) {
+        if (!stateId || !STATE_CONFIGS[stateId]) return;
+        this._state.activeStateId = stateId;
+        // Reset destination to 'all' when state changes to prevent state-destination mismatch
+        this._state.activeDestinationId = 'all';
+        this.persist();
+        this.applyContextToDOM();
+        this.notifyListeners('stateChange');
+    },
+
+    setDestination(destId, parentStateId = null) {
+        if (parentStateId && STATE_CONFIGS[parentStateId]) {
+            this._state.activeStateId = parentStateId;
+        }
+        this._state.activeDestinationId = destId || 'all';
+        this.persist();
+        this.applyContextToDOM();
+        this.notifyListeners('destinationChange');
+    },
+
+    persist() {
+        sessionStorage.setItem('yatrasetu_active_state_id', this._state.activeStateId);
+        sessionStorage.setItem('yatrasetu_active_dest_id', this._state.activeDestinationId);
+        sessionStorage.setItem('yatrasetu_manager_scope', this._state.managerScope);
+        sessionStorage.setItem('yatrasetu_manager_role', this._state.managerRole);
+        sessionStorage.setItem('yatrasetu_state_theme', this._state.activeStateId);
+    },
+
+    applyContextToDOM() {
+        const stateKey = this._state.activeStateId;
+        const config = STATE_CONFIGS[stateKey] || STATE_CONFIGS['maharashtra'];
+
+        // Synchronize state theme attributes on root html and body
+        document.documentElement.setAttribute('data-state-theme', config.theme || stateKey);
+        document.body.setAttribute('data-state-theme', config.theme || stateKey);
+        document.body.setAttribute('data-theme', config.theme || stateKey);
+
+        // Update topbar state selector dropdowns across pages
+        const stateSelectors = document.querySelectorAll('#destination-context-select, .state-select-dropdown');
+        stateSelectors.forEach(select => {
+            if (select && select.value !== stateKey) {
+                select.value = stateKey;
+            }
+        });
+
+        // Update destination selectors if present
+        const destSelectors = document.querySelectorAll('#destination-filter-select, .destination-context-dropdown');
+        destSelectors.forEach(select => {
+            if (select && select.value !== this._state.activeDestinationId) {
+                select.value = this._state.activeDestinationId;
+            }
+        });
+
+        // Update topbar state label if present
+        const stateBtnLabel = document.getElementById('topbar-state-label');
+        if (stateBtnLabel && config.badge) {
+            stateBtnLabel.textContent = config.badge.charAt(0) + config.badge.slice(1).toLowerCase();
+        }
+
+        // Update sidebar context badge
+        const sidebarRoleState = document.getElementById('sidebar-role-state');
+        if (sidebarRoleState && config.badge) {
+            sidebarRoleState.textContent = config.badge;
+        }
+
+        // Apply hero image & texts if present
+        const heroBg = document.querySelector('.destination-hero-bg');
+        if (heroBg && config.heroImg) {
+            heroBg.style.backgroundImage = `url('${config.heroImg}')`;
+        }
+
+        const heroTagline = document.getElementById('hero-tagline');
+        const heroHeading = document.getElementById('hero-heading');
+        const heroSubtitle = document.getElementById('hero-subtitle');
+        const heroQuote = document.getElementById('hero-quote-text');
+        const heroWeather = document.getElementById('hero-weather-text');
+        const heroLocation = document.getElementById('hero-location-text');
+
+        if (heroTagline) heroTagline.textContent = config.tagline;
+        if (heroHeading) heroHeading.innerHTML = config.title;
+        if (heroSubtitle) heroSubtitle.textContent = config.subtitle;
+        if (heroQuote) heroQuote.textContent = config.quote;
+        if (heroWeather) heroWeather.textContent = config.weather;
+        if (heroLocation) heroLocation.textContent = config.location;
+
+        // Update top destinations list on overview
+        const topDestList = document.getElementById('top-destinations-list');
+        if (topDestList && config.topDestinations) {
+            topDestList.innerHTML = config.topDestinations.map(item => `
+                <div class="ranking-item" data-destination="${item.name.toLowerCase().replace(/\s+/g, '-')}">
+                    <div class="ranking-num">${item.num}</div>
+                    <span>${item.name}</span>
+                </div>
+            `).join('');
+        }
+
+        const exploreBannerText = document.getElementById('explore-banner-text');
+        if (exploreBannerText) exploreBannerText.textContent = config.exploreText;
+
+        const eventsList = document.getElementById('upcoming-events-list');
+        if (eventsList && config.events) {
+            eventsList.innerHTML = config.events.map(ev => `
+                <div class="event-card-item">
+                    <img src="${ev.img}" class="event-thumb-img" alt="${ev.title}">
+                    <div class="event-date-badge">
+                        <span class="event-date-num">${ev.dateNum}</span>
+                        <span class="event-date-month">${ev.dateMonth}</span>
+                    </div>
+                    <div class="event-info-body">
+                        <div class="event-item-title">${ev.title}</div>
+                        <div class="event-item-location">${ev.loc}</div>
+                    </div>
+                    <span class="status-pill ${ev.statusClass}">${ev.status}</span>
+                </div>
+            `).join('');
+        }
+    },
+
+    bindSelectors() {
+        const stateSelectors = document.querySelectorAll('#destination-context-select, .state-select-dropdown');
+        stateSelectors.forEach(select => {
+            if (!select._contextBound) {
+                select.addEventListener('change', (e) => {
+                    this.setState(e.target.value);
+                });
+                select._contextBound = true;
+            }
+        });
+    },
+
+    bindDestinationCards() {
+        document.addEventListener('click', (e) => {
+            const card = e.target.closest('[data-destination-id], .destination-card, .ranking-item');
+            if (card) {
+                const destId = card.getAttribute('data-destination-id') || 
+                               card.getAttribute('data-destination') || 
+                               card.querySelector('.destination-title, h3, span')?.textContent?.trim().toLowerCase().replace(/\s+/g, '-');
+                if (destId) {
+                    const parentState = card.getAttribute('data-state-id') || this._state.activeStateId;
+                    this.setDestination(destId, parentState);
+                    const navHref = card.getAttribute('data-href');
+                    if (navHref) {
+                        window.location.href = navHref;
+                    }
+                }
+            }
+        });
+    },
+
+    onContextChange(callback) {
+        if (typeof callback === 'function') {
+            this._listeners.push(callback);
+        }
+    },
+
+    notifyListeners(eventType) {
+        this._listeners.forEach(fn => {
+            try { fn(this.getActiveContext(), eventType); } catch (err) { console.error(err); }
+        });
+    }
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     initDestinationStateContext();
@@ -216,108 +406,26 @@ let currentStateIdx = 0;
  * Initialize State Dropdown and Transform Dashboard Theme Dynamically
  */
 function initDestinationStateContext() {
+    window.YatraSetuManagerContext.init();
+    
     const stateBtn = document.getElementById('topbar-state-btn');
-    const stateSelect = document.getElementById('destination-context-select');
-
     if (stateBtn) {
         stateBtn.addEventListener('click', () => {
             cycleStateTheme();
         });
     }
-
-    if (stateSelect) {
-        stateSelect.addEventListener('change', (e) => {
-            applyStateTheme(e.target.value);
-        });
-    }
-
-    // Load initial state theme from session if saved
-    const savedState = sessionStorage.getItem('yatrasetu_state_theme') || 'maharashtra';
-    applyStateTheme(savedState);
 }
 
 function cycleStateTheme() {
-    currentStateIdx = (currentStateIdx + 1) % currentStateList.length;
-    applyStateTheme(currentStateList[currentStateIdx]);
+    const list = currentStateList;
+    const current = window.YatraSetuManagerContext.getActiveContext().activeStateId;
+    let idx = list.indexOf(current);
+    idx = (idx + 1) % list.length;
+    window.YatraSetuManagerContext.setState(list[idx]);
 }
 
 function applyStateTheme(stateKey) {
-    const config = STATE_CONFIGS[stateKey] || STATE_CONFIGS['maharashtra'];
-    sessionStorage.setItem('yatrasetu_state_theme', stateKey);
-
-    // Apply data-theme to body
-    document.body.setAttribute('data-theme', config.theme);
-
-    // Update Topbar State Button Text if present
-    const stateBtnLabel = document.getElementById('topbar-state-label');
-    if (stateBtnLabel) {
-        stateBtnLabel.textContent = config.badge.charAt(0) + config.badge.slice(1).toLowerCase();
-    }
-
-    // Update Topbar Select Dropdown if present
-    const stateSelect = document.getElementById('destination-context-select');
-    if (stateSelect) {
-        stateSelect.value = stateKey;
-    }
-
-    // Update Sidebar Context Label
-    const sidebarRoleState = document.getElementById('sidebar-role-state');
-    if (sidebarRoleState) sidebarRoleState.textContent = config.badge;
-
-    // Update Hero Image Background
-    const heroBg = document.querySelector('.destination-hero-bg');
-    if (heroBg && config.heroImg) {
-        heroBg.style.backgroundImage = `url('${config.heroImg}')`;
-    }
-
-    // Update Hero Card Elements
-    const heroTagline = document.getElementById('hero-tagline');
-    const heroHeading = document.getElementById('hero-heading');
-    const heroSubtitle = document.getElementById('hero-subtitle');
-    const heroQuote = document.getElementById('hero-quote-text');
-    const heroWeather = document.getElementById('hero-weather-text');
-    const heroLocation = document.getElementById('hero-location-text');
-
-    if (heroTagline) heroTagline.textContent = config.tagline;
-    if (heroHeading) heroHeading.innerHTML = config.title;
-    if (heroSubtitle) heroSubtitle.textContent = config.subtitle;
-    if (heroQuote) heroQuote.textContent = config.quote;
-    if (heroWeather) heroWeather.textContent = config.weather;
-    if (heroLocation) heroLocation.textContent = config.location;
-
-    // Update Top Destinations Ranking List
-    const topDestList = document.getElementById('top-destinations-list');
-    if (topDestList && config.topDestinations) {
-        topDestList.innerHTML = config.topDestinations.map(item => `
-            <div class="ranking-item">
-                <div class="ranking-num">${item.num}</div>
-                <span>${item.name}</span>
-            </div>
-        `).join('');
-    }
-
-    // Update Explore Banner Title
-    const exploreBannerText = document.getElementById('explore-banner-text');
-    if (exploreBannerText) exploreBannerText.textContent = config.exploreText;
-
-    // Update Upcoming Events Cards List
-    const eventsList = document.getElementById('upcoming-events-list');
-    if (eventsList && config.events) {
-        eventsList.innerHTML = config.events.map(ev => `
-            <div class="event-card-item">
-                <img src="${ev.img}" class="event-thumb-img" alt="${ev.title}">
-                <div class="event-date-badge">
-                    <span class="event-date-num">${ev.dateNum}</span>
-                    <span class="event-date-month">${ev.dateMonth}</span>
-                </div>
-                <div class="event-info-body">
-                    <div class="event-item-title">${ev.title}</div>
-                    <div class="event-item-location">${ev.loc}</div>
-                </div>
-                <span class="status-pill ${ev.statusClass}">${ev.status}</span>
-            </div>
-        `).join('');
-    }
+    window.YatraSetuManagerContext.setState(stateKey);
 }
 
 /**

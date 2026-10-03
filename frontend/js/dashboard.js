@@ -7,6 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initSidebarToggle();
     initRolePreviewSwitcher();
     initNavItems();
+
+    if (window.YatraSetuManagerContext) {
+        window.YatraSetuManagerContext.init();
+    }
 });
 
 /**
