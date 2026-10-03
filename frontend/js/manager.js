@@ -117,36 +117,45 @@ window.YatraSetuManagerContext = {
         if (heroWeather) heroWeather.textContent = config.weather;
         if (heroLocation) heroLocation.textContent = config.location;
 
-        // Update top destinations list on overview
-        const topDestList = document.getElementById('top-destinations-list');
-        if (topDestList && config.topDestinations) {
-            topDestList.innerHTML = config.topDestinations.map(item => `
-                <div class="ranking-item" data-destination="${item.name.toLowerCase().replace(/\s+/g, '-')}">
-                    <div class="ranking-num">${item.num}</div>
-                    <span>${item.name}</span>
-                </div>
-            `).join('');
+        // Fetch top destinations asynchronously via YatraSetuManagerStore
+        if (typeof window.YatraSetuManagerStore !== 'undefined') {
+            window.YatraSetuManagerStore.getDestinations(stateKey).then(destinations => {
+                const topDestList = document.getElementById('top-destinations-list');
+                if (topDestList && destinations && destinations.length > 0) {
+                    topDestList.innerHTML = destinations.map(item => `
+                        <div class="ranking-item" data-destination="${item.id}">
+                            <div class="ranking-num">${item.rank}</div>
+                            <span>${item.name}</span>
+                        </div>
+                    `).join('');
+                }
+            });
         }
 
         const exploreBannerText = document.getElementById('explore-banner-text');
         if (exploreBannerText) exploreBannerText.textContent = config.exploreText;
 
-        const eventsList = document.getElementById('upcoming-events-list');
-        if (eventsList && config.events) {
-            eventsList.innerHTML = config.events.map(ev => `
-                <div class="event-card-item">
-                    <img src="${ev.img}" class="event-thumb-img" alt="${ev.title}">
-                    <div class="event-date-badge">
-                        <span class="event-date-num">${ev.dateNum}</span>
-                        <span class="event-date-month">${ev.dateMonth}</span>
-                    </div>
-                    <div class="event-info-body">
-                        <div class="event-item-title">${ev.title}</div>
-                        <div class="event-item-location">${ev.loc}</div>
-                    </div>
-                    <span class="status-pill ${ev.statusClass}">${ev.status}</span>
-                </div>
-            `).join('');
+        // Fetch events asynchronously via YatraSetuManagerStore
+        if (typeof window.YatraSetuManagerStore !== 'undefined') {
+            window.YatraSetuManagerStore.getEvents(stateKey, this._state.activeDestinationId).then(events => {
+                const eventsList = document.getElementById('upcoming-events-list');
+                if (eventsList && events && events.length > 0) {
+                    eventsList.innerHTML = events.map(ev => `
+                        <div class="event-card-item">
+                            <img src="${ev.img}" class="event-thumb-img" alt="${ev.title}">
+                            <div class="event-date-badge">
+                                <span class="event-date-num">${ev.dateNum}</span>
+                                <span class="event-date-month">${ev.dateMonth}</span>
+                            </div>
+                            <div class="event-info-body">
+                                <div class="event-item-title">${ev.title}</div>
+                                <div class="event-item-location">${ev.location}</div>
+                            </div>
+                            <span class="status-pill ${ev.statusClass}">${ev.status}</span>
+                        </div>
+                    `).join('');
+                }
+            });
         }
     },
 
@@ -200,6 +209,81 @@ document.addEventListener('DOMContentLoaded', () => {
     initTableSearchAndFilters();
     initReportGenerator();
 });
+
+/**
+ * YatraSetu — Temporary Relational Data Access Adapter
+ * Exposes API-shaped relational query functions filtering strictly by state_id and destination_id.
+ * Queries existing records without expanding or duplicating fake domain data.
+ */
+window.YatraSetuManagerStore = {
+    async getDestinations(stateId) {
+        if (!stateId || !STATE_CONFIGS[stateId]) return [];
+        const config = STATE_CONFIGS[stateId];
+        return (config.topDestinations || []).map(dest => ({
+            id: dest.name.toLowerCase().replace(/\s+/g, '-'),
+            state_id: stateId,
+            name: dest.name,
+            rank: dest.num
+        }));
+    },
+
+    async getAttractions(stateId, destinationId = 'all') {
+        if (!stateId || !STATE_CONFIGS[stateId]) return [];
+        const config = STATE_CONFIGS[stateId];
+        const attractions = (config.topDestinations || []).map(dest => ({
+            id: `attr-${dest.name.toLowerCase().replace(/\s+/g, '-')}`,
+            state_id: stateId,
+            destination_id: dest.name.toLowerCase().replace(/\s+/g, '-'),
+            name: dest.name,
+            category: 'Heritage'
+        }));
+        if (destinationId && destinationId !== 'all') {
+            return attractions.filter(a => a.destination_id === destinationId || a.destination_id.includes(destinationId));
+        }
+        return attractions;
+    },
+
+    async getEvents(stateId, destinationId = 'all') {
+        if (!stateId || !STATE_CONFIGS[stateId]) return [];
+        const config = STATE_CONFIGS[stateId];
+        const events = (config.events || []).map((ev, idx) => ({
+            id: `event-${stateId}-${idx + 1}`,
+            state_id: stateId,
+            destination_id: ev.loc ? ev.loc.toLowerCase().split(',')[0].trim().replace(/\s+/g, '-') : 'all',
+            title: ev.title,
+            dateNum: ev.dateNum,
+            dateMonth: ev.dateMonth,
+            location: ev.loc,
+            status: ev.status,
+            statusClass: ev.statusClass,
+            img: ev.img
+        }));
+        if (destinationId && destinationId !== 'all') {
+            return events.filter(e => e.destination_id === destinationId || e.destination_id.includes(destinationId));
+        }
+        return events;
+    },
+
+    async getStakeholders(stateId, destinationId = 'all') {
+        if (!stateId || !STATE_CONFIGS[stateId]) return [];
+        return [];
+    },
+
+    async getVisitorStats(stateId, destinationId = 'all') {
+        if (!stateId || !STATE_CONFIGS[stateId]) return null;
+        return {
+            state_id: stateId,
+            destination_id: destinationId || 'all',
+            weather: STATE_CONFIGS[stateId].weather || '',
+            location: STATE_CONFIGS[stateId].location || ''
+        };
+    },
+
+    async getFeedback(stateId, destinationId = 'all') {
+        if (!stateId || !STATE_CONFIGS[stateId]) return [];
+        return [];
+    }
+};
 
 /**
  * State Data Configurations for Dynamic UI Transformation
