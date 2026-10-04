@@ -174,7 +174,7 @@
                             aria-label="Select State Context" title="State context is managed from the Dashboard">
                             <option value="maharashtra">📍 Maharashtra</option>
                             <option value="kerala">🌴 Kerala</option>
-                            <option value="kashmir">🏔️ Kashmir</option>
+                            <option value="kashmir">🏔️ Jammu & Kashmir</option>
                             <option value="rajasthan">🏰 Rajasthan</option>
                             <option value="goa">🏖️ Goa</option>
                             <option value="tamilnadu">🛕 Tamil Nadu</option>
@@ -210,29 +210,26 @@
 
                 <!-- Filter Pills Bar -->
                 <div class="filter-pill-bar">
-                    <a href="#" class="filter-pill active">All Events</a>
-                    <a href="#" class="filter-pill">Cultural</a>
-                    <a href="#" class="filter-pill">Religious</a>
-                    <a href="#" class="filter-pill">Nature</a>
-                    <a href="#" class="filter-pill">Adventure</a>
-                    <a href="#" class="filter-pill">Workshops</a>
+                    <a href="#" class="filter-pill active" data-category="all">All Events</a>
+                    <a href="#" class="filter-pill" data-category="cultural">Cultural</a>
+                    <a href="#" class="filter-pill" data-category="religious">Religious</a>
+                    <a href="#" class="filter-pill" data-category="nature">Nature</a>
+                    <a href="#" class="filter-pill" data-category="adventure">Adventure</a>
+                    <a href="#" class="filter-pill" data-category="workshops">Workshops</a>
                 </div>
 
                 <!-- Featured Event Card -->
                 <div class="event-featured-card">
                     <div class="event-featured-media"
-                        style="background-image: url('../assets/images/thumb-mumbai.jpg');">
+                        style="background-image: url('https://commons.wikimedia.org/wiki/Special:Redirect/file/Mountaineous_trail_of_the_Rajgad_Fort.jpg');">
                         <div class="event-featured-media-overlay"></div>
                         <div class="event-featured-content">
                             <span class="demo-data-badge"
                                 style="background: rgba(230,126,34,0.9); margin-bottom: 0.5rem;">FEATURED EVENT</span>
-                            <h2 style="font-size: 1.6rem; font-weight: 800; color: #FFF; margin-bottom: 0.35rem;">Ganesh
-                                Chaturthi Festival</h2>
-                            <p
-                                style="font-size: 0.85rem; color: rgba(255,255,255,0.9); max-width: 480px; margin-bottom: 1rem;">
-                                📍 <strong>7 Sep – 17 Sep 2024</strong> • Mumbai, Maharashtra<br>
-                                One of India's most celebrated festivals with grand processions, cultural music, and
-                                community celebrations.
+                            <h2 style="font-size: 1.6rem; font-weight: 800; color: #FFF; margin-bottom: 0.35rem;">Monsoon Rajgad Trekking Festival</h2>
+                            <p style="font-size: 0.85rem; color: rgba(255,255,255,0.9); max-width: 480px; margin-bottom: 1rem;">
+                                📍 <strong>28 SEP</strong> • Rajgad Fort, Maharashtra<br>
+                                Scenic monsoon trekking & eco-tourism event across Rajgad Fort.
                             </p>
                             <button class="btn-primary">View Details</button>
                         </div>
@@ -243,20 +240,20 @@
                             Highlights</span>
                         <div class="event-highlight-grid">
                             <div class="event-highlight-item">
-                                <span class="event-highlight-val">1.2M</span>
-                                <span class="event-highlight-lbl">Expected Visitors</span>
+                                <span class="event-highlight-val">2.5K</span>
+                                <span class="event-highlight-lbl">Expected Trekkers</span>
                             </div>
                             <div class="event-highlight-item">
-                                <span class="event-highlight-val">50+</span>
-                                <span class="event-highlight-lbl">Cultural Programs</span>
+                                <span class="event-highlight-val">12+</span>
+                                <span class="event-highlight-lbl">Guided Trails</span>
                             </div>
                             <div class="event-highlight-item">
-                                <span class="event-highlight-val">10</span>
-                                <span class="event-highlight-lbl">Locations</span>
+                                <span class="event-highlight-val">Rajgad</span>
+                                <span class="event-highlight-lbl">Location</span>
                             </div>
                             <div class="event-highlight-item">
                                 <span class="event-highlight-val">High</span>
-                                <span class="event-highlight-lbl">Tourism Impact</span>
+                                <span class="event-highlight-lbl">Eco Impact</span>
                             </div>
                         </div>
                     </div>
@@ -271,59 +268,7 @@
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 0.85rem;" id="upcoming-events-container">
-                    <div class="event-timeline-card">
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <div class="event-date-box">
-                                <span class="event-date-num">07</span>
-                                <span class="event-date-month">SEP</span>
-                            </div>
-                            <div>
-                                <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">Ganesh
-                                    Chaturthi Festival</h4>
-                                <span style="font-size: 0.78rem; color: var(--text-muted);">Mumbai • Cultural</span>
-                            </div>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 0.75rem;">
-                            <span class="badge badge-warning">High Impact</span>
-                            <span class="badge badge-success">Upcoming</span>
-                        </div>
-                    </div>
-
-                    <div class="event-timeline-card">
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <div class="event-date-box">
-                                <span class="event-date-num">15</span>
-                                <span class="event-date-month">OCT</span>
-                            </div>
-                            <div>
-                                <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">Ellora
-                                    Festival</h4>
-                                <span style="font-size: 0.78rem; color: var(--text-muted);">Aurangabad • Cultural</span>
-                            </div>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 0.75rem;">
-                            <span class="badge badge-info">Medium Impact</span>
-                            <span class="badge badge-success">Upcoming</span>
-                        </div>
-                    </div>
-
-                    <div class="event-timeline-card">
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <div class="event-date-box">
-                                <span class="event-date-num">21</span>
-                                <span class="event-date-month">JUL</span>
-                            </div>
-                            <div>
-                                <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">Lonavala
-                                    Monsoon Festival</h4>
-                                <span style="font-size: 0.78rem; color: var(--text-muted);">Lonavala • Nature</span>
-                            </div>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 0.75rem;">
-                            <span class="badge badge-info">Medium Impact</span>
-                            <span class="badge badge-success">Upcoming</span>
-                        </div>
-                    </div>
+                    <div style="padding: 2.5rem; text-align: center; color: #64748b; font-weight: 500;">Loading upcoming events...</div>
                 </div>
             </div>
         </main>
@@ -339,29 +284,36 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label>Event Title</label>
-                    <input type="text" class="form-control" placeholder="e.g. Fort Shivneri Fort Heritage Tour">
+                    <input type="text" id="add-event-title" class="form-control" placeholder="e.g. Fort Shivneri Heritage Tour">
+                </div>
+                <div class="form-group">
+                    <label>Parent Destination</label>
+                    <select id="add-event-dest" class="form-control">
+                        <!-- Populated dynamically -->
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Location / Venue</label>
-                    <input type="text" class="form-control" placeholder="e.g. Junnar, Pune District">
+                    <input type="text" id="add-event-location" class="form-control" placeholder="e.g. Junnar, Pune District">
                 </div>
                 <div class="form-group">
-                    <label>Event Date</label>
-                    <input type="date" class="form-control">
+                    <label>Event Date (Day & Month)</label>
+                    <input type="text" id="add-event-date" class="form-control" placeholder="e.g. 15 OCT">
                 </div>
                 <div class="form-group">
-                    <label>Expected Capacity / Attendees</label>
-                    <input type="number" class="form-control" placeholder="e.g. 500">
+                    <label>Image URL (Optional)</label>
+                    <input type="text" id="add-event-img" class="form-control" placeholder="https://...">
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary modal-close">Cancel</button>
-                <button class="btn-primary modal-close">Schedule Event</button>
+                <button type="button" class="btn-primary" id="btn-save-event">Schedule Event</button>
             </div>
         </div>
     </div>
 
     <script src="../js/dashboard.js"></script>
+    <script src="../js/manager-data.js"></script>
     <script src="../js/manager.js"></script>
 </body>
 

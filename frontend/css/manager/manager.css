@@ -54,6 +54,7 @@ body[data-theme="assam"]      { --state-accent: #059669; --state-accent-hover: #
 
 body.app-body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-size: 14px;
     color: var(--text-primary);
     background-color: var(--bg-page);
     min-height: 100vh;
@@ -72,7 +73,12 @@ body.app-body {
    2. Sidebar Navigation (Matching Reference Shell Image)
    -------------------------------------------------------------------------- */
 .app-sidebar {
-    width: 250px;
+    width: 225px;
+    min-width: 225px;
+    max-width: 225px;
+    height: 100vh;
+    position: sticky;
+    top: 0;
     background-color: var(--sidebar-bg);
     color: var(--sidebar-text);
     display: flex;
@@ -82,11 +88,16 @@ body.app-body {
     border-right: 1px solid var(--sidebar-border);
     z-index: 100;
     transition: transform 0.3s ease;
+    overflow: hidden;
 }
 
 .app-sidebar-header {
-    padding: 1.5rem 1.25rem 1.25rem;
+    height: 64px;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
     border-bottom: 1px solid var(--sidebar-border);
+    flex-shrink: 0;
 }
 
 .app-brand-link {
@@ -97,8 +108,8 @@ body.app-body {
 }
 
 .app-brand-crest {
-    width: 38px;
-    height: 38px;
+    width: 34px;
+    height: 34px;
     background: var(--state-accent);
     color: #FFFFFF;
     border-radius: var(--radius-sm);
@@ -106,7 +117,8 @@ body.app-body {
     align-items: center;
     justify-content: center;
     font-weight: 800;
-    font-size: 1.15rem;
+    font-size: 1.05rem;
+    flex-shrink: 0;
 }
 
 .app-brand-info {
@@ -115,10 +127,11 @@ body.app-body {
 }
 
 .app-brand-name {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     font-weight: 800;
     color: #FFFFFF;
     letter-spacing: -0.01em;
+    line-height: 1.2;
 }
 
 .app-brand-name span {
@@ -126,19 +139,20 @@ body.app-body {
 }
 
 .app-role-label {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 600;
     color: var(--sidebar-text-muted);
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
 }
 
 .app-sidebar-nav {
     flex: 1;
-    padding: 1rem 0.75rem;
+    padding: 0.5rem 0.5rem;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.2rem;
+    scrollbar-width: thin;
 }
 
 .app-nav-section-title {
@@ -147,20 +161,23 @@ body.app-body {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--sidebar-text-muted);
-    padding: 0.75rem 0.75rem 0.25rem;
+    padding: 0.5rem 0.65rem 0.2rem;
 }
 
 .app-nav-item {
     display: flex;
     align-items: center;
-    gap: 0.85rem;
-    padding: 0.7rem 0.85rem;
+    gap: 0.75rem;
+    height: 40px;
+    min-height: 40px;
+    padding: 0 0.75rem;
     color: #94A3B8;
     text-decoration: none;
-    font-size: 0.875rem;
+    font-size: 0.85rem;
     font-weight: 600;
     border-radius: 8px;
     transition: all 0.15s ease;
+    white-space: nowrap;
 }
 
 .app-nav-item:hover {
@@ -177,29 +194,34 @@ body.app-body {
 }
 
 .app-nav-icon {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     width: 20px;
     text-align: center;
+    flex-shrink: 0;
 }
 
 .app-sidebar-footer {
-    padding: 1rem 0.75rem;
+    padding: 0.75rem;
     border-top: 1px solid var(--sidebar-border);
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    background-color: var(--sidebar-bg);
 }
 
 .sidebar-slogan-box {
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: var(--radius-sm);
-    padding: 0.75rem;
+    padding: 0.6rem 0.5rem;
     text-align: center;
     font-size: 0.72rem;
     font-weight: 700;
     font-style: italic;
     color: var(--state-accent);
+    white-space: normal;
+    line-height: 1.35;
 }
 
 /* --------------------------------------------------------------------------
@@ -357,8 +379,8 @@ body.app-body {
    4. Main Content Area & Universal Header
    -------------------------------------------------------------------------- */
 .app-content {
-    padding: 1.75rem 2rem;
-    max-width: 1400px;
+    padding: 28px 32px;
+    max-width: 1440px;
     width: 100%;
     margin: 0 auto;
     display: flex;
@@ -375,14 +397,15 @@ body.app-body {
 }
 
 .page-title-group h1 {
-    font-size: 1.6rem;
+    font-size: 26px;
     font-weight: 800;
     color: var(--text-primary);
     letter-spacing: -0.02em;
+    line-height: 1.2;
 }
 
 .page-title-group p {
-    font-size: 0.85rem;
+    font-size: 14px;
     color: var(--text-muted);
 }
 
@@ -491,11 +514,14 @@ body.app-body {
     background-color: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-md);
-    padding: 1.25rem 1.5rem;
+    padding: 1rem 1.25rem;
     box-shadow: var(--card-shadow);
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    justify-content: space-between;
+    height: 118px;
+    min-height: 110px;
+    max-height: 125px;
 }
 
 .metric-header {
@@ -577,6 +603,121 @@ body.app-body {
     font-size: 0.7rem;
     color: var(--text-muted);
     font-weight: 600;
+}
+
+/* Destination Hero Banner */
+.destination-hero-banner {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    min-height: 180px;
+    display: flex;
+    align-items: flex-end;
+    padding: 1.5rem 2rem;
+    color: #FFFFFF;
+    box-shadow: var(--card-shadow);
+}
+
+.destination-hero-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+}
+
+.destination-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(15,23,42,0.15) 0%, rgba(15,23,42,0.8) 100%);
+}
+
+.destination-hero-body {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+}
+
+.hero-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--state-accent);
+    margin-bottom: 0.25rem;
+}
+
+.hero-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    line-height: 1.2;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.hero-subtitle {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-top: 0.25rem;
+}
+
+/* Section Card & Directory Grids */
+.section-card {
+    background: #FFFFFF;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.5rem;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.section-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.section-link {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--state-accent);
+    text-decoration: none;
+}
+
+.section-link:hover {
+    color: var(--state-accent-hover);
+}
+
+.destinations-directory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+}
+
+.dest-directory-card {
+    background: #FFFFFF;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dest-directory-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+}
+
+/* Workspace Multi-column Grids */
+.workspace-two-col {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 1.25rem;
 }
 
 /* Destination Cards Grid */
@@ -819,8 +960,8 @@ body.app-body {
     justify-content: space-between;
 }
 
-.chart-title {
-    font-size: 0.95rem;
+.chart-title, .section-title {
+    font-size: 18px;
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -1056,7 +1197,7 @@ body.app-body {
 }
 
 .signal-title {
-    font-size: 1.05rem;
+    font-size: 18px;
     font-weight: 800;
     color: var(--text-primary);
 }
@@ -1118,10 +1259,15 @@ body.app-body {
     border-bottom: 1px solid var(--card-border);
 }
 
+.data-table tr {
+    height: 56px;
+}
+
 .data-table td {
-    padding: 1rem 1.25rem;
+    padding: 0.75rem 1.25rem;
     border-bottom: 1px solid var(--card-border);
     color: var(--text-primary);
+    vertical-align: middle;
 }
 
 .data-table tr:hover {
@@ -1254,6 +1400,7 @@ body.app-body {
     .feedback-summary-grid { grid-template-columns: 1fr; }
     .signal-grid { grid-template-columns: 1fr; }
     .season-strip { grid-template-columns: 1fr; }
+    .workspace-two-col { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 768px) {

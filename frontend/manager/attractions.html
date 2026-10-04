@@ -174,7 +174,7 @@
                             aria-label="Select State Context" title="State context is managed from the Dashboard">
                             <option value="maharashtra">📍 Maharashtra</option>
                             <option value="kerala">🌴 Kerala</option>
-                            <option value="kashmir">🏔️ Kashmir</option>
+                            <option value="kashmir">🏔️ Jammu & Kashmir</option>
                             <option value="rajasthan">🏰 Rajasthan</option>
                             <option value="goa">🏖️ Goa</option>
                             <option value="tamilnadu">🛕 Tamil Nadu</option>
@@ -210,12 +210,12 @@
 
                 <!-- Category Pill Filter Bar -->
                 <div class="filter-pill-bar">
-                    <a href="#" class="filter-pill active">🏛️ Historical <span class="filter-pill-count">24</span></a>
-                    <a href="#" class="filter-pill">🛕 Temples <span class="filter-pill-count">18</span></a>
-                    <a href="#" class="filter-pill">🌿 Natural <span class="filter-pill-count">32</span></a>
-                    <a href="#" class="filter-pill">🏰 Forts <span class="filter-pill-count">15</span></a>
-                    <a href="#" class="filter-pill">🗿 Caves <span class="filter-pill-count">12</span></a>
-                    <a href="#" class="filter-pill">🏖️ Beaches <span class="filter-pill-count">14</span></a>
+                    <a href="#" class="filter-pill active" data-category="all">All <span class="filter-pill-count" id="pill-count-all">0</span></a>
+                    <a href="#" class="filter-pill" data-category="fort">🏰 Forts <span class="filter-pill-count" id="pill-count-fort">0</span></a>
+                    <a href="#" class="filter-pill" data-category="shrine">🛕 Shrines & Temples <span class="filter-pill-count" id="pill-count-shrine">0</span></a>
+                    <a href="#" class="filter-pill" data-category="viewpoint">🌿 Viewpoints <span class="filter-pill-count" id="pill-count-viewpoint">0</span></a>
+                    <a href="#" class="filter-pill" data-category="park">🐅 Parks & Wildlife <span class="filter-pill-count" id="pill-count-park">0</span></a>
+                    <a href="#" class="filter-pill" data-category="water">⛵ Water & Beaches <span class="filter-pill-count" id="pill-count-water">0</span></a>
                 </div>
 
                 <!-- POI Data Table -->
@@ -232,114 +232,7 @@
                             </tr>
                         </thead>
                         <tbody id="attractions-table-body">
-                            <tr>
-                                <td>
-                                    <div class="poi-cell">
-                                        <img src="../assets/images/thumb-ajanta.jpg" alt="Ajanta Caves"
-                                            class="poi-thumb">
-                                        <div>
-                                            <div class="poi-info-title">Ajanta Caves</div>
-                                            <div class="poi-info-sub">UNESCO World Heritage Site</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>Aurangabad</td>
-                                <td>Cave</td>
-                                <td><strong style="color: #F59E0B;">⭐ 4.8</strong></td>
-                                <td><span class="badge badge-success">Open</span></td>
-                                <td style="text-align: right;"><button class="btn-secondary"
-                                        style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">•••</button></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="poi-cell">
-                                        <img src="../assets/images/thumb-lonavala.jpg" alt="Ellora Caves"
-                                            class="poi-thumb">
-                                        <div>
-                                            <div class="poi-info-title">Ellora Caves</div>
-                                            <div class="poi-info-sub">Kailasa Temple Monolith</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>Aurangabad</td>
-                                <td>Cave</td>
-                                <td><strong style="color: #F59E0B;">⭐ 4.7</strong></td>
-                                <td><span class="badge badge-success">Open</span></td>
-                                <td style="text-align: right;"><button class="btn-secondary"
-                                        style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">•••</button></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="poi-cell">
-                                        <img src="../assets/images/thumb-rajgad.jpg" alt="Raigad Fort"
-                                            class="poi-thumb">
-                                        <div>
-                                            <div class="poi-info-title">Raigad Fort</div>
-                                            <div class="poi-info-sub">Maratha Citadel & Ropeway</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>Raigad</td>
-                                <td>Fort</td>
-                                <td><strong style="color: #F59E0B;">⭐ 4.6</strong></td>
-                                <td><span class="badge badge-success">Open</span></td>
-                                <td style="text-align: right;"><button class="btn-secondary"
-                                        style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">•••</button></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="poi-cell">
-                                        <img src="../assets/images/thumb-mumbai.jpg" alt="Sinhagad Fort"
-                                            class="poi-thumb">
-                                        <div>
-                                            <div class="poi-info-title">Sinhagad Fort</div>
-                                            <div class="poi-info-sub">Mountain Pass Fortress</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>Pune</td>
-                                <td>Fort</td>
-                                <td><strong style="color: #F59E0B;">⭐ 4.5</strong></td>
-                                <td><span class="badge badge-success">Open</span></td>
-                                <td style="text-align: right;"><button class="btn-secondary"
-                                        style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">•••</button></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="poi-cell">
-                                        <img src="../assets/images/thumb-lonavala.jpg" alt="Bhaja Caves"
-                                            class="poi-thumb">
-                                        <div>
-                                            <div class="poi-info-title">Bhaja Caves</div>
-                                            <div class="poi-info-sub">Buddhist Stupa Complex</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>Lonavala</td>
-                                <td>Cave</td>
-                                <td><strong style="color: #F59E0B;">⭐ 4.4</strong></td>
-                                <td><span class="badge badge-warning">Maintenance</span></td>
-                                <td style="text-align: right;"><button class="btn-secondary"
-                                        style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">•••</button></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="poi-cell">
-                                        <img src="../assets/images/thumb-konkan.jpg" alt="Karla Caves"
-                                            class="poi-thumb">
-                                        <div>
-                                            <div class="poi-info-title">Karla Caves</div>
-                                            <div class="poi-info-sub">Ancient Rock-cut Chaitya</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>Lonavala</td>
-                                <td>Cave</td>
-                                <td><strong style="color: #F59E0B;">⭐ 4.3</strong></td>
-                                <td><span class="badge badge-success">Open</span></td>
-                                <td style="text-align: right;"><button class="btn-secondary"
-                                        style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">•••</button></td>
-                            </tr>
+                            <tr><td colspan="6" style="text-align: center; padding: 2.5rem; color: #64748b; font-weight: 500;">Loading attractions...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -357,34 +250,32 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label>Attraction Name</label>
-                    <input type="text" class="form-control" placeholder="e.g. Hirakani Buruj Viewpoint">
+                    <input type="text" id="add-attr-name" class="form-control" placeholder="e.g. Hirakani Buruj Viewpoint">
                 </div>
                 <div class="form-group">
                     <label>Parent Destination</label>
-                    <select class="form-control">
-                        <option>Raigad Fort</option>
-                        <option>Ellora Caves</option>
-                        <option>Ajanta Caves</option>
-                        <option>Lonavala Hills</option>
+                    <select id="add-attr-dest" class="form-control">
+                        <!-- Populated dynamically -->
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Attraction Type</label>
-                    <input type="text" class="form-control" placeholder="e.g. Viewpoint / Monument">
+                    <label>Attraction Type / Category</label>
+                    <input type="text" id="add-attr-category" class="form-control" placeholder="e.g. Scenic Viewpoint / Fort Shrine">
                 </div>
                 <div class="form-group">
-                    <label>Operating Hours</label>
-                    <input type="text" class="form-control" placeholder="e.g. 06:00 AM - 06:00 PM">
+                    <label>Image URL (Optional)</label>
+                    <input type="text" id="add-attr-img" class="form-control" placeholder="https://...">
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary modal-close">Cancel</button>
-                <button class="btn-primary modal-close">Save Attraction</button>
+                <button type="button" class="btn-primary" id="btn-save-attraction">Save Attraction</button>
             </div>
         </div>
     </div>
 
     <script src="../js/dashboard.js"></script>
+    <script src="../js/manager-data.js"></script>
     <script src="../js/manager.js"></script>
 </body>
 

@@ -174,7 +174,7 @@
                             aria-label="Select State Context" title="State context is managed from the Dashboard">
                             <option value="maharashtra">📍 Maharashtra</option>
                             <option value="kerala">🌴 Kerala</option>
-                            <option value="kashmir">🏔️ Kashmir</option>
+                            <option value="kashmir">🏔️ Jammu & Kashmir</option>
                             <option value="rajasthan">🏰 Rajasthan</option>
                             <option value="goa">🏖️ Goa</option>
                             <option value="tamilnadu">🛕 Tamil Nadu</option>
@@ -210,12 +210,12 @@
 
                 <!-- Filter Pills Bar -->
                 <div class="filter-pill-bar">
-                    <a href="#" class="filter-pill active">All Destinations</a>
-                    <a href="#" class="filter-pill">Heritage</a>
-                    <a href="#" class="filter-pill">Nature</a>
-                    <a href="#" class="filter-pill">Spiritual</a>
-                    <a href="#" class="filter-pill">Coastal</a>
-                    <a href="#" class="filter-pill">Adventure</a>
+                    <a href="#" class="filter-pill active" data-category="all">All Destinations</a>
+                    <a href="#" class="filter-pill" data-category="heritage">Heritage</a>
+                    <a href="#" class="filter-pill" data-category="nature">Nature</a>
+                    <a href="#" class="filter-pill" data-category="spiritual">Spiritual</a>
+                    <a href="#" class="filter-pill" data-category="coastal">Coastal</a>
+                    <a href="#" class="filter-pill" data-category="adventure">Adventure</a>
                 </div>
 
                 <!-- Featured Destination Hero Banner -->
@@ -260,69 +260,7 @@
 
                 <!-- Destination Grid -->
                 <div class="destination-grid-4" id="destinations-cards-grid">
-                    <div class="dest-card">
-                        <div class="dest-card-media"
-                            style="background-image: url('../assets/images/thumb-ajanta.jpg');">
-                            <span class="dest-card-tag">Heritage • UNESCO</span>
-                            <span class="dest-card-rating">⭐ 4.8</span>
-                        </div>
-                        <div class="dest-card-body">
-                            <h3 class="dest-card-title">Ajanta Caves</h3>
-                            <span class="dest-card-loc">Aurangabad • UNESCO Site</span>
-                            <div class="dest-card-stats">
-                                <span>🏛️ 12 attractions</span>
-                                <span>📅 4 events</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="dest-card">
-                        <div class="dest-card-media"
-                            style="background-image: url('../assets/images/thumb-lonavala.jpg');">
-                            <span class="dest-card-tag">Hill Station</span>
-                            <span class="dest-card-rating">⭐ 4.7</span>
-                        </div>
-                        <div class="dest-card-body">
-                            <h3 class="dest-card-title">Ellora Caves</h3>
-                            <span class="dest-card-loc">Aurangabad • UNESCO Site</span>
-                            <div class="dest-card-stats">
-                                <span>🏛| 15 attractions</span>
-                                <span>📅 3 events</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="dest-card">
-                        <div class="dest-card-media"
-                            style="background-image: url('../assets/images/thumb-lonavala.jpg');">
-                            <span class="dest-card-tag">Nature • Hill</span>
-                            <span class="dest-card-rating">⭐ 4.6</span>
-                        </div>
-                        <div class="dest-card-body">
-                            <h3 class="dest-card-title">Lonavala</h3>
-                            <span class="dest-card-loc">Pune • Hill Station</span>
-                            <div class="dest-card-stats">
-                                <span>🏛️ 8 attractions</span>
-                                <span>📅 5 events</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="dest-card">
-                        <div class="dest-card-media"
-                            style="background-image: url('../assets/images/thumb-konkan.jpg');">
-                            <span class="dest-card-tag">Coastal • Beach</span>
-                            <span class="dest-card-rating">⭐ 4.5</span>
-                        </div>
-                        <div class="dest-card-body">
-                            <h3 class="dest-card-title">Alibaug</h3>
-                            <span class="dest-card-loc">Raigad • Beach</span>
-                            <div class="dest-card-stats">
-                                <span>🏛️ 6 attractions</span>
-                                <span>📅 2 events</span>
-                            </div>
-                        </div>
-                    </div>
+                    <div style="grid-column: 1 / -1; padding: 2.5rem; text-align: center; color: #64748b; font-weight: 500;">Loading destinations...</div>
                 </div>
             </div>
         </main>
@@ -338,35 +276,41 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label>Destination Name</label>
-                    <input type="text" class="form-control" placeholder="e.g. Pratapgad Fort">
+                    <input type="text" id="add-dest-name" class="form-control" placeholder="e.g. Pratapgad Fort">
                 </div>
                 <div class="form-group">
                     <label>Category</label>
-                    <select class="form-control">
-                        <option>Heritage Fort</option>
-                        <option>UNESCO World Heritage Site</option>
-                        <option>Hill Station</option>
-                        <option>Pilgrimage Site</option>
-                        <option>Eco & Wildlife Reserve</option>
+                    <select id="add-dest-category" class="form-control">
+                        <option value="Heritage Fort">Heritage Fort</option>
+                        <option value="UNESCO World Heritage Site">UNESCO World Heritage Site</option>
+                        <option value="Hill Station">Hill Station</option>
+                        <option value="Pilgrimage Site">Pilgrimage Site</option>
+                        <option value="Eco & Wildlife Reserve">Eco & Wildlife Reserve</option>
+                        <option value="Coastal Beach">Coastal Beach</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Region / District</label>
-                    <input type="text" class="form-control" placeholder="e.g. Satara, Maharashtra">
+                    <input type="text" id="add-dest-region" class="form-control" placeholder="e.g. Satara, Maharashtra">
+                </div>
+                <div class="form-group">
+                    <label>Image URL (Optional)</label>
+                    <input type="text" id="add-dest-img" class="form-control" placeholder="https://...">
                 </div>
                 <div class="form-group">
                     <label>Recommended Daily Visitor Capacity</label>
-                    <input type="number" class="form-control" placeholder="e.g. 4000">
+                    <input type="number" id="add-dest-capacity" class="form-control" placeholder="e.g. 4000">
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary modal-close">Cancel</button>
-                <button class="btn-primary modal-close">Save Destination</button>
+                <button type="button" class="btn-primary" id="btn-save-destination">Save Destination</button>
             </div>
         </div>
     </div>
 
     <script src="../js/dashboard.js"></script>
+    <script src="../js/manager-data.js"></script>
     <script src="../js/manager.js"></script>
 </body>
 

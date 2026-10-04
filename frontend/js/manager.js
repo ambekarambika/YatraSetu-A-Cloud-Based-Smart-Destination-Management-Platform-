@@ -187,15 +187,16 @@ window.YatraSetuManagerContext = {
 
     bindDestinationCards() {
         document.addEventListener('click', (e) => {
-            const card = e.target.closest('[data-destination-id], .destination-card, .ranking-item');
+            const card = e.target.closest('[data-destination-id], .dest-card, .dest-directory-card, .ranking-item');
             if (card) {
                 const destId = card.getAttribute('data-destination-id') || 
                                card.getAttribute('data-destination') || 
-                               card.querySelector('.destination-title, h3, span')?.textContent?.trim().toLowerCase().replace(/\s+/g, '-');
+                               card.querySelector('.destination-title, .dest-card-title, h3, h4, span')?.textContent?.trim().toLowerCase().replace(/\s+/g, '-');
                 if (destId) {
                     const parentState = card.getAttribute('data-state-id') || this._state.activeStateId;
                     this.setDestination(destId, parentState);
-                    const navHref = card.getAttribute('data-href');
+                    const isDashboard = window.location.pathname.includes('dashboard.html') || window.location.pathname.endsWith('/manager/') || window.location.pathname === '/manager';
+                    const navHref = card.getAttribute('data-href') || (isDashboard ? 'destinations.html' : null);
                     if (navHref) {
                         window.location.href = navHref;
                     }
@@ -244,9 +245,9 @@ async function renderConnectedViews(context) {
     if (dashboardDestGrid) {
         const destinations = await window.YatraSetuManagerStore.getDestinations(activeStateId);
         if (destinations && destinations.length > 0) {
-            dashboardDestGrid.innerHTML = destinations.slice(0, 4).map((dest, i) => `
+            dashboardDestGrid.innerHTML = destinations.slice(0, 4).map((dest) => `
                 <div class="dest-directory-card" data-destination-id="${dest.id}" data-state-id="${activeStateId}" style="cursor: pointer;">
-                    <div class="dest-card-thumb" style="background-image: url('${config.heroImg}'); background-size: cover; background-position: center; height: 160px;"></div>
+                    <div class="dest-card-thumb" style="background-image: url('${dest.img}'); background-size: cover; background-position: center; height: 160px;"></div>
                     <div class="dest-card-body" style="padding: 1rem;">
                         <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">${dest.name}</h4>
                         <p style="font-size: 0.8rem; color: var(--text-muted);">${formattedStateName} Destination • Rank #${dest.rank}</p>
@@ -271,9 +272,10 @@ async function renderConnectedViews(context) {
     const destHeroSub = document.querySelector('.destination-hero-banner .hero-subtitle');
     const destHeroBg = document.querySelector('.destination-hero-banner .destination-hero-bg');
     if (destHeroTitle && config.topDestinations && config.topDestinations.length > 0) {
-        destHeroTitle.textContent = config.topDestinations[0].name;
-        if (destHeroSub) destHeroSub.textContent = `${config.topDestinations[0].name}, ${formattedStateName} • Scenic destination in ${formattedStateName}`;
-        if (destHeroBg && config.heroImg) destHeroBg.style.backgroundImage = `url('${config.heroImg}')`;
+        const firstDest = config.topDestinations[0];
+        destHeroTitle.textContent = firstDest.name;
+        if (destHeroSub) destHeroSub.textContent = `${firstDest.name}, ${formattedStateName} • Scenic destination in ${formattedStateName}`;
+        if (destHeroBg) destHeroBg.style.backgroundImage = `url('${firstDest.img || config.heroImg}')`;
     }
 
     const destGrid = document.querySelector('#destinations-cards-grid');
@@ -282,8 +284,8 @@ async function renderConnectedViews(context) {
         if (destinations && destinations.length > 0) {
             destGrid.innerHTML = destinations.map(dest => `
                 <div class="dest-card" data-destination-id="${dest.id}" data-state-id="${activeStateId}" style="cursor: pointer;">
-                    <div class="dest-card-media" style="background-image: url('${config.heroImg}');">
-                        <span class="dest-card-tag">Heritage • Tourism</span>
+                    <div class="dest-card-media" style="background-image: url('${dest.img}');">
+                        <span class="dest-card-tag">${dest.category || 'Heritage • Tourism'}</span>
                         <span class="dest-card-rating">--</span>
                     </div>
                     <div class="dest-card-body">
@@ -305,28 +307,39 @@ async function renderConnectedViews(context) {
     const attractionsTableBody = document.querySelector('#attractions-table-body');
     if (attractionsTableBody) {
         const attractions = await window.YatraSetuManagerStore.getAttractions(activeStateId, activeDestinationId);
+        const allDestinations = await window.YatraSetuManagerStore.getDestinations(activeStateId);
+
+        if (typeof updateAttractionPillCounts === 'function') {
+            updateAttractionPillCounts(attractions);
+        }
+
         if (attractions && attractions.length > 0) {
-            attractionsTableBody.innerHTML = attractions.map(attr => `
-                <tr data-category="${attr.category.toLowerCase()}" data-status="open">
+            attractionsTableBody.innerHTML = attractions.map(attr => {
+                const destObj = allDestinations.find(d => d.id === attr.destination_id);
+                const destName = destObj ? destObj.name : (attr.destination_id ? attr.destination_id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : formattedStateName);
+                return `
+                <tr data-category="${attr.category ? attr.category.toLowerCase() : ''}" data-status="${(attr.status || 'open').toLowerCase()}">
                     <td>
                         <div class="poi-cell">
-                            <img src="${config.heroImg}" alt="${attr.name}" class="poi-thumb">
+                            <img src="${attr.img}" alt="${attr.name}" class="poi-thumb">
                             <div>
-                                <div class="poi-name">${attr.name}</div>
-                                <div class="poi-meta">${formattedStateName}</div>
+                                <div class="poi-info-title">${attr.name}</div>
+                                <div class="poi-info-sub">${attr.category || 'Attraction'}</div>
                             </div>
                         </div>
                     </td>
-                    <td>${attr.destination_id}</td>
-                    <td>${attr.category}</td>
-                    <td>--</td>
-                    <td><span class="status-pill active">Open</span></td>
-                    <td style="text-align: right;"><button class="btn-sm btn-outline">Manage</button></td>
+                    <td>${destName}</td>
+                    <td>${attr.category || 'General'}</td>
+                    <td><strong style="color: #F59E0B;">⭐ ${attr.rating || '4.8'}</strong></td>
+                    <td><span class="badge badge-${attr.status === 'Closed' ? 'danger' : (attr.status === 'Maintenance' ? 'warning' : 'success')}">${attr.status || 'Open'}</span></td>
+                    <td style="text-align: right;"><button class="btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">•••</button></td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
         } else {
             attractionsTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2.5rem; color: #64748b; font-weight: 500;">No attraction records available for ${activeDestinationId !== 'all' ? activeDestinationId : formattedStateName}.</td></tr>`;
         }
+        filterTableRows();
     }
 
     // 3. EVENTS VIEW (events.html)
@@ -540,65 +553,66 @@ document.addEventListener('DOMContentLoaded', () => {
     initManagerModals();
     initTableSearchAndFilters();
     initReportGenerator();
+    initAddAttractionForm();
+    initAddDestinationForm();
+    initAddEventForm();
+    initAddStakeholderForm();
 });
+
 
 /**
  * YatraSetu — Temporary Relational Data Access Adapter
  * Exposes API-shaped relational query functions filtering strictly by state_id and destination_id.
- * Queries existing records without expanding or duplicating fake domain data.
+ * Consumes central data repository in manager-data.js.
  */
 window.YatraSetuManagerStore = {
+    getActiveContext() {
+        if (window.YatraSetuManagerContext) {
+            return window.YatraSetuManagerContext.getActiveContext();
+        }
+        return { activeStateId: 'maharashtra', activeDestinationId: 'all' };
+    },
+
     async getDestinations(stateId) {
-        if (!stateId || !STATE_CONFIGS[stateId]) return [];
-        const config = STATE_CONFIGS[stateId];
-        return (config.topDestinations || []).map(dest => ({
-            id: dest.name.toLowerCase().replace(/\s+/g, '-'),
-            state_id: stateId,
-            name: dest.name,
-            rank: dest.num
-        }));
+        if (!window.YatraSetuManagerData || !window.YatraSetuManagerData.destinations) return [];
+        if (!stateId || stateId === 'all') return window.YatraSetuManagerData.destinations;
+        return window.YatraSetuManagerData.destinations.filter(d => d.state_id === stateId);
     },
 
     async getAttractions(stateId, destinationId = 'all') {
-        if (!stateId || !STATE_CONFIGS[stateId]) return [];
-        const config = STATE_CONFIGS[stateId];
-        const attractions = (config.topDestinations || []).map(dest => ({
-            id: `attr-${dest.name.toLowerCase().replace(/\s+/g, '-')}`,
-            state_id: stateId,
-            destination_id: dest.name.toLowerCase().replace(/\s+/g, '-'),
-            name: dest.name,
-            category: 'Heritage'
-        }));
-        if (destinationId && destinationId !== 'all') {
-            return attractions.filter(a => a.destination_id === destinationId || a.destination_id.includes(destinationId));
+        if (!window.YatraSetuManagerData || !window.YatraSetuManagerData.attractions) return [];
+        let list = window.YatraSetuManagerData.attractions;
+        if (stateId && stateId !== 'all') {
+            list = list.filter(a => a.state_id === stateId);
         }
-        return attractions;
+        if (destinationId && destinationId !== 'all') {
+            list = list.filter(a => a.destination_id === destinationId || a.destination_id.includes(destinationId));
+        }
+        return list;
     },
 
     async getEvents(stateId, destinationId = 'all') {
-        if (!stateId || !STATE_CONFIGS[stateId]) return [];
-        const config = STATE_CONFIGS[stateId];
-        const events = (config.events || []).map((ev, idx) => ({
-            id: `event-${stateId}-${idx + 1}`,
-            state_id: stateId,
-            destination_id: ev.loc ? ev.loc.toLowerCase().split(',')[0].trim().replace(/\s+/g, '-') : 'all',
-            title: ev.title,
-            dateNum: ev.dateNum,
-            dateMonth: ev.dateMonth,
-            location: ev.loc,
-            status: ev.status,
-            statusClass: ev.statusClass,
-            img: ev.img
-        }));
-        if (destinationId && destinationId !== 'all') {
-            return events.filter(e => e.destination_id === destinationId || e.destination_id.includes(destinationId));
+        if (!window.YatraSetuManagerData || !window.YatraSetuManagerData.events) return [];
+        let list = window.YatraSetuManagerData.events;
+        if (stateId && stateId !== 'all') {
+            list = list.filter(e => e.state_id === stateId);
         }
-        return events;
+        if (destinationId && destinationId !== 'all') {
+            list = list.filter(e => e.destination_id === destinationId || e.destination_id.includes(destinationId));
+        }
+        return list;
     },
 
     async getStakeholders(stateId, destinationId = 'all') {
-        if (!stateId || !STATE_CONFIGS[stateId]) return [];
-        return [];
+        if (!window.YatraSetuManagerData || !window.YatraSetuManagerData.stakeholders) return [];
+        let list = window.YatraSetuManagerData.stakeholders;
+        if (stateId && stateId !== 'all') {
+            list = list.filter(s => s.state_id === stateId);
+        }
+        if (destinationId && destinationId !== 'all') {
+            list = list.filter(s => s.destination_id === destinationId || s.destination_id.includes(destinationId));
+        }
+        return list;
     },
 
     async getVisitorStats(stateId, destinationId = 'all') {
@@ -612,208 +626,24 @@ window.YatraSetuManagerStore = {
     },
 
     async getFeedback(stateId, destinationId = 'all') {
-        if (!stateId || !STATE_CONFIGS[stateId]) return [];
-        return [];
+        if (!window.YatraSetuManagerData || !window.YatraSetuManagerData.feedback) return [];
+        let list = window.YatraSetuManagerData.feedback;
+        if (stateId && stateId !== 'all') {
+            list = list.filter(f => f.state_id === stateId);
+        }
+        if (destinationId && destinationId !== 'all') {
+            list = list.filter(f => f.destination_id === destinationId || f.destination_id.includes(destinationId));
+        }
+        return list;
     }
 };
 
 /**
- * State Data Configurations for Dynamic UI Transformation
+ * State Data Configurations for Dynamic UI Transformation (Derived from YatraSetuManagerData)
  */
-const STATE_CONFIGS = {
-    maharashtra: {
-        theme: 'maharashtra',
-        badge: 'MAHARASHTRA',
-        tagline: 'MAHARASHTRA DESTINATION MANAGEMENT',
-        title: 'Maharashtra Workspace',
-        subtitle: 'Manage tourism activity, monitor visitor influx, and coordinate destination stakeholders efficiently.',
-        quote: '"From our forts to our festivals, Maharashtra inspires every journey." — YatraSetu',
-        weather: '☀️ 26°C | Pune, Maharashtra',
-        location: '📍 Raigad Fort | Maharashtra',
-        heroImg: 'https://images.unsplash.com/photo-1627894483216-2138af692e32?auto=format&fit=crop&w=1600&q=80',
-        topDestinations: [
-            { num: 1, name: 'Raigad Fort' },
-            { num: 2, name: 'Ajanta Caves' },
-            { num: 3, name: 'Ellora Caves' },
-            { num: 4, name: 'Lonavala' },
-            { num: 5, name: 'Shirdi' }
-        ],
-        exploreText: 'Explore Maharashtra — Heritage • Culture • Nature • People',
-        events: [
-            { title: 'Pune Heritage Walk', dateNum: '12', dateMonth: 'OCT', loc: 'Pune, Maharashtra', status: 'Open', statusClass: 'active', img: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=200&q=80' },
-            { title: 'Ajanta Ellora Festival', dateNum: '18', dateMonth: 'OCT', loc: 'Aurangabad, Maharashtra', status: 'Registration', statusClass: 'pending', img: 'https://images.unsplash.com/photo-1627894483216-2138af692e32?auto=format&fit=crop&w=200&q=80' },
-            { title: 'Konkan Food Festival', dateNum: '25', dateMonth: 'OCT', loc: 'Ratnagiri, Maharashtra', status: 'Upcoming', statusClass: 'draft', img: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=200&q=80' }
-        ]
-    },
-    kerala: {
-        theme: 'kerala',
-        badge: 'KERALA',
-        tagline: 'KERALA DESTINATION MANAGEMENT',
-        title: 'Kerala Workspace',
-        subtitle: 'Sustain God’s Own Country, conserve pristine backwaters, and curate enriching eco-tourism experiences.',
-        quote: '"God’s Own Country — Where nature meets heritage in harmony." — YatraSetu',
-        weather: '🌧️ 24°C | Kochi, Kerala',
-        location: '📍 Munnar Tea Gardens | Kerala',
-        heroImg: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=1600&q=80',
-        topDestinations: [
-            { num: 1, name: 'Munnar Hills' },
-            { num: 2, name: 'Alleppey Backwaters' },
-            { num: 3, name: 'Wayanad Wildlife' },
-            { num: 4, name: 'Fort Kochi' },
-            { num: 5, name: 'Varkala Cliff' }
-        ],
-        exploreText: 'Explore Kerala — Nature • Backwaters • Wellness • People',
-        events: [
-            { title: 'Onam Cultural Pageant', dateNum: '10', dateMonth: 'OCT', loc: 'Kochi, Kerala', status: 'Open', statusClass: 'active', img: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=200&q=80' },
-            { title: 'Backwater Regatta Rally', dateNum: '16', dateMonth: 'OCT', loc: 'Alleppey, Kerala', status: 'Registration', statusClass: 'pending', img: 'https://images.unsplash.com/photo-1593693397690-362cb9666fc2?auto=format&fit=crop&w=200&q=80' },
-            { title: 'Wayanad Eco Summit', dateNum: '22', dateMonth: 'OCT', loc: 'Wayanad, Kerala', status: 'Upcoming', statusClass: 'draft', img: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=200&q=80' }
-        ]
-    },
-    kashmir: {
-        theme: 'kashmir',
-        badge: 'JAMMU & KASHMIR',
-        tagline: 'KASHMIR DESTINATION MANAGEMENT',
-        title: 'Kashmir Workspace',
-        subtitle: 'Promote paradise on earth, manage alpine valleys, houseboats, and sustainable high-altitude tourism.',
-        quote: '"Gar firdaus bar roo-e zameen ast — Paradise on Earth." — YatraSetu',
-        weather: '❄️ 14°C | Srinagar, Kashmir',
-        location: '📍 Dal Lake | Srinagar',
-        heroImg: 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=1600&q=80',
-        topDestinations: [
-            { num: 1, name: 'Dal Lake Srinagar' },
-            { num: 2, name: 'Gulmarg Snow Slopes' },
-            { num: 3, name: 'Pahalgam Valley' },
-            { num: 4, name: 'Sonamarg Glaciers' },
-            { num: 5, name: 'Shankaracharya Temple' }
-        ],
-        exploreText: 'Explore Kashmir — Lakes • Valleys • Snow Slopes • Crafts',
-        events: [
-            { title: 'Srinagar Tulip Festival', dateNum: '08', dateMonth: 'APR', loc: 'Indira Gandhi Memorial Garden', status: 'Open', statusClass: 'active', img: 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=200&q=80' },
-            { title: 'Gulmarg Winter Sports Meet', dateNum: '14', dateMonth: 'DEC', loc: 'Gulmarg Alpine Resort', status: 'Upcoming', statusClass: 'draft', img: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=200&q=80' },
-            { title: 'Shikara Cultural Regatta', dateNum: '20', dateMonth: 'OCT', loc: 'Dal Lake Boulevard', status: 'Registration', statusClass: 'pending', img: 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=200&q=80' }
-        ]
-    },
-    rajasthan: {
-        theme: 'rajasthan',
-        badge: 'RAJASTHAN',
-        tagline: 'RAJASTHAN DESTINATION MANAGEMENT',
-        title: 'Rajasthan Workspace',
-        subtitle: 'Preserve majestic forts, elevate royal heritage tourism, and foster sustainable desert journeys.',
-        quote: '"Padharo Mhare Des — Experience the timeless grandeur of Rajasthan." — YatraSetu',
-        weather: '☀️ 32°C | Jaipur, Rajasthan',
-        location: '📍 Amber Fort | Jaipur, Rajasthan',
-        heroImg: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?auto=format&fit=crop&w=1600&q=80',
-        topDestinations: [
-            { num: 1, name: 'Amber Fort' },
-            { num: 2, name: 'Jaisalmer Desert' },
-            { num: 3, name: 'Udaipur City Palace' },
-            { num: 4, name: 'Mehrangarh Fort' },
-            { num: 5, name: 'Pushkar Lake' }
-        ],
-        exploreText: 'Explore Rajasthan — Royal Heritage • Forts • Deserts • Culture',
-        events: [
-            { title: 'Jaipur Literature Fest', dateNum: '14', dateMonth: 'OCT', loc: 'Jaipur, Rajasthan', status: 'Open', statusClass: 'active', img: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?auto=format&fit=crop&w=200&q=80' },
-            { title: 'Jaisalmer Desert Safari', dateNum: '20', dateMonth: 'OCT', loc: 'Jaisalmer, Rajasthan', status: 'Registration', statusClass: 'pending', img: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=200&q=80' },
-            { title: 'Udaipur Light Festival', dateNum: '28', dateMonth: 'OCT', loc: 'Udaipur, Rajasthan', status: 'Upcoming', statusClass: 'draft', img: 'https://images.unsplash.com/photo-1615836245337-f5b9b2303f10?auto=format&fit=crop&w=200&q=80' }
-        ]
-    },
-    goa: {
-        theme: 'goa',
-        badge: 'GOA',
-        tagline: 'GOA DESTINATION MANAGEMENT',
-        title: 'Goa Workspace',
-        subtitle: 'Balance coastal heritage, manage eco-beach tourism, and coordinate sustainable marine destinations.',
-        quote: '"Viva Goa — Sun, sand, heritage, and serene coastal culture." — YatraSetu',
-        weather: '🌤️ 29°C | Panaji, Goa',
-        location: '📍 Old Goa Basilica | Goa',
-        heroImg: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=1600&q=80',
-        topDestinations: [
-            { num: 1, name: 'Old Goa Churches' },
-            { num: 2, name: 'Calangute Coast' },
-            { num: 3, name: 'Dudhsagar Falls' },
-            { num: 4, name: 'Fort Aguada' },
-            { num: 5, name: 'Palolem Beach' }
-        ],
-        exploreText: 'Explore Goa — Beaches • Heritage • Waterfalls • Festivities',
-        events: [
-            { title: 'Goa Heritage Carnival', dateNum: '11', dateMonth: 'NOV', loc: 'Panaji Promenade', status: 'Open', statusClass: 'active', img: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=200&q=80' },
-            { title: 'Fontainhas Cultural Walk', dateNum: '19', dateMonth: 'NOV', loc: 'Latin Quarter Panaji', status: 'Registration', statusClass: 'pending', img: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=200&q=80' },
-            { title: 'Dudhsagar Eco Trail', dateNum: '26', dateMonth: 'NOV', loc: 'Mollem Reserve', status: 'Upcoming', statusClass: 'draft', img: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=200&q=80' }
-        ]
-    },
-    tamilnadu: {
-        theme: 'tamilnadu',
-        badge: 'TAMIL NADU',
-        tagline: 'TAMIL NADU DESTINATION MANAGEMENT',
-        title: 'Tamil Nadu Workspace',
-        subtitle: 'Preserve Dravidian temple heritage, manage Nilgiri hill stations, and promote coastal cultural trails.',
-        quote: '"Land of Temples — Millennia of art, devotion, and architecture." — YatraSetu',
-        weather: '☀️ 31°C | Madurai, Tamil Nadu',
-        location: '📍 Meenakshi Temple | Madurai',
-        heroImg: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1600&q=80',
-        topDestinations: [
-            { num: 1, name: 'Meenakshi Amman Temple' },
-            { num: 2, name: 'Ooty Nilgiri Hills' },
-            { num: 3, name: 'Mahabalipuram Reliefs' },
-            { num: 4, name: 'Tanjore Brihadisvara' },
-            { num: 5, name: 'Kanyakumari Point' }
-        ],
-        exploreText: 'Explore Tamil Nadu — Temples • Nilgiri Hills • Architecture',
-        events: [
-            { title: 'Mamallapuram Dance Festival', dateNum: '15', dateMonth: 'DEC', loc: 'Shore Temple Complex', status: 'Open', statusClass: 'active', img: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=200&q=80' },
-            { title: 'Pongal Heritage Expo', dateNum: '14', dateMonth: 'JAN', loc: 'Madurai Heritage Hub', status: 'Upcoming', statusClass: 'draft', img: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=200&q=80' },
-            { title: 'Nilgiri Mountain Railway Tour', dateNum: '22', dateMonth: 'DEC', loc: 'Ooty Station', status: 'Registration', statusClass: 'pending', img: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=200&q=80' }
-        ]
-    },
-    uttarakhand: {
-        theme: 'uttarakhand',
-        badge: 'UTTARAKHAND',
-        tagline: 'UTTARAKHAND DESTINATION MANAGEMENT',
-        title: 'Uttarakhand Workspace',
-        subtitle: 'Promote Himalayan eco-tourism, manage sacred river valleys, and coordinate adventure trail safety.',
-        quote: '"Devbhoomi — Land of the Gods and Sacred Himalayan Valleys." — YatraSetu',
-        weather: '🌤️ 18°C | Rishikesh, Uttarakhand',
-        location: '📍 Triveni Ghat | Rishikesh',
-        heroImg: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=1600&q=80',
-        topDestinations: [
-            { num: 1, name: 'Rishikesh Ganga Ghats' },
-            { num: 2, name: 'Nainital Lake Corridor' },
-            { num: 3, name: 'Mussoorie Queen of Hills' },
-            { num: 4, name: 'Valley of Flowers' },
-            { num: 5, name: 'Jim Corbett Reserve' }
-        ],
-        exploreText: 'Explore Uttarakhand — Sacred Rivers • Himalayas • Wildlife',
-        events: [
-            { title: 'International Yoga Festival', dateNum: '05', dateMonth: 'MAR', loc: 'Rishikesh Ghats', status: 'Open', statusClass: 'active', img: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=200&q=80' },
-            { title: 'Himalayan Trekking Summit', dateNum: '18', dateMonth: 'OCT', loc: 'Dehradun Convention', status: 'Registration', statusClass: 'pending', img: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=200&q=80' },
-            { title: 'Ganga Sandhya Cultural Evening', dateNum: '25', dateMonth: 'OCT', loc: 'Haridwar Har Ki Pauri', status: 'Upcoming', statusClass: 'draft', img: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=200&q=80' }
-        ]
-    },
-    assam: {
-        theme: 'assam',
-        badge: 'ASSAM',
-        tagline: 'ASSAM DESTINATION MANAGEMENT',
-        title: 'Assam Workspace',
-        subtitle: 'Protect one-horned rhino wildlife reserves, manage Brahmaputra river tourism, and celebrate tea heritage.',
-        quote: '"Land of the Red River and Blue Hills." — YatraSetu',
-        weather: '⛅ 27°C | Guwahati, Assam',
-        location: '📍 Kaziranga National Park | Assam',
-        heroImg: 'https://images.unsplash.com/photo-1607141731632-15f9d1469e38?auto=format&fit=crop&w=1600&q=80',
-        topDestinations: [
-            { num: 1, name: 'Kaziranga National Park' },
-            { num: 2, name: 'Majuli Island' },
-            { num: 3, name: 'Kamakhya Temple' },
-            { num: 4, name: 'Jorhat Tea Estates' },
-            { num: 5, name: 'Haflong Hill Station' }
-        ],
-        exploreText: 'Explore Assam — Wildlife • Tea Gardens • Brahmaputra • Culture',
-        events: [
-            { title: 'Kaziranga Rhino Conservation Fest', dateNum: '07', dateMonth: 'NOV', loc: 'Kohora Gate Kaziranga', status: 'Open', statusClass: 'active', img: 'https://images.unsplash.com/photo-1607141731632-15f9d1469e38?auto=format&fit=crop&w=200&q=80' },
-            { title: 'Majuli Raas Mahotsav', dateNum: '15', dateMonth: 'NOV', loc: 'Majuli Satra Grounds', status: 'Registration', statusClass: 'pending', img: 'https://images.unsplash.com/photo-1607141731632-15f9d1469e38?auto=format&fit=crop&w=200&q=80' },
-            { title: 'Assam Tea Tourism Summit', dateNum: '28', dateMonth: 'NOV', loc: 'Jorhat Heritage Club', status: 'Upcoming', statusClass: 'draft', img: 'https://images.unsplash.com/photo-1607141731632-15f9d1469e38?auto=format&fit=crop&w=200&q=80' }
-        ]
-    }
-};
+const STATE_CONFIGS = (window.YatraSetuManagerData && window.YatraSetuManagerData.stateConfigs) 
+    ? window.YatraSetuManagerData.stateConfigs 
+    : {};
 
 let currentStateList = ['maharashtra', 'kerala', 'kashmir', 'rajasthan', 'goa', 'tamilnadu', 'uttarakhand', 'assam'];
 let currentStateIdx = 0;
@@ -888,6 +718,7 @@ function initManagerModals() {
 function initTableSearchAndFilters() {
     const searchInputs = document.querySelectorAll('.table-search-input, .topbar-search-input-rounded');
     const filterSelects = document.querySelectorAll('.table-filter-select');
+    const filterPills = document.querySelectorAll('.filter-pill-bar .filter-pill');
 
     searchInputs.forEach(input => {
         input.addEventListener('input', () => filterTableRows());
@@ -896,18 +727,55 @@ function initTableSearchAndFilters() {
     filterSelects.forEach(select => {
         select.addEventListener('change', () => filterTableRows());
     });
+
+    filterPills.forEach(pill => {
+        pill.addEventListener('click', (e) => {
+            e.preventDefault();
+            filterPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            filterTableRows();
+        });
+    });
+}
+
+function updateAttractionPillCounts(attractions) {
+    if (!attractions) return;
+    const counts = {
+        all: attractions.length,
+        fort: 0,
+        shrine: 0,
+        viewpoint: 0,
+        park: 0,
+        water: 0
+    };
+    attractions.forEach(a => {
+        const cat = (a.category || '').toLowerCase();
+        if (cat.includes('fort')) counts.fort++;
+        if (cat.includes('shrine') || cat.includes('temple') || cat.includes('sacred') || cat.includes('ceremony')) counts.shrine++;
+        if (cat.includes('viewpoint') || cat.includes('landmark') || cat.includes('pavilion') || cat.includes('scenic')) counts.viewpoint++;
+        if (cat.includes('park') || cat.includes('safari') || cat.includes('wildlife') || cat.includes('reserve')) counts.park++;
+        if (cat.includes('water') || cat.includes('beach') || cat.includes('boat') || cat.includes('cruise') || cat.includes('lake') || cat.includes('river') || cat.includes('ghat')) counts.water++;
+    });
+    for (const [key, count] of Object.entries(counts)) {
+        const el = document.getElementById(`pill-count-${key}`);
+        if (el) el.textContent = count;
+    }
 }
 
 function filterTableRows() {
     const searchInput = document.querySelector('.table-search-input') || document.querySelector('.topbar-search-input-rounded');
-    const filterCategory = document.querySelector('[data-filter="category"]');
+    const filterCategorySelect = document.querySelector('[data-filter="category"]');
+    const activePill = document.querySelector('.filter-pill-bar .filter-pill.active');
+    const pillCategory = activePill ? (activePill.getAttribute('data-category') || 'all').toLowerCase() : 'all';
+    const selectCategory = filterCategorySelect ? filterCategorySelect.value.toLowerCase() : 'all';
+    const categoryTerm = pillCategory !== 'all' ? pillCategory : selectCategory;
+
     const filterStatus = document.querySelector('[data-filter="status"]');
     const tables = document.querySelectorAll('.app-table');
 
     if (!tables.length) return;
 
     const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-    const categoryTerm = filterCategory ? filterCategory.value.toLowerCase() : 'all';
     const statusTerm = filterStatus ? filterStatus.value.toLowerCase() : 'all';
 
     tables.forEach(table => {
@@ -918,7 +786,17 @@ function filterTableRows() {
             const rowStatus = row.getAttribute('data-status')?.toLowerCase() || '';
 
             const matchesSearch = text.includes(searchTerm);
-            const matchesCategory = (categoryTerm === 'all' || rowCategory.includes(categoryTerm));
+
+            let matchesCategory = true;
+            if (categoryTerm !== 'all') {
+                if (categoryTerm === 'fort') matchesCategory = rowCategory.includes('fort');
+                else if (categoryTerm === 'shrine') matchesCategory = rowCategory.includes('shrine') || rowCategory.includes('temple') || rowCategory.includes('sacred') || rowCategory.includes('ceremony');
+                else if (categoryTerm === 'viewpoint') matchesCategory = rowCategory.includes('viewpoint') || rowCategory.includes('landmark') || rowCategory.includes('pavilion') || rowCategory.includes('scenic');
+                else if (categoryTerm === 'park') matchesCategory = rowCategory.includes('park') || rowCategory.includes('safari') || rowCategory.includes('wildlife') || rowCategory.includes('reserve');
+                else if (categoryTerm === 'water') matchesCategory = rowCategory.includes('beach') || rowCategory.includes('water') || rowCategory.includes('boat') || rowCategory.includes('cruise') || rowCategory.includes('lake') || rowCategory.includes('river') || rowCategory.includes('ghat');
+                else matchesCategory = rowCategory.includes(categoryTerm);
+            }
+
             const matchesStatus = (statusTerm === 'all' || rowStatus.includes(statusTerm));
 
             if (matchesSearch && matchesCategory && matchesStatus) {
@@ -928,6 +806,266 @@ function filterTableRows() {
             }
         });
     });
+}
+
+function initAddAttractionForm() {
+    const modalTargetBtn = document.querySelector('[data-modal-target="addAttractionModal"]');
+    const destSelect = document.getElementById('add-attr-dest');
+    const saveBtn = document.getElementById('btn-save-attraction');
+
+    if (modalTargetBtn && destSelect) {
+        modalTargetBtn.addEventListener('click', () => {
+            const activeContext = window.YatraSetuManagerStore ? window.YatraSetuManagerStore.getActiveContext() : { activeStateId: 'maharashtra' };
+            const destinations = window.YatraSetuManagerData ? window.YatraSetuManagerData.destinations.filter(d => d.state_id === activeContext.activeStateId) : [];
+            destSelect.innerHTML = destinations.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+        });
+    }
+
+    if (saveBtn) {
+        saveBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const nameInput = document.getElementById('add-attr-name');
+            const destSelect = document.getElementById('add-attr-dest');
+            const catInput = document.getElementById('add-attr-category');
+            const imgInput = document.getElementById('add-attr-img');
+
+            const nameVal = nameInput ? nameInput.value.trim() : '';
+            const destVal = destSelect ? destSelect.value : '';
+            const catVal = catInput ? catInput.value.trim() : '';
+            const imgVal = imgInput ? imgInput.value.trim() : '';
+
+            if (!nameVal) {
+                alert('Please enter an attraction name.');
+                return;
+            }
+
+            const activeContext = window.YatraSetuManagerStore ? window.YatraSetuManagerStore.getActiveContext() : { activeStateId: 'maharashtra' };
+
+            const newAttr = {
+                id: 'attr-' + Date.now(),
+                state_id: activeContext.activeStateId,
+                destination_id: destVal || (window.YatraSetuManagerData.destinations.find(d => d.state_id === activeContext.activeStateId)?.id || 'raigad-fort'),
+                name: nameVal,
+                category: catVal || 'Attraction',
+                img: imgVal || 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=400&q=80',
+                rating: '5.0',
+                status: 'Open'
+            };
+
+            if (window.YatraSetuManagerData && window.YatraSetuManagerData.attractions) {
+                window.YatraSetuManagerData.attractions.push(newAttr);
+            }
+
+            // Reset inputs
+            if (nameInput) nameInput.value = '';
+            if (catInput) catInput.value = '';
+            if (imgInput) imgInput.value = '';
+
+            // Close modal
+            const modal = document.getElementById('addAttractionModal');
+            if (modal) modal.classList.remove('active');
+            document.body.style.overflow = '';
+
+            // Re-render connected view
+            if (typeof renderConnectedViews === 'function' && window.YatraSetuManagerStore) {
+                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+            }
+        });
+    }
+}
+
+function initAddDestinationForm() {
+    const saveBtn = document.getElementById('btn-save-destination');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const nameInput = document.getElementById('add-dest-name');
+            const catSelect = document.getElementById('add-dest-category');
+            const regionInput = document.getElementById('add-dest-region');
+            const imgInput = document.getElementById('add-dest-img');
+
+            const nameVal = nameInput ? nameInput.value.trim() : '';
+            const catVal = catSelect ? catSelect.value : 'Heritage Fort';
+            const regionVal = regionInput ? regionInput.value.trim() : '';
+            const imgVal = imgInput ? imgInput.value.trim() : '';
+
+            if (!nameVal) {
+                alert('Please enter a destination name.');
+                return;
+            }
+
+            const activeContext = window.YatraSetuManagerStore ? window.YatraSetuManagerStore.getActiveContext() : { activeStateId: 'maharashtra' };
+            const destId = nameVal.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+            const newDest = {
+                id: destId || ('dest-' + Date.now()),
+                state_id: activeContext.activeStateId,
+                name: nameVal,
+                category: catVal,
+                rank: (window.YatraSetuManagerData.destinations ? window.YatraSetuManagerData.destinations.filter(d => d.state_id === activeContext.activeStateId).length + 1 : 1),
+                img: imgVal || 'https://images.unsplash.com/photo-1600100397608-f010e423b963?auto=format&fit=crop&w=800&q=80'
+            };
+
+            if (window.YatraSetuManagerData && window.YatraSetuManagerData.destinations) {
+                window.YatraSetuManagerData.destinations.push(newDest);
+            }
+
+            // Reset inputs
+            if (nameInput) nameInput.value = '';
+            if (regionInput) regionInput.value = '';
+            if (imgInput) imgInput.value = '';
+
+            // Close modal
+            const modal = document.getElementById('addDestinationModal');
+            if (modal) modal.classList.remove('active');
+            document.body.style.overflow = '';
+
+            // Re-render connected view
+            if (typeof renderConnectedViews === 'function' && window.YatraSetuManagerStore) {
+                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+            }
+        });
+    }
+}
+
+function initAddEventForm() {
+    const modalTargetBtn = document.querySelector('[data-modal-target="addEventModal"]');
+    const destSelect = document.getElementById('add-event-dest');
+    const saveBtn = document.getElementById('btn-save-event');
+
+    if (modalTargetBtn && destSelect) {
+        modalTargetBtn.addEventListener('click', () => {
+            const activeContext = window.YatraSetuManagerStore ? window.YatraSetuManagerStore.getActiveContext() : { activeStateId: 'maharashtra' };
+            const destinations = window.YatraSetuManagerData ? window.YatraSetuManagerData.destinations.filter(d => d.state_id === activeContext.activeStateId) : [];
+            destSelect.innerHTML = destinations.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+        });
+    }
+
+    if (saveBtn) {
+        saveBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const titleInput = document.getElementById('add-event-title');
+            const destSelect = document.getElementById('add-event-dest');
+            const locInput = document.getElementById('add-event-location');
+            const dateInput = document.getElementById('add-event-date');
+            const imgInput = document.getElementById('add-event-img');
+
+            const titleVal = titleInput ? titleInput.value.trim() : '';
+            const destVal = destSelect ? destSelect.value : '';
+            const locVal = locInput ? locInput.value.trim() : '';
+            const dateVal = dateInput ? dateInput.value.trim() : '15 OCT';
+            const imgVal = imgInput ? imgInput.value.trim() : '';
+
+            if (!titleVal) {
+                alert('Please enter an event title.');
+                return;
+            }
+
+            const activeContext = window.YatraSetuManagerStore ? window.YatraSetuManagerStore.getActiveContext() : { activeStateId: 'maharashtra' };
+            const dateParts = dateVal.split(' ');
+            const dateNum = dateParts[0] || '15';
+            const dateMonth = (dateParts[1] || 'OCT').toUpperCase();
+
+            const newEvent = {
+                id: 'event-' + Date.now(),
+                state_id: activeContext.activeStateId,
+                destination_id: destVal || (window.YatraSetuManagerData.destinations.find(d => d.state_id === activeContext.activeStateId)?.id || 'raigad-fort'),
+                title: titleVal,
+                dateNum: dateNum,
+                dateMonth: dateMonth,
+                location: locVal || 'Local Venue',
+                status: 'Upcoming',
+                statusClass: 'active',
+                img: imgVal || 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=400&q=80'
+            };
+
+            if (window.YatraSetuManagerData && window.YatraSetuManagerData.events) {
+                window.YatraSetuManagerData.events.push(newEvent);
+            }
+
+            // Reset inputs
+            if (titleInput) titleInput.value = '';
+            if (locInput) locInput.value = '';
+            if (dateInput) dateInput.value = '';
+            if (imgInput) imgInput.value = '';
+
+            // Close modal
+            const modal = document.getElementById('addEventModal');
+            if (modal) modal.classList.remove('active');
+            document.body.style.overflow = '';
+
+            // Re-render connected view
+            if (typeof renderConnectedViews === 'function' && window.YatraSetuManagerStore) {
+                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+            }
+        });
+    }
+}
+
+function initAddStakeholderForm() {
+    const modalTargetBtn = document.querySelector('[data-modal-target="addStakeholderModal"]');
+    const destSelect = document.getElementById('add-sh-dest');
+    const saveBtn = document.getElementById('btn-save-stakeholder');
+
+    if (modalTargetBtn && destSelect) {
+        modalTargetBtn.addEventListener('click', () => {
+            const activeContext = window.YatraSetuManagerStore ? window.YatraSetuManagerStore.getActiveContext() : { activeStateId: 'maharashtra' };
+            const destinations = window.YatraSetuManagerData ? window.YatraSetuManagerData.destinations.filter(d => d.state_id === activeContext.activeStateId) : [];
+            destSelect.innerHTML = `<option value="all">State-wide Partner</option>` + destinations.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+        });
+    }
+
+    if (saveBtn) {
+        saveBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const nameInput = document.getElementById('add-sh-name');
+            const catSelect = document.getElementById('add-sh-category');
+            const destSelect = document.getElementById('add-sh-dest');
+            const contactInput = document.getElementById('add-sh-contact');
+
+            const nameVal = nameInput ? nameInput.value.trim() : '';
+            const catVal = catSelect ? catSelect.value : 'Guides';
+            const destVal = destSelect ? destSelect.value : 'all';
+            const contactVal = contactInput ? contactInput.value.trim() : '+91 98765 00000';
+
+            if (!nameVal) {
+                alert('Please enter a stakeholder/partner name.');
+                return;
+            }
+
+            const activeContext = window.YatraSetuManagerStore ? window.YatraSetuManagerStore.getActiveContext() : { activeStateId: 'maharashtra' };
+
+            const newStakeholder = {
+                id: 'sh-' + Date.now(),
+                state_id: activeContext.activeStateId,
+                destination_id: destVal,
+                destination: destVal !== 'all' ? (window.YatraSetuManagerData.destinations.find(d => d.id === destVal)?.name || destVal) : 'State-wide',
+                name: nameVal,
+                category: catVal,
+                contact: contactVal,
+                status: 'Verified'
+            };
+
+            if (window.YatraSetuManagerData) {
+                if (!window.YatraSetuManagerData.stakeholders) window.YatraSetuManagerData.stakeholders = [];
+                window.YatraSetuManagerData.stakeholders.push(newStakeholder);
+            }
+
+            // Reset inputs
+            if (nameInput) nameInput.value = '';
+            if (contactInput) contactInput.value = '';
+
+            // Close modal
+            const modal = document.getElementById('addStakeholderModal');
+            if (modal) modal.classList.remove('active');
+            document.body.style.overflow = '';
+
+            // Re-render connected view
+            if (typeof renderConnectedViews === 'function' && window.YatraSetuManagerStore) {
+                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+            }
+        });
+    }
 }
 
 /**
