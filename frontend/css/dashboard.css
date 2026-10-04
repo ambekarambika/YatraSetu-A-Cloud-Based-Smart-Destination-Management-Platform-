@@ -933,7 +933,7 @@ body.app-body {
     padding: 1rem;
 }
 
-.modal-overlay.show {
+.modal-overlay.active {
     display: flex;
 }
 
