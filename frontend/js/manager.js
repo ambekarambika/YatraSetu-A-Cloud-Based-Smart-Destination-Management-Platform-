@@ -13,16 +13,26 @@ window.YatraSetuManagerContext = {
     _listeners: [],
 
     init() {
-        const savedState = sessionStorage.getItem('yatrasetu_active_state_id') || sessionStorage.getItem('yatrasetu_state_theme') || 'maharashtra';
-        const savedDest = sessionStorage.getItem('yatrasetu_active_dest_id') || 'all';
-        const savedScope = sessionStorage.getItem('yatrasetu_manager_scope') || 'state';
-        const savedRole = sessionStorage.getItem('yatrasetu_manager_role') || 'state_manager';
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlDest = urlParams.get('dest');
+        const urlState = urlParams.get('state');
+
+        let savedState = urlState || sessionStorage.getItem('yatrasetu_active_state_id') || sessionStorage.getItem('yatrasetu_state_theme') || 'maharashtra';
+        let savedDest = urlDest || sessionStorage.getItem('yatrasetu_active_dest_id') || 'all';
+
+        if (urlDest && window.YatraSetuManagerData && window.YatraSetuManagerData.destinations) {
+            const matchDest = window.YatraSetuManagerData.destinations.find(d => d.id === urlDest);
+            if (matchDest) {
+                savedState = matchDest.state_id;
+            }
+        }
 
         this._state.activeStateId = STATE_CONFIGS[savedState] ? savedState : 'maharashtra';
         this._state.activeDestinationId = savedDest;
-        this._state.managerScope = savedScope;
-        this._state.managerRole = savedRole;
+        this._state.managerScope = sessionStorage.getItem('yatrasetu_manager_scope') || 'state';
+        this._state.managerRole = sessionStorage.getItem('yatrasetu_manager_role') || 'state_manager';
 
+        this.persist();
         this.applyContextToDOM();
         this.bindSelectors();
         this.bindDestinationCards();
@@ -268,36 +278,107 @@ async function renderConnectedViews(context) {
     }
 
     // 1. DESTINATIONS VIEW (destinations.html)
-    const destHeroTitle = document.querySelector('.destination-hero-banner .hero-title');
-    const destHeroSub = document.querySelector('.destination-hero-banner .hero-subtitle');
-    const destHeroBg = document.querySelector('.destination-hero-banner .destination-hero-bg');
-    if (destHeroTitle && config.topDestinations && config.topDestinations.length > 0) {
-        const firstDest = config.topDestinations[0];
-        destHeroTitle.textContent = firstDest.name;
-        if (destHeroSub) destHeroSub.textContent = `${firstDest.name}, ${formattedStateName} • Scenic destination in ${formattedStateName}`;
-        if (destHeroBg) destHeroBg.style.backgroundImage = `url('${firstDest.img || config.heroImg}')`;
+    const destinations = await window.YatraSetuManagerStore.getDestinations(activeStateId);
+    const activeDest = (activeDestinationId !== 'all') 
+        ? (destinations.find(d => d.id === activeDestinationId) || destinations[0])
+        : (destinations[0] || null);
+
+    const destHeroBanner = document.querySelector('.destination-hero-banner');
+    if (destHeroBanner && activeDest) {
+        const destHeroTitle = destHeroBanner.querySelector('.hero-title');
+        const destHeroSub = destHeroBanner.querySelector('.hero-subtitle');
+        const destHeroBg = destHeroBanner.querySelector('.destination-hero-bg');
+        const destHeroStats = destHeroBanner.querySelector('div[style*="flex"]');
+
+        if (destHeroTitle) destHeroTitle.textContent = activeDest.name;
+        if (destHeroSub) destHeroSub.textContent = `${activeDest.name}, ${formattedStateName} • ${activeDest.category || 'Scenic destination in ' + formattedStateName}`;
+        if (destHeroBg && activeDest.img) destHeroBg.style.backgroundImage = `url('${activeDest.img}')`;
+
+        const attrCount = (window.YatraSetuManagerData.attractions || []).filter(a => a.destination_id === activeDest.id).length;
+        const evCount = (window.YatraSetuManagerData.events || []).filter(e => e.destination_id === activeDest.id).length;
+
+        if (destHeroStats) {
+            destHeroStats.innerHTML = `
+                <span>🏛️ <strong>${attrCount}</strong> Attractions</span>
+                <span>📅 <strong>${evCount}</strong> Events</span>
+                <span>⭐ <strong>4.8</strong> Rating</span>
+            `;
+        }
+
+        const heroBtn = destHeroBanner.querySelector('.hero-actions button');
+        if (heroBtn) {
+            heroBtn.setAttribute('data-destination-id', activeDest.id);
+            heroBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openDestinationDetailModal(activeDest.id, 'view');
+            };
+        }
     }
 
     const destGrid = document.querySelector('#destinations-cards-grid');
     if (destGrid) {
-        const destinations = await window.YatraSetuManagerStore.getDestinations(activeStateId);
         if (destinations && destinations.length > 0) {
-            destGrid.innerHTML = destinations.map(dest => `
-                <div class="dest-card" data-destination-id="${dest.id}" data-state-id="${activeStateId}" style="cursor: pointer;">
-                    <div class="dest-card-media" style="background-image: url('${dest.img}');">
-                        <span class="dest-card-tag">${dest.category || 'Heritage • Tourism'}</span>
-                        <span class="dest-card-rating">--</span>
-                    </div>
-                    <div class="dest-card-body">
-                        <h3 class="dest-card-title">${dest.name}</h3>
-                        <span class="dest-card-loc">${formattedStateName} • Destination</span>
-                        <div class="dest-card-stats">
-                            <span>🏛️ Rank #${dest.rank}</span>
-                            <span>📅 Active</span>
+            destGrid.innerHTML = destinations.map(dest => {
+                const isSelected = dest.id === activeDestinationId;
+                const attrCount = (window.YatraSetuManagerData.attractions || []).filter(a => a.destination_id === dest.id).length;
+                const evCount = (window.YatraSetuManagerData.events || []).filter(e => e.destination_id === dest.id).length;
+                return `
+                    <div class="dest-card ${isSelected ? 'selected-card' : ''}" data-destination-id="${dest.id}" data-state-id="${activeStateId}" style="cursor: pointer; border: ${isSelected ? '2px solid var(--state-accent)' : '1px solid var(--card-border)'}; border-radius: 12px; overflow: hidden; background: #fff; transition: all 0.2s;">
+                        <div class="dest-card-media" style="background-image: url('${dest.img}'); height: 160px; background-size: cover; background-position: center; position: relative;">
+                            <span class="dest-card-tag" style="position: absolute; top: 10px; left: 10px; background: rgba(15,23,42,0.75); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 600;">${dest.category || 'Destination'}</span>
+                            <span class="dest-card-rating" style="position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.9); color: #D97706; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">⭐ 4.8</span>
+                        </div>
+                        <div class="dest-card-body" style="padding: 1rem;">
+                            <h3 class="dest-card-title" style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.25rem;">${dest.name}</h3>
+                            <span class="dest-card-loc" style="font-size: 0.78rem; color: #64748b; font-weight: 500;">${formattedStateName} • Rank #${dest.rank}</span>
+                            <div class="dest-card-stats" style="display: flex; gap: 0.75rem; margin-top: 0.5rem; font-size: 0.75rem; color: #475569; font-weight: 600;">
+                                <span>🏛️ ${attrCount} Attractions</span>
+                                <span>📅 ${evCount} Events</span>
+                            </div>
+                            <div class="dest-card-actions" style="margin-top: 0.85rem; display: flex; gap: 0.35rem; flex-wrap: wrap;">
+                                <button type="button" class="btn-secondary btn-card-details" data-destination-id="${dest.id}" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; flex: 1; font-weight: 600;">View Details</button>
+                                <button type="button" class="btn-secondary btn-card-attractions" data-destination-id="${dest.id}" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; font-weight: 600;">Attractions</button>
+                                <button type="button" class="btn-secondary btn-card-events" data-destination-id="${dest.id}" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; font-weight: 600;">Events</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
+
+            // Attach explicit button click listeners for each card action
+            destGrid.querySelectorAll('.btn-card-details').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const destId = btn.getAttribute('data-destination-id');
+                    openDestinationDetailModal(destId, 'view');
+                };
+            });
+
+            destGrid.querySelectorAll('.btn-card-attractions').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const destId = btn.getAttribute('data-destination-id');
+                    if (window.YatraSetuManagerContext) {
+                        window.YatraSetuManagerContext.setDestination(destId);
+                    }
+                    window.location.href = 'attractions.html';
+                };
+            });
+
+            destGrid.querySelectorAll('.btn-card-events').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const destId = btn.getAttribute('data-destination-id');
+                    if (window.YatraSetuManagerContext) {
+                        window.YatraSetuManagerContext.setDestination(destId);
+                    }
+                    window.location.href = 'events.html';
+                };
+            });
         } else {
             destGrid.innerHTML = `<div style="grid-column: 1 / -1; padding: 2.5rem; text-align: center; color: #64748b; font-weight: 500;">No destination records available for ${formattedStateName}.</div>`;
         }
@@ -1099,4 +1180,180 @@ function initReportGenerator() {
             reportPreview.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 500);
     });
+}
+
+/**
+ * Destination Details & Actions Modal Functionality
+ * Supports: View Details, Edit Details, Save, Cancel, Delete, Close, View Attractions, View Events, View Stakeholders
+ */
+function openDestinationDetailModal(destId, mode = 'view') {
+    if (!destId || !window.YatraSetuManagerData || !window.YatraSetuManagerData.destinations) return;
+    const dest = window.YatraSetuManagerData.destinations.find(d => d.id === destId);
+    if (!dest) return;
+
+    const modal = document.getElementById('destinationDetailModal');
+    const titleEl = document.getElementById('detail-modal-title');
+    const bodyEl = document.getElementById('detail-modal-body');
+    const footerEl = document.getElementById('detail-modal-footer');
+    const closeBtn = document.getElementById('btn-close-detail-modal');
+
+    if (!modal || !bodyEl || !footerEl) return;
+
+    const stateConfig = STATE_CONFIGS[dest.state_id] || STATE_CONFIGS['maharashtra'];
+    const formattedState = stateConfig ? stateConfig.badge : dest.state_id;
+
+    const attrCount = (window.YatraSetuManagerData.attractions || []).filter(a => a.destination_id === dest.id).length;
+    const evCount = (window.YatraSetuManagerData.events || []).filter(e => e.destination_id === dest.id).length;
+    const shCount = (window.YatraSetuManagerData.stakeholders || []).filter(s => s.destination_id === dest.id).length;
+
+    if (mode === 'view') {
+        if (titleEl) titleEl.textContent = `${dest.name} — Destination Profile`;
+
+        bodyEl.innerHTML = `
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <img src="${dest.img}" alt="${dest.name}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px;">
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; font-size: 0.88rem;">
+                <div><strong>Destination Name:</strong> <span id="detail-dest-name">${dest.name}</span></div>
+                <div><strong>ID:</strong> <span id="detail-dest-id">${dest.id}</span></div>
+                <div><strong>Category:</strong> <span>${dest.category || 'Heritage & Tourism'}</span></div>
+                <div><strong>State:</strong> <span>${formattedState}</span></div>
+                <div><strong>Rank:</strong> <span>#${dest.rank}</span></div>
+                <div><strong>Status:</strong> <span class="badge badge-success">Active Destination</span></div>
+            </div>
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 0.85rem; font-size: 0.85rem; margin-bottom: 1rem;">
+                <h4 style="font-size: 0.8rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.5rem;">Associated Ecosystem Records</h4>
+                <div style="display: flex; gap: 1.25rem;">
+                    <span>🏛️ <strong>${attrCount}</strong> Attractions</span>
+                    <span>📅 <strong>${evCount}</strong> Events</span>
+                    <span>🤝 <strong>${shCount}</strong> Stakeholders</span>
+                </div>
+            </div>
+        `;
+
+        footerEl.innerHTML = `
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="button" class="btn-primary" id="btn-edit-dest-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Edit Details</button>
+                <button type="button" class="btn-secondary" id="btn-delete-dest-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; color: #DC2626; border-color: #FECACA;">Delete</button>
+            </div>
+            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                <button type="button" class="btn-secondary" id="btn-nav-attr-modal" style="padding: 0.45rem 0.75rem; font-size: 0.8rem;">View Attractions</button>
+                <button type="button" class="btn-secondary" id="btn-nav-ev-modal" style="padding: 0.45rem 0.75rem; font-size: 0.8rem;">View Events</button>
+                <button type="button" class="btn-secondary" id="btn-nav-sh-modal" style="padding: 0.45rem 0.75rem; font-size: 0.8rem;">View Stakeholders</button>
+            </div>
+        `;
+
+        // Bind Action Handlers
+        const editBtn = document.getElementById('btn-edit-dest-modal');
+        if (editBtn) editBtn.onclick = () => openDestinationDetailModal(destId, 'edit');
+
+        const deleteBtn = document.getElementById('btn-delete-dest-modal');
+        if (deleteBtn) {
+            deleteBtn.onclick = async () => {
+                if (confirm(`Are you sure you want to delete destination "${dest.name}" (${dest.id})?`)) {
+                    const idx = window.YatraSetuManagerData.destinations.findIndex(d => d.id === destId);
+                    if (idx !== -1) {
+                        window.YatraSetuManagerData.destinations.splice(idx, 1);
+                    }
+                    if (window.YatraSetuManagerContext) {
+                        const ctx = window.YatraSetuManagerContext.getActiveContext();
+                        if (ctx.activeDestinationId === destId) {
+                            window.YatraSetuManagerContext.setDestination('all');
+                        }
+                    }
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                    await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                }
+            };
+        }
+
+        const navAttrBtn = document.getElementById('btn-nav-attr-modal');
+        if (navAttrBtn) {
+            navAttrBtn.onclick = () => {
+                if (window.YatraSetuManagerContext) window.YatraSetuManagerContext.setDestination(destId);
+                window.location.href = 'attractions.html';
+            };
+        }
+
+        const navEvBtn = document.getElementById('btn-nav-ev-modal');
+        if (navEvBtn) {
+            navEvBtn.onclick = () => {
+                if (window.YatraSetuManagerContext) window.YatraSetuManagerContext.setDestination(destId);
+                window.location.href = 'events.html';
+            };
+        }
+
+        const navShBtn = document.getElementById('btn-nav-sh-modal');
+        if (navShBtn) {
+            navShBtn.onclick = () => {
+                if (window.YatraSetuManagerContext) window.YatraSetuManagerContext.setDestination(destId);
+                window.location.href = 'stakeholders.html';
+            };
+        }
+
+    } else if (mode === 'edit') {
+        if (titleEl) titleEl.textContent = `Edit Destination — ${dest.name}`;
+
+        bodyEl.innerHTML = `
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Destination Name</label>
+                <input type="text" id="edit-dest-name-input" class="form-control" value="${dest.name}">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Category</label>
+                <select id="edit-dest-cat-select" class="form-control">
+                    <option value="Heritage Fort" ${dest.category === 'Heritage Fort' ? 'selected' : ''}>Heritage Fort</option>
+                    <option value="UNESCO World Heritage Site" ${dest.category === 'UNESCO World Heritage Site' ? 'selected' : ''}>UNESCO World Heritage Site</option>
+                    <option value="Hill Station" ${dest.category === 'Hill Station' ? 'selected' : ''}>Hill Station</option>
+                    <option value="Pilgrimage Site" ${dest.category === 'Pilgrimage Site' ? 'selected' : ''}>Pilgrimage Site</option>
+                    <option value="Eco & Wildlife Reserve" ${dest.category === 'Eco & Wildlife Reserve' ? 'selected' : ''}>Eco & Wildlife Reserve</option>
+                    <option value="Coastal Beach" ${dest.category === 'Coastal Beach' ? 'selected' : ''}>Coastal Beach</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Image URL</label>
+                <input type="text" id="edit-dest-img-input" class="form-control" value="${dest.img || ''}">
+            </div>
+        `;
+
+        footerEl.innerHTML = `
+            <button type="button" class="btn-secondary" id="btn-cancel-edit-dest" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Cancel</button>
+            <button type="button" class="btn-primary" id="btn-save-edit-dest" style="padding: 0.45rem 1.1rem; font-size: 0.82rem;">Save Changes</button>
+        `;
+
+        const cancelEditBtn = document.getElementById('btn-cancel-edit-dest');
+        if (cancelEditBtn) cancelEditBtn.onclick = () => openDestinationDetailModal(destId, 'view');
+
+        const saveEditBtn = document.getElementById('btn-save-edit-dest');
+        if (saveEditBtn) {
+            saveEditBtn.onclick = async () => {
+                const nameVal = document.getElementById('edit-dest-name-input').value.trim();
+                const catVal = document.getElementById('edit-dest-cat-select').value;
+                const imgVal = document.getElementById('edit-dest-img-input').value.trim();
+
+                if (!nameVal) {
+                    alert('Please enter a destination name.');
+                    return;
+                }
+
+                dest.name = nameVal;
+                dest.category = catVal;
+                if (imgVal) dest.img = imgVal;
+
+                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                openDestinationDetailModal(destId, 'view');
+            };
+        }
+    }
+
+    if (closeBtn) {
+        closeBtn.onclick = () => {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+    }
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
 }
