@@ -1,4 +1,89 @@
 /**
+ * State Data Configurations for Dynamic UI Transformation (Derived from YatraSetuManagerData)
+ */
+const STATE_CONFIGS = (window.YatraSetuManagerData && window.YatraSetuManagerData.stateConfigs) 
+    ? window.YatraSetuManagerData.stateConfigs 
+    : {};
+
+/**
+ * YatraSetu — Relational Data Access Adapter / Authoritative Store
+ * Exposes API-shaped relational query functions filtering strictly by state_id and destination_id.
+ * Consumes central data repository in manager-data.js.
+ */
+window.YatraSetuManagerStore = {
+    getActiveContext() {
+        if (window.YatraSetuManagerContext) {
+            return window.YatraSetuManagerContext.getActiveContext();
+        }
+        return { activeStateId: 'maharashtra', activeDestinationId: 'all' };
+    },
+
+    async getDestinations(stateId) {
+        if (!window.YatraSetuManagerData || !window.YatraSetuManagerData.destinations) return [];
+        if (!stateId || stateId === 'all') return window.YatraSetuManagerData.destinations;
+        return window.YatraSetuManagerData.destinations.filter(d => d.state_id === stateId);
+    },
+
+    async getAttractions(stateId, destinationId = 'all') {
+        if (!window.YatraSetuManagerData || !window.YatraSetuManagerData.attractions) return [];
+        let list = window.YatraSetuManagerData.attractions;
+        if (stateId && stateId !== 'all') {
+            list = list.filter(a => a.state_id === stateId);
+        }
+        if (destinationId && destinationId !== 'all') {
+            list = list.filter(a => a.destination_id === destinationId || a.destination_id.includes(destinationId));
+        }
+        return list;
+    },
+
+    async getEvents(stateId, destinationId = 'all') {
+        if (!window.YatraSetuManagerData || !window.YatraSetuManagerData.events) return [];
+        let list = window.YatraSetuManagerData.events;
+        if (stateId && stateId !== 'all') {
+            list = list.filter(e => e.state_id === stateId);
+        }
+        if (destinationId && destinationId !== 'all') {
+            list = list.filter(e => e.destination_id === destinationId || e.destination_id.includes(destinationId));
+        }
+        return list;
+    },
+
+    async getStakeholders(stateId, destinationId = 'all') {
+        if (!window.YatraSetuManagerData || !window.YatraSetuManagerData.stakeholders) return [];
+        let list = window.YatraSetuManagerData.stakeholders;
+        if (stateId && stateId !== 'all') {
+            list = list.filter(s => s.state_id === stateId);
+        }
+        if (destinationId && destinationId !== 'all') {
+            list = list.filter(s => s.destination_id === destinationId || s.destination_id.includes(destinationId));
+        }
+        return list;
+    },
+
+    async getVisitorStats(stateId, destinationId = 'all') {
+        const config = STATE_CONFIGS[stateId] || STATE_CONFIGS['maharashtra'] || {};
+        return {
+            state_id: stateId,
+            destination_id: destinationId || 'all',
+            weather: config.weather || '',
+            location: config.location || ''
+        };
+    },
+
+    async getFeedback(stateId, destinationId = 'all') {
+        if (!window.YatraSetuManagerData || !window.YatraSetuManagerData.feedback) return [];
+        let list = window.YatraSetuManagerData.feedback;
+        if (stateId && stateId !== 'all') {
+            list = list.filter(f => f.state_id === stateId);
+        }
+        if (destinationId && destinationId !== 'all') {
+            list = list.filter(f => f.destination_id === destinationId || f.destination_id.includes(destinationId));
+        }
+        return list;
+    }
+};
+
+/**
  * Central YatraSetu Manager Context Engine
  * Manages activeStateId, activeDestinationId, managerScope, managerRole.
  * Persists context across page reloads via sessionStorage.
@@ -36,6 +121,10 @@ window.YatraSetuManagerContext = {
         this.applyContextToDOM();
         this.bindSelectors();
         this.bindDestinationCards();
+
+        if (typeof renderConnectedViews === 'function') {
+            renderConnectedViews(this.getActiveContext());
+        }
     },
 
     getActiveContext() {
@@ -640,91 +729,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initAddStakeholderForm();
 });
 
-
-/**
- * YatraSetu — Temporary Relational Data Access Adapter
- * Exposes API-shaped relational query functions filtering strictly by state_id and destination_id.
- * Consumes central data repository in manager-data.js.
- */
-window.YatraSetuManagerStore = {
-    getActiveContext() {
-        if (window.YatraSetuManagerContext) {
-            return window.YatraSetuManagerContext.getActiveContext();
-        }
-        return { activeStateId: 'maharashtra', activeDestinationId: 'all' };
-    },
-
-    async getDestinations(stateId) {
-        if (!window.YatraSetuManagerData || !window.YatraSetuManagerData.destinations) return [];
-        if (!stateId || stateId === 'all') return window.YatraSetuManagerData.destinations;
-        return window.YatraSetuManagerData.destinations.filter(d => d.state_id === stateId);
-    },
-
-    async getAttractions(stateId, destinationId = 'all') {
-        if (!window.YatraSetuManagerData || !window.YatraSetuManagerData.attractions) return [];
-        let list = window.YatraSetuManagerData.attractions;
-        if (stateId && stateId !== 'all') {
-            list = list.filter(a => a.state_id === stateId);
-        }
-        if (destinationId && destinationId !== 'all') {
-            list = list.filter(a => a.destination_id === destinationId || a.destination_id.includes(destinationId));
-        }
-        return list;
-    },
-
-    async getEvents(stateId, destinationId = 'all') {
-        if (!window.YatraSetuManagerData || !window.YatraSetuManagerData.events) return [];
-        let list = window.YatraSetuManagerData.events;
-        if (stateId && stateId !== 'all') {
-            list = list.filter(e => e.state_id === stateId);
-        }
-        if (destinationId && destinationId !== 'all') {
-            list = list.filter(e => e.destination_id === destinationId || e.destination_id.includes(destinationId));
-        }
-        return list;
-    },
-
-    async getStakeholders(stateId, destinationId = 'all') {
-        if (!window.YatraSetuManagerData || !window.YatraSetuManagerData.stakeholders) return [];
-        let list = window.YatraSetuManagerData.stakeholders;
-        if (stateId && stateId !== 'all') {
-            list = list.filter(s => s.state_id === stateId);
-        }
-        if (destinationId && destinationId !== 'all') {
-            list = list.filter(s => s.destination_id === destinationId || s.destination_id.includes(destinationId));
-        }
-        return list;
-    },
-
-    async getVisitorStats(stateId, destinationId = 'all') {
-        if (!stateId || !STATE_CONFIGS[stateId]) return null;
-        return {
-            state_id: stateId,
-            destination_id: destinationId || 'all',
-            weather: STATE_CONFIGS[stateId].weather || '',
-            location: STATE_CONFIGS[stateId].location || ''
-        };
-    },
-
-    async getFeedback(stateId, destinationId = 'all') {
-        if (!window.YatraSetuManagerData || !window.YatraSetuManagerData.feedback) return [];
-        let list = window.YatraSetuManagerData.feedback;
-        if (stateId && stateId !== 'all') {
-            list = list.filter(f => f.state_id === stateId);
-        }
-        if (destinationId && destinationId !== 'all') {
-            list = list.filter(f => f.destination_id === destinationId || f.destination_id.includes(destinationId));
-        }
-        return list;
-    }
-};
-
-/**
- * State Data Configurations for Dynamic UI Transformation (Derived from YatraSetuManagerData)
- */
-const STATE_CONFIGS = (window.YatraSetuManagerData && window.YatraSetuManagerData.stateConfigs) 
-    ? window.YatraSetuManagerData.stateConfigs 
-    : {};
 
 let currentStateList = ['maharashtra', 'kerala', 'kashmir', 'rajasthan', 'goa', 'tamilnadu', 'uttarakhand', 'assam'];
 let currentStateIdx = 0;
