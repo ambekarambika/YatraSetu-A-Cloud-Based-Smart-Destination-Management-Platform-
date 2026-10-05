@@ -282,6 +282,16 @@ window.YatraSetuManagerContext = {
                 select._contextBound = true;
             }
         });
+
+        const destSelectors = document.querySelectorAll('#destination-filter-select, .destination-context-dropdown');
+        destSelectors.forEach(select => {
+            if (!select._destContextBound) {
+                select.addEventListener('change', (e) => {
+                    this.setDestination(e.target.value);
+                });
+                select._destContextBound = true;
+            }
+        });
     },
 
     bindDestinationCards() {
@@ -327,6 +337,18 @@ async function renderConnectedViews(context) {
 
     const formattedStateName = config.badge.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
     const destLabel = activeDestinationId !== 'all' ? activeDestinationId.replace(/-/g, ' ').toUpperCase() : formattedStateName;
+
+    // Populate destination filter dropdowns dynamically if present on active page
+    const destinationsForState = await window.YatraSetuManagerStore.getDestinations(activeStateId);
+    const destFilterSelects = document.querySelectorAll('#destination-filter-select, .destination-context-dropdown');
+    destFilterSelects.forEach(select => {
+        if (select) {
+            const currentVal = activeDestinationId;
+            select.innerHTML = `<option value="all">All Destinations</option>` + 
+                destinationsForState.map(d => `<option value="${d.id}" ${d.id === currentVal ? 'selected' : ''}>${d.name}</option>`).join('');
+            select.value = currentVal;
+        }
+    });
 
     // Update subpage header subtitles to reflect active state/destination context
     const pageSubtitles = document.querySelectorAll('.page-title-group p');
@@ -435,7 +457,6 @@ async function renderConnectedViews(context) {
                 `;
             }).join('');
 
-            // Attach explicit button click listeners for each card action
             destGrid.querySelectorAll('.btn-card-details').forEach(btn => {
                 btn.onclick = (e) => {
                     e.preventDefault();
@@ -502,10 +523,42 @@ async function renderConnectedViews(context) {
                     <td>${attr.category || 'General'}</td>
                     <td><strong style="color: #F59E0B;">⭐ ${attr.rating || '4.8'}</strong></td>
                     <td><span class="badge badge-${attr.status === 'Closed' ? 'danger' : (attr.status === 'Maintenance' ? 'warning' : 'success')}">${attr.status || 'Open'}</span></td>
-                    <td style="text-align: right;"><button class="btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">•••</button></td>
+                    <td style="text-align: right; white-space: nowrap;">
+                        <button type="button" class="btn-secondary btn-attr-view" data-attr-id="${attr.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; margin-right: 0.25rem;">View</button>
+                        <button type="button" class="btn-secondary btn-attr-edit" data-attr-id="${attr.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; margin-right: 0.25rem;">Edit</button>
+                        <button type="button" class="btn-secondary btn-attr-delete" data-attr-id="${attr.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; color: #DC2626; border-color: #FECACA;">Delete</button>
+                    </td>
                 </tr>
                 `;
             }).join('');
+
+            attractionsTableBody.querySelectorAll('.btn-attr-view').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openAttractionDetailModal(btn.getAttribute('data-attr-id'), 'view');
+                };
+            });
+            attractionsTableBody.querySelectorAll('.btn-attr-edit').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openAttractionDetailModal(btn.getAttribute('data-attr-id'), 'edit');
+                };
+            });
+            attractionsTableBody.querySelectorAll('.btn-attr-delete').forEach(btn => {
+                btn.onclick = async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const attrId = btn.getAttribute('data-attr-id');
+                    const attrItem = (window.YatraSetuManagerData.attractions || []).find(a => a.id === attrId);
+                    if (attrItem && confirm(`Are you sure you want to delete attraction "${attrItem.name}"?`)) {
+                        const idx = window.YatraSetuManagerData.attractions.findIndex(a => a.id === attrId);
+                        if (idx !== -1) window.YatraSetuManagerData.attractions.splice(idx, 1);
+                        await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                    }
+                };
+            });
         } else {
             attractionsTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2.5rem; color: #64748b; font-weight: 500;">No attraction records available for ${activeDestinationId !== 'all' ? activeDestinationId : formattedStateName}.</td></tr>`;
         }
@@ -527,22 +580,53 @@ async function renderConnectedViews(context) {
         const events = await window.YatraSetuManagerStore.getEvents(activeStateId, activeDestinationId);
         if (events && events.length > 0) {
             upcomingEventsContainer.innerHTML = events.map(ev => `
-                <div class="event-timeline-card">
+                <div class="event-timeline-card" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border: 1px solid var(--card-border); border-radius: 10px; margin-bottom: 0.75rem; background: #fff;">
                     <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div class="event-date-box">
-                            <span class="event-date-num">${ev.dateNum}</span>
-                            <span class="event-date-month">${ev.dateMonth}</span>
+                        <div class="event-date-box" style="text-align: center; background: var(--state-accent-light); padding: 0.5rem 0.75rem; border-radius: 8px;">
+                            <span class="event-date-num" style="display: block; font-weight: 800; font-size: 1.1rem; color: var(--state-accent);">${ev.dateNum}</span>
+                            <span class="event-date-month" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">${ev.dateMonth}</span>
                         </div>
                         <div>
-                            <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">${ev.title}</h4>
-                            <span style="font-size: 0.78rem; color: var(--text-muted);">${ev.location}</span>
+                            <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.2rem;">${ev.title}</h4>
+                            <span style="font-size: 0.78rem; color: var(--text-muted);">📍 ${ev.location}</span>
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                         <span class="status-pill ${ev.statusClass}">${ev.status}</span>
+                        <button type="button" class="btn-secondary btn-event-view" data-event-id="${ev.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600;">View Details</button>
+                        <button type="button" class="btn-secondary btn-event-edit" data-event-id="${ev.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600;">Edit</button>
+                        <button type="button" class="btn-secondary btn-event-delete" data-event-id="${ev.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; color: #DC2626; border-color: #FECACA;">Delete</button>
                     </div>
                 </div>
             `).join('');
+
+            upcomingEventsContainer.querySelectorAll('.btn-event-view').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openEventDetailModal(btn.getAttribute('data-event-id'), 'view');
+                };
+            });
+            upcomingEventsContainer.querySelectorAll('.btn-event-edit').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openEventDetailModal(btn.getAttribute('data-event-id'), 'edit');
+                };
+            });
+            upcomingEventsContainer.querySelectorAll('.btn-event-delete').forEach(btn => {
+                btn.onclick = async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const eventId = btn.getAttribute('data-event-id');
+                    const evItem = (window.YatraSetuManagerData.events || []).find(e => e.id === eventId);
+                    if (evItem && confirm(`Are you sure you want to delete event "${evItem.title}"?`)) {
+                        const idx = window.YatraSetuManagerData.events.findIndex(e => e.id === eventId);
+                        if (idx !== -1) window.YatraSetuManagerData.events.splice(idx, 1);
+                        await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                    }
+                };
+            });
         } else {
             upcomingEventsContainer.innerHTML = `<div style="padding: 2.5rem; text-align: center; color: #64748b; font-weight: 500;">No event records available for ${activeDestinationId !== 'all' ? activeDestinationId : formattedStateName}.</div>`;
         }
@@ -559,10 +643,42 @@ async function renderConnectedViews(context) {
                     <td>${sh.category}</td>
                     <td>${sh.destination}</td>
                     <td>${sh.contact}</td>
-                    <td><span class="status-pill active">Active</span></td>
-                    <td style="text-align: right;"><button class="btn-sm btn-outline">View</button></td>
+                    <td><span class="status-pill active">${sh.status || 'Verified'}</span></td>
+                    <td style="text-align: right; white-space: nowrap;">
+                        <button type="button" class="btn-secondary btn-sh-view" data-sh-id="${sh.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; margin-right: 0.25rem;">View</button>
+                        <button type="button" class="btn-secondary btn-sh-edit" data-sh-id="${sh.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; margin-right: 0.25rem;">Edit</button>
+                        <button type="button" class="btn-secondary btn-sh-delete" data-sh-id="${sh.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; color: #DC2626; border-color: #FECACA;">Delete</button>
+                    </td>
                 </tr>
             `).join('');
+
+            stakeholdersTableBody.querySelectorAll('.btn-sh-view').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openStakeholderDetailModal(btn.getAttribute('data-sh-id'), 'view');
+                };
+            });
+            stakeholdersTableBody.querySelectorAll('.btn-sh-edit').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openStakeholderDetailModal(btn.getAttribute('data-sh-id'), 'edit');
+                };
+            });
+            stakeholdersTableBody.querySelectorAll('.btn-sh-delete').forEach(btn => {
+                btn.onclick = async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const shId = btn.getAttribute('data-sh-id');
+                    const shItem = (window.YatraSetuManagerData.stakeholders || []).find(s => s.id === shId);
+                    if (shItem && confirm(`Are you sure you want to delete stakeholder "${shItem.name}"?`)) {
+                        const idx = window.YatraSetuManagerData.stakeholders.findIndex(s => s.id === shId);
+                        if (idx !== -1) window.YatraSetuManagerData.stakeholders.splice(idx, 1);
+                        await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                    }
+                };
+            });
         } else {
             stakeholdersTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2.5rem; color: #64748b; font-weight: 500;">No stakeholder records available for ${activeDestinationId !== 'all' ? activeDestinationId : formattedStateName}.</td></tr>`;
         }
@@ -580,23 +696,45 @@ async function renderConnectedViews(context) {
         const feedback = await window.YatraSetuManagerStore.getFeedback(activeStateId, activeDestinationId);
         if (feedback && feedback.length > 0) {
             feedbackContainer.innerHTML = feedback.map(fb => `
-                <div class="feedback-item-card">
-                    <div class="feedback-author-row">
-                        <div class="author-info">
-                            <div class="author-avatar">${fb.author ? fb.author.slice(0, 2).toUpperCase() : 'VS'}</div>
+                <div class="feedback-item-card" style="background: #fff; border: 1px solid var(--card-border); border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <div class="feedback-author-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <div class="author-info" style="display: flex; align-items: center; gap: 0.75rem;">
+                            <div class="author-avatar" style="width: 36px; height: 36px; border-radius: 50%; background: var(--state-accent-light); color: var(--state-accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">${fb.author ? fb.author.slice(0, 2).toUpperCase() : 'VS'}</div>
                             <div>
-                                <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">${fb.author || 'Visitor'}</h4>
-                                <span style="font-size: 0.75rem; color: var(--text-muted);">${fb.date || 'Recently'} • ${fb.destination}</span>
+                                <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary); margin: 0;">${fb.author || 'Visitor'}</h4>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">${fb.date || 'Recently'} • ${fb.destination || formattedStateName}</span>
                             </div>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 0.75rem;">
-                            <span style="color: #F59E0B; font-size: 0.85rem;">★★★★★</span>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="color: #F59E0B; font-size: 0.85rem;">${'★'.repeat(fb.rating || 5)}</span>
                             <span class="badge badge-success">Positive</span>
+                            <button type="button" class="btn-secondary btn-fb-view" data-fb-id="${fb.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600;">View</button>
+                            <button type="button" class="btn-secondary btn-fb-delete" data-fb-id="${fb.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; color: #DC2626; border-color: #FECACA;">Delete</button>
                         </div>
                     </div>
-                    <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">${fb.text}</p>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin: 0;">${fb.text}</p>
                 </div>
             `).join('');
+
+            feedbackContainer.querySelectorAll('.btn-fb-view').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openFeedbackDetailModal(btn.getAttribute('data-fb-id'));
+                };
+            });
+            feedbackContainer.querySelectorAll('.btn-fb-delete').forEach(btn => {
+                btn.onclick = async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const fbId = btn.getAttribute('data-fb-id');
+                    if (confirm('Are you sure you want to delete this feedback record?')) {
+                        const idx = window.YatraSetuManagerData.feedback.findIndex(f => f.id === fbId);
+                        if (idx !== -1) window.YatraSetuManagerData.feedback.splice(idx, 1);
+                        await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                    }
+                };
+            });
         } else {
             feedbackContainer.innerHTML = `<div style="padding: 2.5rem; text-align: center; color: #64748b; font-weight: 500;">No visitor feedback records available for ${activeDestinationId !== 'all' ? activeDestinationId : formattedStateName}.</div>`;
         }
@@ -654,7 +792,7 @@ async function renderConnectedViews(context) {
                 <div class="signal-grid">
                     <div class="signal-box">
                         <span class="signal-box-lbl" style="color: #3B82F6;">DATA SIGNAL</span>
-                        <p class="signal-box-txt">Visitor numbers increased by 32% during the ${firstEvent.title} period.</p>
+                        <p class="signal-box-txt">Visitor numbers increased during the ${firstEvent.title} period.</p>
                     </div>
                     <div class="signal-box">
                         <span class="signal-box-lbl">OBSERVATION</span>
@@ -678,7 +816,7 @@ async function renderConnectedViews(context) {
                 <div class="signal-grid">
                     <div class="signal-box">
                         <span class="signal-box-lbl" style="color: #8B5CF6;">DATA SIGNAL</span>
-                        <p class="signal-box-txt">Interest in ${dest1} increased by 45% in the last quarter.</p>
+                        <p class="signal-box-txt">Interest in ${dest1} increased during recent quarters.</p>
                     </div>
                     <div class="signal-box">
                         <span class="signal-box-lbl">OBSERVATION</span>
@@ -702,7 +840,7 @@ async function renderConnectedViews(context) {
                 <div class="signal-grid">
                     <div class="signal-box">
                         <span class="signal-box-lbl" style="color: var(--state-accent);">DATA SIGNAL</span>
-                        <p class="signal-box-txt">Queries for ${dest2} up by 58% for the upcoming seasonal window.</p>
+                        <p class="signal-box-txt">Queries for ${dest2} up for the upcoming seasonal window.</p>
                     </div>
                     <div class="signal-box">
                         <span class="signal-box-lbl">OBSERVATION</span>
@@ -1159,30 +1297,99 @@ function initAddStakeholderForm() {
 function initReportGenerator() {
     const generateBtn = document.getElementById('btn-generate-report');
     const reportPreview = document.getElementById('report-preview-container');
-    if (!generateBtn || !reportPreview) return;
 
-    generateBtn.addEventListener('click', () => {
+    const handleGenerate = (reportName = 'Tourism Report') => {
         const typeSelect = document.getElementById('report-type-select');
         const periodSelect = document.getElementById('report-period-select');
         const reportTitle = document.getElementById('preview-report-title');
         const reportDate = document.getElementById('preview-report-date');
 
-        const typeName = typeSelect ? typeSelect.options[typeSelect.selectedIndex].text : 'Tourism Report';
-        const periodName = periodSelect ? periodSelect.options[periodSelect.selectedIndex].text : 'Current Month';
+        const typeName = typeSelect ? typeSelect.options[typeSelect.selectedIndex].text : reportName;
+        const periodName = periodSelect ? periodSelect.options[periodSelect.selectedIndex].text : 'Last 3 Months';
 
-        generateBtn.disabled = true;
-        generateBtn.innerHTML = `Generating Report...`;
+        const ctx = window.YatraSetuManagerStore ? window.YatraSetuManagerStore.getActiveContext() : { activeStateId: 'maharashtra', activeDestinationId: 'all' };
+        const data = window.YatraSetuManagerData || {};
 
-        setTimeout(() => {
-            generateBtn.disabled = false;
-            generateBtn.innerHTML = `Generate Report Preview`;
+        const destinations = (data.destinations || []).filter(d => !ctx.activeStateId || ctx.activeStateId === 'all' || d.state_id === ctx.activeStateId);
+        const attractions = (data.attractions || []).filter(a => (!ctx.activeStateId || ctx.activeStateId === 'all' || a.state_id === ctx.activeStateId) && (ctx.activeDestinationId === 'all' || a.destination_id === ctx.activeDestinationId));
+        const events = (data.events || []).filter(e => (!ctx.activeStateId || ctx.activeStateId === 'all' || e.state_id === ctx.activeStateId) && (ctx.activeDestinationId === 'all' || e.destination_id === ctx.activeDestinationId));
+        const stakeholders = (data.stakeholders || []).filter(s => (!ctx.activeStateId || ctx.activeStateId === 'all' || s.state_id === ctx.activeStateId) && (ctx.activeDestinationId === 'all' || s.destination_id === ctx.activeDestinationId));
 
-            if (reportTitle) reportTitle.textContent = `${typeName} — ${periodName}`;
-            if (reportDate) reportDate.textContent = `Generated on ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+        const stateName = ctx.activeStateId ? ctx.activeStateId.toUpperCase() : 'MAHARASHTRA';
+        const destName = ctx.activeDestinationId !== 'all' ? ctx.activeDestinationId.toUpperCase() : 'ALL DESTINATIONS';
 
+        if (reportTitle) reportTitle.textContent = `${typeName} — ${stateName} (${destName})`;
+        if (reportDate) reportDate.textContent = `Period: ${periodName} • Generated: ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+
+        if (reportPreview) {
             reportPreview.style.display = 'block';
+            const bodyEl = reportPreview.querySelector('.preview-body') || reportPreview;
+            if (bodyEl) {
+                bodyEl.innerHTML = `
+                    <div style="background: #fff; border: 1px solid var(--card-border); border-radius: 10px; padding: 1.5rem; margin-top: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--state-accent); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                            <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-primary);">${typeName}</h3>
+                            <button type="button" class="btn-primary" id="btn-export-download-txt" style="padding: 0.35rem 0.85rem; font-size: 0.8rem;">📥 Export Report Data</button>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.25rem; background: var(--surface-subtle); padding: 1rem; border-radius: 8px;">
+                            <div><span style="font-size: 0.75rem; color: var(--text-muted);">Destinations</span><br><strong style="font-size: 1.2rem;">${destinations.length}</strong></div>
+                            <div><span style="font-size: 0.75rem; color: var(--text-muted);">Attractions</span><br><strong style="font-size: 1.2rem;">${attractions.length}</strong></div>
+                            <div><span style="font-size: 0.75rem; color: var(--text-muted);">Upcoming Events</span><br><strong style="font-size: 1.2rem;">${events.length}</strong></div>
+                            <div><span style="font-size: 0.75rem; color: var(--text-muted);">Partners / Stakeholders</span><br><strong style="font-size: 1.2rem;">${stakeholders.length}</strong></div>
+                        </div>
+                        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.5rem;">Key Executive Summary</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                            This report covers active destination management records for <strong>${stateName}</strong> (Scope: <strong>${destName}</strong>). 
+                            Total verified attractions stand at <strong>${attractions.length}</strong>, supported by <strong>${events.length}</strong> registered festival/cultural events and <strong>${stakeholders.length}</strong> verified ecosystem service partners.
+                        </p>
+                    </div>
+                `;
+
+                const exportBtn = document.getElementById('btn-export-download-txt');
+                if (exportBtn) {
+                    exportBtn.onclick = () => {
+                        const reportText = `==================================================\nYATRASETU SMART DESTINATION MANAGEMENT PLATFORM\nEXECUTIVE TOURISM REPORT\n==================================================\n\nReport Type: ${typeName}\nState Context: ${stateName}\nDestination Context: ${destName}\nReporting Period: ${periodName}\nGenerated Date: ${new Date().toLocaleString()}\n\nSUMMARY METRICS:\n- Total Destinations: ${destinations.length}\n- Total Attractions: ${attractions.length}\n- Upcoming Events: ${events.length}\n- Verified Stakeholders: ${stakeholders.length}\n\nDESTINATION LIST:\n${destinations.map(d => `* ${d.name} (${d.category || 'General'})`).join('\n')}\n\nATTRACTIONS LIST:\n${attractions.map(a => `* ${a.name} [Status: ${a.status || 'Open'}]`).join('\n')}\n\nUPCOMING EVENTS:\n${events.map(e => `* ${e.title} (${e.dateNum} ${e.dateMonth}) - ${e.location}`).join('\n')}\n\n==================================================\nEnd of Report.\n`;
+                        const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' });
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = `YatraSetu_${typeName.replace(/\s+/g, '_')}_${stateName}.txt`;
+                        link.click();
+                    };
+                }
+            }
             reportPreview.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 500);
+        }
+    };
+
+    if (generateBtn) {
+        generateBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleGenerate();
+        });
+    }
+
+    document.querySelectorAll('#reports-card-grid .report-item-card').forEach(card => {
+        const titleEl = card.querySelector('h4');
+        const titleText = titleEl ? titleEl.textContent : 'Tourism Report';
+        const genBtn = card.querySelector('button.btn-secondary');
+        const dlBtn = card.querySelector('button.btn-primary');
+
+        if (genBtn) {
+            genBtn.onclick = (e) => {
+                e.preventDefault();
+                handleGenerate(titleText);
+            };
+        }
+        if (dlBtn) {
+            dlBtn.onclick = (e) => {
+                e.preventDefault();
+                handleGenerate(titleText);
+                setTimeout(() => {
+                    const exportBtn = document.getElementById('btn-export-download-txt');
+                    if (exportBtn) exportBtn.click();
+                }, 200);
+            };
+        }
     });
 }
 
@@ -1356,6 +1563,444 @@ function openDestinationDetailModal(destId, mode = 'view') {
             modal.classList.remove('active');
             document.body.style.overflow = '';
         };
+    }
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * Attraction Details & Actions Modal Functionality
+ */
+function openAttractionDetailModal(attrId, mode = 'view') {
+    if (!attrId || !window.YatraSetuManagerData || !window.YatraSetuManagerData.attractions) return;
+    const attr = window.YatraSetuManagerData.attractions.find(a => a.id === attrId);
+    if (!attr) return;
+
+    const modal = document.getElementById('attractionDetailModal');
+    const titleEl = document.getElementById('attr-detail-modal-title');
+    const bodyEl = document.getElementById('attr-detail-modal-body');
+    const footerEl = document.getElementById('attr-detail-modal-footer');
+    const closeBtn = document.getElementById('btn-close-attr-detail-modal');
+
+    if (!modal || !bodyEl || !footerEl) return;
+
+    const allDest = window.YatraSetuManagerData.destinations || [];
+    const destObj = allDest.find(d => d.id === attr.destination_id);
+    const destName = destObj ? destObj.name : attr.destination_id;
+
+    if (mode === 'view') {
+        if (titleEl) titleEl.textContent = `${attr.name} — Attraction Details`;
+
+        bodyEl.innerHTML = `
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <img src="${attr.img}" alt="${attr.name}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px;">
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; font-size: 0.88rem;">
+                <div><strong>Attraction Name:</strong> <span>${attr.name}</span></div>
+                <div><strong>Destination:</strong> <span>${destName}</span></div>
+                <div><strong>Category:</strong> <span>${attr.category || 'Attraction'}</span></div>
+                <div><strong>State:</strong> <span>${attr.state_id ? attr.state_id.toUpperCase() : 'MAHARASHTRA'}</span></div>
+                <div><strong>Rating:</strong> <span style="color: #F59E0B; font-weight: 700;">⭐ ${attr.rating || '4.8'}</span></div>
+                <div><strong>Status:</strong> <span class="badge badge-${attr.status === 'Closed' ? 'danger' : (attr.status === 'Maintenance' ? 'warning' : 'success')}">${attr.status || 'Open'}</span></div>
+            </div>
+        `;
+
+        footerEl.innerHTML = `
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="button" class="btn-primary" id="btn-edit-attr-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Edit Details</button>
+                <button type="button" class="btn-secondary" id="btn-delete-attr-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; color: #DC2626; border-color: #FECACA;">Delete</button>
+            </div>
+            <button type="button" class="btn-secondary" id="btn-close-attr-modal-action" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Close</button>
+        `;
+
+        const editBtn = document.getElementById('btn-edit-attr-modal');
+        if (editBtn) editBtn.onclick = () => openAttractionDetailModal(attrId, 'edit');
+
+        const deleteBtn = document.getElementById('btn-delete-attr-modal');
+        if (deleteBtn) {
+            deleteBtn.onclick = async () => {
+                if (confirm(`Are you sure you want to delete attraction "${attr.name}"?`)) {
+                    const idx = window.YatraSetuManagerData.attractions.findIndex(a => a.id === attrId);
+                    if (idx !== -1) window.YatraSetuManagerData.attractions.splice(idx, 1);
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                    await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                }
+            };
+        }
+
+        const closeActionBtn = document.getElementById('btn-close-attr-modal-action');
+        if (closeActionBtn) closeActionBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+
+    } else if (mode === 'edit') {
+        if (titleEl) titleEl.textContent = `Edit Attraction — ${attr.name}`;
+
+        bodyEl.innerHTML = `
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Attraction Name</label>
+                <input type="text" id="edit-attr-name-input" class="form-control" value="${attr.name}">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Category</label>
+                <input type="text" id="edit-attr-cat-input" class="form-control" value="${attr.category || ''}">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Status</label>
+                <select id="edit-attr-status-select" class="form-control">
+                    <option value="Open" ${attr.status === 'Open' ? 'selected' : ''}>Open</option>
+                    <option value="Maintenance" ${attr.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
+                    <option value="Closed" ${attr.status === 'Closed' ? 'selected' : ''}>Closed</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Image URL</label>
+                <input type="text" id="edit-attr-img-input" class="form-control" value="${attr.img || ''}">
+            </div>
+        `;
+
+        footerEl.innerHTML = `
+            <button type="button" class="btn-secondary" id="btn-cancel-edit-attr" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Cancel</button>
+            <button type="button" class="btn-primary" id="btn-save-edit-attr" style="padding: 0.45rem 1.1rem; font-size: 0.82rem;">Save Changes</button>
+        `;
+
+        const cancelBtn = document.getElementById('btn-cancel-edit-attr');
+        if (cancelBtn) cancelBtn.onclick = () => openAttractionDetailModal(attrId, 'view');
+
+        const saveBtn = document.getElementById('btn-save-edit-attr');
+        if (saveBtn) {
+            saveBtn.onclick = async () => {
+                const nameVal = document.getElementById('edit-attr-name-input').value.trim();
+                const catVal = document.getElementById('edit-attr-cat-input').value.trim();
+                const statusVal = document.getElementById('edit-attr-status-select').value;
+                const imgVal = document.getElementById('edit-attr-img-input').value.trim();
+
+                if (!nameVal) { alert('Please enter attraction name.'); return; }
+                attr.name = nameVal;
+                attr.category = catVal || 'Attraction';
+                attr.status = statusVal;
+                if (imgVal) attr.img = imgVal;
+
+                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                openAttractionDetailModal(attrId, 'view');
+            };
+        }
+    }
+
+    if (closeBtn) {
+        closeBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+    }
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * Event Details & Actions Modal Functionality
+ */
+function openEventDetailModal(eventId, mode = 'view') {
+    if (!eventId || !window.YatraSetuManagerData || !window.YatraSetuManagerData.events) return;
+    const ev = window.YatraSetuManagerData.events.find(e => e.id === eventId);
+    if (!ev) return;
+
+    const modal = document.getElementById('eventDetailModal');
+    const titleEl = document.getElementById('event-detail-modal-title');
+    const bodyEl = document.getElementById('event-detail-modal-body');
+    const footerEl = document.getElementById('event-detail-modal-footer');
+    const closeBtn = document.getElementById('btn-close-event-detail-modal');
+
+    if (!modal || !bodyEl || !footerEl) return;
+
+    const allDest = window.YatraSetuManagerData.destinations || [];
+    const destObj = allDest.find(d => d.id === ev.destination_id);
+    const destName = destObj ? destObj.name : ev.destination_id;
+
+    if (mode === 'view') {
+        if (titleEl) titleEl.textContent = `${ev.title} — Event Details`;
+
+        bodyEl.innerHTML = `
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <img src="${ev.img}" alt="${ev.title}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px;">
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; font-size: 0.88rem;">
+                <div><strong>Event Title:</strong> <span>${ev.title}</span></div>
+                <div><strong>Date:</strong> <span>${ev.dateNum} ${ev.dateMonth}</span></div>
+                <div><strong>Location:</strong> <span>${ev.location}</span></div>
+                <div><strong>Destination:</strong> <span>${destName}</span></div>
+                <div><strong>Status:</strong> <span class="status-pill ${ev.statusClass}">${ev.status}</span></div>
+                <div><strong>State:</strong> <span>${ev.state_id ? ev.state_id.toUpperCase() : 'MAHARASHTRA'}</span></div>
+            </div>
+        `;
+
+        footerEl.innerHTML = `
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="button" class="btn-primary" id="btn-edit-event-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Edit Details</button>
+                <button type="button" class="btn-secondary" id="btn-delete-event-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; color: #DC2626; border-color: #FECACA;">Delete</button>
+            </div>
+            <button type="button" class="btn-secondary" id="btn-close-event-modal-action" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Close</button>
+        `;
+
+        const editBtn = document.getElementById('btn-edit-event-modal');
+        if (editBtn) editBtn.onclick = () => openEventDetailModal(eventId, 'edit');
+
+        const deleteBtn = document.getElementById('btn-delete-event-modal');
+        if (deleteBtn) {
+            deleteBtn.onclick = async () => {
+                if (confirm(`Are you sure you want to delete event "${ev.title}"?`)) {
+                    const idx = window.YatraSetuManagerData.events.findIndex(e => e.id === eventId);
+                    if (idx !== -1) window.YatraSetuManagerData.events.splice(idx, 1);
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                    await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                }
+            };
+        }
+
+        const closeActionBtn = document.getElementById('btn-close-event-modal-action');
+        if (closeActionBtn) closeActionBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+
+    } else if (mode === 'edit') {
+        if (titleEl) titleEl.textContent = `Edit Event — ${ev.title}`;
+
+        bodyEl.innerHTML = `
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Event Title</label>
+                <input type="text" id="edit-event-title-input" class="form-control" value="${ev.title}">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Date (e.g., 15 OCT)</label>
+                <input type="text" id="edit-event-date-input" class="form-control" value="${ev.dateNum} ${ev.dateMonth}">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Location</label>
+                <input type="text" id="edit-event-loc-input" class="form-control" value="${ev.location}">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Status</label>
+                <select id="edit-event-status-select" class="form-control">
+                    <option value="Upcoming" ${ev.status === 'Upcoming' ? 'selected' : ''}>Upcoming</option>
+                    <option value="Ongoing" ${ev.status === 'Ongoing' ? 'selected' : ''}>Ongoing</option>
+                    <option value="Completed" ${ev.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Image URL</label>
+                <input type="text" id="edit-event-img-input" class="form-control" value="${ev.img || ''}">
+            </div>
+        `;
+
+        footerEl.innerHTML = `
+            <button type="button" class="btn-secondary" id="btn-cancel-edit-event" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Cancel</button>
+            <button type="button" class="btn-primary" id="btn-save-edit-event" style="padding: 0.45rem 1.1rem; font-size: 0.82rem;">Save Changes</button>
+        `;
+
+        const cancelBtn = document.getElementById('btn-cancel-edit-event');
+        if (cancelBtn) cancelBtn.onclick = () => openEventDetailModal(eventId, 'view');
+
+        const saveBtn = document.getElementById('btn-save-edit-event');
+        if (saveBtn) {
+            saveBtn.onclick = async () => {
+                const titleVal = document.getElementById('edit-event-title-input').value.trim();
+                const dateVal = document.getElementById('edit-event-date-input').value.trim();
+                const locVal = document.getElementById('edit-event-loc-input').value.trim();
+                const statusVal = document.getElementById('edit-event-status-select').value;
+                const imgVal = document.getElementById('edit-event-img-input').value.trim();
+
+                if (!titleVal) { alert('Please enter event title.'); return; }
+                ev.title = titleVal;
+                if (dateVal) {
+                    const parts = dateVal.split(' ');
+                    ev.dateNum = parts[0] || '15';
+                    ev.dateMonth = (parts[1] || 'OCT').toUpperCase();
+                }
+                ev.location = locVal || ev.location;
+                ev.status = statusVal;
+                ev.statusClass = statusVal === 'Upcoming' ? 'active' : (statusVal === 'Ongoing' ? 'warning' : 'neutral');
+                if (imgVal) ev.img = imgVal;
+
+                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                openEventDetailModal(eventId, 'view');
+            };
+        }
+    }
+
+    if (closeBtn) {
+        closeBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+    }
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * Stakeholder Details & Actions Modal Functionality
+ */
+function openStakeholderDetailModal(shId, mode = 'view') {
+    if (!shId || !window.YatraSetuManagerData || !window.YatraSetuManagerData.stakeholders) return;
+    const sh = window.YatraSetuManagerData.stakeholders.find(s => s.id === shId);
+    if (!sh) return;
+
+    const modal = document.getElementById('stakeholderDetailModal');
+    const titleEl = document.getElementById('sh-detail-modal-title');
+    const bodyEl = document.getElementById('sh-detail-modal-body');
+    const footerEl = document.getElementById('sh-detail-modal-footer');
+    const closeBtn = document.getElementById('btn-close-sh-detail-modal');
+
+    if (!modal || !bodyEl || !footerEl) return;
+
+    if (mode === 'view') {
+        if (titleEl) titleEl.textContent = `${sh.name} — Partner Profile`;
+
+        bodyEl.innerHTML = `
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; font-size: 0.88rem;">
+                <div><strong>Stakeholder Name:</strong> <span>${sh.name}</span></div>
+                <div><strong>Category:</strong> <span>${sh.category}</span></div>
+                <div><strong>Destination/Scope:</strong> <span>${sh.destination || 'State-wide'}</span></div>
+                <div><strong>Contact Info:</strong> <span>${sh.contact}</span></div>
+                <div><strong>Status:</strong> <span class="status-pill active">${sh.status || 'Verified'}</span></div>
+                <div><strong>State:</strong> <span>${sh.state_id ? sh.state_id.toUpperCase() : 'MAHARASHTRA'}</span></div>
+            </div>
+        `;
+
+        footerEl.innerHTML = `
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="button" class="btn-primary" id="btn-edit-sh-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Edit Details</button>
+                <button type="button" class="btn-secondary" id="btn-delete-sh-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; color: #DC2626; border-color: #FECACA;">Delete</button>
+            </div>
+            <button type="button" class="btn-secondary" id="btn-close-sh-modal-action" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Close</button>
+        `;
+
+        const editBtn = document.getElementById('btn-edit-sh-modal');
+        if (editBtn) editBtn.onclick = () => openStakeholderDetailModal(shId, 'edit');
+
+        const deleteBtn = document.getElementById('btn-delete-sh-modal');
+        if (deleteBtn) {
+            deleteBtn.onclick = async () => {
+                if (confirm(`Are you sure you want to delete stakeholder "${sh.name}"?`)) {
+                    const idx = window.YatraSetuManagerData.stakeholders.findIndex(s => s.id === shId);
+                    if (idx !== -1) window.YatraSetuManagerData.stakeholders.splice(idx, 1);
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                    await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                }
+            };
+        }
+
+        const closeActionBtn = document.getElementById('btn-close-sh-modal-action');
+        if (closeActionBtn) closeActionBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+
+    } else if (mode === 'edit') {
+        if (titleEl) titleEl.textContent = `Edit Partner — ${sh.name}`;
+
+        bodyEl.innerHTML = `
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Partner / Organization Name</label>
+                <input type="text" id="edit-sh-name-input" class="form-control" value="${sh.name}">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Category</label>
+                <select id="edit-sh-cat-select" class="form-control">
+                    <option value="Guides" ${sh.category === 'Guides' ? 'selected' : ''}>Guide / Escort</option>
+                    <option value="Homestays" ${sh.category === 'Homestays' ? 'selected' : ''}>Homestay / Resort</option>
+                    <option value="Transport" ${sh.category === 'Transport' ? 'selected' : ''}>Transport Service</option>
+                    <option value="Handicrafts" ${sh.category === 'Handicrafts' ? 'selected' : ''}>Handicraft Artisan</option>
+                    <option value="Tourism Services" ${sh.category === 'Tourism Services' ? 'selected' : ''}>Tourism Operator</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Contact Information</label>
+                <input type="text" id="edit-sh-contact-input" class="form-control" value="${sh.contact}">
+            </div>
+        `;
+
+        footerEl.innerHTML = `
+            <button type="button" class="btn-secondary" id="btn-cancel-edit-sh" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Cancel</button>
+            <button type="button" class="btn-primary" id="btn-save-edit-sh" style="padding: 0.45rem 1.1rem; font-size: 0.82rem;">Save Changes</button>
+        `;
+
+        const cancelBtn = document.getElementById('btn-cancel-edit-sh');
+        if (cancelBtn) cancelBtn.onclick = () => openStakeholderDetailModal(shId, 'view');
+
+        const saveBtn = document.getElementById('btn-save-edit-sh');
+        if (saveBtn) {
+            saveBtn.onclick = async () => {
+                const nameVal = document.getElementById('edit-sh-name-input').value.trim();
+                const catVal = document.getElementById('edit-sh-cat-select').value;
+                const contactVal = document.getElementById('edit-sh-contact-input').value.trim();
+
+                if (!nameVal) { alert('Please enter partner name.'); return; }
+                sh.name = nameVal;
+                sh.category = catVal;
+                sh.contact = contactVal || sh.contact;
+
+                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                openStakeholderDetailModal(shId, 'view');
+            };
+        }
+    }
+
+    if (closeBtn) {
+        closeBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+    }
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * Feedback Details Modal Functionality
+ */
+function openFeedbackDetailModal(fbId) {
+    if (!fbId || !window.YatraSetuManagerData || !window.YatraSetuManagerData.feedback) return;
+    const fb = window.YatraSetuManagerData.feedback.find(f => f.id === fbId);
+    if (!fb) return;
+
+    const modal = document.getElementById('feedbackDetailModal');
+    const titleEl = document.getElementById('fb-detail-modal-title');
+    const bodyEl = document.getElementById('fb-detail-modal-body');
+    const footerEl = document.getElementById('fb-detail-modal-footer');
+    const closeBtn = document.getElementById('btn-close-fb-detail-modal');
+
+    if (!modal || !bodyEl || !footerEl) return;
+
+    if (titleEl) titleEl.textContent = `Feedback from ${fb.author || 'Visitor'}`;
+
+    bodyEl.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; font-size: 0.88rem;">
+            <div><strong>Visitor Name:</strong> <span>${fb.author || 'Anonymous'}</span></div>
+            <div><strong>Date:</strong> <span>${fb.date || 'Recent'}</span></div>
+            <div><strong>Destination:</strong> <span>${fb.destination || 'State-wide'}</span></div>
+            <div><strong>Rating:</strong> <span style="color: #F59E0B;">${'★'.repeat(fb.rating || 5)} (${fb.rating || 5}/5)</span></div>
+        </div>
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 1rem; font-size: 0.9rem; color: #334155; line-height: 1.6;">
+            <strong>Comment:</strong><br>
+            "${fb.text}"
+        </div>
+    `;
+
+    footerEl.innerHTML = `
+        <button type="button" class="btn-secondary" id="btn-delete-fb-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; color: #DC2626; border-color: #FECACA;">Delete Record</button>
+        <button type="button" class="btn-secondary" id="btn-close-fb-modal-action" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Close</button>
+    `;
+
+    const deleteBtn = document.getElementById('btn-delete-fb-modal');
+    if (deleteBtn) {
+        deleteBtn.onclick = async () => {
+            if (confirm('Are you sure you want to delete this feedback record?')) {
+                const idx = window.YatraSetuManagerData.feedback.findIndex(f => f.id === fbId);
+                if (idx !== -1) window.YatraSetuManagerData.feedback.splice(idx, 1);
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+            }
+        };
+    }
+
+    const closeActionBtn = document.getElementById('btn-close-fb-modal-action');
+    if (closeActionBtn) closeActionBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+
+    if (closeBtn) {
+        closeBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
     }
 
     modal.classList.add('active');

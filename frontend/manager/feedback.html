@@ -314,10 +314,24 @@
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 1rem;" id="feedback-list-container">
-                    <div style="padding: 2.5rem; text-align: center; color: #64748b; font-weight: 500;">No visitor feedback recorded for Maharashtra.</div>
                 </div>
             </div>
         </main>
+    </div>
+    <!-- Modal Dialog: Feedback Details & Review -->
+    <div class="modal-overlay app-modal" id="feedbackDetailModal">
+        <div class="modal-card" style="max-width: 600px; width: 90%;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="fb-detail-modal-title">Visitor Feedback Details</h3>
+                <button class="modal-close" id="btn-close-fb-detail-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="fb-detail-modal-body">
+                <!-- Rendered dynamically by JS -->
+            </div>
+            <div class="modal-footer" id="fb-detail-modal-footer" style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                <button type="button" class="btn-secondary modal-close" id="btn-close-fb-modal-footer">Close</button>
+            </div>
+        </div>
     </div>
 
     <script src="../js/manager-data.js"></script>
