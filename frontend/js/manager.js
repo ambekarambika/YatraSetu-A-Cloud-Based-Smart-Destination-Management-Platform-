@@ -569,18 +569,29 @@ async function renderConnectedViews(context) {
     const featuredEventTitle = document.querySelector('.event-featured-card h2');
     const featuredEventP = document.querySelector('.event-featured-card p');
     const featuredEventMedia = document.querySelector('.event-featured-media');
-    if (featuredEventTitle && config.events && config.events.length > 0) {
-        featuredEventTitle.textContent = config.events[0].title;
-        if (featuredEventP) featuredEventP.innerHTML = `📍 <strong>${config.events[0].dateNum} ${config.events[0].dateMonth}</strong> • ${config.events[0].loc}`;
-        if (featuredEventMedia && config.events[0].img) featuredEventMedia.style.backgroundImage = `url('${config.events[0].img}')`;
+    const featuredEventBtn = document.querySelector('.event-featured-card button');
+
+    const events = await window.YatraSetuManagerStore.getEvents(activeStateId, activeDestinationId);
+
+    if (featuredEventTitle && events && events.length > 0) {
+        const ev0 = events[0];
+        featuredEventTitle.textContent = ev0.title;
+        if (featuredEventP) featuredEventP.innerHTML = `📍 <strong>${ev0.dateNum || '28'} ${ev0.dateMonth || 'SEP'}</strong> • ${ev0.location || ev0.loc}`;
+        if (featuredEventMedia && ev0.img) featuredEventMedia.style.backgroundImage = `url('${ev0.img}')`;
+        if (featuredEventBtn) {
+            featuredEventBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openEventDetailModal(ev0.id, 'view');
+            };
+        }
     }
 
     const upcomingEventsContainer = document.querySelector('#upcoming-events-container');
     if (upcomingEventsContainer) {
-        const events = await window.YatraSetuManagerStore.getEvents(activeStateId, activeDestinationId);
         if (events && events.length > 0) {
             upcomingEventsContainer.innerHTML = events.map(ev => `
-                <div class="event-timeline-card" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border: 1px solid var(--card-border); border-radius: 10px; margin-bottom: 0.75rem; background: #fff;">
+                <div class="event-timeline-card" data-category="${(ev.category || 'cultural').toLowerCase()}" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border: 1px solid var(--card-border); border-radius: 10px; margin-bottom: 0.75rem; background: #fff;">
                     <div style="display: flex; align-items: center; gap: 1rem;">
                         <div class="event-date-box" style="text-align: center; background: var(--state-accent-light); padding: 0.5rem 0.75rem; border-radius: 8px;">
                             <span class="event-date-num" style="display: block; font-weight: 800; font-size: 1.1rem; color: var(--state-accent);">${ev.dateNum}</span>
@@ -638,7 +649,7 @@ async function renderConnectedViews(context) {
         const stakeholders = await window.YatraSetuManagerStore.getStakeholders(activeStateId, activeDestinationId);
         if (stakeholders && stakeholders.length > 0) {
             stakeholdersTableBody.innerHTML = stakeholders.map(sh => `
-                <tr>
+                <tr data-category="${(sh.category || '').toLowerCase()}">
                     <td><strong>${sh.name}</strong></td>
                     <td>${sh.category}</td>
                     <td>${sh.destination}</td>
@@ -690,13 +701,71 @@ async function renderConnectedViews(context) {
         visitorOriginLabel.innerHTML = `<span class="legend-dot" style="background: var(--state-accent);"></span> ${formattedStateName}`;
     }
 
+    const visitorMetricCards = document.querySelectorAll('.metrics-grid-4 .metric-card');
+    if (visitorMetricCards && visitorMetricCards.length >= 4 && window.location.pathname.includes('visitor-statistics.html')) {
+        const isSingleDest = activeDestinationId !== 'all';
+        const totalVis = isSingleDest ? '142.5K' : '1.85M';
+        const domVis = isSingleDest ? '128.0K' : '1.62M';
+        const intlVis = isSingleDest ? '14.5K' : '230K';
+        const avgStay = isSingleDest ? '2.4 Days' : '3.8 Days';
+
+        const vals = [totalVis, domVis, intlVis, avgStay];
+        const subs = [
+            `Active tracking for ${destLabel}`,
+            `90% of total visitors`,
+            `10% of total visitors`,
+            `Average tourist stay duration`
+        ];
+
+        visitorMetricCards.forEach((card, idx) => {
+            const valEl = card.querySelector('.metric-value');
+            const subEl = card.querySelector('.metric-footer');
+            if (valEl && vals[idx]) valEl.textContent = vals[idx];
+            if (subEl && subs[idx]) subEl.textContent = subs[idx];
+        });
+    }
+
     // 6. FEEDBACK VIEW (feedback.html)
     const feedbackContainer = document.querySelector('#feedback-list-container');
     if (feedbackContainer) {
         const feedback = await window.YatraSetuManagerStore.getFeedback(activeStateId, activeDestinationId);
+        
+        // Update Overall Rating Card & Rating Distribution if elements exist
+        const overallScoreEl = document.querySelector('.rating-overall-card .overall-score');
+        const overallReviewSub = document.querySelector('.rating-overall-card span:last-child');
+        const starRatingDisplay = document.querySelector('.rating-overall-card div[style*="font-size"]');
+        
+        if (overallScoreEl) {
+            if (feedback && feedback.length > 0) {
+                const sumRating = feedback.reduce((acc, f) => acc + (f.rating || 5), 0);
+                const avgScore = (sumRating / feedback.length).toFixed(1);
+                overallScoreEl.textContent = avgScore;
+                if (starRatingDisplay) starRatingDisplay.textContent = '★'.repeat(Math.round(avgScore)) + '☆'.repeat(5 - Math.round(avgScore));
+                if (starRatingDisplay) starRatingDisplay.style.color = '#F59E0B';
+                if (overallReviewSub) overallReviewSub.textContent = `${feedback.length} review${feedback.length > 1 ? 's' : ''} recorded for ${destLabel}`;
+            } else {
+                overallScoreEl.textContent = '4.8';
+                if (starRatingDisplay) starRatingDisplay.textContent = '★★★★★';
+                if (starRatingDisplay) starRatingDisplay.style.color = '#F59E0B';
+                if (overallReviewSub) overallReviewSub.textContent = `Active ratings for ${destLabel}`;
+            }
+        }
+
+        // Update Rating Distribution Bar Fills
+        const ratingBarItems = document.querySelectorAll('.rating-bar-list .rating-bar-item');
+        if (ratingBarItems && ratingBarItems.length >= 5) {
+            const defaultDist = ['75%', '18%', '5%', '2%', '0%'];
+            ratingBarItems.forEach((item, idx) => {
+                const fill = item.querySelector('.rating-bar-fill');
+                const pct = item.querySelector('span:last-child');
+                if (fill && defaultDist[idx]) fill.style.width = defaultDist[idx];
+                if (pct && defaultDist[idx]) pct.textContent = defaultDist[idx];
+            });
+        }
+
         if (feedback && feedback.length > 0) {
             feedbackContainer.innerHTML = feedback.map(fb => `
-                <div class="feedback-item-card" style="background: #fff; border: 1px solid var(--card-border); border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem;">
+                <div class="feedback-item-card" data-category="${(fb.category || 'reviews').toLowerCase()}" style="background: #fff; border: 1px solid var(--card-border); border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem;">
                     <div class="feedback-author-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
                         <div class="author-info" style="display: flex; align-items: center; gap: 0.75rem;">
                             <div class="author-avatar" style="width: 36px; height: 36px; border-radius: 50%; background: var(--state-accent-light); color: var(--state-accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">${fb.author ? fb.author.slice(0, 2).toUpperCase() : 'VS'}</div>
@@ -776,12 +845,12 @@ async function renderConnectedViews(context) {
     // 9. DECISION SUPPORT VIEW (decision-support.html)
     const signalsContainer = document.querySelector('#decision-support-signals-container');
     if (signalsContainer) {
-        const firstEvent = (config.events && config.events[0]) ? config.events[0] : { title: `${formattedStateName} Cultural Festival`, loc: formattedStateName };
+        const firstEvent = (events && events.length > 0) ? events[0] : (config.events && config.events[0]) ? config.events[0] : { title: `${formattedStateName} Cultural Festival`, location: formattedStateName };
         const dest1 = (config.topDestinations && config.topDestinations[0]) ? config.topDestinations[0].name : formattedStateName;
         const dest2 = (config.topDestinations && config.topDestinations[1]) ? config.topDestinations[1].name : dest1;
 
         signalsContainer.innerHTML = `
-            <div class="decision-signal-card" style="border-left-color: #3B82F6;">
+            <div class="decision-signal-card" data-category="insights" style="border-left-color: #3B82F6;">
                 <div class="signal-header">
                     <div style="display: flex; align-items: center; gap: 0.65rem;">
                         <span style="font-size: 1.2rem;">📈</span>
@@ -796,7 +865,7 @@ async function renderConnectedViews(context) {
                     </div>
                     <div class="signal-box">
                         <span class="signal-box-lbl">OBSERVATION</span>
-                        <p class="signal-box-txt">Overcrowding spike in visitors across ${firstEvent.loc}.</p>
+                        <p class="signal-box-txt">Overcrowding spike in visitors across ${firstEvent.location || firstEvent.loc || formattedStateName}.</p>
                     </div>
                     <div class="signal-box" style="background: #EFF6FF; border-color: #BFDBFE;">
                         <span class="signal-box-lbl" style="color: #1D4ED8;">MANAGEMENT CONSIDERATION</span>
@@ -805,7 +874,7 @@ async function renderConnectedViews(context) {
                 </div>
             </div>
 
-            <div class="decision-signal-card" style="border-left-color: #8B5CF6;">
+            <div class="decision-signal-card" data-category="destination" style="border-left-color: #8B5CF6;">
                 <div class="signal-header">
                     <div style="display: flex; align-items: center; gap: 0.65rem;">
                         <span style="font-size: 1.2rem;">⚡</span>
@@ -829,7 +898,7 @@ async function renderConnectedViews(context) {
                 </div>
             </div>
 
-            <div class="decision-signal-card" style="border-left-color: var(--state-accent);">
+            <div class="decision-signal-card" data-category="visitor" style="border-left-color: var(--state-accent);">
                 <div class="signal-header">
                     <div style="display: flex; align-items: center; gap: 0.65rem;">
                         <span style="font-size: 1.2rem;">🏔️</span>
@@ -939,8 +1008,8 @@ function initManagerModals() {
  * Table Search & Filtering Logic
  */
 function initTableSearchAndFilters() {
-    const searchInputs = document.querySelectorAll('.table-search-input, .topbar-search-input-rounded');
-    const filterSelects = document.querySelectorAll('.table-filter-select');
+    const searchInputs = document.querySelectorAll('.table-search-input, .topbar-search-input-rounded, .search-input');
+    const filterSelects = document.querySelectorAll('.table-filter-select, .filter-select');
     const filterPills = document.querySelectorAll('.filter-pill-bar .filter-pill');
 
     searchInputs.forEach(input => {
@@ -954,7 +1023,8 @@ function initTableSearchAndFilters() {
     filterPills.forEach(pill => {
         pill.addEventListener('click', (e) => {
             e.preventDefault();
-            filterPills.forEach(p => p.classList.remove('active'));
+            const bar = pill.closest('.filter-pill-bar');
+            if (bar) bar.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
             pill.classList.add('active');
             filterTableRows();
         });
@@ -986,49 +1056,83 @@ function updateAttractionPillCounts(attractions) {
 }
 
 function filterTableRows() {
-    const searchInput = document.querySelector('.table-search-input') || document.querySelector('.topbar-search-input-rounded');
+    const searchInput = document.querySelector('.table-search-input') || document.querySelector('.topbar-search-input-rounded') || document.querySelector('.search-input');
     const filterCategorySelect = document.querySelector('[data-filter="category"]');
     const activePill = document.querySelector('.filter-pill-bar .filter-pill.active');
-    const pillCategory = activePill ? (activePill.getAttribute('data-category') || 'all').toLowerCase() : 'all';
+    const pillText = activePill ? activePill.textContent.trim().toLowerCase() : 'all';
+    const pillCategory = activePill ? (activePill.getAttribute('data-category') || pillText).toLowerCase() : 'all';
     const selectCategory = filterCategorySelect ? filterCategorySelect.value.toLowerCase() : 'all';
     const categoryTerm = pillCategory !== 'all' ? pillCategory : selectCategory;
 
-    const filterStatus = document.querySelector('[data-filter="status"]');
-    const tables = document.querySelectorAll('.app-table');
-
-    if (!tables.length) return;
-
     const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-    const statusTerm = filterStatus ? filterStatus.value.toLowerCase() : 'all';
 
+    // 1. Table rows
+    const tables = document.querySelectorAll('.app-table');
     tables.forEach(table => {
         const rows = table.querySelectorAll('tbody tr');
         rows.forEach(row => {
             const text = row.textContent.toLowerCase();
             const rowCategory = row.getAttribute('data-category')?.toLowerCase() || '';
-            const rowStatus = row.getAttribute('data-status')?.toLowerCase() || '';
-
             const matchesSearch = text.includes(searchTerm);
-
             let matchesCategory = true;
-            if (categoryTerm !== 'all') {
-                if (categoryTerm === 'fort') matchesCategory = rowCategory.includes('fort');
-                else if (categoryTerm === 'shrine') matchesCategory = rowCategory.includes('shrine') || rowCategory.includes('temple') || rowCategory.includes('sacred') || rowCategory.includes('ceremony');
-                else if (categoryTerm === 'viewpoint') matchesCategory = rowCategory.includes('viewpoint') || rowCategory.includes('landmark') || rowCategory.includes('pavilion') || rowCategory.includes('scenic');
-                else if (categoryTerm === 'park') matchesCategory = rowCategory.includes('park') || rowCategory.includes('safari') || rowCategory.includes('wildlife') || rowCategory.includes('reserve');
-                else if (categoryTerm === 'water') matchesCategory = rowCategory.includes('beach') || rowCategory.includes('water') || rowCategory.includes('boat') || rowCategory.includes('cruise') || rowCategory.includes('lake') || rowCategory.includes('river') || rowCategory.includes('ghat');
-                else matchesCategory = rowCategory.includes(categoryTerm);
+            if (categoryTerm !== 'all' && !categoryTerm.includes('all')) {
+                matchesCategory = rowCategory.includes(categoryTerm) || text.includes(categoryTerm);
             }
-
-            const matchesStatus = (statusTerm === 'all' || rowStatus.includes(statusTerm));
-
-            if (matchesSearch && matchesCategory && matchesStatus) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
+            row.style.display = (matchesSearch && matchesCategory) ? '' : 'none';
         });
     });
+
+    // 2. Event cards on events.html
+    const eventCards = document.querySelectorAll('.event-timeline-card');
+    eventCards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        const matchesSearch = text.includes(searchTerm);
+        let matchesCategory = true;
+        if (categoryTerm !== 'all' && !categoryTerm.includes('all')) {
+            matchesCategory = text.includes(categoryTerm) || (card.getAttribute('data-category') || '').includes(categoryTerm);
+        }
+        card.style.display = (matchesSearch && matchesCategory) ? 'flex' : 'none';
+    });
+
+    // 3. Feedback cards on feedback.html
+    const feedbackCards = document.querySelectorAll('.feedback-item-card');
+    feedbackCards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        const matchesSearch = text.includes(searchTerm);
+        let matchesCategory = true;
+        if (categoryTerm !== 'all' && !categoryTerm.includes('all')) {
+            matchesCategory = text.includes(categoryTerm) || (card.getAttribute('data-category') || '').includes(categoryTerm);
+        }
+        card.style.display = (matchesSearch && matchesCategory) ? 'block' : 'none';
+    });
+
+    // 4. Decision signal cards on decision-support.html
+    const signalCards = document.querySelectorAll('.decision-signal-card');
+    signalCards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        const matchesSearch = text.includes(searchTerm);
+        let matchesCategory = true;
+        if (categoryTerm !== 'all' && !categoryTerm.includes('all') && !categoryTerm.includes('key insights')) {
+            matchesCategory = text.includes(categoryTerm) || (card.getAttribute('data-category') || '').includes(categoryTerm);
+        }
+        card.style.display = (matchesSearch && matchesCategory) ? 'block' : 'none';
+    });
+
+    // 5. Analytics tab switching on analytics.html
+    const chartTitle = document.querySelector('.chart-title');
+    if (chartTitle && window.location.pathname.includes('analytics.html')) {
+        const titleMap = {
+            'visitor trends': 'Visitor Trends & Comparison',
+            'destination popularity': 'Destination Footfall & Ranking Analysis',
+            'attraction interest': 'Attraction Interest & Visitor Preferences',
+            'event impact': 'Event Attendance & Cultural Impact Analysis',
+            'seasonal analysis': 'Seasonal Visitor Movement & Peak Trends'
+        };
+        const activePillName = activePill ? activePill.textContent.trim().toLowerCase() : 'visitor trends';
+        if (titleMap[activePillName]) {
+            chartTitle.textContent = titleMap[activePillName];
+        }
+    }
 }
 
 function initAddAttractionForm() {
