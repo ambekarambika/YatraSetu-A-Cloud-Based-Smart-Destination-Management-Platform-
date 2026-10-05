@@ -163,7 +163,7 @@
                     <button class="mobile-menu-toggle" id="sidebar-toggle-btn">☰</button>
                     <div class="search-box">
                         <span class="search-icon">🔍</span>
-                        <input type="text" class="search-input" placeholder="Search destinations, attractions, e...">
+                        <input type="text" class="search-input" id="topbar-search-input" placeholder="Search destinations, attractions, events...">
                     </div>
                 </div>
 
@@ -182,16 +182,16 @@
                         </select>
                     </div>
 
-                    <button class="notification-btn" title="Notifications">🔔<span
-                            class="notification-badge">3</span></button>
+                    <button class="notification-btn" id="topbar-notification-btn" title="Notifications">🔔<span
+                            class="notification-badge" id="topbar-notif-badge">3</span></button>
 
-                    <div class="user-profile-badge">
-                        <div class="user-avatar">AM</div>
-                        <div style="display: flex; flex-direction: column;">
-                            <span class="user-name">Ambika Ambekar</span>
-                            <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">Destination
-                                Manager</span>
+                    <div class="user-profile-badge" id="topbar-user-badge">
+                        <div class="user-avatar" id="topbar-user-avatar">AM</div>
+                        <div class="user-info-text">
+                            <span class="user-name" id="topbar-user-name">Ambika Ambekar</span>
+                            <span class="user-role-sub">State Manager</span>
                         </div>
+                        <span class="user-chevron">▾</span>
                     </div>
                 </div>
             </header>

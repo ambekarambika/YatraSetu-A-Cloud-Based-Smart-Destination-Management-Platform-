@@ -934,7 +934,536 @@ document.addEventListener('DOMContentLoaded', () => {
     initAddDestinationForm();
     initAddEventForm();
     initAddStakeholderForm();
+    initTopbarSharedFeatures();
+    initManagerProfilePage();
 });
+
+/**
+ * Shared Topbar Features Initialization (Across all 11 Manager Pages)
+ */
+function initTopbarSharedFeatures() {
+    const topbar = document.querySelector('.app-topbar');
+    if (!topbar) return;
+
+    // Helper function to close all floating panels
+    const closeAllTopbarPanels = () => {
+        const searchPanel = document.getElementById('topbar-search-results');
+        const notifPanel = document.getElementById('notification-dropdown-panel');
+        const userPanel = document.getElementById('user-menu-dropdown-panel');
+        const userBadge = document.getElementById('topbar-user-badge') || document.querySelector('.user-profile-badge');
+
+        if (searchPanel) searchPanel.classList.remove('show');
+        if (notifPanel) notifPanel.classList.remove('show');
+        if (userPanel) userPanel.classList.remove('show');
+        if (userBadge) userBadge.classList.remove('active');
+    };
+
+    // 1. Mobile Sidebar Toggle
+    const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn') || document.querySelector('.mobile-menu-toggle');
+    const appSidebar = document.getElementById('app-sidebar') || document.querySelector('.app-sidebar');
+
+    if (sidebarToggleBtn && appSidebar) {
+        sidebarToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            appSidebar.classList.toggle('show');
+            appSidebar.classList.toggle('drawer-open');
+        });
+    }
+
+    // 2. Sync Topbar Profile Name & Avatar + Floating Profile Menu
+    const profile = (window.YatraSetuManagerData && window.YatraSetuManagerData.profile) ? window.YatraSetuManagerData.profile : {
+        name: 'Ambika Ambekar',
+        avatar_initials: 'AA',
+        manager_type: 'State Manager'
+    };
+
+    const userBadge = document.getElementById('topbar-user-badge') || document.querySelector('.user-profile-badge');
+    if (userBadge) {
+        const userAvatarEl = userBadge.querySelector('.user-avatar') || document.getElementById('topbar-user-avatar');
+        const userNameEl = userBadge.querySelector('.user-name') || document.getElementById('topbar-user-name');
+        const userRoleSubEl = userBadge.querySelector('.user-role-sub');
+
+        const initials = profile.avatar_initials || (profile.name ? profile.name.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase() : 'AA');
+        if (userAvatarEl) userAvatarEl.textContent = initials;
+        if (userNameEl) userNameEl.textContent = profile.name;
+        if (userRoleSubEl) userRoleSubEl.textContent = profile.manager_type || 'State Manager';
+
+        let userPanel = document.getElementById('user-menu-dropdown-panel');
+        if (!userPanel) {
+            userPanel = document.createElement('div');
+            userPanel.id = 'user-menu-dropdown-panel';
+            userPanel.className = 'topbar-dropdown-panel';
+            userPanel.innerHTML = `
+                <a href="profile.html" class="dropdown-menu-item">
+                    <span>👤</span> <span>View Profile</span>
+                </a>
+                <a href="profile.html?action=edit" class="dropdown-menu-item">
+                    <span>✏️</span> <span>Edit Profile</span>
+                </a>
+                <a href="profile.html?tab=security" class="dropdown-menu-item">
+                    <span>🔐</span> <span>Account Security</span>
+                </a>
+                <div class="dropdown-divider"></div>
+                <button type="button" class="dropdown-menu-item logout-item" id="topbar-btn-logout">
+                    <span>🚪</span> <span>Logout</span>
+                </button>
+            `;
+            const topbarRight = document.querySelector('.topbar-right');
+            if (topbarRight) {
+                topbarRight.appendChild(userPanel);
+            } else {
+                userBadge.parentElement.appendChild(userPanel);
+            }
+
+            const logoutBtn = userPanel.querySelector('#topbar-btn-logout');
+            if (logoutBtn) {
+                logoutBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    sessionStorage.clear();
+                    window.location.href = '../login.html';
+                };
+            }
+        }
+
+        userBadge.onclick = (e) => {
+            e.stopPropagation();
+            const isOpen = userPanel.classList.contains('show');
+            closeAllTopbarPanels();
+            if (!isOpen) {
+                userPanel.classList.add('show');
+                userBadge.classList.add('active');
+            }
+        };
+    }
+
+    // 3. Floating Notifications Bell Dropdown
+    const notifBtn = document.getElementById('topbar-notification-btn') || document.querySelector('.notification-btn');
+    if (notifBtn) {
+        const notifBadge = notifBtn.querySelector('.notification-badge') || document.getElementById('topbar-notif-badge');
+
+        const updateNotifBadge = () => {
+            const notifications = (window.YatraSetuManagerData && window.YatraSetuManagerData.notifications) ? window.YatraSetuManagerData.notifications : [];
+            const unreadCount = notifications.filter(n => !n.read).length;
+            if (notifBadge) {
+                notifBadge.textContent = unreadCount;
+                notifBadge.style.display = unreadCount > 0 ? 'flex' : 'none';
+            }
+        };
+        updateNotifBadge();
+
+        let notifPanel = document.getElementById('notification-dropdown-panel');
+        if (!notifPanel) {
+            notifPanel = document.createElement('div');
+            notifPanel.id = 'notification-dropdown-panel';
+            notifPanel.className = 'topbar-dropdown-panel';
+            notifPanel.innerHTML = `
+                <div class="topbar-dropdown-header">
+                    <span>Notifications</span>
+                    <button type="button" id="btn-mark-all-read" style="background:none; border:none; color: var(--state-accent); font-size: 0.75rem; font-weight: 700; cursor: pointer;">Mark all read</button>
+                </div>
+                <div class="topbar-dropdown-body" id="notification-list-body"></div>
+                <div class="topbar-dropdown-footer">
+                    <span style="color: var(--text-muted); font-size: 0.75rem;">YatraSetu Real-time Updates</span>
+                </div>
+            `;
+            const topbarRight = document.querySelector('.topbar-right');
+            if (topbarRight) {
+                topbarRight.appendChild(notifPanel);
+            } else {
+                notifBtn.parentElement.appendChild(notifPanel);
+            }
+        }
+
+        const renderNotifList = () => {
+            const listBody = document.getElementById('notification-list-body');
+            if (!listBody) return;
+
+            const notifications = (window.YatraSetuManagerData && window.YatraSetuManagerData.notifications) ? window.YatraSetuManagerData.notifications : [];
+            if (notifications.length === 0) {
+                listBody.innerHTML = `<div style="padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">No new notifications</div>`;
+                return;
+            }
+
+            listBody.innerHTML = notifications.map(n => `
+                <div class="notification-item ${n.read ? '' : 'unread'}" data-notif-id="${n.id}">
+                    <div class="notification-title">${n.title}</div>
+                    <div class="notification-msg">${n.message}</div>
+                    <div class="notification-time">${n.time}</div>
+                </div>
+            `).join('');
+        };
+
+        const markAllReadBtn = document.getElementById('btn-mark-all-read');
+        if (markAllReadBtn) {
+            markAllReadBtn.onclick = (e) => {
+                e.stopPropagation();
+                if (window.YatraSetuManagerData && window.YatraSetuManagerData.notifications) {
+                    window.YatraSetuManagerData.notifications.forEach(n => n.read = true);
+                }
+                updateNotifBadge();
+                renderNotifList();
+            };
+        }
+
+        notifBtn.onclick = (e) => {
+            e.stopPropagation();
+            const isOpen = notifPanel.classList.contains('show');
+            closeAllTopbarPanels();
+            if (!isOpen) {
+                renderNotifList();
+                notifPanel.classList.add('show');
+            }
+        };
+    }
+
+    // 4. Floating Topbar Global Search Functionality
+    const searchBox = document.querySelector('.topbar-left .search-box') || document.querySelector('.search-box');
+    const searchInput = searchBox ? (searchBox.querySelector('.search-input') || document.getElementById('topbar-search-input')) : null;
+
+    if (searchBox && searchInput) {
+        searchInput.placeholder = "Search destinations, attractions, events...";
+
+        let searchResultsPanel = document.getElementById('topbar-search-results');
+        if (!searchResultsPanel) {
+            searchResultsPanel = document.createElement('div');
+            searchResultsPanel.id = 'topbar-search-results';
+            searchResultsPanel.className = 'topbar-dropdown-panel';
+            searchBox.appendChild(searchResultsPanel);
+        }
+
+        searchInput.addEventListener('focus', () => {
+            if (searchInput.value.trim().length >= 2) {
+                const isOpen = searchResultsPanel.classList.contains('show');
+                if (!isOpen) {
+                    closeAllTopbarPanels();
+                    searchResultsPanel.classList.add('show');
+                }
+            }
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim().toLowerCase();
+            if (query.length < 2) {
+                searchResultsPanel.classList.remove('show');
+                return;
+            }
+
+            closeAllTopbarPanels();
+
+            const data = window.YatraSetuManagerData || {};
+            const dests = (data.destinations || []).filter(d => d.name.toLowerCase().includes(query)).slice(0, 3);
+            const attrs = (data.attractions || []).filter(a => a.name.toLowerCase().includes(query)).slice(0, 3);
+            const evts = (data.events || []).filter(ev => (ev.title || '').toLowerCase().includes(query)).slice(0, 3);
+            const shs = (data.stakeholders || []).filter(s => (s.name || '').toLowerCase().includes(query)).slice(0, 3);
+
+            if (dests.length === 0 && attrs.length === 0 && evts.length === 0 && shs.length === 0) {
+                searchResultsPanel.innerHTML = `
+                    <div style="padding: 1rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+                        No results found for "${query}"
+                    </div>
+                `;
+                searchResultsPanel.classList.add('show');
+                return;
+            }
+
+            let html = '<div class="topbar-dropdown-body" style="max-height: 360px;">';
+
+            if (dests.length > 0) {
+                html += `<div class="search-result-group-header">Destinations</div>`;
+                dests.forEach(d => {
+                    html += `
+                        <div class="search-result-item" data-search-type="dest" data-id="${d.id}" data-state="${d.state_id}">
+                            <div class="search-result-info">
+                                <span class="search-result-title">📍 ${d.name}</span>
+                                <span class="search-result-sub">${d.category || 'Destination'}</span>
+                            </div>
+                            <span class="search-result-badge">${d.state_id}</span>
+                        </div>
+                    `;
+                });
+            }
+
+            if (attrs.length > 0) {
+                html += `<div class="search-result-group-header">Attractions</div>`;
+                attrs.forEach(a => {
+                    html += `
+                        <div class="search-result-item" data-search-type="attr" data-id="${a.id}" data-dest="${a.destination_id}" data-state="${a.state_id}">
+                            <div class="search-result-info">
+                                <span class="search-result-title">🏛️ ${a.name}</span>
+                                <span class="search-result-sub">${a.category || 'Attraction'}</span>
+                            </div>
+                            <span class="search-result-badge">${a.state_id}</span>
+                        </div>
+                    `;
+                });
+            }
+
+            if (evts.length > 0) {
+                html += `<div class="search-result-group-header">Events</div>`;
+                evts.forEach(ev => {
+                    html += `
+                        <div class="search-result-item" data-search-type="event" data-id="${ev.id}" data-dest="${ev.destination_id}" data-state="${ev.state_id}">
+                            <div class="search-result-info">
+                                <span class="search-result-title">🎉 ${ev.title}</span>
+                                <span class="search-result-sub">${ev.location || 'Event'}</span>
+                            </div>
+                            <span class="search-result-badge">${ev.state_id}</span>
+                        </div>
+                    `;
+                });
+            }
+
+            if (shs.length > 0) {
+                html += `<div class="search-result-group-header">Stakeholders</div>`;
+                shs.forEach(s => {
+                    html += `
+                        <div class="search-result-item" data-search-type="sh" data-id="${s.id}" data-dest="${s.destination_id}" data-state="${s.state_id}">
+                            <div class="search-result-info">
+                                <span class="search-result-title">🤝 ${s.name}</span>
+                                <span class="search-result-sub">${s.category || 'Partner'}</span>
+                            </div>
+                            <span class="search-result-badge">${s.state_id}</span>
+                        </div>
+                    `;
+                });
+            }
+
+            html += '</div>';
+            searchResultsPanel.innerHTML = html;
+            searchResultsPanel.classList.add('show');
+
+            searchResultsPanel.querySelectorAll('.search-result-item').forEach(item => {
+                item.addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    const type = item.getAttribute('data-search-type');
+                    const id = item.getAttribute('data-id');
+                    const dest = item.getAttribute('data-dest') || id;
+                    const state = item.getAttribute('data-state');
+
+                    if (window.YatraSetuManagerContext) {
+                        window.YatraSetuManagerContext.setDestination(dest, state);
+                    }
+
+                    searchResultsPanel.classList.remove('show');
+                    searchInput.value = '';
+
+                    if (type === 'dest') {
+                        window.location.href = `destinations.html?dest=${id}`;
+                    } else if (type === 'attr') {
+                        window.location.href = `attractions.html?dest=${dest}`;
+                    } else if (type === 'event') {
+                        window.location.href = `events.html?dest=${dest}`;
+                    } else if (type === 'sh') {
+                        window.location.href = `stakeholders.html?dest=${dest}`;
+                    }
+                });
+            });
+        });
+    }
+
+    // 5. Global Click Outside & Escape Key Listeners
+    document.addEventListener('click', () => {
+        closeAllTopbarPanels();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeAllTopbarPanels();
+        }
+    });
+}
+
+/**
+ * Manager Profile Page Functionality
+ */
+function initManagerProfilePage() {
+    const isProfilePage = window.location.pathname.includes('profile.html');
+    const profileBannerName = document.getElementById('profile-banner-name');
+
+    if (!isProfilePage && !profileBannerName) return;
+
+    const data = window.YatraSetuManagerData || {};
+    const profile = data.profile || {
+        id: 'MGR-MH-40192',
+        name: 'Rajesh Patil',
+        email: 'rajesh.patil@mahatourism.gov.in',
+        phone: '+91 98230 41092',
+        manager_type: 'State Manager',
+        scope: 'STATE',
+        state_id: 'maharashtra',
+        state_name: 'Maharashtra',
+        destination: 'All destinations in Maharashtra',
+        status: 'Active',
+        avatar_initials: 'RP'
+    };
+
+    // Render profile values to DOM
+    const renderProfileDOM = () => {
+        const initials = profile.avatar_initials || (profile.name ? profile.name.split(' ').map(n=>n[0]).join('').toUpperCase() : 'AA');
+
+        // Banner Elements
+        const bannerAvatar = document.getElementById('profile-banner-avatar');
+        const bannerName = document.getElementById('profile-banner-name');
+        const bannerRole = document.getElementById('profile-banner-role');
+        const bannerStatus = document.getElementById('profile-banner-status');
+
+        if (bannerAvatar) bannerAvatar.textContent = initials;
+        if (bannerName) bannerName.textContent = profile.name;
+        if (bannerRole) bannerRole.innerHTML = `${profile.manager_type} — ${profile.state_name || 'Maharashtra'} • ID: <strong style="color: var(--text-primary);">${profile.id}</strong>`;
+        if (bannerStatus) bannerStatus.textContent = `${profile.status || 'Active'} / Verified`;
+
+        // Card Text Elements
+        const valName = document.getElementById('prof-val-name');
+        const valEmail = document.getElementById('prof-val-email');
+        const valPhone = document.getElementById('prof-val-phone');
+        const valId = document.getElementById('prof-val-id');
+        const valRole = document.getElementById('prof-val-role');
+        const valType = document.getElementById('prof-val-type');
+        const valState = document.getElementById('prof-val-state');
+        const valDest = document.getElementById('prof-val-dest-scope');
+
+        if (valName) valName.textContent = profile.name;
+        if (valEmail) valEmail.textContent = profile.email;
+        if (valPhone) valPhone.textContent = profile.phone;
+        if (valId) valId.textContent = profile.id;
+        if (valRole) valRole.textContent = profile.manager_type || 'Destination Manager';
+        if (valType) valType.textContent = profile.manager_type || 'State Manager';
+        if (valState) valState.textContent = profile.state_name || 'Maharashtra';
+        if (valDest) valDest.textContent = profile.destination || 'All Destinations';
+    };
+
+    renderProfileDOM();
+
+    // Open Edit Profile Modal Handlers
+    const openEditBtn = document.getElementById('btn-open-edit-profile');
+    const editInfoCardBtn = document.getElementById('btn-edit-info-card');
+    const editModal = document.getElementById('editProfileModal');
+
+    const openProfileModal = () => {
+        if (!editModal) return;
+        const nameInput = document.getElementById('edit-prof-name');
+        const emailInput = document.getElementById('edit-prof-email');
+        const phoneInput = document.getElementById('edit-prof-phone');
+
+        if (nameInput) nameInput.value = profile.name;
+        if (emailInput) emailInput.value = profile.email;
+        if (phoneInput) phoneInput.value = profile.phone;
+
+        editModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    if (openEditBtn) openEditBtn.onclick = openProfileModal;
+    if (editInfoCardBtn) editInfoCardBtn.onclick = openProfileModal;
+
+    // Check URL parameters for direct modal trigger e.g. profile.html?action=edit
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('action') === 'edit') {
+        openProfileModal();
+    }
+
+    // Close Edit Modal Handlers
+    const closeEditBtn = document.getElementById('btn-close-edit-profile');
+    const cancelEditBtn = document.getElementById('btn-cancel-edit-profile');
+    const closeEditModal = () => {
+        if (editModal) {
+            editModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    };
+    if (closeEditBtn) closeEditBtn.onclick = closeEditModal;
+    if (cancelEditBtn) cancelEditBtn.onclick = closeEditModal;
+
+    // Save Profile Changes
+    const saveProfileBtn = document.getElementById('btn-save-profile');
+    if (saveProfileBtn) {
+        saveProfileBtn.onclick = () => {
+            const nameInput = document.getElementById('edit-prof-name');
+            const emailInput = document.getElementById('edit-prof-email');
+            const phoneInput = document.getElementById('edit-prof-phone');
+
+            const newName = nameInput ? nameInput.value.trim() : '';
+            const newEmail = emailInput ? emailInput.value.trim() : '';
+            const newPhone = phoneInput ? phoneInput.value.trim() : '';
+
+            if (!newName) {
+                alert('Please enter your full name.');
+                return;
+            }
+
+            profile.name = newName;
+            if (newEmail) profile.email = newEmail;
+            if (newPhone) profile.phone = newPhone;
+            profile.avatar_initials = newName.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase();
+
+            renderProfileDOM();
+
+            // Sync Topbar Avatar & Name
+            const userAvatarEl = document.querySelector('.user-profile-badge .user-avatar');
+            const userNameEl = document.querySelector('.user-profile-badge .user-name');
+            if (userAvatarEl) userAvatarEl.textContent = profile.avatar_initials;
+            if (userNameEl) userNameEl.textContent = profile.name;
+
+            closeEditModal();
+        };
+    }
+
+    // Change Password Modal Handlers
+    const changePassCardBtn = document.getElementById('btn-change-password-card');
+    const passModal = document.getElementById('changePasswordModal');
+
+    const openPassModal = () => {
+        if (!passModal) return;
+        document.getElementById('pass-current').value = '';
+        document.getElementById('pass-new').value = '';
+        document.getElementById('pass-confirm').value = '';
+        passModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    if (changePassCardBtn) changePassCardBtn.onclick = openPassModal;
+    if (urlParams.get('tab') === 'security') {
+        openPassModal();
+    }
+
+    const closePassBtn = document.getElementById('btn-close-change-pass');
+    const cancelPassBtn = document.getElementById('btn-cancel-pass');
+    const closePassModal = () => {
+        if (passModal) {
+            passModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    };
+    if (closePassBtn) closePassBtn.onclick = closePassModal;
+    if (cancelPassBtn) cancelPassBtn.onclick = closePassModal;
+
+    const savePassBtn = document.getElementById('btn-save-pass');
+    if (savePassBtn) {
+        savePassBtn.onclick = () => {
+            const current = document.getElementById('pass-current').value;
+            const newP = document.getElementById('pass-new').value;
+            const confP = document.getElementById('pass-confirm').value;
+
+            if (!current) { alert('Please enter your current password.'); return; }
+            if (!newP || newP.length < 6) { alert('New password must be at least 6 characters.'); return; }
+            if (newP !== confP) { alert('New password and confirmation do not match.'); return; }
+
+            alert('Password updated successfully!');
+            closePassModal();
+        };
+    }
+
+    // Logout from Security Card
+    const logoutSessionBtn = document.getElementById('btn-logout-session');
+    if (logoutSessionBtn) {
+        logoutSessionBtn.onclick = () => {
+            if (confirm('Are you sure you want to log out of your session?')) {
+                sessionStorage.clear();
+                window.location.href = '../login.html';
+            }
+        };
+    }
+}
 
 
 let currentStateList = ['maharashtra', 'kerala', 'kashmir', 'rajasthan', 'goa', 'tamilnadu', 'uttarakhand', 'assam'];

@@ -257,6 +257,8 @@ body.app-body {
 
 .app-topbar {
     height: 64px;
+    min-height: 64px;
+    max-height: 64px;
     background-color: #FFFFFF;
     border-bottom: 1px solid var(--card-border);
     display: flex;
@@ -265,7 +267,9 @@ body.app-body {
     padding: 0 2rem;
     position: sticky;
     top: 0;
-    z-index: 90;
+    z-index: 500;
+    flex-shrink: 0;
+    box-sizing: border-box;
 }
 
 .topbar-left {
@@ -274,6 +278,7 @@ body.app-body {
     gap: 1rem;
     flex: 1;
     max-width: 480px;
+    position: relative;
 }
 
 .mobile-menu-toggle {
@@ -293,18 +298,22 @@ body.app-body {
 
 .search-input {
     width: 100%;
-    padding: 0.5rem 0.85rem 0.5rem 2.25rem;
+    height: 38px;
+    padding: 0 1rem 0 2.3rem;
     font-size: 0.85rem;
+    font-family: inherit;
     border: 1px solid var(--card-border);
     border-radius: 20px;
     background-color: var(--bg-page);
     color: var(--text-primary);
     outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
 }
 
 .search-input:focus {
     border-color: var(--state-accent);
+    background-color: #FFFFFF;
     box-shadow: 0 0 0 3px var(--state-accent-light);
 }
 
@@ -314,14 +323,16 @@ body.app-body {
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     pointer-events: none;
+    z-index: 2;
 }
 
 .topbar-right {
     display: flex;
     align-items: center;
     gap: 1.25rem;
+    position: relative;
 }
 
 .destination-selector {

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en" data-state-theme="maharashtra">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Profile — YatraSetu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/manager/manager.css">
+</head>
+
+<body class="app-body" data-theme="maharashtra" data-state-theme="maharashtra">
+    <div class="app-shell">
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar" id="app-sidebar">
+            <div class="app-sidebar-header">
+                <a href="dashboard.html" class="app-brand-link">
+                    <div class="app-brand-crest">🪷</div>
+                    <div class="app-brand-info">
+                        <span class="app-brand-name">Yatra<span>Setu</span></span>
+                        <span class="app-role-label" id="sidebar-role-state">MAHARASHTRA</span>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="app-sidebar-nav">
+                <span class="app-nav-section-title">Navigation</span>
+                <a href="dashboard.html" class="app-nav-item">
+                    <span class="app-nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="7" height="9" x="3" y="3" rx="1" />
+                            <rect width="7" height="5" x="14" y="3" rx="1" />
+                            <rect width="7" height="9" x="14" y="12" rx="1" />
+                            <rect width="7" height="5" x="3" y="16" rx="1" />
+                        </svg>
+                    </span>
+                    <span>Overview</span>
+                </a>
+                <a href="destinations.html" class="app-nav-item">
+                    <span class="app-nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                            <circle cx="12" cy="10" r="3" />
+                        </svg>
+                    </span>
+                    <span>Destinations</span>
+                </a>
+                <a href="attractions.html" class="app-nav-item">
+                    <span class="app-nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
+                            <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
+                            <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
+                        </svg>
+                    </span>
+                    <span>Attractions</span>
+                </a>
+                <a href="events.html" class="app-nav-item">
+                    <span class="app-nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                            <line x1="16" x2="16" y1="2" y2="6" />
+                            <line x1="8" x2="8" y1="2" y2="6" />
+                            <line x1="3" x2="21" y1="10" y2="10" />
+                        </svg>
+                    </span>
+                    <span>Events</span>
+                </a>
+                <a href="stakeholders.html" class="app-nav-item">
+                    <span class="app-nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                    </span>
+                    <span>Stakeholders</span>
+                </a>
+                <a href="visitor-statistics.html" class="app-nav-item">
+                    <span class="app-nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" x2="18" y1="20" y2="10" />
+                            <line x1="12" x2="12" y1="20" y2="4" />
+                            <line x1="6" x2="6" y1="20" y2="14" />
+                        </svg>
+                    </span>
+                    <span>Visitor Statistics</span>
+                </a>
+                <a href="feedback.html" class="app-nav-item">
+                    <span class="app-nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                    </span>
+                    <span>Feedback</span>
+                </a>
+                <a href="analytics.html" class="app-nav-item">
+                    <span class="app-nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                        </svg>
+                    </span>
+                    <span>Analytics</span>
+                </a>
+                <a href="reports.html" class="app-nav-item">
+                    <span class="app-nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="16" x2="8" y1="13" y2="13" />
+                            <line x1="16" x2="8" y1="17" y2="17" />
+                            <line x1="10" x2="8" y1="9" y2="9" />
+                        </svg>
+                    </span>
+                    <span>Reports</span>
+                </a>
+                <a href="decision-support.html" class="app-nav-item">
+                    <span class="app-nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3.5z" />
+                        </svg>
+                    </span>
+                    <span>Decision Support</span>
+                </a>
+                <a href="profile.html" class="app-nav-item active">
+                    <span class="app-nav-icon">👤</span>
+                    <span>Manager Profile</span>
+                </a>
+            </nav>
+
+            <div class="app-sidebar-footer">
+                <div class="sidebar-slogan-box">
+                    <span style="color: var(--state-accent); font-style: italic;">🪷 Preserve • Promote • Plan
+                        Together</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="app-main">
+            <!-- Topbar -->
+            <header class="app-topbar">
+                <div class="topbar-left">
+                    <button class="mobile-menu-toggle" id="sidebar-toggle-btn">☰</button>
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" id="topbar-search-input" placeholder="Search destinations, attractions, events...">
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="destination-selector">
+                        <select id="destination-context-select" disabled class="destination-select-dropdown"
+                            aria-label="Select State Context" title="State context is managed from the Dashboard">
+                            <option value="maharashtra">📍 Maharashtra</option>
+                            <option value="kerala">🌴 Kerala</option>
+                            <option value="kashmir">🏔️ Jammu & Kashmir</option>
+                            <option value="rajasthan">🏰 Rajasthan</option>
+                            <option value="goa">🏖️ Goa</option>
+                            <option value="tamilnadu">🛕 Tamil Nadu</option>
+                            <option value="uttarakhand">🌲 Uttarakhand</option>
+                            <option value="assam">🦏 Assam</option>
+                        </select>
+                    </div>
+
+                    <button class="notification-btn" id="topbar-notification-btn" title="Notifications">🔔<span
+                            class="notification-badge" id="topbar-notif-badge">3</span></button>
+
+                    <div class="user-profile-badge" id="topbar-user-badge">
+                        <div class="user-avatar" id="topbar-user-avatar">AM</div>
+                        <div class="user-info-text">
+                            <span class="user-name" id="topbar-user-name">Ambika Ambekar</span>
+                            <span class="user-role-sub">State Manager</span>
+                        </div>
+                        <span class="user-chevron">▾</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="app-content">
+                <!-- Page Header Row -->
+                <div class="page-header-row">
+                    <div class="page-title-group">
+                        <h1>Manager Profile</h1>
+                        <p>Account credentials and administrative scope for Maharashtra</p>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn-primary" id="btn-open-edit-profile">+ Edit Profile</button>
+                    </div>
+                </div>
+
+                <!-- Profile Overview Banner Card -->
+                <div class="profile-header-banner" style="background: #FFF; border: 1px solid var(--card-border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 1.25rem;">
+                        <div class="profile-avatar-large" style="width: 64px; height: 64px; border-radius: 50%; background: var(--state-accent); color: #FFF; font-size: 1.6rem; font-weight: 800; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px var(--state-accent-light);" id="profile-banner-avatar">AM</div>
+                        <div>
+                            <h2 style="font-size: 1.3rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.2rem;" id="profile-banner-name">Ambika Ambekar</h2>
+                            <span style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;" id="profile-banner-role">State Manager — Maharashtra • ID: <strong style="color: var(--text-primary);" id="profile-banner-id">MGR-MH-2024-001</strong></span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.75rem; align-items: center;">
+                        <span class="badge badge-success" style="font-size: 0.8rem; padding: 0.35rem 0.85rem;" id="profile-banner-status">Active / Verified</span>
+                        <span class="status-pill active" style="font-size: 0.8rem;" id="profile-banner-scope">STATE SCOPE</span>
+                    </div>
+                </div>
+
+                <!-- 2-Column Grid -->
+                <div class="workspace-two-col" style="grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                    <!-- Personal Info Card -->
+                    <div class="chart-card" style="padding: 1.5rem; background: #FFF; border: 1px solid var(--card-border); border-radius: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.75rem;">
+                            <h3 style="font-size: 1rem; font-weight: 800; color: var(--text-primary); margin: 0;">Personal Information</h3>
+                            <button type="button" class="btn-secondary" id="btn-edit-info-card" style="padding: 0.3rem 0.75rem; font-size: 0.78rem;">Edit</button>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 0.9rem; font-size: 0.88rem;">
+                            <div style="display: flex; justify-content: space-between;"><strong style="color: var(--text-muted);">Full Name:</strong> <span style="font-weight: 700;" id="prof-val-name">Ambika Ambekar</span></div>
+                            <div style="display: flex; justify-content: space-between;"><strong style="color: var(--text-muted);">Email Address:</strong> <span style="font-weight: 600;" id="prof-val-email">ambika.ambekar@yatrasetu.gov.in</span></div>
+                            <div style="display: flex; justify-content: space-between;"><strong style="color: var(--text-muted);">Contact Phone:</strong> <span style="font-weight: 600;" id="prof-val-phone">+91 98765 43210</span></div>
+                            <div style="display: flex; justify-content: space-between;"><strong style="color: var(--text-muted);">Manager ID:</strong> <span style="font-weight: 700; color: var(--state-accent);" id="prof-val-id">MGR-MH-2024-001</span></div>
+                            <div style="display: flex; justify-content: space-between;"><strong style="color: var(--text-muted);">Role Designation:</strong> <span style="font-weight: 600;" id="prof-val-role">Destination Manager</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Scope Card -->
+                    <div class="chart-card" style="padding: 1.5rem; background: #FFF; border: 1px solid var(--card-border); border-radius: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.75rem;">
+                            <h3 style="font-size: 1rem; font-weight: 800; color: var(--text-primary); margin: 0;">Management Scope & Access</h3>
+                            <span class="badge badge-info">State Authority</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 0.9rem; font-size: 0.88rem;">
+                            <div style="display: flex; justify-content: space-between;"><strong style="color: var(--text-muted);">Manager Level:</strong> <span style="font-weight: 700;" id="prof-val-type">State Manager</span></div>
+                            <div style="display: flex; justify-content: space-between;"><strong style="color: var(--text-muted);">Assigned State:</strong> <span style="font-weight: 700; color: var(--state-accent);" id="prof-val-state">Maharashtra</span></div>
+                            <div style="display: flex; justify-content: space-between;"><strong style="color: var(--text-muted);">Destination Scope:</strong> <span style="font-weight: 600;" id="prof-val-dest-scope">All Destinations in Maharashtra</span></div>
+                            <div style="display: flex; justify-content: space-between;"><strong style="color: var(--text-muted);">Access Level:</strong> <span style="font-weight: 600;" id="prof-val-access">Full State Administrative Access</span></div>
+                            <div style="display: flex; justify-content: space-between;"><strong style="color: var(--text-muted);">Account Status:</strong> <span class="badge badge-success" id="prof-val-status-badge">Active / Verified</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Security & Session Card -->
+                    <div class="chart-card" style="grid-column: 1 / -1; padding: 1.5rem; background: #FFF; border: 1px solid var(--card-border); border-radius: 12px; margin-top: 0.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.75rem;">
+                            <h3 style="font-size: 1rem; font-weight: 800; color: var(--text-primary); margin: 0;">Account Security & Session</h3>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                            <div>
+                                <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.2rem;">Password & Security Credentials</h4>
+                                <span style="font-size: 0.8rem; color: var(--text-muted);">Last updated 30 days ago • Two-Factor Authentication Enabled</span>
+                            </div>
+                            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                                <button type="button" class="btn-secondary" id="btn-change-password-card">Change Password</button>
+                                <button type="button" class="btn-primary" id="btn-logout-session" style="background: #EF4444; border-color: #EF4444;">Logout Session</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="app-modal" id="editProfileModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3>Edit Profile Information</h3>
+                <button type="button" class="modal-close" id="btn-close-edit-profile">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="margin-bottom: 0.85rem;">
+                    <label style="font-weight: 600; font-size: 0.85rem;">Full Name</label>
+                    <input type="text" id="edit-prof-name" class="form-control" value="Ambika Ambekar">
+                </div>
+                <div class="form-group" style="margin-bottom: 0.85rem;">
+                    <label style="font-weight: 600; font-size: 0.85rem;">Email Address</label>
+                    <input type="email" id="edit-prof-email" class="form-control" value="ambika.ambekar@yatrasetu.gov.in">
+                </div>
+                <div class="form-group" style="margin-bottom: 0.85rem;">
+                    <label style="font-weight: 600; font-size: 0.85rem;">Contact Phone</label>
+                    <input type="text" id="edit-prof-phone" class="form-control" value="+91 98765 43210">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="btn-cancel-edit-profile">Cancel</button>
+                <button type="button" class="btn-primary" id="btn-save-profile">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="app-modal" id="changePasswordModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3>Change Security Password</h3>
+                <button type="button" class="modal-close" id="btn-close-change-pass">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="margin-bottom: 0.85rem;">
+                    <label style="font-weight: 600; font-size: 0.85rem;">Current Password</label>
+                    <input type="password" id="pass-current" class="form-control" placeholder="Enter current password">
+                </div>
+                <div class="form-group" style="margin-bottom: 0.85rem;">
+                    <label style="font-weight: 600; font-size: 0.85rem;">New Password</label>
+                    <input type="password" id="pass-new" class="form-control" placeholder="Enter new password">
+                </div>
+                <div class="form-group" style="margin-bottom: 0.85rem;">
+                    <label style="font-weight: 600; font-size: 0.85rem;">Confirm New Password</label>
+                    <input type="password" id="pass-confirm" class="form-control" placeholder="Re-enter new password">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="btn-cancel-pass">Cancel</button>
+                <button type="button" class="btn-primary" id="btn-save-pass">Update Password</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Central Manager Data & Logic -->
+    <script src="../js/manager-data.js"></script>
+    <script src="../js/manager.js"></script>
+    <script src="../js/dashboard.js"></script>
+</body>
+
+</html>

@@ -282,5 +282,48 @@ window.YatraSetuManagerData = {
 
     stakeholders: [],
     visitorStats: [],
-    feedback: []
+    feedback: [],
+
+    profile: {
+        id: 'MGR-MH-40192',
+        name: 'Rajesh Patil',
+        email: 'rajesh.patil@mahatourism.gov.in',
+        phone: '+91 98230 41092',
+        manager_type: 'State Manager',
+        scope: 'STATE',
+        state_id: 'maharashtra',
+        state_name: 'Maharashtra',
+        destination: 'All destinations in Maharashtra',
+        destination_ids: ['raigad-fort', 'ajanta-caves', 'ellora-caves', 'lonavala', 'shirdi'],
+        assigned_date: '15 Jan 2024',
+        status: 'Active',
+        avatar_initials: 'RP'
+    },
+
+    notifications: [
+        {
+            id: 'notif-1',
+            title: 'High Influx Alert: Rajgad Fort',
+            message: 'Visitor turnout exceeded safety threshold by 18% during weekend trek.',
+            time: '2 hours ago',
+            read: false,
+            type: 'alert'
+        },
+        {
+            id: 'notif-2',
+            title: 'Pending Stakeholder Verification',
+            message: 'Mahanagar Travel Co. requested official accreditation approval.',
+            time: '5 hours ago',
+            read: false,
+            type: 'pending'
+        },
+        {
+            id: 'notif-3',
+            title: 'Monthly Q3 Tourism Report Ready',
+            message: 'Analytical summary report for Maharashtra state is now generated.',
+            time: '1 day ago',
+            read: true,
+            type: 'info'
+        }
+    ]
 };
