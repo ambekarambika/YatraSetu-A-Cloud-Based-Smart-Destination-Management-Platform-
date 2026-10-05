@@ -257,8 +257,6 @@ body.app-body {
 
 .app-topbar {
     height: 64px;
-    min-height: 64px;
-    max-height: 64px;
     background-color: #FFFFFF;
     border-bottom: 1px solid var(--card-border);
     display: flex;
@@ -267,9 +265,7 @@ body.app-body {
     padding: 0 2rem;
     position: sticky;
     top: 0;
-    z-index: 500;
-    flex-shrink: 0;
-    box-sizing: border-box;
+    z-index: 90;
 }
 
 .topbar-left {
@@ -278,7 +274,6 @@ body.app-body {
     gap: 1rem;
     flex: 1;
     max-width: 480px;
-    position: relative;
 }
 
 .mobile-menu-toggle {
@@ -298,22 +293,18 @@ body.app-body {
 
 .search-input {
     width: 100%;
-    height: 38px;
-    padding: 0 1rem 0 2.3rem;
+    padding: 0.5rem 0.85rem 0.5rem 2.25rem;
     font-size: 0.85rem;
-    font-family: inherit;
     border: 1px solid var(--card-border);
     border-radius: 20px;
     background-color: var(--bg-page);
     color: var(--text-primary);
     outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    box-sizing: border-box;
 }
 
 .search-input:focus {
     border-color: var(--state-accent);
-    background-color: #FFFFFF;
     box-shadow: 0 0 0 3px var(--state-accent-light);
 }
 
@@ -323,16 +314,14 @@ body.app-body {
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     pointer-events: none;
-    z-index: 2;
 }
 
 .topbar-right {
     display: flex;
     align-items: center;
     gap: 1.25rem;
-    position: relative;
 }
 
 .destination-selector {
@@ -1064,4 +1053,87 @@ body.app-body {
         font-size: 1.35rem;
     }
 }
+
+/* --------------------------------------------------------------------------
+   Shared Floating Topbar Dropdown Panels & Search Results
+   -------------------------------------------------------------------------- */
+.topbar-action-wrapper,
+.user-profile-badge-wrapper {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.topbar-dropdown-panel {
+    position: absolute !important;
+    background: #FFFFFF !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18) !important;
+    z-index: 1000 !important;
+    display: none !important;
+    overflow: hidden !important;
+}
+
+.topbar-dropdown-panel.show {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.search-results-floating {
+    top: calc(100% + 8px) !important;
+    left: 0 !important;
+    width: 100% !important;
+    min-width: 320px !important;
+    max-width: 480px !important;
+}
+
+.notif-dropdown-floating {
+    top: calc(100% + 12px) !important;
+    right: 0 !important;
+    width: 340px !important;
+}
+
+.user-menu-floating {
+    top: calc(100% + 12px) !important;
+    right: 0 !important;
+    width: 220px !important;
+    padding: 0.35rem 0 !important;
+}
+
+.user-menu-item {
+    padding: 0.65rem 1rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.65rem !important;
+    color: var(--text-primary) !important;
+    text-decoration: none !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    transition: background 0.15s ease, color 0.15s ease !important;
+    cursor: pointer !important;
+    border: none !important;
+    background: none !important;
+    width: 100% !important;
+    text-align: left !important;
+    box-sizing: border-box !important;
+}
+
+.user-menu-item:hover {
+    background-color: var(--state-accent-light) !important;
+    color: var(--state-accent) !important;
+}
+
+.user-menu-item.logout {
+    color: var(--danger-color) !important;
+    border-top: 1px solid var(--card-border) !important;
+    margin-top: 0.3rem !important;
+    padding-top: 0.75rem !important;
+}
+
+.user-menu-item.logout:hover {
+    background-color: rgba(239, 68, 68, 0.08) !important;
+    color: var(--danger-color) !important;
+}
+
 

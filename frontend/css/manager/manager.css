@@ -225,12 +225,18 @@ body.app-body {
 }
 
 /* --------------------------------------------------------------------------
-   3. Topbar Layout & Floating Overlays
+   3. Topbar Layout
    -------------------------------------------------------------------------- */
+.app-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow-y: auto;
+}
+
 .app-topbar {
     height: 64px;
-    min-height: 64px;
-    max-height: 64px;
     background-color: #FFFFFF;
     border-bottom: 1px solid var(--card-border);
     display: flex;
@@ -239,9 +245,7 @@ body.app-body {
     padding: 0 2rem;
     position: sticky;
     top: 0;
-    z-index: 500;
-    flex-shrink: 0;
-    box-sizing: border-box;
+    z-index: 90;
 }
 
 .topbar-left {
@@ -250,7 +254,6 @@ body.app-body {
     gap: 1rem;
     flex: 1;
     max-width: 480px;
-    position: relative;
 }
 
 .mobile-menu-toggle {
@@ -260,7 +263,6 @@ body.app-body {
     font-size: 1.25rem;
     color: var(--text-primary);
     cursor: pointer;
-    padding: 0.4rem;
 }
 
 .search-box {
@@ -270,23 +272,18 @@ body.app-body {
 
 .search-input {
     width: 100%;
-    height: 38px;
-    padding: 0 1rem 0 2.3rem;
+    padding: 0.5rem 0.85rem 0.5rem 2.25rem;
     font-size: 0.85rem;
-    font-family: inherit;
     border: 1px solid var(--card-border);
     border-radius: 20px;
     background-color: var(--bg-page);
     color: var(--text-primary);
     outline: none;
-    transition: all 0.2s ease;
-    box-sizing: border-box;
+    transition: border-color 0.2s ease;
 }
 
 .search-input:focus {
     border-color: var(--state-accent);
-    background-color: #FFFFFF;
-    box-shadow: 0 0 0 3px var(--state-accent-light);
 }
 
 .search-icon {
@@ -295,16 +292,14 @@ body.app-body {
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     pointer-events: none;
-    z-index: 2;
 }
 
 .topbar-right {
     display: flex;
     align-items: center;
     gap: 1.25rem;
-    position: relative;
 }
 
 .destination-selector {
@@ -336,52 +331,28 @@ body.app-body {
     font-size: 1.2rem;
     color: var(--text-muted);
     cursor: pointer;
-    padding: 0.4rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.15s ease;
-}
-
-.notification-btn:hover {
-    background-color: var(--bg-page);
-    color: var(--text-primary);
 }
 
 .notification-badge {
     position: absolute;
-    top: -2px;
-    right: -2px;
+    top: -4px;
+    right: -4px;
     background: var(--danger-color);
-    color: #FFFFFF;
+    color: #FFF;
     font-size: 0.65rem;
     font-weight: 800;
-    min-width: 16px;
+    width: 16px;
     height: 16px;
-    padding: 0 4px;
-    border-radius: 8px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .user-profile-badge {
-    position: relative;
     display: flex;
     align-items: center;
     gap: 0.65rem;
-    padding: 0.35rem 0.65rem;
-    border-radius: 20px;
-    cursor: pointer;
-    user-select: none;
-    transition: background 0.15s ease, border-color 0.15s ease;
-    border: 1px solid transparent;
-}
-
-.user-profile-badge:hover, .user-profile-badge.active {
-    background-color: var(--bg-page);
-    border-color: var(--card-border);
 }
 
 .user-avatar {
@@ -393,236 +364,15 @@ body.app-body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 800;
+    font-weight: 700;
     font-size: 0.85rem;
-    border: 1.5px solid var(--state-accent);
-    flex-shrink: 0;
-}
-
-.user-info-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.2;
+    border: 1px solid var(--state-accent-border);
 }
 
 .user-name {
     font-size: 0.85rem;
     font-weight: 700;
     color: var(--text-primary);
-}
-
-.user-role-sub {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    font-weight: 600;
-}
-
-.user-chevron {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    margin-left: 0.15rem;
-    transition: transform 0.2s ease;
-}
-
-.user-profile-badge.active .user-chevron {
-    transform: rotate(180deg);
-}
-
-/* --------------------------------------------------------------------------
-   7. Shared Topbar Floating Overlays
-   -------------------------------------------------------------------------- */
-.topbar-dropdown-panel {
-    position: absolute;
-    top: calc(100% + 10px);
-    background: #FFFFFF;
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-md);
-    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
-    z-index: 1000;
-    display: none;
-    flex-direction: column;
-    overflow: hidden;
-    animation: topbarFadeIn 0.15s ease-out;
-}
-
-.topbar-dropdown-panel.show {
-    display: flex;
-}
-
-@keyframes topbarFadeIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-#topbar-search-results {
-    left: 0;
-    width: 100%;
-    min-width: 340px;
-    max-width: 480px;
-}
-
-#notification-dropdown-panel {
-    right: 0;
-    width: 330px;
-}
-
-#user-menu-dropdown-panel {
-    right: 0;
-    width: 220px;
-    padding: 0.35rem 0;
-}
-
-.topbar-dropdown-header {
-    padding: 0.85rem 1rem;
-    border-bottom: 1px solid var(--card-border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-weight: 700;
-    font-size: 0.9rem;
-    color: var(--text-primary);
-    background-color: #FAFAFA;
-}
-
-.topbar-dropdown-body {
-    max-height: 320px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-}
-
-.topbar-dropdown-footer {
-    padding: 0.65rem 1rem;
-    border-top: 1px solid var(--card-border);
-    background-color: #F8FAFC;
-    text-align: center;
-    font-size: 0.8rem;
-}
-
-.search-result-group-header {
-    padding: 0.4rem 0.85rem;
-    font-size: 0.7rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    background-color: #F1F5F9;
-}
-
-.search-result-item {
-    padding: 0.65rem 0.85rem;
-    border-bottom: 1px solid #F1F5F9;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    text-decoration: none;
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: background 0.15s ease;
-}
-
-.search-result-item:hover {
-    background-color: var(--state-accent-light);
-}
-
-.search-result-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.search-result-title {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-.search-result-sub {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-}
-
-.search-result-badge {
-    font-size: 0.65rem;
-    font-weight: 800;
-    padding: 0.15rem 0.45rem;
-    border-radius: 4px;
-    text-transform: uppercase;
-    background: var(--state-accent-light);
-    color: var(--state-accent);
-}
-
-.notification-item {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #F1F5F9;
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-    transition: background 0.15s ease;
-}
-
-.notification-item:hover {
-    background-color: #F8FAFC;
-}
-
-.notification-item.unread {
-    background-color: rgba(230, 126, 34, 0.05);
-    border-left: 3px solid var(--state-accent);
-}
-
-.notification-title {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-.notification-msg {
-    font-size: 0.78rem;
-    color: var(--text-secondary);
-    line-height: 1.35;
-}
-
-.notification-time {
-    font-size: 0.7rem;
-    color: var(--text-light);
-    margin-top: 0.15rem;
-}
-
-.dropdown-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    padding: 0.65rem 1rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    text-decoration: none;
-    background: none;
-    border: none;
-    width: 100%;
-    text-align: left;
-    cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
-}
-
-.dropdown-menu-item:hover {
-    background-color: var(--state-accent-light);
-    color: var(--state-accent);
-}
-
-.dropdown-divider {
-    height: 1px;
-    background-color: var(--card-border);
-    margin: 0.35rem 0;
-}
-
-.dropdown-menu-item.logout-item {
-    color: var(--danger-color);
-}
-
-.dropdown-menu-item.logout-item:hover {
-    background-color: rgba(239, 68, 68, 0.08);
-    color: var(--danger-color);
 }
 
 /* --------------------------------------------------------------------------
@@ -1553,31 +1303,34 @@ body.app-body {
 }
 
 /* Modals */
+.app-modal,
 .modal-overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(4px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 200;
-    padding: 1rem;
+    position: fixed !important;
+    top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+    background-color: rgba(15, 23, 42, 0.6) !important;
+    backdrop-filter: blur(4px) !important;
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 2000 !important;
+    padding: 1rem !important;
 }
 
+.app-modal.active,
 .modal-overlay.active {
-    display: flex;
+    display: flex !important;
 }
 
-.modal-card {
-    background-color: #FFFFFF;
-    border-radius: var(--radius-lg);
-    width: 100%;
-    max-width: 540px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+.modal-card,
+.modal-dialog {
+    background-color: #FFFFFF !important;
+    border-radius: var(--radius-lg) !important;
+    width: 100% !important;
+    max-width: 540px !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
 }
 
 .modal-header {
@@ -1667,31 +1420,50 @@ body.app-body {
 }
 
 /* --------------------------------------------------------------------------
-   7. Shared Topbar Dropdown Panels & Search Results
+   7. Shared Floating Topbar Dropdown Panels & Search Results
    -------------------------------------------------------------------------- */
+.topbar-action-wrapper,
+.user-profile-badge-wrapper {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
 .topbar-dropdown-panel {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    background: #FFFFFF;
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-md);
-    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
-    width: 340px;
-    z-index: 1000;
-    display: none;
-    flex-direction: column;
-    overflow: hidden;
-    animation: fadeInDown 0.15s ease-out;
+    position: absolute !important;
+    background: #FFFFFF !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18) !important;
+    z-index: 1000 !important;
+    display: none !important;
+    overflow: hidden !important;
 }
 
 .topbar-dropdown-panel.show {
-    display: flex;
+    display: flex !important;
+    flex-direction: column !important;
 }
 
-@keyframes fadeInDown {
-    from { opacity: 0; transform: translateY(-6px); }
-    to { opacity: 1; transform: translateY(0); }
+.search-results-floating {
+    top: calc(100% + 8px) !important;
+    left: 0 !important;
+    width: 100% !important;
+    min-width: 320px !important;
+    max-width: 480px !important;
+}
+
+.notif-dropdown-floating {
+    top: calc(100% + 12px) !important;
+    right: 0 !important;
+    width: 340px !important;
+}
+
+.user-menu-floating {
+    top: calc(100% + 12px) !important;
+    right: 0 !important;
+    width: 220px !important;
+    padding: 0.35rem 0 !important;
 }
 
 .topbar-dropdown-header {
@@ -1719,28 +1491,6 @@ body.app-body {
     background-color: #F8FAFC;
     text-align: center;
     font-size: 0.8rem;
-}
-
-/* Global Search Dropdown */
-#topbar-search-results {
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
-    width: 100%;
-    min-width: 320px;
-    max-width: 480px;
-    background: #FFFFFF;
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-md);
-    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
-    z-index: 1000;
-    display: none;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-#topbar-search-results.show {
-    display: flex;
 }
 
 .search-result-group-header {
@@ -1796,7 +1546,6 @@ body.app-body {
     color: var(--state-accent);
 }
 
-/* Notifications Styling */
 .notification-item {
     padding: 0.75rem 1rem;
     border-bottom: 1px solid #F1F5F9;
@@ -1833,37 +1582,39 @@ body.app-body {
     margin-top: 0.15rem;
 }
 
-/* User Profile Menu Styling */
 .user-menu-item {
-    padding: 0.7rem 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    color: var(--text-primary);
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: all 0.15s ease;
-    cursor: pointer;
-    border: none;
-    background: none;
-    width: 100%;
-    text-align: left;
+    padding: 0.65rem 1rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.65rem !important;
+    color: var(--text-primary) !important;
+    text-decoration: none !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    transition: background 0.15s ease, color 0.15s ease !important;
+    cursor: pointer !important;
+    border: none !important;
+    background: none !important;
+    width: 100% !important;
+    text-align: left !important;
+    box-sizing: border-box !important;
 }
 
 .user-menu-item:hover {
-    background-color: var(--state-accent-light);
-    color: var(--state-accent);
+    background-color: var(--state-accent-light) !important;
+    color: var(--state-accent) !important;
 }
 
 .user-menu-item.logout {
-    color: var(--danger-color);
-    border-top: 1px solid var(--card-border);
+    color: var(--danger-color) !important;
+    border-top: 1px solid var(--card-border) !important;
+    margin-top: 0.3rem !important;
+    padding-top: 0.75rem !important;
 }
 
 .user-menu-item.logout:hover {
-    background-color: rgba(239, 68, 68, 0.08);
-    color: var(--danger-color);
+    background-color: rgba(239, 68, 68, 0.08) !important;
+    color: var(--danger-color) !important;
 }
 
 /* --------------------------------------------------------------------------
