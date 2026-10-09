@@ -88,8 +88,12 @@ frontend/
 │   ├── style.css
 │   └── dashboard.css
 ├── js/
-│   ├── script.js
+│   ├── main.js
+│   ├── auth.js
 │   ├── dashboard.js
+│   ├── manager-data.js
+│   ├── manager-core.js
+│   ├── manager-views.js
 │   └── manager.js
 ├── manager/
 │   ├── dashboard.html

@@ -105,3 +105,25 @@ This file records decisions that should not be silently reversed.
 **Reason:** This prevents AI coding agents from confusing mock frontend work with completed backend functionality.
 
 **Consequence:** All future progress reports should use precise status language.
+
+---
+
+## 2026-10-10 — Manager JavaScript Modularization
+
+**Decision:** Split monolithic `manager.js` into cohesive modules (`manager-data.js`, `manager-core.js`, `manager-views.js`, `manager.js`) across Checkpoints `a969479` (Stage 1) and `ba4ada9` (Stage 2A).
+
+**Reason:** Solves maintainability and file length issues while strictly adhering to Vanilla JS requirements without adding framework dependencies.
+
+**Consequence:** All 11 Manager HTML files load scripts in exact order: `manager-data.js` → `manager-core.js` → `manager-views.js` → `manager.js` → `dashboard.js`.
+
+---
+
+## 2026-10-10 — Manager Refactoring Scope Constraints & Workflow Rules
+
+**Decision:**
+1. Preserve existing Manager Dashboard design and CSS unchanged unless a specific defect requires an approved fix.
+2. Do not create `manager-reports.js`; the remaining `manager.js` (514 lines) is sufficiently cohesive for search, filters, add forms, and report generator simulation.
+3. Do not refactor CSS merely to reduce file size or improve code organization.
+4. Build distinct Tourist, Tourism Stakeholder, and Administrator UI experiences where their workflows require them, reusing shared components and conventions where appropriate.
+5. Keep exactly four roles: Destination Manager, Tourism Stakeholder, Tourist, and Administrator.
+6. Continue following REUSE BEFORE CREATE and the approved Plan → Approve → Implement → Test → Report → Documentation → Git checkpoint workflow.
