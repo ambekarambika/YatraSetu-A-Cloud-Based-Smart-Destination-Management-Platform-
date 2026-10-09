@@ -1,0 +1,1413 @@
+/**
+ * YatraSetu — Destination Manager Subpage View Renderers & Detail Modals (manager-views.js)
+ * Handles connected view rendering across state/destination context changes,
+ * profile page controller, and entity detail/edit overlay modals.
+ * Dependencies: manager-data.js, manager-core.js
+ */
+
+/**
+ * Connected View Renderer Engine for Manager Subpages
+ */
+async function renderConnectedViews(context) {
+    if (!context || typeof window.YatraSetuManagerStore === 'undefined') return;
+    const { activeStateId, activeDestinationId } = context;
+    const config = STATE_CONFIGS[activeStateId] || STATE_CONFIGS['maharashtra'];
+
+    const formattedStateName = config.badge.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    const destLabel = activeDestinationId !== 'all' ? activeDestinationId.replace(/-/g, ' ').toUpperCase() : formattedStateName;
+
+    // Populate destination filter dropdowns dynamically if present on active page
+    const destinationsForState = await window.YatraSetuManagerStore.getDestinations(activeStateId);
+    const destFilterSelects = document.querySelectorAll('#destination-filter-select, .destination-context-dropdown');
+    destFilterSelects.forEach(select => {
+        if (select) {
+            const currentVal = activeDestinationId;
+            select.innerHTML = `<option value="all">All Destinations</option>` + 
+                destinationsForState.map(d => `<option value="${d.id}" ${d.id === currentVal ? 'selected' : ''}>${d.name}</option>`).join('');
+            select.value = currentVal;
+        }
+    });
+
+    // Update subpage header subtitles to reflect active state/destination context
+    const pageSubtitles = document.querySelectorAll('.page-title-group p');
+    pageSubtitles.forEach(p => {
+        if (!p.hasAttribute('data-template')) {
+            p.setAttribute('data-template', (p.textContent || '').trim());
+        }
+        const baseTemplate = p.getAttribute('data-template');
+        if (baseTemplate.match(/(in|across|for)\s+[\w\s&]+/i)) {
+            p.textContent = baseTemplate.replace(/(in|across|for)\s+[\w\s&]+/i, `$1 ${destLabel}`);
+        } else {
+            p.textContent = `${baseTemplate} for ${destLabel}`;
+        }
+    });
+
+    // 0. DASHBOARD OVERVIEW VIEW (dashboard.html)
+    const dashboardDestGrid = document.querySelector('.destinations-directory-grid');
+    if (dashboardDestGrid) {
+        const destinations = await window.YatraSetuManagerStore.getDestinations(activeStateId);
+        if (destinations && destinations.length > 0) {
+            dashboardDestGrid.innerHTML = destinations.slice(0, 4).map((dest) => `
+                <div class="dest-directory-card" data-destination-id="${dest.id}" data-state-id="${activeStateId}" style="cursor: pointer;">
+                    <div class="dest-card-thumb" style="background-image: url('${dest.img}'); background-size: cover; background-position: center; height: 160px;"></div>
+                    <div class="dest-card-body" style="padding: 1rem;">
+                        <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">${dest.name}</h4>
+                        <p style="font-size: 0.8rem; color: var(--text-muted);">${formattedStateName} Destination • Rank #${dest.rank}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+
+    const metricCards = document.querySelectorAll('.metrics-grid-4 .metric-card');
+    if (metricCards && metricCards.length >= 4) {
+        const destinations = await window.YatraSetuManagerStore.getDestinations(activeStateId);
+        const events = await window.YatraSetuManagerStore.getEvents(activeStateId, activeDestinationId);
+        const activeDestVal = metricCards[2].querySelector('.metric-value');
+        if (activeDestVal) activeDestVal.textContent = destinations.length;
+        const upcomingEventsVal = metricCards[3].querySelector('.metric-value');
+        if (upcomingEventsVal) upcomingEventsVal.textContent = events.length;
+    }
+
+    // 1. DESTINATIONS VIEW (destinations.html)
+    const destinations = await window.YatraSetuManagerStore.getDestinations(activeStateId);
+    const activeDest = (activeDestinationId !== 'all') 
+        ? (destinations.find(d => d.id === activeDestinationId) || destinations[0])
+        : (destinations[0] || null);
+
+    const destHeroBanner = document.querySelector('.destination-hero-banner');
+    if (destHeroBanner && activeDest) {
+        const destHeroTitle = destHeroBanner.querySelector('.hero-title');
+        const destHeroSub = destHeroBanner.querySelector('.hero-subtitle');
+        const destHeroBg = destHeroBanner.querySelector('.destination-hero-bg');
+        const destHeroStats = destHeroBanner.querySelector('div[style*="flex"]');
+
+        if (destHeroTitle) destHeroTitle.textContent = activeDest.name;
+        if (destHeroSub) destHeroSub.textContent = `${activeDest.name}, ${formattedStateName} • ${activeDest.category || 'Scenic destination in ' + formattedStateName}`;
+        if (destHeroBg && activeDest.img) destHeroBg.style.backgroundImage = `url('${activeDest.img}')`;
+
+        const attrCount = (window.YatraSetuManagerData.attractions || []).filter(a => a.destination_id === activeDest.id).length;
+        const evCount = (window.YatraSetuManagerData.events || []).filter(e => e.destination_id === activeDest.id).length;
+
+        if (destHeroStats) {
+            destHeroStats.innerHTML = `
+                <span>🏛️ <strong>${attrCount}</strong> Attractions</span>
+                <span>📅 <strong>${evCount}</strong> Events</span>
+                <span>⭐ <strong>4.8</strong> Rating</span>
+            `;
+        }
+
+        const heroBtn = destHeroBanner.querySelector('.hero-actions button');
+        if (heroBtn) {
+            heroBtn.setAttribute('data-destination-id', activeDest.id);
+            heroBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openDestinationDetailModal(activeDest.id, 'view');
+            };
+        }
+    }
+
+    const destGrid = document.querySelector('#destinations-cards-grid');
+    if (destGrid) {
+        if (destinations && destinations.length > 0) {
+            destGrid.innerHTML = destinations.map(dest => {
+                const isSelected = dest.id === activeDestinationId;
+                const attrCount = (window.YatraSetuManagerData.attractions || []).filter(a => a.destination_id === dest.id).length;
+                const evCount = (window.YatraSetuManagerData.events || []).filter(e => e.destination_id === dest.id).length;
+                return `
+                    <div class="dest-card ${isSelected ? 'selected-card' : ''}" data-destination-id="${dest.id}" data-state-id="${activeStateId}" style="cursor: pointer; border: ${isSelected ? '2px solid var(--state-accent)' : '1px solid var(--card-border)'}; border-radius: 12px; overflow: hidden; background: #fff; transition: all 0.2s;">
+                        <div class="dest-card-media" style="background-image: url('${dest.img}'); height: 160px; background-size: cover; background-position: center; position: relative;">
+                            <span class="dest-card-tag" style="position: absolute; top: 10px; left: 10px; background: rgba(15,23,42,0.75); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 600;">${dest.category || 'Destination'}</span>
+                            <span class="dest-card-rating" style="position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.9); color: #D97706; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">⭐ 4.8</span>
+                        </div>
+                        <div class="dest-card-body" style="padding: 1rem;">
+                            <h3 class="dest-card-title" style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.25rem;">${dest.name}</h3>
+                            <span class="dest-card-loc" style="font-size: 0.78rem; color: #64748b; font-weight: 500;">${formattedStateName} • Rank #${dest.rank}</span>
+                            <div class="dest-card-stats" style="display: flex; gap: 0.75rem; margin-top: 0.5rem; font-size: 0.75rem; color: #475569; font-weight: 600;">
+                                <span>🏛️ ${attrCount} Attractions</span>
+                                <span>📅 ${evCount} Events</span>
+                            </div>
+                            <div class="dest-card-actions" style="margin-top: 0.85rem; display: flex; gap: 0.35rem; flex-wrap: wrap;">
+                                <button type="button" class="btn-secondary btn-card-details" data-destination-id="${dest.id}" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; flex: 1; font-weight: 600;">View Details</button>
+                                <button type="button" class="btn-secondary btn-card-attractions" data-destination-id="${dest.id}" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; font-weight: 600;">Attractions</button>
+                                <button type="button" class="btn-secondary btn-card-events" data-destination-id="${dest.id}" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; font-weight: 600;">Events</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            destGrid.querySelectorAll('.btn-card-details').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const destId = btn.getAttribute('data-destination-id');
+                    openDestinationDetailModal(destId, 'view');
+                };
+            });
+
+            destGrid.querySelectorAll('.btn-card-attractions').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const destId = btn.getAttribute('data-destination-id');
+                    if (window.YatraSetuManagerContext) {
+                        window.YatraSetuManagerContext.setDestination(destId);
+                    }
+                    window.location.href = 'attractions.html';
+                };
+            });
+
+            destGrid.querySelectorAll('.btn-card-events').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const destId = btn.getAttribute('data-destination-id');
+                    if (window.YatraSetuManagerContext) {
+                        window.YatraSetuManagerContext.setDestination(destId);
+                    }
+                    window.location.href = 'events.html';
+                };
+            });
+        } else {
+            destGrid.innerHTML = `<div style="grid-column: 1 / -1; padding: 2.5rem; text-align: center; color: #64748b; font-weight: 500;">No destination records available for ${formattedStateName}.</div>`;
+        }
+    }
+
+    // 2. ATTRACTIONS VIEW (attractions.html)
+    const attractionsTableBody = document.querySelector('#attractions-table-body');
+    if (attractionsTableBody) {
+        const attractions = await window.YatraSetuManagerStore.getAttractions(activeStateId, activeDestinationId);
+        const allDestinations = await window.YatraSetuManagerStore.getDestinations(activeStateId);
+
+        if (typeof updateAttractionPillCounts === 'function') {
+            updateAttractionPillCounts(attractions);
+        }
+
+        if (attractions && attractions.length > 0) {
+            attractionsTableBody.innerHTML = attractions.map(attr => {
+                const destObj = allDestinations.find(d => d.id === attr.destination_id);
+                const destName = destObj ? destObj.name : (attr.destination_id ? attr.destination_id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : formattedStateName);
+                return `
+                <tr data-category="${attr.category ? attr.category.toLowerCase() : ''}" data-status="${(attr.status || 'open').toLowerCase()}">
+                    <td>
+                        <div class="poi-cell">
+                            <img src="${attr.img}" alt="${attr.name}" class="poi-thumb">
+                            <div>
+                                <div class="poi-info-title">${attr.name}</div>
+                                <div class="poi-info-sub">${attr.category || 'Attraction'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${destName}</td>
+                    <td>${attr.category || 'General'}</td>
+                    <td><strong style="color: #F59E0B;">⭐ ${attr.rating || '4.8'}</strong></td>
+                    <td><span class="badge badge-${attr.status === 'Closed' ? 'danger' : (attr.status === 'Maintenance' ? 'warning' : 'success')}">${attr.status || 'Open'}</span></td>
+                    <td style="text-align: right; white-space: nowrap;">
+                        <button type="button" class="btn-secondary btn-attr-view" data-attr-id="${attr.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; margin-right: 0.25rem;">View</button>
+                        <button type="button" class="btn-secondary btn-attr-edit" data-attr-id="${attr.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; margin-right: 0.25rem;">Edit</button>
+                        <button type="button" class="btn-secondary btn-attr-delete" data-attr-id="${attr.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; color: #DC2626; border-color: #FECACA;">Delete</button>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+
+            attractionsTableBody.querySelectorAll('.btn-attr-view').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openAttractionDetailModal(btn.getAttribute('data-attr-id'), 'view');
+                };
+            });
+            attractionsTableBody.querySelectorAll('.btn-attr-edit').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openAttractionDetailModal(btn.getAttribute('data-attr-id'), 'edit');
+                };
+            });
+            attractionsTableBody.querySelectorAll('.btn-attr-delete').forEach(btn => {
+                btn.onclick = async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const attrId = btn.getAttribute('data-attr-id');
+                    const attrItem = (window.YatraSetuManagerData.attractions || []).find(a => a.id === attrId);
+                    if (attrItem && confirm(`Are you sure you want to delete attraction "${attrItem.name}"?`)) {
+                        const idx = window.YatraSetuManagerData.attractions.findIndex(a => a.id === attrId);
+                        if (idx !== -1) window.YatraSetuManagerData.attractions.splice(idx, 1);
+                        await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                    }
+                };
+            });
+        } else {
+            attractionsTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2.5rem; color: #64748b; font-weight: 500;">No attraction records available for ${activeDestinationId !== 'all' ? activeDestinationId : formattedStateName}.</td></tr>`;
+        }
+        if (typeof filterTableRows === 'function') filterTableRows();
+    }
+
+    // 3. EVENTS VIEW (events.html)
+    const featuredEventTitle = document.querySelector('.event-featured-card h2');
+    const featuredEventP = document.querySelector('.event-featured-card p');
+    const featuredEventMedia = document.querySelector('.event-featured-media');
+    const featuredEventBtn = document.querySelector('.event-featured-card button');
+
+    const events = await window.YatraSetuManagerStore.getEvents(activeStateId, activeDestinationId);
+
+    if (featuredEventTitle && events && events.length > 0) {
+        const ev0 = events[0];
+        featuredEventTitle.textContent = ev0.title;
+        if (featuredEventP) featuredEventP.innerHTML = `📍 <strong>${ev0.dateNum || '28'} ${ev0.dateMonth || 'SEP'}</strong> • ${ev0.location || ev0.loc}`;
+        if (featuredEventMedia && ev0.img) featuredEventMedia.style.backgroundImage = `url('${ev0.img}')`;
+        if (featuredEventBtn) {
+            featuredEventBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openEventDetailModal(ev0.id, 'view');
+            };
+        }
+    }
+
+    const upcomingEventsContainer = document.querySelector('#upcoming-events-container');
+    if (upcomingEventsContainer) {
+        if (events && events.length > 0) {
+            upcomingEventsContainer.innerHTML = events.map(ev => `
+                <div class="event-timeline-card" data-category="${(ev.category || 'cultural').toLowerCase()}" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border: 1px solid var(--card-border); border-radius: 10px; margin-bottom: 0.75rem; background: #fff;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div class="event-date-box" style="text-align: center; background: var(--state-accent-light); padding: 0.5rem 0.75rem; border-radius: 8px;">
+                            <span class="event-date-num" style="display: block; font-weight: 800; font-size: 1.1rem; color: var(--state-accent);">${ev.dateNum}</span>
+                            <span class="event-date-month" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">${ev.dateMonth}</span>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.2rem;">${ev.title}</h4>
+                            <span style="font-size: 0.78rem; color: var(--text-muted);">📍 ${ev.location}</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                        <span class="status-pill ${ev.statusClass}">${ev.status}</span>
+                        <button type="button" class="btn-secondary btn-event-view" data-event-id="${ev.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600;">View Details</button>
+                        <button type="button" class="btn-secondary btn-event-edit" data-event-id="${ev.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600;">Edit</button>
+                        <button type="button" class="btn-secondary btn-event-delete" data-event-id="${ev.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; color: #DC2626; border-color: #FECACA;">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+
+            upcomingEventsContainer.querySelectorAll('.btn-event-view').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openEventDetailModal(btn.getAttribute('data-event-id'), 'view');
+                };
+            });
+            upcomingEventsContainer.querySelectorAll('.btn-event-edit').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openEventDetailModal(btn.getAttribute('data-event-id'), 'edit');
+                };
+            });
+            upcomingEventsContainer.querySelectorAll('.btn-event-delete').forEach(btn => {
+                btn.onclick = async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const eventId = btn.getAttribute('data-event-id');
+                    const evItem = (window.YatraSetuManagerData.events || []).find(e => e.id === eventId);
+                    if (evItem && confirm(`Are you sure you want to delete event "${evItem.title}"?`)) {
+                        const idx = window.YatraSetuManagerData.events.findIndex(e => e.id === eventId);
+                        if (idx !== -1) window.YatraSetuManagerData.events.splice(idx, 1);
+                        await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                    }
+                };
+            });
+        } else {
+            upcomingEventsContainer.innerHTML = `<div style="padding: 2.5rem; text-align: center; color: #64748b; font-weight: 500;">No event records available for ${activeDestinationId !== 'all' ? activeDestinationId : formattedStateName}.</div>`;
+        }
+    }
+
+    // 4. STAKEHOLDERS VIEW (stakeholders.html)
+    const stakeholdersTableBody = document.querySelector('#stakeholders-table-body');
+    if (stakeholdersTableBody) {
+        const stakeholders = await window.YatraSetuManagerStore.getStakeholders(activeStateId, activeDestinationId);
+        if (stakeholders && stakeholders.length > 0) {
+            stakeholdersTableBody.innerHTML = stakeholders.map(sh => `
+                <tr data-category="${(sh.category || '').toLowerCase()}">
+                    <td><strong>${sh.name}</strong></td>
+                    <td>${sh.category}</td>
+                    <td>${sh.destination}</td>
+                    <td>${sh.contact}</td>
+                    <td><span class="status-pill active">${sh.status || 'Verified'}</span></td>
+                    <td style="text-align: right; white-space: nowrap;">
+                        <button type="button" class="btn-secondary btn-sh-view" data-sh-id="${sh.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; margin-right: 0.25rem;">View</button>
+                        <button type="button" class="btn-secondary btn-sh-edit" data-sh-id="${sh.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; margin-right: 0.25rem;">Edit</button>
+                        <button type="button" class="btn-secondary btn-sh-delete" data-sh-id="${sh.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; color: #DC2626; border-color: #FECACA;">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            stakeholdersTableBody.querySelectorAll('.btn-sh-view').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openStakeholderDetailModal(btn.getAttribute('data-sh-id'), 'view');
+                };
+            });
+            stakeholdersTableBody.querySelectorAll('.btn-sh-edit').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openStakeholderDetailModal(btn.getAttribute('data-sh-id'), 'edit');
+                };
+            });
+            stakeholdersTableBody.querySelectorAll('.btn-sh-delete').forEach(btn => {
+                btn.onclick = async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const shId = btn.getAttribute('data-sh-id');
+                    const shItem = (window.YatraSetuManagerData.stakeholders || []).find(s => s.id === shId);
+                    if (shItem && confirm(`Are you sure you want to delete stakeholder "${shItem.name}"?`)) {
+                        const idx = window.YatraSetuManagerData.stakeholders.findIndex(s => s.id === shId);
+                        if (idx !== -1) window.YatraSetuManagerData.stakeholders.splice(idx, 1);
+                        await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                    }
+                };
+            });
+        } else {
+            stakeholdersTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2.5rem; color: #64748b; font-weight: 500;">No stakeholder records available for ${activeDestinationId !== 'all' ? activeDestinationId : formattedStateName}.</td></tr>`;
+        }
+    }
+
+    // 5. VISITOR STATISTICS VIEW (visitor-statistics.html)
+    const visitorOriginLabel = document.getElementById('visitor-origin-state-label');
+    if (visitorOriginLabel) {
+        visitorOriginLabel.innerHTML = `<span class="legend-dot" style="background: var(--state-accent);"></span> ${formattedStateName}`;
+    }
+
+    const visitorMetricCards = document.querySelectorAll('.metrics-grid-4 .metric-card');
+    if (visitorMetricCards && visitorMetricCards.length >= 4 && window.location.pathname.includes('visitor-statistics.html')) {
+        const isSingleDest = activeDestinationId !== 'all';
+        const totalVis = isSingleDest ? '142.5K' : '1.85M';
+        const domVis = isSingleDest ? '128.0K' : '1.62M';
+        const intlVis = isSingleDest ? '14.5K' : '230K';
+        const avgStay = isSingleDest ? '2.4 Days' : '3.8 Days';
+
+        const vals = [totalVis, domVis, intlVis, avgStay];
+        const subs = [
+            `Active tracking for ${destLabel}`,
+            `90% of total visitors`,
+            `10% of total visitors`,
+            `Average tourist stay duration`
+        ];
+
+        visitorMetricCards.forEach((card, idx) => {
+            const valEl = card.querySelector('.metric-value');
+            const subEl = card.querySelector('.metric-footer');
+            if (valEl && vals[idx]) valEl.textContent = vals[idx];
+            if (subEl && subs[idx]) subEl.textContent = subs[idx];
+        });
+    }
+
+    // 6. FEEDBACK VIEW (feedback.html)
+    const feedbackContainer = document.querySelector('#feedback-list-container');
+    if (feedbackContainer) {
+        const feedback = await window.YatraSetuManagerStore.getFeedback(activeStateId, activeDestinationId);
+        
+        // Update Overall Rating Card & Rating Distribution if elements exist
+        const overallScoreEl = document.querySelector('.rating-overall-card .overall-score');
+        const overallReviewSub = document.querySelector('.rating-overall-card span:last-child');
+        const starRatingDisplay = document.querySelector('.rating-overall-card div[style*="font-size"]');
+        
+        if (overallScoreEl) {
+            if (feedback && feedback.length > 0) {
+                const sumRating = feedback.reduce((acc, f) => acc + (f.rating || 5), 0);
+                const avgScore = (sumRating / feedback.length).toFixed(1);
+                overallScoreEl.textContent = avgScore;
+                if (starRatingDisplay) starRatingDisplay.textContent = '★'.repeat(Math.round(avgScore)) + '☆'.repeat(5 - Math.round(avgScore));
+                if (starRatingDisplay) starRatingDisplay.style.color = '#F59E0B';
+                if (overallReviewSub) overallReviewSub.textContent = `${feedback.length} review${feedback.length > 1 ? 's' : ''} recorded for ${destLabel}`;
+            } else {
+                overallScoreEl.textContent = '4.8';
+                if (starRatingDisplay) starRatingDisplay.textContent = '★★★★★';
+                if (starRatingDisplay) starRatingDisplay.style.color = '#F59E0B';
+                if (overallReviewSub) overallReviewSub.textContent = `Active ratings for ${destLabel}`;
+            }
+        }
+
+        // Update Rating Distribution Bar Fills
+        const ratingBarItems = document.querySelectorAll('.rating-bar-list .rating-bar-item');
+        if (ratingBarItems && ratingBarItems.length >= 5) {
+            const defaultDist = ['75%', '18%', '5%', '2%', '0%'];
+            ratingBarItems.forEach((item, idx) => {
+                const fill = item.querySelector('.rating-bar-fill');
+                const pct = item.querySelector('span:last-child');
+                if (fill && defaultDist[idx]) fill.style.width = defaultDist[idx];
+                if (pct && defaultDist[idx]) pct.textContent = defaultDist[idx];
+            });
+        }
+
+        if (feedback && feedback.length > 0) {
+            feedbackContainer.innerHTML = feedback.map(fb => `
+                <div class="feedback-item-card" data-category="${(fb.category || 'reviews').toLowerCase()}" style="background: #fff; border: 1px solid var(--card-border); border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <div class="feedback-author-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <div class="author-info" style="display: flex; align-items: center; gap: 0.75rem;">
+                            <div class="author-avatar" style="width: 36px; height: 36px; border-radius: 50%; background: var(--state-accent-light); color: var(--state-accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">${fb.author ? fb.author.slice(0, 2).toUpperCase() : 'VS'}</div>
+                            <div>
+                                <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary); margin: 0;">${fb.author || 'Visitor'}</h4>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">${fb.date || 'Recently'} • ${fb.destination || formattedStateName}</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="color: #F59E0B; font-size: 0.85rem;">${'★'.repeat(fb.rating || 5)}</span>
+                            <span class="badge badge-success">Positive</span>
+                            <button type="button" class="btn-secondary btn-fb-view" data-fb-id="${fb.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600;">View</button>
+                            <button type="button" class="btn-secondary btn-fb-delete" data-fb-id="${fb.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; color: #DC2626; border-color: #FECACA;">Delete</button>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin: 0;">${fb.text}</p>
+                </div>
+            `).join('');
+
+            feedbackContainer.querySelectorAll('.btn-fb-view').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openFeedbackDetailModal(btn.getAttribute('data-fb-id'));
+                };
+            });
+            feedbackContainer.querySelectorAll('.btn-fb-delete').forEach(btn => {
+                btn.onclick = async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const fbId = btn.getAttribute('data-fb-id');
+                    if (confirm('Are you sure you want to delete this feedback record?')) {
+                        const idx = window.YatraSetuManagerData.feedback.findIndex(f => f.id === fbId);
+                        if (idx !== -1) window.YatraSetuManagerData.feedback.splice(idx, 1);
+                        await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                    }
+                };
+            });
+        } else {
+            feedbackContainer.innerHTML = `<div style="padding: 2.5rem; text-align: center; color: #64748b; font-weight: 500;">No visitor feedback records available for ${activeDestinationId !== 'all' ? activeDestinationId : formattedStateName}.</div>`;
+        }
+    }
+
+    // 7. ANALYTICS VIEW (analytics.html)
+    const analyticsTopList = document.querySelector('#analytics-top-destinations-list');
+    if (analyticsTopList && config.topDestinations && config.topDestinations.length > 0) {
+        analyticsTopList.innerHTML = config.topDestinations.map((dest, i) => `
+            <div class="ranking-item">
+                <div class="ranking-meta">
+                    <span>${dest.name}</span>
+                    <span>Rank #${dest.num || i + 1}</span>
+                </div>
+                <div class="ranking-track">
+                    <div class="ranking-fill" style="width: ${Math.max(30, 85 - i * 14)}%;"></div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // 8. REPORTS VIEW (reports.html)
+    const reportCardDescs = document.querySelectorAll('#reports-card-grid .report-item-card p');
+    if (reportCardDescs && reportCardDescs.length >= 5) {
+        const reportTemplates = [
+            `Comprehensive tourism statistics and insights across ${formattedStateName} state circuits.`,
+            `Individual destination footfall analysis, carrying capacity, and visitor density for ${formattedStateName}.`,
+            `Visitor origin, stay duration, and demographic analysis for ${formattedStateName} state planning.`,
+            `Event statistics, visitor turnout, and economic impact analysis for ${formattedStateName} festivals.`,
+            `Tourism ecosystem analysis, partner registration status, and service coverage in ${formattedStateName}.`
+        ];
+        reportCardDescs.forEach((p, idx) => {
+            if (reportTemplates[idx]) {
+                p.textContent = reportTemplates[idx];
+            }
+        });
+    }
+
+    // 9. DECISION SUPPORT VIEW (decision-support.html)
+    const signalsContainer = document.querySelector('#decision-support-signals-container');
+    if (signalsContainer) {
+        const firstEvent = (events && events.length > 0) ? events[0] : (config.events && config.events[0]) ? config.events[0] : { title: `${formattedStateName} Cultural Festival`, location: formattedStateName };
+        const dest1 = (config.topDestinations && config.topDestinations[0]) ? config.topDestinations[0].name : formattedStateName;
+        const dest2 = (config.topDestinations && config.topDestinations[1]) ? config.topDestinations[1].name : dest1;
+
+        signalsContainer.innerHTML = `
+            <div class="decision-signal-card" data-category="insights" style="border-left-color: #3B82F6;">
+                <div class="signal-header">
+                    <div style="display: flex; align-items: center; gap: 0.65rem;">
+                        <span style="font-size: 1.2rem;">📈</span>
+                        <h3 class="signal-title">Visitor Activity Surge</h3>
+                    </div>
+                    <span class="badge badge-info">Festival Event</span>
+                </div>
+                <div class="signal-grid">
+                    <div class="signal-box">
+                        <span class="signal-box-lbl" style="color: #3B82F6;">DATA SIGNAL</span>
+                        <p class="signal-box-txt">Visitor numbers increased during the ${firstEvent.title} period.</p>
+                    </div>
+                    <div class="signal-box">
+                        <span class="signal-box-lbl">OBSERVATION</span>
+                        <p class="signal-box-txt">Overcrowding spike in visitors across ${firstEvent.location || firstEvent.loc || formattedStateName}.</p>
+                    </div>
+                    <div class="signal-box" style="background: #EFF6FF; border-color: #BFDBFE;">
+                        <span class="signal-box-lbl" style="color: #1D4ED8;">MANAGEMENT CONSIDERATION</span>
+                        <p class="signal-box-txt" style="color: #1E3A8A; font-weight: 500;">Review crowd-management arrangements, transport facilities, and waste-management for future event periods in ${formattedStateName}.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="decision-signal-card" data-category="destination" style="border-left-color: #8B5CF6;">
+                <div class="signal-header">
+                    <div style="display: flex; align-items: center; gap: 0.65rem;">
+                        <span style="font-size: 1.2rem;">⚡</span>
+                        <h3 class="signal-title">Emerging Destination Interest</h3>
+                    </div>
+                    <span class="badge badge-warning">High Growth</span>
+                </div>
+                <div class="signal-grid">
+                    <div class="signal-box">
+                        <span class="signal-box-lbl" style="color: #8B5CF6;">DATA SIGNAL</span>
+                        <p class="signal-box-txt">Interest in ${dest1} increased during recent quarters.</p>
+                    </div>
+                    <div class="signal-box">
+                        <span class="signal-box-lbl">OBSERVATION</span>
+                        <p class="signal-box-txt">Growing popularity among travelers visiting ${formattedStateName}.</p>
+                    </div>
+                    <div class="signal-box" style="background: #F5F3FF; border-color: #DDD6FE;">
+                        <span class="signal-box-lbl" style="color: #6D28D9;">MANAGEMENT CONSIDERATION</span>
+                        <p class="signal-box-txt" style="color: #4C1D95; font-weight: 500;">Consider infrastructure improvements and additional tourism services in ${dest1}.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="decision-signal-card" data-category="visitor" style="border-left-color: var(--state-accent);">
+                <div class="signal-header">
+                    <div style="display: flex; align-items: center; gap: 0.65rem;">
+                        <span style="font-size: 1.2rem;">🏔️</span>
+                        <h3 class="signal-title">Seasonal Transition Signal</h3>
+                    </div>
+                    <span class="badge badge-success">Seasonal Trend</span>
+                </div>
+                <div class="signal-grid">
+                    <div class="signal-box">
+                        <span class="signal-box-lbl" style="color: var(--state-accent);">DATA SIGNAL</span>
+                        <p class="signal-box-txt">Queries for ${dest2} up for the upcoming seasonal window.</p>
+                    </div>
+                    <div class="signal-box">
+                        <span class="signal-box-lbl">OBSERVATION</span>
+                        <p class="signal-box-txt">Higher demand for heritage and eco-trails across ${formattedStateName}.</p>
+                    </div>
+                    <div class="signal-box" style="background: var(--state-accent-light); border-color: var(--state-accent-border);">
+                        <span class="signal-box-lbl" style="color: var(--state-accent-hover);">MANAGEMENT CONSIDERATION</span>
+                        <p class="signal-box-txt" style="color: var(--text-primary); font-weight: 500;">Deploy safety marshals and coordinate with local tourism operators in ${dest2}.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+/**
+ * Manager Profile Page Functionality
+ */
+function initManagerProfilePage() {
+    const isProfilePage = window.location.pathname.includes('profile.html');
+    const profileBannerName = document.getElementById('profile-banner-name');
+
+    if (!isProfilePage && !profileBannerName) return;
+
+    const data = window.YatraSetuManagerData || {};
+    const profile = data.profile || {
+        id: 'MGR-MH-40192',
+        name: 'Rajesh Patil',
+        email: 'rajesh.patil@mahatourism.gov.in',
+        phone: '+91 98230 41092',
+        manager_type: 'State Manager',
+        scope: 'STATE',
+        state_id: 'maharashtra',
+        state_name: 'Maharashtra',
+        destination: 'All destinations in Maharashtra',
+        status: 'Active',
+        avatar_initials: 'RP'
+    };
+
+    // Render profile values to DOM
+    const renderProfileDOM = () => {
+        const initials = profile.avatar_initials || (profile.name ? profile.name.split(' ').map(n=>n[0]).join('').toUpperCase() : 'AA');
+
+        // Banner Elements
+        const bannerAvatar = document.getElementById('profile-banner-avatar');
+        const bannerName = document.getElementById('profile-banner-name');
+        const bannerRole = document.getElementById('profile-banner-role');
+        const bannerStatus = document.getElementById('profile-banner-status');
+
+        if (bannerAvatar) bannerAvatar.textContent = initials;
+        if (bannerName) bannerName.textContent = profile.name;
+        if (bannerRole) bannerRole.innerHTML = `${profile.manager_type} — ${profile.state_name || 'Maharashtra'} • ID: <strong style="color: var(--text-primary);">${profile.id}</strong>`;
+        if (bannerStatus) bannerStatus.textContent = `${profile.status || 'Active'} / Verified`;
+
+        // Card Text Elements
+        const valName = document.getElementById('prof-val-name');
+        const valEmail = document.getElementById('prof-val-email');
+        const valPhone = document.getElementById('prof-val-phone');
+        const valId = document.getElementById('prof-val-id');
+        const valRole = document.getElementById('prof-val-role');
+        const valType = document.getElementById('prof-val-type');
+        const valState = document.getElementById('prof-val-state');
+        const valDest = document.getElementById('prof-val-dest-scope');
+
+        if (valName) valName.textContent = profile.name;
+        if (valEmail) valEmail.textContent = profile.email;
+        if (valPhone) valPhone.textContent = profile.phone;
+        if (valId) valId.textContent = profile.id;
+        if (valRole) valRole.textContent = profile.manager_type || 'Destination Manager';
+        if (valType) valType.textContent = profile.manager_type || 'State Manager';
+        if (valState) valState.textContent = profile.state_name || 'Maharashtra';
+        if (valDest) valDest.textContent = profile.destination || 'All Destinations';
+    };
+
+    renderProfileDOM();
+
+    // Open Edit Profile Modal Handlers
+    const openEditBtn = document.getElementById('btn-open-edit-profile');
+    const editInfoCardBtn = document.getElementById('btn-edit-info-card');
+    const editModal = document.getElementById('editProfileModal');
+
+    const openProfileModal = () => {
+        if (!editModal) return;
+        const nameInput = document.getElementById('edit-prof-name');
+        const emailInput = document.getElementById('edit-prof-email');
+        const phoneInput = document.getElementById('edit-prof-phone');
+
+        if (nameInput) nameInput.value = profile.name;
+        if (emailInput) emailInput.value = profile.email;
+        if (phoneInput) phoneInput.value = profile.phone;
+
+        editModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    if (openEditBtn) openEditBtn.onclick = openProfileModal;
+    if (editInfoCardBtn) editInfoCardBtn.onclick = openProfileModal;
+
+    // Check URL parameters for direct modal trigger e.g. profile.html?action=edit
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('action') === 'edit') {
+        openProfileModal();
+    }
+
+    // Close Edit Modal Handlers
+    const closeEditBtn = document.getElementById('btn-close-edit-profile');
+    const cancelEditBtn = document.getElementById('btn-cancel-edit-profile');
+    const closeEditModal = () => {
+        if (editModal) {
+            editModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    };
+    if (closeEditBtn) closeEditBtn.onclick = closeEditModal;
+    if (cancelEditBtn) cancelEditBtn.onclick = closeEditModal;
+
+    // Save Profile Changes
+    const saveProfileBtn = document.getElementById('btn-save-profile');
+    if (saveProfileBtn) {
+        saveProfileBtn.onclick = () => {
+            const nameInput = document.getElementById('edit-prof-name');
+            const emailInput = document.getElementById('edit-prof-email');
+            const phoneInput = document.getElementById('edit-prof-phone');
+
+            const newName = nameInput ? nameInput.value.trim() : '';
+            const newEmail = emailInput ? emailInput.value.trim() : '';
+            const newPhone = phoneInput ? phoneInput.value.trim() : '';
+
+            if (!newName) {
+                alert('Please enter your full name.');
+                return;
+            }
+
+            profile.name = newName;
+            if (newEmail) profile.email = newEmail;
+            if (newPhone) profile.phone = newPhone;
+            profile.avatar_initials = newName.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase();
+
+            renderProfileDOM();
+
+            // Sync Topbar Avatar & Name
+            const userAvatarEl = document.querySelector('.user-profile-badge .user-avatar');
+            const userNameEl = document.querySelector('.user-profile-badge .user-name');
+            if (userAvatarEl) userAvatarEl.textContent = profile.avatar_initials;
+            if (userNameEl) userNameEl.textContent = profile.name;
+
+            closeEditModal();
+        };
+    }
+
+    // Change Password Modal Handlers
+    const changePassCardBtn = document.getElementById('btn-change-password-card');
+    const passModal = document.getElementById('changePasswordModal');
+
+    const openPassModal = () => {
+        if (!passModal) return;
+        document.getElementById('pass-current').value = '';
+        document.getElementById('pass-new').value = '';
+        document.getElementById('pass-confirm').value = '';
+        passModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    if (changePassCardBtn) changePassCardBtn.onclick = openPassModal;
+    if (urlParams.get('tab') === 'security') {
+        openPassModal();
+    }
+
+    const closePassBtn = document.getElementById('btn-close-change-pass');
+    const cancelPassBtn = document.getElementById('btn-cancel-pass');
+    const closePassModal = () => {
+        if (passModal) {
+            passModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    };
+    if (closePassBtn) closePassBtn.onclick = closePassModal;
+    if (cancelPassBtn) cancelPassBtn.onclick = closePassModal;
+
+    const savePassBtn = document.getElementById('btn-save-pass');
+    if (savePassBtn) {
+        savePassBtn.onclick = () => {
+            const current = document.getElementById('pass-current').value;
+            const newP = document.getElementById('pass-new').value;
+            const confP = document.getElementById('pass-confirm').value;
+
+            if (!current) { alert('Please enter your current password.'); return; }
+            if (!newP || newP.length < 6) { alert('New password must be at least 6 characters.'); return; }
+            if (newP !== confP) { alert('New password and confirmation do not match.'); return; }
+
+            alert('Password updated successfully!');
+            closePassModal();
+        };
+    }
+
+    // Logout from Security Card
+    const logoutSessionBtn = document.getElementById('btn-logout-session');
+    if (logoutSessionBtn) {
+        logoutSessionBtn.onclick = () => {
+            if (confirm('Are you sure you want to log out of your session?')) {
+                sessionStorage.clear();
+                window.location.href = '../login.html';
+            }
+        };
+    }
+}
+
+/**
+ * Destination Details & Actions Modal Functionality
+ * Supports: View Details, Edit Details, Save, Cancel, Delete, Close, View Attractions, View Events, View Stakeholders
+ */
+function openDestinationDetailModal(destId, mode = 'view') {
+    if (!destId || !window.YatraSetuManagerData || !window.YatraSetuManagerData.destinations) return;
+    const dest = window.YatraSetuManagerData.destinations.find(d => d.id === destId);
+    if (!dest) return;
+
+    const modal = document.getElementById('destinationDetailModal');
+    const titleEl = document.getElementById('detail-modal-title');
+    const bodyEl = document.getElementById('detail-modal-body');
+    const footerEl = document.getElementById('detail-modal-footer');
+    const closeBtn = document.getElementById('btn-close-detail-modal');
+
+    if (!modal || !bodyEl || !footerEl) return;
+
+    const stateConfig = STATE_CONFIGS[dest.state_id] || STATE_CONFIGS['maharashtra'];
+    const formattedState = stateConfig ? stateConfig.badge : dest.state_id;
+
+    const attrCount = (window.YatraSetuManagerData.attractions || []).filter(a => a.destination_id === dest.id).length;
+    const evCount = (window.YatraSetuManagerData.events || []).filter(e => e.destination_id === dest.id).length;
+    const shCount = (window.YatraSetuManagerData.stakeholders || []).filter(s => s.destination_id === dest.id).length;
+
+    if (mode === 'view') {
+        if (titleEl) titleEl.textContent = `${dest.name} — Destination Profile`;
+
+        bodyEl.innerHTML = `
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <img src="${dest.img}" alt="${dest.name}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px;">
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; font-size: 0.88rem;">
+                <div><strong>Destination Name:</strong> <span id="detail-dest-name">${dest.name}</span></div>
+                <div><strong>ID:</strong> <span id="detail-dest-id">${dest.id}</span></div>
+                <div><strong>Category:</strong> <span>${dest.category || 'Heritage & Tourism'}</span></div>
+                <div><strong>State:</strong> <span>${formattedState}</span></div>
+                <div><strong>Rank:</strong> <span>#${dest.rank}</span></div>
+                <div><strong>Status:</strong> <span class="badge badge-success">Active Destination</span></div>
+            </div>
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 0.85rem; font-size: 0.85rem; margin-bottom: 1rem;">
+                <h4 style="font-size: 0.8rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.5rem;">Associated Ecosystem Records</h4>
+                <div style="display: flex; gap: 1.25rem;">
+                    <span>🏛️ <strong>${attrCount}</strong> Attractions</span>
+                    <span>📅 <strong>${evCount}</strong> Events</span>
+                    <span>🤝 <strong>${shCount}</strong> Stakeholders</span>
+                </div>
+            </div>
+        `;
+
+        footerEl.innerHTML = `
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="button" class="btn-primary" id="btn-edit-dest-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Edit Details</button>
+                <button type="button" class="btn-secondary" id="btn-delete-dest-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; color: #DC2626; border-color: #FECACA;">Delete</button>
+            </div>
+            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                <button type="button" class="btn-secondary" id="btn-nav-attr-modal" style="padding: 0.45rem 0.75rem; font-size: 0.8rem;">View Attractions</button>
+                <button type="button" class="btn-secondary" id="btn-nav-ev-modal" style="padding: 0.45rem 0.75rem; font-size: 0.8rem;">View Events</button>
+                <button type="button" class="btn-secondary" id="btn-nav-sh-modal" style="padding: 0.45rem 0.75rem; font-size: 0.8rem;">View Stakeholders</button>
+            </div>
+        `;
+
+        // Bind Action Handlers
+        const editBtn = document.getElementById('btn-edit-dest-modal');
+        if (editBtn) editBtn.onclick = () => openDestinationDetailModal(destId, 'edit');
+
+        const deleteBtn = document.getElementById('btn-delete-dest-modal');
+        if (deleteBtn) {
+            deleteBtn.onclick = async () => {
+                if (confirm(`Are you sure you want to delete destination "${dest.name}" (${dest.id})?`)) {
+                    const idx = window.YatraSetuManagerData.destinations.findIndex(d => d.id === destId);
+                    if (idx !== -1) {
+                        window.YatraSetuManagerData.destinations.splice(idx, 1);
+                    }
+                    if (window.YatraSetuManagerContext) {
+                        const ctx = window.YatraSetuManagerContext.getActiveContext();
+                        if (ctx.activeDestinationId === destId) {
+                            window.YatraSetuManagerContext.setDestination('all');
+                        }
+                    }
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                    await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                }
+            };
+        }
+
+        const navAttrBtn = document.getElementById('btn-nav-attr-modal');
+        if (navAttrBtn) {
+            navAttrBtn.onclick = () => {
+                if (window.YatraSetuManagerContext) window.YatraSetuManagerContext.setDestination(destId);
+                window.location.href = 'attractions.html';
+            };
+        }
+
+        const navEvBtn = document.getElementById('btn-nav-ev-modal');
+        if (navEvBtn) {
+            navEvBtn.onclick = () => {
+                if (window.YatraSetuManagerContext) window.YatraSetuManagerContext.setDestination(destId);
+                window.location.href = 'events.html';
+            };
+        }
+
+        const navShBtn = document.getElementById('btn-nav-sh-modal');
+        if (navShBtn) {
+            navShBtn.onclick = () => {
+                if (window.YatraSetuManagerContext) window.YatraSetuManagerContext.setDestination(destId);
+                window.location.href = 'stakeholders.html';
+            };
+        }
+
+    } else if (mode === 'edit') {
+        if (titleEl) titleEl.textContent = `Edit Destination — ${dest.name}`;
+
+        bodyEl.innerHTML = `
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Destination Name</label>
+                <input type="text" id="edit-dest-name-input" class="form-control" value="${dest.name}">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Category</label>
+                <select id="edit-dest-cat-select" class="form-control">
+                    <option value="Heritage Fort" ${dest.category === 'Heritage Fort' ? 'selected' : ''}>Heritage Fort</option>
+                    <option value="UNESCO World Heritage Site" ${dest.category === 'UNESCO World Heritage Site' ? 'selected' : ''}>UNESCO World Heritage Site</option>
+                    <option value="Hill Station" ${dest.category === 'Hill Station' ? 'selected' : ''}>Hill Station</option>
+                    <option value="Pilgrimage Site" ${dest.category === 'Pilgrimage Site' ? 'selected' : ''}>Pilgrimage Site</option>
+                    <option value="Eco & Wildlife Reserve" ${dest.category === 'Eco & Wildlife Reserve' ? 'selected' : ''}>Eco & Wildlife Reserve</option>
+                    <option value="Coastal Beach" ${dest.category === 'Coastal Beach' ? 'selected' : ''}>Coastal Beach</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Image URL</label>
+                <input type="text" id="edit-dest-img-input" class="form-control" value="${dest.img || ''}">
+            </div>
+        `;
+
+        footerEl.innerHTML = `
+            <button type="button" class="btn-secondary" id="btn-cancel-edit-dest" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Cancel</button>
+            <button type="button" class="btn-primary" id="btn-save-edit-dest" style="padding: 0.45rem 1.1rem; font-size: 0.82rem;">Save Changes</button>
+        `;
+
+        const cancelEditBtn = document.getElementById('btn-cancel-edit-dest');
+        if (cancelEditBtn) cancelEditBtn.onclick = () => openDestinationDetailModal(destId, 'view');
+
+        const saveEditBtn = document.getElementById('btn-save-edit-dest');
+        if (saveEditBtn) {
+            saveEditBtn.onclick = async () => {
+                const nameVal = document.getElementById('edit-dest-name-input').value.trim();
+                const catVal = document.getElementById('edit-dest-cat-select').value;
+                const imgVal = document.getElementById('edit-dest-img-input').value.trim();
+
+                if (!nameVal) {
+                    alert('Please enter a destination name.');
+                    return;
+                }
+
+                dest.name = nameVal;
+                dest.category = catVal;
+                if (imgVal) dest.img = imgVal;
+
+                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                openDestinationDetailModal(destId, 'view');
+            };
+        }
+    }
+
+    if (closeBtn) {
+        closeBtn.onclick = () => {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+    }
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * Attraction Details & Actions Modal Functionality
+ */
+function openAttractionDetailModal(attrId, mode = 'view') {
+    if (!attrId || !window.YatraSetuManagerData || !window.YatraSetuManagerData.attractions) return;
+    const attr = window.YatraSetuManagerData.attractions.find(a => a.id === attrId);
+    if (!attr) return;
+
+    const modal = document.getElementById('attractionDetailModal');
+    const titleEl = document.getElementById('attr-detail-modal-title');
+    const bodyEl = document.getElementById('attr-detail-modal-body');
+    const footerEl = document.getElementById('attr-detail-modal-footer');
+    const closeBtn = document.getElementById('btn-close-attr-detail-modal');
+
+    if (!modal || !bodyEl || !footerEl) return;
+
+    const allDest = window.YatraSetuManagerData.destinations || [];
+    const destObj = allDest.find(d => d.id === attr.destination_id);
+    const destName = destObj ? destObj.name : attr.destination_id;
+
+    if (mode === 'view') {
+        if (titleEl) titleEl.textContent = `${attr.name} — Attraction Details`;
+
+        bodyEl.innerHTML = `
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <img src="${attr.img}" alt="${attr.name}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px;">
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; font-size: 0.88rem;">
+                <div><strong>Attraction Name:</strong> <span>${attr.name}</span></div>
+                <div><strong>Destination:</strong> <span>${destName}</span></div>
+                <div><strong>Category:</strong> <span>${attr.category || 'Attraction'}</span></div>
+                <div><strong>State:</strong> <span>${attr.state_id ? attr.state_id.toUpperCase() : 'MAHARASHTRA'}</span></div>
+                <div><strong>Rating:</strong> <span style="color: #F59E0B; font-weight: 700;">⭐ ${attr.rating || '4.8'}</span></div>
+                <div><strong>Status:</strong> <span class="badge badge-${attr.status === 'Closed' ? 'danger' : (attr.status === 'Maintenance' ? 'warning' : 'success')}">${attr.status || 'Open'}</span></div>
+            </div>
+        `;
+
+        footerEl.innerHTML = `
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="button" class="btn-primary" id="btn-edit-attr-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Edit Details</button>
+                <button type="button" class="btn-secondary" id="btn-delete-attr-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; color: #DC2626; border-color: #FECACA;">Delete</button>
+            </div>
+            <button type="button" class="btn-secondary" id="btn-close-attr-modal-action" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Close</button>
+        `;
+
+        const editBtn = document.getElementById('btn-edit-attr-modal');
+        if (editBtn) editBtn.onclick = () => openAttractionDetailModal(attrId, 'edit');
+
+        const deleteBtn = document.getElementById('btn-delete-attr-modal');
+        if (deleteBtn) {
+            deleteBtn.onclick = async () => {
+                if (confirm(`Are you sure you want to delete attraction "${attr.name}"?`)) {
+                    const idx = window.YatraSetuManagerData.attractions.findIndex(a => a.id === attrId);
+                    if (idx !== -1) window.YatraSetuManagerData.attractions.splice(idx, 1);
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                    await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                }
+            };
+        }
+
+        const closeActionBtn = document.getElementById('btn-close-attr-modal-action');
+        if (closeActionBtn) closeActionBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+
+    } else if (mode === 'edit') {
+        if (titleEl) titleEl.textContent = `Edit Attraction — ${attr.name}`;
+
+        bodyEl.innerHTML = `
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Attraction Name</label>
+                <input type="text" id="edit-attr-name-input" class="form-control" value="${attr.name}">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Category</label>
+                <input type="text" id="edit-attr-cat-input" class="form-control" value="${attr.category || ''}">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Status</label>
+                <select id="edit-attr-status-select" class="form-control">
+                    <option value="Open" ${attr.status === 'Open' ? 'selected' : ''}>Open</option>
+                    <option value="Maintenance" ${attr.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
+                    <option value="Closed" ${attr.status === 'Closed' ? 'selected' : ''}>Closed</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Image URL</label>
+                <input type="text" id="edit-attr-img-input" class="form-control" value="${attr.img || ''}">
+            </div>
+        `;
+
+        footerEl.innerHTML = `
+            <button type="button" class="btn-secondary" id="btn-cancel-edit-attr" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Cancel</button>
+            <button type="button" class="btn-primary" id="btn-save-edit-attr" style="padding: 0.45rem 1.1rem; font-size: 0.82rem;">Save Changes</button>
+        `;
+
+        const cancelBtn = document.getElementById('btn-cancel-edit-attr');
+        if (cancelBtn) cancelBtn.onclick = () => openAttractionDetailModal(attrId, 'view');
+
+        const saveBtn = document.getElementById('btn-save-edit-attr');
+        if (saveBtn) {
+            saveBtn.onclick = async () => {
+                const nameVal = document.getElementById('edit-attr-name-input').value.trim();
+                const catVal = document.getElementById('edit-attr-cat-input').value.trim();
+                const statusVal = document.getElementById('edit-attr-status-select').value;
+                const imgVal = document.getElementById('edit-attr-img-input').value.trim();
+
+                if (!nameVal) { alert('Please enter attraction name.'); return; }
+                attr.name = nameVal;
+                attr.category = catVal || 'Attraction';
+                attr.status = statusVal;
+                if (imgVal) attr.img = imgVal;
+
+                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                openAttractionDetailModal(attrId, 'view');
+            };
+        }
+    }
+
+    if (closeBtn) {
+        closeBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+    }
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * Event Details & Actions Modal Functionality
+ */
+function openEventDetailModal(eventId, mode = 'view') {
+    if (!eventId || !window.YatraSetuManagerData || !window.YatraSetuManagerData.events) return;
+    const ev = window.YatraSetuManagerData.events.find(e => e.id === eventId);
+    if (!ev) return;
+
+    const modal = document.getElementById('eventDetailModal');
+    const titleEl = document.getElementById('event-detail-modal-title');
+    const bodyEl = document.getElementById('event-detail-modal-body');
+    const footerEl = document.getElementById('event-detail-modal-footer');
+    const closeBtn = document.getElementById('btn-close-event-detail-modal');
+
+    if (!modal || !bodyEl || !footerEl) return;
+
+    const allDest = window.YatraSetuManagerData.destinations || [];
+    const destObj = allDest.find(d => d.id === ev.destination_id);
+    const destName = destObj ? destObj.name : ev.destination_id;
+
+    if (mode === 'view') {
+        if (titleEl) titleEl.textContent = `${ev.title} — Event Details`;
+
+        bodyEl.innerHTML = `
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <img src="${ev.img}" alt="${ev.title}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px;">
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; font-size: 0.88rem;">
+                <div><strong>Event Title:</strong> <span>${ev.title}</span></div>
+                <div><strong>Date:</strong> <span>${ev.dateNum} ${ev.dateMonth}</span></div>
+                <div><strong>Location:</strong> <span>${ev.location}</span></div>
+                <div><strong>Destination:</strong> <span>${destName}</span></div>
+                <div><strong>Status:</strong> <span class="status-pill ${ev.statusClass}">${ev.status}</span></div>
+                <div><strong>State:</strong> <span>${ev.state_id ? ev.state_id.toUpperCase() : 'MAHARASHTRA'}</span></div>
+            </div>
+        `;
+
+        footerEl.innerHTML = `
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="button" class="btn-primary" id="btn-edit-event-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Edit Details</button>
+                <button type="button" class="btn-secondary" id="btn-delete-event-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; color: #DC2626; border-color: #FECACA;">Delete</button>
+            </div>
+            <button type="button" class="btn-secondary" id="btn-close-event-modal-action" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Close</button>
+        `;
+
+        const editBtn = document.getElementById('btn-edit-event-modal');
+        if (editBtn) editBtn.onclick = () => openEventDetailModal(eventId, 'edit');
+
+        const deleteBtn = document.getElementById('btn-delete-event-modal');
+        if (deleteBtn) {
+            deleteBtn.onclick = async () => {
+                if (confirm(`Are you sure you want to delete event "${ev.title}"?`)) {
+                    const idx = window.YatraSetuManagerData.events.findIndex(e => e.id === eventId);
+                    if (idx !== -1) window.YatraSetuManagerData.events.splice(idx, 1);
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                    await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                }
+            };
+        }
+
+        const closeActionBtn = document.getElementById('btn-close-event-modal-action');
+        if (closeActionBtn) closeActionBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+
+    } else if (mode === 'edit') {
+        if (titleEl) titleEl.textContent = `Edit Event — ${ev.title}`;
+
+        bodyEl.innerHTML = `
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Event Title</label>
+                <input type="text" id="edit-event-title-input" class="form-control" value="${ev.title}">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Date (e.g., 15 OCT)</label>
+                <input type="text" id="edit-event-date-input" class="form-control" value="${ev.dateNum} ${ev.dateMonth}">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Location</label>
+                <input type="text" id="edit-event-loc-input" class="form-control" value="${ev.location}">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Status</label>
+                <select id="edit-event-status-select" class="form-control">
+                    <option value="Upcoming" ${ev.status === 'Upcoming' ? 'selected' : ''}>Upcoming</option>
+                    <option value="Ongoing" ${ev.status === 'Ongoing' ? 'selected' : ''}>Ongoing</option>
+                    <option value="Completed" ${ev.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Image URL</label>
+                <input type="text" id="edit-event-img-input" class="form-control" value="${ev.img || ''}">
+            </div>
+        `;
+
+        footerEl.innerHTML = `
+            <button type="button" class="btn-secondary" id="btn-cancel-edit-event" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Cancel</button>
+            <button type="button" class="btn-primary" id="btn-save-edit-event" style="padding: 0.45rem 1.1rem; font-size: 0.82rem;">Save Changes</button>
+        `;
+
+        const cancelBtn = document.getElementById('btn-cancel-edit-event');
+        if (cancelBtn) cancelBtn.onclick = () => openEventDetailModal(eventId, 'view');
+
+        const saveBtn = document.getElementById('btn-save-edit-event');
+        if (saveBtn) {
+            saveBtn.onclick = async () => {
+                const titleVal = document.getElementById('edit-event-title-input').value.trim();
+                const dateVal = document.getElementById('edit-event-date-input').value.trim();
+                const locVal = document.getElementById('edit-event-loc-input').value.trim();
+                const statusVal = document.getElementById('edit-event-status-select').value;
+                const imgVal = document.getElementById('edit-event-img-input').value.trim();
+
+                if (!titleVal) { alert('Please enter event title.'); return; }
+                ev.title = titleVal;
+                if (dateVal) {
+                    const parts = dateVal.split(' ');
+                    ev.dateNum = parts[0] || '15';
+                    ev.dateMonth = (parts[1] || 'OCT').toUpperCase();
+                }
+                ev.location = locVal || ev.location;
+                ev.status = statusVal;
+                ev.statusClass = statusVal === 'Upcoming' ? 'active' : (statusVal === 'Ongoing' ? 'warning' : 'neutral');
+                if (imgVal) ev.img = imgVal;
+
+                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                openEventDetailModal(eventId, 'view');
+            };
+        }
+    }
+
+    if (closeBtn) {
+        closeBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+    }
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * Stakeholder Details & Actions Modal Functionality
+ */
+function openStakeholderDetailModal(shId, mode = 'view') {
+    if (!shId || !window.YatraSetuManagerData || !window.YatraSetuManagerData.stakeholders) return;
+    const sh = window.YatraSetuManagerData.stakeholders.find(s => s.id === shId);
+    if (!sh) return;
+
+    const modal = document.getElementById('stakeholderDetailModal');
+    const titleEl = document.getElementById('sh-detail-modal-title');
+    const bodyEl = document.getElementById('sh-detail-modal-body');
+    const footerEl = document.getElementById('sh-detail-modal-footer');
+    const closeBtn = document.getElementById('btn-close-sh-detail-modal');
+
+    if (!modal || !bodyEl || !footerEl) return;
+
+    if (mode === 'view') {
+        if (titleEl) titleEl.textContent = `${sh.name} — Partner Profile`;
+
+        bodyEl.innerHTML = `
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; font-size: 0.88rem;">
+                <div><strong>Stakeholder Name:</strong> <span>${sh.name}</span></div>
+                <div><strong>Category:</strong> <span>${sh.category}</span></div>
+                <div><strong>Destination/Scope:</strong> <span>${sh.destination || 'State-wide'}</span></div>
+                <div><strong>Contact Info:</strong> <span>${sh.contact}</span></div>
+                <div><strong>Status:</strong> <span class="status-pill active">${sh.status || 'Verified'}</span></div>
+                <div><strong>State:</strong> <span>${sh.state_id ? sh.state_id.toUpperCase() : 'MAHARASHTRA'}</span></div>
+            </div>
+        `;
+
+        footerEl.innerHTML = `
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="button" class="btn-primary" id="btn-edit-sh-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Edit Details</button>
+                <button type="button" class="btn-secondary" id="btn-delete-sh-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; color: #DC2626; border-color: #FECACA;">Delete</button>
+            </div>
+            <button type="button" class="btn-secondary" id="btn-close-sh-modal-action" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Close</button>
+        `;
+
+        const editBtn = document.getElementById('btn-edit-sh-modal');
+        if (editBtn) editBtn.onclick = () => openStakeholderDetailModal(shId, 'edit');
+
+        const deleteBtn = document.getElementById('btn-delete-sh-modal');
+        if (deleteBtn) {
+            deleteBtn.onclick = async () => {
+                if (confirm(`Are you sure you want to delete stakeholder "${sh.name}"?`)) {
+                    const idx = window.YatraSetuManagerData.stakeholders.findIndex(s => s.id === shId);
+                    if (idx !== -1) window.YatraSetuManagerData.stakeholders.splice(idx, 1);
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                    await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                }
+            };
+        }
+
+        const closeActionBtn = document.getElementById('btn-close-sh-modal-action');
+        if (closeActionBtn) closeActionBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+
+    } else if (mode === 'edit') {
+        if (titleEl) titleEl.textContent = `Edit Partner — ${sh.name}`;
+
+        bodyEl.innerHTML = `
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Partner / Organization Name</label>
+                <input type="text" id="edit-sh-name-input" class="form-control" value="${sh.name}">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Category</label>
+                <select id="edit-sh-cat-select" class="form-control">
+                    <option value="Guides" ${sh.category === 'Guides' ? 'selected' : ''}>Guide / Escort</option>
+                    <option value="Homestays" ${sh.category === 'Homestays' ? 'selected' : ''}>Homestay / Resort</option>
+                    <option value="Transport" ${sh.category === 'Transport' ? 'selected' : ''}>Transport Service</option>
+                    <option value="Handicrafts" ${sh.category === 'Handicrafts' ? 'selected' : ''}>Handicraft Artisan</option>
+                    <option value="Tourism Services" ${sh.category === 'Tourism Services' ? 'selected' : ''}>Tourism Operator</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-weight: 600; font-size: 0.85rem;">Contact Information</label>
+                <input type="text" id="edit-sh-contact-input" class="form-control" value="${sh.contact}">
+            </div>
+        `;
+
+        footerEl.innerHTML = `
+            <button type="button" class="btn-secondary" id="btn-cancel-edit-sh" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Cancel</button>
+            <button type="button" class="btn-primary" id="btn-save-edit-sh" style="padding: 0.45rem 1.1rem; font-size: 0.82rem;">Save Changes</button>
+        `;
+
+        const cancelBtn = document.getElementById('btn-cancel-edit-sh');
+        if (cancelBtn) cancelBtn.onclick = () => openStakeholderDetailModal(shId, 'view');
+
+        const saveBtn = document.getElementById('btn-save-edit-sh');
+        if (saveBtn) {
+            saveBtn.onclick = async () => {
+                const nameVal = document.getElementById('edit-sh-name-input').value.trim();
+                const catVal = document.getElementById('edit-sh-cat-select').value;
+                const contactVal = document.getElementById('edit-sh-contact-input').value.trim();
+
+                if (!nameVal) { alert('Please enter partner name.'); return; }
+                sh.name = nameVal;
+                sh.category = catVal;
+                sh.contact = contactVal || sh.contact;
+
+                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                openStakeholderDetailModal(shId, 'view');
+            };
+        }
+    }
+
+    if (closeBtn) {
+        closeBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+    }
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * Feedback Details Modal Functionality
+ */
+function openFeedbackDetailModal(fbId) {
+    if (!fbId || !window.YatraSetuManagerData || !window.YatraSetuManagerData.feedback) return;
+    const fb = window.YatraSetuManagerData.feedback.find(f => f.id === fbId);
+    if (!fb) return;
+
+    const modal = document.getElementById('feedbackDetailModal');
+    const titleEl = document.getElementById('fb-detail-modal-title');
+    const bodyEl = document.getElementById('fb-detail-modal-body');
+    const footerEl = document.getElementById('fb-detail-modal-footer');
+    const closeBtn = document.getElementById('btn-close-fb-detail-modal');
+
+    if (!modal || !bodyEl || !footerEl) return;
+
+    if (titleEl) titleEl.textContent = `Feedback from ${fb.author || 'Visitor'}`;
+
+    bodyEl.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; font-size: 0.88rem;">
+            <div><strong>Visitor Name:</strong> <span>${fb.author || 'Anonymous'}</span></div>
+            <div><strong>Date:</strong> <span>${fb.date || 'Recent'}</span></div>
+            <div><strong>Destination:</strong> <span>${fb.destination || 'State-wide'}</span></div>
+            <div><strong>Rating:</strong> <span style="color: #F59E0B;">${'★'.repeat(fb.rating || 5)} (${fb.rating || 5}/5)</span></div>
+        </div>
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 1rem; font-size: 0.9rem; color: #334155; line-height: 1.6;">
+            <strong>Comment:</strong><br>
+            "${fb.text}"
+        </div>
+    `;
+
+    footerEl.innerHTML = `
+        <button type="button" class="btn-secondary" id="btn-delete-fb-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; color: #DC2626; border-color: #FECACA;">Delete Record</button>
+        <button type="button" class="btn-secondary" id="btn-close-fb-modal-action" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Close</button>
+    `;
+
+    const deleteBtn = document.getElementById('btn-delete-fb-modal');
+    if (deleteBtn) {
+        deleteBtn.onclick = async () => {
+            if (confirm('Are you sure you want to delete this feedback record?')) {
+                const idx = window.YatraSetuManagerData.feedback.findIndex(f => f.id === fbId);
+                if (idx !== -1) window.YatraSetuManagerData.feedback.splice(idx, 1);
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+            }
+        };
+    }
+
+    const closeActionBtn = document.getElementById('btn-close-fb-modal-action');
+    if (closeActionBtn) closeActionBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+
+    if (closeBtn) {
+        closeBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+    }
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
