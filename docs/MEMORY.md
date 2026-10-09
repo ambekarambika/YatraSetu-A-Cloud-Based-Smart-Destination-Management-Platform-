@@ -127,3 +127,17 @@ This file records decisions that should not be silently reversed.
 4. Build distinct Tourist, Tourism Stakeholder, and Administrator UI experiences where their workflows require them, reusing shared components and conventions where appropriate.
 5. Keep exactly four roles: Destination Manager, Tourism Stakeholder, Tourist, and Administrator.
 6. Continue following REUSE BEFORE CREATE and the approved Plan → Approve → Implement → Test → Report → Documentation → Git checkpoint workflow.
+
+---
+
+## 2026-10-10 — Destination Information Video Requirement
+
+**Decision:** Include destination-information videos as a planned feature with strict scope, role permissions, and technical design rules.
+
+**Key Rules:**
+1. **Quantity & Duration:** Minimum 80 destination-information videos total across all 8 supported destinations (at least 10 videos per destination). Each video is approximately 30 seconds in duration.
+2. **Role Permissions:** Destination Managers are the sole designated role with management permissions (add, edit, publish/unpublish, remove). Tourists can browse and watch published videos. Stakeholders and Administrators do not have video-management permissions.
+3. **Platform Scope:** Preserve YatraSetu's identity as a Destination Management Platform, not a video-sharing social network.
+4. **Technical Strategy:** Implement metadata entries with hosted video URLs rather than storing raw video binary files directly in PostgreSQL.
+
+**Status:** Planned / Not Implemented. No database tables, APIs, frontend UI, or hosting integrations exist yet.

@@ -32,7 +32,9 @@
 - persistent application data
 - real analytics calculations
 - real report generation
+- destination-information video management and playback (planned minimum of 80 videos across 8 destinations, ~30-second duration, Destination Manager-only management permissions)
 - production backend/database integration
+
 
 ## 2. Phase Roadmap
 
@@ -106,6 +108,7 @@ Expected:
 - destination discovery,
 - attractions,
 - events,
+- destination-information video browsing/playback (~30-second videos, minimum 80 videos total across 8 destinations),
 - basic trip planning,
 - saved trips,
 - feedback/profile.

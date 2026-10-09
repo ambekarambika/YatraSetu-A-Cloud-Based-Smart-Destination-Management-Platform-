@@ -32,7 +32,9 @@ This document distinguishes implemented frontend architecture from planned backe
 - Persistent destination/attraction/event data
 - Real analytics calculations
 - Real report generation from database data
+- Destination-information video management & playback (planned: hosted video URLs, ~30-sec duration, minimum 80 videos total across 8 destinations)
 - Production cloud/backend integration
+
 
 ## 2. High-Level Architecture
 

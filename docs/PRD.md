@@ -45,6 +45,7 @@ Requirements:
 - manage destination information,
 - manage attractions,
 - manage tourism events,
+- manage destination-information videos,
 - view stakeholder information,
 - coordinate/share information with stakeholders,
 - view tourist feedback and ratings,
@@ -62,11 +63,13 @@ Requirements:
 - explore destinations,
 - view attractions,
 - view events,
+- browse and watch destination-information videos,
 - search/explore tourism information,
 - create basic trip plans,
 - save/view trips,
 - submit feedback and ratings,
 - manage profile.
+
 
 ### 4.3 Tourism Stakeholder
 
@@ -135,6 +138,9 @@ Managers can generate basic reports using system data.
 
 ### FR-14 Decision Support
 The platform presents data signals, observations, and management considerations. It does not make decisions automatically.
+
+### FR-15 Destination Information Videos
+The platform supports short, informative destination videos (~30 seconds each; minimum 10 videos per destination across the 8 supported destinations for a total of at least 80 videos). Destination Managers have exclusive permission to manage (add, edit, publish/unpublish, remove) video entries associated with destinations and optional attractions. Tourists can browse and watch published destination videos.
 
 ## 6. Acceptance Criteria
 
