@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connections & Reviews — YatraSetu</title>
+    <meta name="description" content="YatraSetu Tourism Stakeholder Hub — Suggest updates to destination managers and view feedback from tourists.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/stakeholder.css">
+</head>
+<body class="app-body stakeholder-app">
+
+    <div class="app-shell">
+
+        <!-- ====================================================================
+             1. DARK NAVY SIDEBAR WITH VIBRANT ORANGE ACCENT
+             ==================================================================== -->
+        <aside class="app-sidebar stakeholder-sidebar" id="app-sidebar">
+            <div>
+                <!-- Brand Header -->
+                <div class="app-sidebar-header">
+                    <a href="dashboard.html" class="app-brand-link" id="sidebar-logo">
+                        <div class="app-brand-crest">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
+                                <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
+                                <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
+                            </svg>
+                        </div>
+                        <div class="app-brand-info">
+                            <span class="app-brand-name">Yatra<span>Setu</span></span>
+                            <span class="app-role-label">Tourism Stakeholder</span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Stakeholder Navigation Links -->
+                <nav class="app-sidebar-nav" id="app-sidebar-nav">
+                    <a href="dashboard.html" class="app-nav-item" data-title="Overview">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        <span>Overview</span>
+                    </a>
+                    <a href="profile.html" class="app-nav-item" data-title="My Business">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <span>My Business</span>
+                    </a>
+                    <a href="destination-updates.html" class="app-nav-item" data-title="Destination Updates">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                        <span>Destination Updates</span>
+                    </a>
+                    <a href="connections-reviews.html" class="app-nav-item active" data-title="Connections & Reviews">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                        <span>Connections & Reviews</span>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Bottom Sidebar Destination Context Card -->
+            <div class="sidebar-destination-box">
+                <img id="sidebar-dest-img" src="" alt="Destination" class="sidebar-destination-thumb" style="display: none;">
+                <span class="sidebar-destination-label">Your Destination</span>
+                <strong id="sidebar-dest-name" class="sidebar-destination-name">Loading...</strong>
+                <span id="sidebar-dest-state" class="sidebar-destination-state"></span>
+            </div>
+        </aside>
+
+        <!-- ====================================================================
+             2. MAIN STAKEHOLDER WORKSPACE & TOPBAR
+             ==================================================================== -->
+        <main class="app-main">
+
+            <!-- Topbar Navigation Header -->
+            <header class="app-topbar stakeholder-topbar">
+                <div class="topbar-left" style="display: flex; align-items: center; gap: 1rem;">
+                    <button type="button" class="btn-sidebar-toggle" id="sidebar-toggle-btn" aria-label="Toggle Navigation">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+
+                    <!-- Breadcrumbs -->
+                    <div class="breadcrumbs">
+                        <a href="dashboard.html" class="breadcrumb-item">Stakeholder Hub</a>
+                        <span class="breadcrumb-sep">/</span>
+                        <span class="breadcrumb-item active" id="breadcrumb-active">Connections & Reviews</span>
+                    </div>
+                </div>
+
+                <!-- Topbar Right Controls -->
+                <div class="topbar-right" style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div class="topbar-action-wrapper">
+                        <button type="button" class="notification-btn" id="notification-btn" title="Notifications" aria-label="Notifications">🔔<span class="notification-badge" id="notification-badge">0</span></button>
+                    </div>
+
+                    <div class="user-profile-badge-wrapper">
+                        <div class="user-profile-badge" id="user-profile-badge">
+                            <div class="user-avatar" id="topbar-user-avatar">SD</div>
+                            <div class="user-info-text">
+                                <span class="user-name" id="topbar-user-name">Suresh Deshmukh</span>
+                                <span class="user-role" id="topbar-user-role">Tourism Stakeholder</span>
+                            </div>
+                            <span class="user-caret">▾</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content Container -->
+            <div class="dashboard-content" style="padding: 1.75rem;">
+
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h1 style="font-size: 1.55rem; font-weight: 800; color: var(--sh-text-primary); margin: 0 0 0.25rem 0;">Connections & Reviews</h1>
+                        <p style="font-size: 0.88rem; color: var(--sh-text-secondary); margin: 0;">Suggest updates to destination managers and view feedback from tourists.</p>
+                    </div>
+                    <button type="button" id="btn-open-suggest-modal" class="btn-sh-orange">
+                        + Suggest Information Update
+                    </button>
+                </div>
+
+                <!-- Dual Tab Pills -->
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--sh-card-border); padding-bottom: 0.5rem;">
+                    <button type="button" id="tab-btn-conn" class="sh-tab-pill active">👥 Connect with Manager</button>
+                    <button type="button" id="tab-btn-rev" class="sh-tab-pill">💬 Tourist Reviews</button>
+                </div>
+
+                <!-- TAB 1: CONNECT WITH MANAGER -->
+                <div id="tab-content-conn">
+
+                    <!-- Section 1: My Suggestions -->
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--sh-text-primary); margin: 0 0 0.85rem 0;">My Suggestions</h3>
+                        <div class="sh-card-box" style="padding: 0; overflow: hidden;">
+                            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                                <thead>
+                                    <tr style="background: #F8FAFC; border-bottom: 1px solid var(--sh-card-border); font-size: 0.8rem; color: var(--sh-text-muted); text-transform: uppercase;">
+                                        <th style="padding: 0.85rem 1rem;">Topic / Field</th>
+                                        <th style="padding: 0.85rem 1rem;">Suggested Update</th>
+                                        <th style="padding: 0.85rem 1rem;">Submitted</th>
+                                        <th style="padding: 0.85rem 1rem;">Status</th>
+                                        <th style="padding: 0.85rem 1rem;">Manager Response</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="suggestions-table-body">
+                                    <!-- Dynamic Rows Rendered by stakeholder.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Recent Manager Updates -->
+                    <div>
+                        <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--sh-text-primary); margin: 0 0 0.85rem 0;">Recent Manager Updates</h3>
+                        <div id="manager-updates-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <!-- Dynamic Content Rendered by stakeholder.js -->
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- TAB 2: TOURIST REVIEWS -->
+                <div id="tab-content-rev" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--sh-text-primary); margin: 0;">Tourist Reviews for Your Service</h3>
+                        <a href="#" style="font-size: 0.82rem; font-weight: 700; color: var(--sh-orange-accent); text-decoration: none;">View All</a>
+                    </div>
+                    <div id="tourist-reviews-list">
+                        <!-- Dynamic Content Rendered by stakeholder.js -->
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+    <!-- MODAL 1: SUGGEST UPDATE MODAL -->
+    <div id="suggestUpdateModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+        <div class="sh-card-box" style="max-width: 500px; width: 100%; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--sh-card-border); padding-bottom: 0.65rem;">
+                <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--sh-text-primary); margin: 0;">Suggest Information Update</h3>
+                <button type="button" id="btn-close-suggest-modal" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--sh-text-muted);">&times;</button>
+            </div>
+            <form id="suggest-update-form">
+                <div style="margin-bottom: 0.85rem;">
+                    <label for="sug-topic-input" style="display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 0.35rem;">Topic / Field *</label>
+                    <input type="text" id="sug-topic-input" class="form-control" style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid var(--sh-card-border);" placeholder="e.g. Trail Information / Facility Hours">
+                </div>
+                <div style="margin-bottom: 1.1rem;">
+                    <label for="sug-text-input" style="display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 0.35rem;">Suggested Update Details *</label>
+                    <textarea id="sug-text-input" rows="3" class="form-control" style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid var(--sh-card-border);" placeholder="Describe the information correction or facility proposal..."></textarea>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 0.65rem;">
+                    <button type="button" class="btn" style="background: #E2E8F0; border: none; padding: 0.65rem 1rem; border-radius: 8px; font-weight: 600;" onclick="document.getElementById('suggestUpdateModal').style.display='none'">Cancel</button>
+                    <button type="submit" class="btn-sh-orange">Submit Suggestion</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: REVIEW RESPONSE MODAL -->
+    <div id="reviewResponseModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+        <div class="sh-card-box" style="max-width: 500px; width: 100%; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--sh-card-border); padding-bottom: 0.65rem;">
+                <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--sh-text-primary); margin: 0;">Reply to Tourist Review</h3>
+                <button type="button" id="btn-close-response-modal" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--sh-text-muted);">&times;</button>
+            </div>
+            <div style="background: #F8FAFC; border-radius: 8px; padding: 0.75rem; margin-bottom: 1rem;">
+                <span id="modal-review-author" style="font-weight: 700; font-size: 0.85rem; color: var(--sh-text-primary); display: block;"></span>
+                <p id="modal-review-text" style="font-size: 0.82rem; color: var(--sh-text-secondary); margin: 0.2rem 0 0 0; italic;"></p>
+            </div>
+            <form id="review-response-form">
+                <input type="hidden" id="modal-review-id" value="">
+                <div style="margin-bottom: 1.1rem;">
+                    <label for="modal-response-input" style="display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 0.35rem;">Your Official Response *</label>
+                    <textarea id="modal-response-input" rows="3" class="form-control" style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid var(--sh-card-border);" placeholder="Thank the tourist for their feedback..."></textarea>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 0.65rem;">
+                    <button type="button" class="btn" style="background: #E2E8F0; border: none; padding: 0.65rem 1rem; border-radius: 8px; font-weight: 600;" onclick="document.getElementById('reviewResponseModal').style.display='none'">Cancel</button>
+                    <button type="submit" class="btn-sh-orange">Publish Response</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript Dependencies -->
+    <script src="../js/manager-data.js"></script>
+    <script src="../js/stakeholder-data.js"></script>
+    <script src="../js/stakeholder.js"></script>
+    <script src="../js/dashboard.js"></script>
+</body>
+</html>

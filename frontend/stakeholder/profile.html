@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Business Profile — YatraSetu</title>
+    <meta name="description" content="YatraSetu Tourism Stakeholder Hub — Manage organization details, service category, operating schedule, and public listing details.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/stakeholder.css">
+</head>
+<body class="app-body stakeholder-app">
+
+    <div class="app-shell">
+
+        <!-- ====================================================================
+             1. DARK NAVY SIDEBAR WITH VIBRANT ORANGE ACCENT
+             ==================================================================== -->
+        <aside class="app-sidebar stakeholder-sidebar" id="app-sidebar">
+            <div>
+                <!-- Brand Header -->
+                <div class="app-sidebar-header">
+                    <a href="dashboard.html" class="app-brand-link" id="sidebar-logo">
+                        <div class="app-brand-crest">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
+                                <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
+                                <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
+                            </svg>
+                        </div>
+                        <div class="app-brand-info">
+                            <span class="app-brand-name">Yatra<span>Setu</span></span>
+                            <span class="app-role-label">Tourism Stakeholder</span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Stakeholder Navigation Links -->
+                <nav class="app-sidebar-nav" id="app-sidebar-nav">
+                    <a href="dashboard.html" class="app-nav-item" data-title="Overview">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        <span>Overview</span>
+                    </a>
+                    <a href="profile.html" class="app-nav-item active" data-title="My Business">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <span>My Business</span>
+                    </a>
+                    <a href="destination-updates.html" class="app-nav-item" data-title="Destination Updates">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                        <span>Destination Updates</span>
+                    </a>
+                    <a href="connections-reviews.html" class="app-nav-item" data-title="Connections & Reviews">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                        <span>Connections & Reviews</span>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Bottom Sidebar Destination Context Card -->
+            <div class="sidebar-destination-box">
+                <img id="sidebar-dest-img" src="" alt="Destination" class="sidebar-destination-thumb" style="display: none;">
+                <span class="sidebar-destination-label">Your Destination</span>
+                <strong id="sidebar-dest-name" class="sidebar-destination-name">Loading...</strong>
+                <span id="sidebar-dest-state" class="sidebar-destination-state"></span>
+            </div>
+        </aside>
+
+        <!-- ====================================================================
+             2. MAIN STAKEHOLDER WORKSPACE & TOPBAR
+             ==================================================================== -->
+        <main class="app-main">
+
+            <!-- Topbar Navigation Header -->
+            <header class="app-topbar stakeholder-topbar">
+                <div class="topbar-left" style="display: flex; align-items: center; gap: 1rem;">
+                    <button type="button" class="btn-sidebar-toggle" id="sidebar-toggle-btn" aria-label="Toggle Navigation">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+
+                    <!-- Breadcrumbs -->
+                    <div class="breadcrumbs">
+                        <a href="dashboard.html" class="breadcrumb-item">Stakeholder Hub</a>
+                        <span class="breadcrumb-sep">/</span>
+                        <span class="breadcrumb-item active" id="breadcrumb-active">My Business</span>
+                    </div>
+                </div>
+
+                <!-- Topbar Right Controls -->
+                <div class="topbar-right" style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div class="topbar-action-wrapper">
+                        <button type="button" class="notification-btn" id="notification-btn" title="Notifications" aria-label="Notifications">🔔<span class="notification-badge" id="notification-badge">0</span></button>
+                    </div>
+
+                    <div class="user-profile-badge-wrapper">
+                        <div class="user-profile-badge" id="user-profile-badge">
+                            <div class="user-avatar" id="topbar-user-avatar">SD</div>
+                            <div class="user-info-text">
+                                <span class="user-name" id="topbar-user-name">Suresh Deshmukh</span>
+                                <span class="user-role" id="topbar-user-role">Tourism Stakeholder</span>
+                            </div>
+                            <span class="user-caret">▾</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content Container -->
+            <div class="dashboard-content" style="padding: 1.75rem;">
+
+                <div style="margin-bottom: 1.5rem;">
+                    <h1 style="font-size: 1.55rem; font-weight: 800; color: var(--sh-text-primary); margin: 0 0 0.25rem 0;">My Business Profile</h1>
+                    <p style="font-size: 0.88rem; color: var(--sh-text-secondary); margin: 0;">Manage your organization details and how it appears to visitors on YatraSetu.</p>
+                </div>
+
+                <!-- Two Column Layout: Form + Public Profile Preview -->
+                <div style="display: grid; grid-template-columns: 1.7fr 1.3fr; gap: 1.75rem; align-items: start;">
+
+                    <!-- Left Column: Form -->
+                    <div class="sh-card-box">
+                        <form id="profile-form">
+
+                            <!-- Business Type Cards -->
+                            <div style="margin-bottom: 1.25rem;">
+                                <label style="display: block; font-weight: 700; font-size: 0.88rem; color: var(--sh-text-primary); margin-bottom: 0.5rem;">Business Type</label>
+
+                                <div class="sh-radio-card-grid">
+                                    <label class="sh-radio-card active" id="card-type-visitor">
+                                        <input type="radio" name="business_type" id="type-visitor-facing" value="visitor-facing" checked>
+                                        <div>
+                                            <strong style="display: block; font-size: 0.88rem; color: var(--sh-text-primary); margin-bottom: 0.2rem;">Visitor-Facing Service</strong>
+                                            <span style="font-size: 0.76rem; color: var(--sh-text-muted); line-height: 1.3; display: block;">Tour Guide, Stay, Transport, Attractions, Food & Dining</span>
+                                        </div>
+                                    </label>
+
+                                    <label class="sh-radio-card" id="card-type-contributor">
+                                        <input type="radio" name="business_type" id="type-info-contributor" value="info-contributor">
+                                        <div>
+                                            <strong style="display: block; font-size: 0.88rem; color: var(--sh-text-primary); margin-bottom: 0.2rem;">Information Partner</strong>
+                                            <span style="font-size: 0.76rem; color: var(--sh-text-muted); line-height: 1.3; display: block;">Local Tourism Board, NGO, Community Organization</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Operating Destination Assignment -->
+                            <div style="margin-bottom: 1.25rem; background: #F8FAFC; padding: 1rem; border-radius: 10px; border: 1px solid var(--sh-card-border);">
+                                <label for="sh-destination-select" style="display: block; font-weight: 700; font-size: 0.85rem; color: var(--sh-text-primary); margin-bottom: 0.35rem;">Assigned Operating Destination *</label>
+                                <select id="sh-destination-select" class="form-control" style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid var(--sh-card-border); background: #FFFFFF; font-size: 0.88rem;">
+                                    <option value="">-- No Destination Assigned (Unassigned) --</option>
+                                    <!-- Options populated dynamically from catalog by stakeholder.js -->
+                                </select>
+                                <span style="font-size: 0.75rem; color: var(--sh-text-muted); display: block; margin-top: 0.35rem;">
+                                    Connects your services to localized destination notices, attractions, official events, and tourists.
+                                </span>
+                            </div>
+
+                            <!-- Organization Details -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                                <div>
+                                    <label for="sh-org-name" style="display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 0.35rem;">Business / Organization Name *</label>
+                                    <input type="text" id="sh-org-name" class="form-control" style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid var(--sh-card-border);" placeholder="Sahyadri Trekking Guides Co-op">
+                                </div>
+
+                                <div>
+                                    <label for="sh-category" style="display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 0.35rem;">Category *</label>
+                                    <select id="sh-category" class="form-control" style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid var(--sh-card-border);">
+                                        <option value="Tour & Trekking Guides">Tour & Trekking Guides</option>
+                                        <option value="Stay & Accommodation">Stay & Accommodation</option>
+                                        <option value="Local Transport & Safaris">Local Transport & Safaris</option>
+                                        <option value="Food & Local Dining">Food & Local Dining</option>
+                                        <option value="Community Board">Community Board</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                                <div>
+                                    <label for="sh-contact-person" style="display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 0.35rem;">Contact Person *</label>
+                                    <input type="text" id="sh-contact-person" class="form-control" style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid var(--sh-card-border);" placeholder="Suresh Deshmukh">
+                                </div>
+
+                                <div>
+                                    <label for="sh-phone" style="display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 0.35rem;">Phone Number *</label>
+                                    <input type="text" id="sh-phone" class="form-control" style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid var(--sh-card-border);" placeholder="+91 98220 11223">
+                                </div>
+
+                                <div>
+                                    <label for="sh-email" style="display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 0.35rem;">Email Address *</label>
+                                    <input type="email" id="sh-email" class="form-control" style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid var(--sh-card-border);" placeholder="sahyadri.guides@gmail.com">
+                                </div>
+                            </div>
+
+                            <!-- Visitor-Facing Service Details Box -->
+                            <div id="service-details-box" style="background: var(--sh-orange-light); border: 1px solid var(--sh-orange-border); border-radius: 12px; padding: 1.1rem; margin-bottom: 1rem;">
+                                <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--sh-orange-accent); margin: 0 0 0.75rem 0; display: flex; align-items: center; gap: 0.4rem;">
+                                    <span>🏪</span> Service Details (Visitor-Facing)
+                                </h4>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.75rem;">
+                                    <div>
+                                        <label for="sh-hours" style="display: block; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.3rem;">Operating Hours</label>
+                                        <input type="text" id="sh-hours" class="form-control" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--sh-card-border); background: #FFFFFF;" placeholder="Mon - Sun (06:00 - 18:00)">
+                                    </div>
+
+                                    <div>
+                                        <label for="sh-price" style="display: block; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.3rem;">Price Range (₹)</label>
+                                        <input type="text" id="sh-price" class="form-control" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--sh-card-border); background: #FFFFFF;" placeholder="500 - 1,500 per group">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="sh-address" style="display: block; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.3rem;">Base Office / Pickup Address</label>
+                                    <input type="text" id="sh-address" class="form-control" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--sh-card-border); background: #FFFFFF;" placeholder="Base Camp Office, Gunjavane Village, Velhe, Pune - 412213">
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div style="margin-bottom: 1.25rem;">
+                                <label for="sh-desc" style="display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 0.35rem;">Description *</label>
+                                <textarea id="sh-desc" rows="3" class="form-control" style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid var(--sh-card-border);" placeholder="Certified local trekking guide cooperative specializing in heritage fort trails and monsoon safety."></textarea>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div style="display: flex; justify-content: flex-end;">
+                                <button type="submit" id="btn-save-profile" class="btn-sh-orange">
+                                    Save Changes
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+
+                    <!-- Right Column: Public Profile Preview -->
+                    <div>
+                        <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--sh-text-primary); margin: 0 0 0.85rem 0;">Public Profile Preview</h3>
+                        <div id="public-profile-preview">
+                            <!-- Dynamic Live Card Preview Rendered by stakeholder.js -->
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+    <!-- JavaScript Dependencies -->
+    <script src="../js/manager-data.js"></script>
+    <script src="../js/stakeholder-data.js"></script>
+    <script src="../js/stakeholder.js"></script>
+    <script src="../js/dashboard.js"></script>
+</body>
+</html>

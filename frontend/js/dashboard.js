@@ -1,10 +1,13 @@
 /* ==========================================================================
    YatraSetu — Smart Destination Management Platform
-   Shared Application Dashboard Logic (Phase 5 Finalized & Corrected)
+   Shared Application Shell, Sidebar, and Topbar System (dashboard.js)
+   Provides standardized fixed sidebar, mobile drawer, notifications,
+   user identity synchronization, and logout handling across all workspaces.
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
-    initSidebarToggle();
+    initAppSidebar();
+    initAppTopbar();
     initRolePreviewSwitcher();
     initNavItems();
 
@@ -14,31 +17,380 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Mobile Drawer / Sidebar Toggle
+ * 1. Fixed Sidebar Navigation & Mobile Collapsible Drawer
  */
-function initSidebarToggle() {
-    const toggleBtn = document.getElementById('sidebar-toggle-btn');
+function initAppSidebar() {
+    const toggleBtn = document.getElementById('sidebar-toggle-btn') || document.querySelector('.btn-sidebar-toggle, .mobile-menu-toggle');
     const sidebar = document.getElementById('app-sidebar');
+    if (!sidebar) return;
 
-    if (!toggleBtn || !sidebar) return;
+    // Create or locate backdrop for mobile drawer
+    let backdrop = document.querySelector('.sidebar-backdrop');
+    if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.className = 'sidebar-backdrop';
+        document.body.appendChild(backdrop);
+    }
 
-    toggleBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('drawer-open');
+    const openDrawer = () => {
+        sidebar.classList.add('show', 'drawer-open');
+        backdrop.classList.add('show');
+    };
+
+    const closeDrawer = () => {
+        sidebar.classList.remove('show', 'drawer-open');
+        backdrop.classList.remove('show');
+    };
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (sidebar.classList.contains('show') || sidebar.classList.contains('drawer-open')) {
+                closeDrawer();
+            } else {
+                openDrawer();
+            }
+        });
+    }
+
+    backdrop.addEventListener('click', closeDrawer);
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeDrawer();
     });
 
-    // Close sidebar on outer click on small screens
-    document.addEventListener('click', (e) => {
-        if (window.innerWidth <= 840) {
-            if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
-                sidebar.classList.remove('drawer-open');
+    // Close drawer when a navigation item is clicked on mobile
+    const navItems = sidebar.querySelectorAll('.app-nav-item');
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                closeDrawer();
             }
+        });
+    });
+
+    // Sync active nav item with current URL
+    const currentPath = window.location.pathname;
+    navItems.forEach(item => {
+        const href = item.getAttribute('href');
+        if (href && href !== '#' && currentPath.includes(href)) {
+            navItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+
+            const pageTitle = item.getAttribute('data-title') || item.querySelector('span')?.textContent;
+            const breadcrumbActive = document.getElementById('breadcrumb-active');
+            if (breadcrumbActive && pageTitle) {
+                breadcrumbActive.textContent = pageTitle;
+            }
+        }
+    });
+
+    // Clear session when clicking sidebar footer logout button
+    const sidebarLogoutBtns = document.querySelectorAll('.btn-sidebar-logout');
+    sidebarLogoutBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            sessionStorage.clear();
+        });
+    });
+}
+
+/**
+ * 2. Standardized Topbar: User Identity, User Menu, and Notifications
+ */
+function initAppTopbar() {
+    const topbar = document.querySelector('.app-topbar');
+    if (!topbar) return;
+
+    // Detect Active Workspace Role Context
+    const currentPath = window.location.pathname;
+    let detectedRole = 'tourist';
+    let defaultUserName = 'Ananya Sharma';
+    let defaultRoleLabel = 'Tourist Member';
+    let defaultAvatar = 'AS';
+
+    if (currentPath.includes('/manager/')) {
+        detectedRole = 'manager';
+        defaultUserName = 'Ambika Ambekar';
+        defaultRoleLabel = 'Destination Manager';
+        defaultAvatar = 'AA';
+    } else if (currentPath.includes('/stakeholder/')) {
+        detectedRole = 'stakeholder';
+        defaultUserName = 'Suresh Deshmukh';
+        defaultRoleLabel = 'Tourism Stakeholder';
+        defaultAvatar = 'SD';
+    } else if (currentPath.includes('/admin/')) {
+        detectedRole = 'admin';
+        defaultUserName = 'Rajesh Verma';
+        defaultRoleLabel = 'System Administrator';
+        defaultAvatar = 'RV';
+    }
+
+    // Sync User Identity from Session Storage
+    const sessionName = sessionStorage.getItem('yatrasetu_name');
+    const sessionEmail = sessionStorage.getItem('yatrasetu_email');
+    const activeUserName = sessionName || defaultUserName;
+    const initials = activeUserName.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2) || defaultAvatar;
+
+    // 2A. Initialize User Profile Badge & Dropdown
+    initTopbarUserDropdown(topbar, activeUserName, initials, defaultRoleLabel);
+
+    // 2B. Initialize Notification Button & Floating Panel
+    initTopbarNotifications(topbar, detectedRole);
+
+    // 2C. Close Dropdowns on Outer Click
+    document.addEventListener('click', (e) => {
+        const notifPanel = document.getElementById('notification-dropdown-panel');
+        const userMenu = document.getElementById('user-menu-dropdown-panel');
+        const notifBtn = topbar.querySelector('.notification-btn');
+        const userBadge = topbar.querySelector('.user-profile-badge');
+
+        if (notifPanel && notifBtn && !notifPanel.contains(e.target) && !notifBtn.contains(e.target)) {
+            notifPanel.classList.remove('show');
+        }
+        if (userMenu && userBadge && !userMenu.contains(e.target) && !userBadge.contains(e.target)) {
+            userMenu.classList.remove('show');
         }
     });
 }
 
 /**
- * Interactive Role Switcher Preview (Source of Truth Navigation Items)
- * Demonstrates shared shell role navigation rendering.
+ * Helper: User Profile Badge & Dropdown Panel
+ */
+function initTopbarUserDropdown(topbar, userName, initials, roleLabel) {
+    let userBadge = topbar.querySelector('.user-profile-badge');
+    let rightArea = topbar.querySelector('.topbar-right');
+
+    if (!rightArea) {
+        rightArea = document.createElement('div');
+        rightArea.className = 'topbar-right';
+        topbar.appendChild(rightArea);
+    }
+
+    if (!userBadge) {
+        userBadge = document.createElement('div');
+        userBadge.className = 'user-profile-badge';
+        userBadge.innerHTML = `
+            <div class="user-avatar">${initials}</div>
+            <div class="user-info-text">
+                <span class="user-name">${userName}</span>
+                <span class="user-role">${roleLabel}</span>
+            </div>
+            <span class="user-caret">▾</span>
+        `;
+        rightArea.appendChild(userBadge);
+    } else {
+        // Update existing badge fields
+        const avatarEl = userBadge.querySelector('.user-avatar');
+        const nameEl = userBadge.querySelector('.user-name');
+        const roleEl = userBadge.querySelector('.user-role');
+
+        if (avatarEl) avatarEl.textContent = initials;
+        if (nameEl) nameEl.textContent = userName;
+        if (roleEl) roleEl.textContent = roleLabel;
+        if (!userBadge.querySelector('.user-caret')) {
+            const caret = document.createElement('span');
+            caret.className = 'user-caret';
+            caret.textContent = ' ▾';
+            userBadge.appendChild(caret);
+        }
+    }
+
+    userBadge.style.cursor = 'pointer';
+
+    // Ensure Badge Wrapper
+    let badgeWrapper = userBadge.parentElement;
+    if (!badgeWrapper.classList.contains('user-profile-badge-wrapper')) {
+        badgeWrapper = document.createElement('div');
+        badgeWrapper.className = 'user-profile-badge-wrapper';
+        userBadge.parentNode.insertBefore(badgeWrapper, userBadge);
+        badgeWrapper.appendChild(userBadge);
+    }
+
+    // Floating User Dropdown Panel
+    let userMenuPanel = document.getElementById('user-menu-dropdown-panel');
+    if (!userMenuPanel) {
+        userMenuPanel = document.createElement('div');
+        userMenuPanel.id = 'user-menu-dropdown-panel';
+        userMenuPanel.className = 'topbar-dropdown-panel user-menu-floating';
+
+        const isRoot = !window.location.pathname.includes('/manager/') &&
+                       !window.location.pathname.includes('/stakeholder/') &&
+                       !window.location.pathname.includes('/tourist/') &&
+                       !window.location.pathname.includes('/admin/');
+        const loginPath = isRoot ? 'login.html' : '../login.html';
+        const profilePath = window.location.pathname.includes('/manager/') ? 'profile.html' :
+                            (window.location.pathname.includes('/stakeholder/') ? 'profile.html' : '#');
+
+        userMenuPanel.innerHTML = `
+            <a href="${profilePath}" class="user-menu-item">👤 View Profile</a>
+            <a href="${profilePath}" class="user-menu-item">⚙️ Account Settings</a>
+            <button type="button" class="user-menu-item logout" id="topbar-btn-logout">🚪 Logout</button>
+        `;
+        badgeWrapper.appendChild(userMenuPanel);
+
+        const logoutBtn = userMenuPanel.querySelector('#topbar-btn-logout');
+        if (logoutBtn) {
+            logoutBtn.onclick = (e) => {
+                e.stopPropagation();
+                sessionStorage.clear();
+                window.location.href = loginPath;
+            };
+        }
+    }
+
+    userBadge.onclick = (e) => {
+        e.stopPropagation();
+        const notifPanel = document.getElementById('notification-dropdown-panel');
+        if (notifPanel) notifPanel.classList.remove('show');
+        userMenuPanel.classList.toggle('show');
+    };
+}
+
+/**
+ * Helper: Notification Bell & Floating Panel
+ */
+function initTopbarNotifications(topbar, role) {
+    let notifBtn = topbar.querySelector('.notification-btn');
+    let rightArea = topbar.querySelector('.topbar-right');
+
+    if (!notifBtn && rightArea) {
+        const notifWrapper = document.createElement('div');
+        notifWrapper.className = 'topbar-action-wrapper';
+        notifBtn = document.createElement('button');
+        notifBtn.type = 'button';
+        notifBtn.className = 'notification-btn';
+        notifBtn.id = 'notification-btn';
+        notifBtn.title = 'Notifications';
+        notifBtn.setAttribute('aria-label', 'Notifications');
+        notifBtn.innerHTML = `🔔<span class="notification-badge" id="notification-badge">0</span>`;
+        notifWrapper.appendChild(notifBtn);
+        rightArea.insertBefore(notifWrapper, rightArea.firstChild);
+    }
+
+    if (!notifBtn) return;
+
+    let notifWrapper = notifBtn.parentElement;
+    if (!notifWrapper.classList.contains('topbar-action-wrapper')) {
+        notifWrapper = document.createElement('div');
+        notifWrapper.className = 'topbar-action-wrapper';
+        notifBtn.parentNode.insertBefore(notifWrapper, notifBtn);
+        notifWrapper.appendChild(notifBtn);
+    }
+
+    // Role-Specific Prototype Notification Store
+    let notifications = [];
+    if (role === 'manager') {
+        notifications = window.YatraSetuManagerData?.notifications || [
+            { id: 'notif-mgr-1', title: '⚠️ High Footfall Warning', message: 'Ajanta Caves approaching 85% daily capacity limit.', time: '25 mins ago', read: false },
+            { id: 'notif-mgr-2', title: '📋 Stakeholder Registration', message: 'Sahyadri Trekking Guides submitted verification details.', time: '3 hours ago', read: false },
+            { id: 'notif-mgr-3', title: '💬 Feedback Surge', message: '12 new visitor reviews received for Rajgad Fort.', time: '1 day ago', read: true }
+        ];
+    } else if (role === 'stakeholder') {
+        notifications = window.YatraSetuStakeholderData?.notifications || [
+            { id: 'notif-sh-1', title: '🚨 Weather & Trail Advisory', message: 'Monsoon trail guidelines updated for Rajgad Fort.', time: '2 hours ago', read: false },
+            { id: 'notif-sh-2', title: '💬 Manager Suggestion Review', message: 'Manager Ambika Ambekar reviewed your trail water point suggestion.', time: '1 day ago', read: false },
+            { id: 'notif-sh-3', title: '⭐ New Tourist Review', message: 'Anjali Patil left a 5-star review for your trekking guide service.', time: '3 days ago', read: true }
+        ];
+    } else if (role === 'admin') {
+        notifications = [
+            { id: 'notif-adm-1', title: '🔐 Security Audit Alert', message: 'Routine credential check passed with 0 permission discrepancies.', time: '1 hour ago', read: false },
+            { id: 'notif-adm-2', title: '👤 User Governance', message: 'Account status verified for Destination Manager Ambika Ambekar.', time: '2 days ago', read: true }
+        ];
+    } else {
+        notifications = [
+            { id: 'notif-tour-1', title: '📍 Destination Advisory Update', message: 'Seasonal trail guidelines updated for Rajgad Fort.', time: '2 hours ago', read: false },
+            { id: 'notif-tour-2', title: '🎉 New Cultural Festival', message: 'Heritage festival registration is now open.', time: '1 day ago', read: true }
+        ];
+    }
+
+    const notifBadge = notifBtn.querySelector('.notification-badge') || document.getElementById('notification-badge');
+
+    const updateNotifBadge = () => {
+        const unreadCount = notifications.filter(n => !n.read).length;
+        if (notifBadge) {
+            notifBadge.textContent = unreadCount;
+            notifBadge.style.display = unreadCount > 0 ? 'flex' : 'none';
+        }
+    };
+    updateNotifBadge();
+
+    // Floating Notification Panel
+    let notifPanel = document.getElementById('notification-dropdown-panel');
+    if (!notifPanel) {
+        notifPanel = document.createElement('div');
+        notifPanel.id = 'notification-dropdown-panel';
+        notifPanel.className = 'topbar-dropdown-panel notif-dropdown-floating';
+        notifWrapper.appendChild(notifPanel);
+    }
+
+    const renderNotifList = () => {
+        let html = `
+            <div class="topbar-dropdown-header">
+                <span>Notifications</span>
+                <button type="button" id="btn-mark-all-read" style="background:none; border:none; color: var(--state-accent, #EA580C); font-size: 0.75rem; font-weight: 700; cursor: pointer;">Mark all read</button>
+            </div>
+            <div class="topbar-dropdown-body" id="notification-list-body">
+        `;
+
+        if (notifications.length === 0) {
+            html += `<div style="padding: 1.5rem; text-align: center; color: var(--text-muted, #64748B); font-size: 0.85rem;">No new notifications</div>`;
+        } else {
+            html += notifications.map(n => `
+                <div class="notification-item ${n.read ? '' : 'unread'}" data-notif-id="${n.id}" style="cursor: pointer;" title="${n.read ? '' : 'Click to mark as read'}">
+                    <div class="notification-title">${n.title}</div>
+                    <div class="notification-msg">${n.message}</div>
+                    <div class="notification-time">${n.time}</div>
+                </div>
+            `).join('');
+        }
+
+        html += `
+            </div>
+            <div class="topbar-dropdown-footer">
+                <span style="color: var(--text-muted, #64748B); font-size: 0.72rem;">YatraSetu Prototype Notification Center</span>
+            </div>
+        `;
+
+        notifPanel.innerHTML = html;
+
+        const markAllReadBtn = notifPanel.querySelector('#btn-mark-all-read');
+        if (markAllReadBtn) {
+            markAllReadBtn.onclick = (e) => {
+                e.stopPropagation();
+                notifications.forEach(n => n.read = true);
+                updateNotifBadge();
+                renderNotifList();
+            };
+        }
+
+        // Support clicking individual notification to mark as read
+        const unreadItems = notifPanel.querySelectorAll('.notification-item.unread');
+        unreadItems.forEach(item => {
+            item.onclick = (e) => {
+                e.stopPropagation();
+                const notifId = item.getAttribute('data-notif-id');
+                const target = notifications.find(n => n.id === notifId);
+                if (target) {
+                    target.read = true;
+                    updateNotifBadge();
+                    renderNotifList();
+                }
+            };
+        });
+    };
+
+    notifBtn.onclick = (e) => {
+        e.stopPropagation();
+        const userMenu = document.getElementById('user-menu-dropdown-panel');
+        if (userMenu) userMenu.classList.remove('show');
+        renderNotifList();
+        notifPanel.classList.toggle('show');
+    };
+}
+
+/**
+ * 3. Interactive Role Switcher Preview (Phase 5 Showcase Demo Support)
  */
 function initRolePreviewSwitcher() {
     const rolePills = document.querySelectorAll('.role-switcher-pill');
@@ -99,7 +451,7 @@ function initRolePreviewSwitcher() {
                 </a>`
         },
         tourist: {
-            title: 'TOURIST DISCOVERY',
+            title: 'TOURIST WORKSPACE',
             badge: 'TOURIST',
             eyebrow: 'DEMONSTRATION CONTEXT: TOURIST WORKSPACE',
             breadcrumb: 'Tourist Nav Demonstration',
@@ -118,30 +470,30 @@ function initRolePreviewSwitcher() {
                     <span>Attractions</span>
                 </a>
                 <a href="#" class="app-nav-item" data-title="Events">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg>
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                     <span>Events</span>
                 </a>
                 <a href="#" class="app-nav-item" data-title="Trip Planner">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
                     <span>Trip Planner</span>
                 </a>
-                <a href="#" class="app-nav-item" data-title="My Trips">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-                    <span>My Trips</span>
+                <a href="#" class="app-nav-item" data-title="Crowd Indicators">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path></svg>
+                    <span>Crowd Indicators</span>
                 </a>
                 <a href="#" class="app-nav-item" data-title="Feedback">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                    <span>Feedback</span>
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <span>Feedback & Reviews</span>
                 </a>
-                <a href="#" class="app-nav-item" data-title="Profile">
+                <a href="#" class="app-nav-item" data-title="Tourist Profile">
                     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    <span>Profile</span>
+                    <span>Tourist Profile</span>
                 </a>`
         },
         stakeholder: {
-            title: 'STAKEHOLDER HUB',
+            title: 'STAKEHOLDER WORKSPACE',
             badge: 'STAKEHOLDER',
-            eyebrow: 'DEMONSTRATION CONTEXT: TOURISM STAKEHOLDER WORKSPACE',
+            eyebrow: 'DEMONSTRATION CONTEXT: STAKEHOLDER WORKSPACE',
             breadcrumb: 'Stakeholder Nav Demonstration',
             nav: `
                 <div class="nav-section-title">STAKEHOLDER HUB</div>
@@ -149,30 +501,22 @@ function initRolePreviewSwitcher() {
                     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                     <span>Overview</span>
                 </a>
-                <a href="#" class="app-nav-item" data-title="My Profile">
+                <a href="#" class="app-nav-item" data-title="My Business">
                     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    <span>My Profile</span>
-                </a>
-                <a href="#" class="app-nav-item" data-title="My Information / Services">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                    <span>My Information / Services</span>
-                </a>
-                <a href="#" class="app-nav-item" data-title="Shared Information">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
-                    <span>Shared Information</span>
+                    <span>My Business</span>
                 </a>
                 <a href="#" class="app-nav-item" data-title="Destination Updates">
                     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                     <span>Destination Updates</span>
                 </a>
-                <a href="#" class="app-nav-item" data-title="Coordination">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path></svg>
-                    <span>Coordination</span>
+                <a href="#" class="app-nav-item" data-title="Connections & Reviews">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                    <span>Connections & Reviews</span>
                 </a>`
         },
         admin: {
-            title: 'ADMIN GOVERNANCE',
-            badge: 'ADMINISTRATOR',
+            title: 'ADMIN WORKSPACE',
+            badge: 'ADMIN',
             eyebrow: 'DEMONSTRATION CONTEXT: ADMINISTRATOR WORKSPACE',
             breadcrumb: 'Admin Nav Demonstration',
             nav: `
@@ -215,7 +559,7 @@ function initRolePreviewSwitcher() {
 }
 
 /**
- * Handle Navigation Item Active State Switching
+ * 4. Nav Items Click Handler
  */
 function initNavItems() {
     const navItems = document.querySelectorAll('.app-nav-item');
@@ -229,7 +573,10 @@ function initNavItems() {
                 navItems.forEach(i => i.classList.remove('active'));
                 item.classList.add('active');
 
-                if (breadcrumbActive) breadcrumbActive.textContent = item.innerText.trim();
+                if (breadcrumbActive) {
+                    const text = item.getAttribute('data-title') || item.querySelector('span')?.textContent || item.innerText.trim();
+                    breadcrumbActive.textContent = text;
+                }
             }
         });
     });

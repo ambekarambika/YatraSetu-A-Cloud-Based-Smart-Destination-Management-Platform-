@@ -120,6 +120,9 @@ body.app-body {
    -------------------------------------------------------------------------- */
 .app-sidebar {
     width: 240px;
+    height: 100vh;
+    position: sticky;
+    top: 0;
     background-color: var(--sidebar-bg);
     color: var(--sidebar-text);
     display: flex;
@@ -129,6 +132,7 @@ body.app-body {
     border-right: 1px solid var(--sidebar-border);
     z-index: 100;
     transition: transform 0.3s ease;
+    overflow-y: auto;
 }
 
 .app-sidebar-header {
@@ -276,14 +280,26 @@ body.app-body {
     max-width: 480px;
 }
 
-.mobile-menu-toggle {
+.mobile-menu-toggle,
+.btn-sidebar-toggle {
     display: none;
-    background: none;
+    background: transparent;
     border: none;
     font-size: 1.25rem;
     color: var(--text-primary);
     cursor: pointer;
-    padding: 0.4rem;
+    padding: 0.4rem 0.5rem;
+    border-radius: var(--radius-sm, 6px);
+    line-height: 1;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.mobile-menu-toggle:hover,
+.btn-sidebar-toggle:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--state-accent, #EA580C);
 }
 
 .search-box {
@@ -1029,12 +1045,28 @@ body.app-body {
         top: 0;
         bottom: 0;
         left: 0;
+        width: 260px;
+        height: 100vh;
         transform: translateX(-100%);
+        z-index: 1000;
     }
-    .app-sidebar.show {
+    .app-sidebar.show,
+    .app-sidebar.drawer-open {
         transform: translateX(0);
     }
-    .mobile-menu-toggle {
+    .mobile-menu-toggle,
+    .btn-sidebar-toggle {
+        display: block !important;
+    }
+    .sidebar-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(2px);
+        z-index: 999;
+        display: none;
+    }
+    .sidebar-backdrop.show {
         display: block;
     }
     .app-topbar {
@@ -1134,6 +1166,157 @@ body.app-body {
 .user-menu-item.logout:hover {
     background-color: rgba(239, 68, 68, 0.08) !important;
     color: var(--danger-color) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Shared Topbar Notification Panel & User Badge Additions
+   -------------------------------------------------------------------------- */
+.notification-btn {
+    position: relative;
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.35rem 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.notification-btn:hover {
+    color: var(--text-primary);
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.notification-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: var(--danger-color);
+    color: #FFFFFF;
+    font-size: 0.65rem;
+    font-weight: 800;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.user-info-text {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.user-role {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.user-caret {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-left: 0.25rem;
+    transition: transform 0.2s ease;
+}
+
+.topbar-dropdown-header {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--card-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    background: #FFFFFF;
+}
+
+.topbar-dropdown-body {
+    max-height: 320px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.topbar-dropdown-footer {
+    padding: 0.5rem 1rem;
+    border-top: 1px solid var(--card-border);
+    background: #F8FAFC;
+    text-align: center;
+}
+
+.notification-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #F1F5F9;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    transition: background 0.15s ease;
+    text-align: left;
+    cursor: default;
+}
+
+.notification-item:hover {
+    background-color: #F8FAFC;
+}
+
+.notification-item.unread {
+    background-color: rgba(234, 88, 12, 0.05);
+    border-left: 3px solid var(--state-accent);
+}
+
+.notification-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.notification-msg {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    line-height: 1.35;
+}
+
+.notification-time {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+}
+
+.breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.breadcrumb-item {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.breadcrumb-item:hover {
+    color: var(--state-accent);
+}
+
+.breadcrumb-item.active {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.breadcrumb-sep {
+    color: #CBD5E1;
+    font-size: 0.8rem;
 }
 
 

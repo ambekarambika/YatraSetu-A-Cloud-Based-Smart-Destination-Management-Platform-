@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>Destination Updates — YatraSetu</title>
+    <meta name="description" content="YatraSetu Tourism Stakeholder Hub — View official announcements, attractions catalog, and scheduled events for your assigned destination.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/stakeholder.css">
+</head>
+<body class="app-body stakeholder-app">
+
+    <div class="app-shell">
+
+        <!-- ====================================================================
+             1. DARK NAVY SIDEBAR WITH VIBRANT ORANGE ACCENT
+             ==================================================================== -->
+        <aside class="app-sidebar stakeholder-sidebar" id="app-sidebar">
+            <div>
+                <!-- Brand Header -->
+                <div class="app-sidebar-header">
+                    <a href="dashboard.html" class="app-brand-link" id="sidebar-logo">
+                        <div class="app-brand-crest">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
+                                <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
+                                <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
+                            </svg>
+                        </div>
+                        <div class="app-brand-info">
+                            <span class="app-brand-name">Yatra<span>Setu</span></span>
+                            <span class="app-role-label">Tourism Stakeholder</span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Stakeholder Navigation Links -->
+                <nav class="app-sidebar-nav" id="app-sidebar-nav">
+                    <a href="dashboard.html" class="app-nav-item" data-title="Overview">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        <span>Overview</span>
+                    </a>
+                    <a href="profile.html" class="app-nav-item" data-title="My Business">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <span>My Business</span>
+                    </a>
+                    <a href="destination-updates.html" class="app-nav-item active" data-title="Destination Updates">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                        <span>Destination Updates</span>
+                    </a>
+                    <a href="connections-reviews.html" class="app-nav-item" data-title="Connections & Reviews">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                        <span>Connections & Reviews</span>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Bottom Sidebar Destination Context Card -->
+            <div class="sidebar-destination-box">
+                <img id="sidebar-dest-img" src="" alt="Destination" class="sidebar-destination-thumb" style="display: none;">
+                <span class="sidebar-destination-label">Your Destination</span>
+                <strong id="sidebar-dest-name" class="sidebar-destination-name">Loading...</strong>
+                <span id="sidebar-dest-state" class="sidebar-destination-state"></span>
+            </div>
+        </aside>
+
+        <!-- ====================================================================
+             2. MAIN STAKEHOLDER WORKSPACE & TOPBAR
+             ==================================================================== -->
+        <main class="app-main">
+
+            <!-- Topbar Navigation Header -->
+            <header class="app-topbar stakeholder-topbar">
+                <div class="topbar-left" style="display: flex; align-items: center; gap: 1rem;">
+                    <button type="button" class="btn-sidebar-toggle" id="sidebar-toggle-btn" aria-label="Toggle Navigation">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+
+                    <!-- Breadcrumbs -->
+                    <div class="breadcrumbs">
+                        <a href="dashboard.html" class="breadcrumb-item">Stakeholder Hub</a>
+                        <span class="breadcrumb-sep">/</span>
+                        <span class="breadcrumb-item active" id="breadcrumb-active">Destination Updates</span>
+                    </div>
+                </div>
+
+                <!-- Topbar Right Controls -->
+                <div class="topbar-right" style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div class="topbar-action-wrapper">
+                        <button type="button" class="notification-btn" id="notification-btn" title="Notifications" aria-label="Notifications">🔔<span class="notification-badge" id="notification-badge">0</span></button>
+                    </div>
+
+                    <div class="user-profile-badge-wrapper">
+                        <div class="user-profile-badge" id="user-profile-badge">
+                            <div class="user-avatar" id="topbar-user-avatar">SD</div>
+                            <div class="user-info-text">
+                                <span class="user-name" id="topbar-user-name">Suresh Deshmukh</span>
+                                <span class="user-role" id="topbar-user-role">Tourism Stakeholder</span>
+                            </div>
+                            <span class="user-caret">▾</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content Container -->
+            <div class="dashboard-content" style="padding: 1.75rem;">
+
+                <div style="margin-bottom: 1.25rem;">
+                    <h1 style="font-size: 1.55rem; font-weight: 800; color: var(--sh-text-primary); margin: 0 0 0.25rem 0;">Destination Updates</h1>
+                    <p id="updates-page-subtitle" style="font-size: 0.88rem; color: var(--sh-text-secondary); margin: 0;">View official announcements, attractions and events for your assigned destination.</p>
+                </div>
+
+                <!-- Unassigned Destination Warning Banner (Shown only when unassigned) -->
+                <div id="updates-unassigned-banner" style="display: none; margin-bottom: 1.5rem;">
+                    <!-- Populated dynamically if no destination is assigned -->
+                </div>
+
+                <!-- 1. Interactive Multi-Factor Filter Card -->
+                <div class="sh-filter-card" id="updates-filter-card">
+                    <div class="sh-filter-grid">
+                        <!-- Search Field -->
+                        <div class="sh-filter-group">
+                            <label for="sh-updates-search" class="sh-filter-label">Search Updates</label>
+                            <input type="text" id="sh-updates-search" class="sh-input-control" placeholder="Search by title, keyword, location...">
+                        </div>
+
+                        <!-- Category Selector -->
+                        <div class="sh-filter-group">
+                            <label for="sh-updates-type-filter" class="sh-filter-label">Category</label>
+                            <select id="sh-updates-type-filter" class="sh-input-control">
+                                <option value="all">All Categories</option>
+                                <option value="announcements">📣 Announcements Only</option>
+                                <option value="attractions">🏛️ Attractions Only</option>
+                                <option value="events">📅 Scheduled Events Only</option>
+                            </select>
+                        </div>
+
+                        <!-- Event Timing Filter -->
+                        <div class="sh-filter-group">
+                            <label for="sh-updates-event-timing" class="sh-filter-label">Event Timing</label>
+                            <select id="sh-updates-event-timing" class="sh-input-control">
+                                <option value="all">All (Upcoming & Past)</option>
+                                <option value="upcoming">Upcoming Events</option>
+                                <option value="past">Past Events</option>
+                            </select>
+                        </div>
+
+                        <!-- Date / Month Filter -->
+                        <div class="sh-filter-group">
+                            <label for="sh-updates-month-filter" class="sh-filter-label">Date / Month</label>
+                            <select id="sh-updates-month-filter" class="sh-input-control">
+                                <option value="all">All Dates / Months</option>
+                                <option value="SEP">September 2026</option>
+                                <option value="OCT">October 2026</option>
+                                <option value="NOV">November 2026</option>
+                                <option value="DEC">December 2026</option>
+                                <option value="JAN">January 2027</option>
+                                <option value="FEB">February 2027</option>
+                                <option value="MAR">March 2027</option>
+                                <option value="APR">April 2027</option>
+                                <option value="MAY">May 2027</option>
+                            </select>
+                        </div>
+
+                        <!-- Sort Controls -->
+                        <div class="sh-filter-group">
+                            <label for="sh-updates-sort" class="sh-filter-label">Sort By</label>
+                            <select id="sh-updates-sort" class="sh-input-control">
+                                <option value="default">Default Order</option>
+                                <option value="newest">Newest First</option>
+                                <option value="az">Alphabetical (A - Z)</option>
+                                <option value="rating">Highest Rating</option>
+                            </select>
+                        </div>
+
+                        <!-- Clear / Reset Action -->
+                        <div class="sh-filter-group" style="justify-content: flex-end;">
+                            <button type="button" id="sh-updates-reset-btn" class="btn-filter-reset" title="Reset all active filters">
+                                <span>↺</span> Reset Filters
+                            </button>
+                    </div>
+                </div>
+
+                <!-- Quick Category Tabs Bar & Counter -->
+                <div class="sh-quick-tabs-bar" id="updates-quick-tabs-bar">
+                    <div class="sh-quick-tabs-group" role="tablist" aria-label="Category Filters">
+                        <button type="button" class="sh-tab-pill active" data-category="all">All Content</button>
+                        <button type="button" class="sh-tab-pill" data-category="announcements">📣 Announcements</button>
+                        <button type="button" class="sh-tab-pill" data-category="attractions">🏛️ Attractions</button>
+                        <button type="button" class="sh-tab-pill" data-category="events">📅 Scheduled Events</button>
+                    </div>
+
+                    <div id="sh-updates-result-count" style="font-size: 0.82rem; font-weight: 600; color: var(--sh-text-muted);">
+                        Showing records...
+                    </div>
+                </div>
+
+                <!-- Overall No Matching Results Empty State -->
+                <div id="updates-no-results-state" style="display: none; padding: 3rem 1.5rem; text-align: center; background: var(--sh-card-bg); border: 1px solid var(--sh-card-border); border-radius: 14px; margin-bottom: 2rem;">
+                    <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🔍</div>
+                    <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--sh-text-primary); margin: 0 0 0.35rem 0;">No matching records found</h3>
+                    <p style="font-size: 0.85rem; color: var(--sh-text-secondary); margin: 0 0 1rem 0; max-width: 460px; margin-left: auto; margin-right: auto;">
+                        No destination updates match your active keyword or category filter combination. Try clearing your search query.
+                    </p>
+                    <button type="button" id="btn-clear-empty-filters" class="btn-sh-orange" style="font-size: 0.82rem; padding: 0.5rem 1rem;">
+                        Clear All Filters
+                    </button>
+                </div>
+
+                <!-- Section 1: Official Announcements -->
+                <div id="updates-announcements-section" style="margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--sh-text-primary); margin: 0;">Official Announcements</h3>
+                        <span id="announcements-count-badge" style="font-size: 0.75rem; background: #F1F5F9; color: var(--sh-text-secondary); padding: 0.2rem 0.55rem; border-radius: 6px; font-weight: 700;">0 notices</span>
+                    </div>
+                    <div id="updates-announcements-list">
+                        <!-- Dynamic Content Rendered by stakeholder.js -->
+                    </div>
+                </div>
+
+                <!-- Section 2: Attractions Grid -->
+                <div id="updates-attractions-section" style="margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 id="updates-attractions-heading" style="font-size: 1.05rem; font-weight: 800; color: var(--sh-text-primary); margin: 0;">Local Attractions</h3>
+                        <span id="attractions-count-badge" style="font-size: 0.75rem; background: #F1F5F9; color: var(--sh-text-secondary); padding: 0.2rem 0.55rem; border-radius: 6px; font-weight: 700;">0 places</span>
+                    </div>
+                    <div id="updates-attractions-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.1rem;">
+                        <!-- Dynamic Content Rendered by stakeholder.js -->
+                    </div>
+                </div>
+
+                <!-- Section 3: Scheduled Events -->
+                <div id="updates-events-section" style="margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--sh-text-primary); margin: 0;">Scheduled Destination Events</h3>
+                        <span id="events-count-badge" style="font-size: 0.75rem; background: #F1F5F9; color: var(--sh-text-secondary); padding: 0.2rem 0.55rem; border-radius: 6px; font-weight: 700;">0 events</span>
+                    </div>
+                    <div id="updates-events-list">
+                        <!-- Dynamic Content Rendered by stakeholder.js -->
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+    <!-- ====================================================================
+         REUSABLE DETAIL MODAL DIALOG (ACCESSIBLE, READ-ONLY VIEW)
+         ==================================================================== -->
+    <div id="destinationDetailModal" class="sh-detail-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-detail-title" style="display: none;">
+        <div class="sh-detail-modal-dialog" id="modal-dialog-box" tabindex="-1">
+            <!-- Modal Header -->
+            <div class="sh-detail-modal-header">
+                <div>
+                    <span id="modal-detail-badge" class="sh-status-badge accepted" style="margin-bottom: 0.35rem; display: inline-block;">Official Record</span>
+                    <h3 id="modal-detail-title" style="font-size: 1.15rem; font-weight: 800; color: var(--sh-text-primary); margin: 0;">Record Details</h3>
+                </div>
+                <button type="button" id="btn-close-detail-modal" aria-label="Close dialog" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--sh-text-muted); line-height: 1; padding: 0.2rem;">&times;</button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="sh-detail-modal-body">
+                <!-- Image Header (Conditional) -->
+                <div id="modal-image-container" style="display: none; border-radius: 10px; overflow: hidden; max-height: 220px;">
+                    <img id="modal-detail-img" src="" alt="Detail visual" style="width: 100%; height: 220px; object-fit: cover; display: block;">
+                </div>
+
+                <!-- Meta Attribute Chips -->
+                <div id="modal-meta-chips" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <!-- Injected chips: location, date, rating, status -->
+                </div>
+
+                <!-- Main Content / Description -->
+                <div>
+                    <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--sh-text-secondary); margin: 0 0 0.4rem 0; text-transform: uppercase; letter-spacing: 0.03em;">Description & Overview</h4>
+                    <p id="modal-detail-content" style="font-size: 0.9rem; color: var(--sh-text-primary); line-height: 1.6; margin: 0;"></p>
+                </div>
+
+                <!-- Visitor Guidance / Advisory Callout (Conditional) -->
+                <div id="modal-guidance-container" style="display: none;">
+                    <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--sh-orange-accent); margin: 0 0 0.4rem 0; text-transform: uppercase; letter-spacing: 0.03em;">Official Guidance for Stakeholders</h4>
+                    <div id="modal-guidance-text" class="sh-guidance-callout"></div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="sh-detail-modal-footer">
+                <span style="font-size: 0.76rem; color: var(--sh-text-muted); display: flex; align-items: center; gap: 0.35rem;">
+                    <span>🔒</span> Official Destination Management Record (Read-Only)
+                </span>
+                <button type="button" id="btn-footer-close-detail-modal" class="btn" style="background: #E2E8F0; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer;">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Dependencies -->
+    <script src="../js/manager-data.js"></script>
+    <script src="../js/stakeholder-data.js"></script>
+    <script src="../js/stakeholder.js"></script>
+    <script src="../js/dashboard.js"></script>
+</body>
+</html>
