@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>Media & Listings — YatraSetu</title>
+    <meta name="description" content="YatraSetu Tourism Stakeholder Hub — Upload photos, videos, and manage your verified business listings for tourists.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/stakeholder.css">
+</head>
+<body class="app-body stakeholder-app">
+
+    <div class="app-shell">
+
+        <!-- ====================================================================
+             1. DARK NAVY SIDEBAR WITH VIBRANT ORANGE ACCENT
+             ==================================================================== -->
+        <aside class="app-sidebar stakeholder-sidebar" id="app-sidebar">
+            <div>
+                <!-- Brand Header -->
+                <div class="app-sidebar-header">
+                    <a href="dashboard.html" class="app-brand-link" id="sidebar-logo">
+                        <div class="app-brand-crest">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
+                                <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
+                                <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
+                            </svg>
+                        </div>
+                        <div class="app-brand-info">
+                            <span class="app-brand-name">Yatra<span>Setu</span></span>
+                            <span class="app-role-label">Tourism Stakeholder</span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Stakeholder Navigation Links -->
+                <nav class="app-sidebar-nav" id="app-sidebar-nav">
+                    <a href="dashboard.html" class="app-nav-item" data-title="Overview">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        <span>Overview</span>
+                    </a>
+                    <a href="profile.html" class="app-nav-item" data-title="My Business">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <span>My Business</span>
+                    </a>
+                    <a href="media-listings.html" class="app-nav-item active" data-title="Media & Listings">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        <span>Media & Listings</span>
+                    </a>
+                    <a href="destination-updates.html" class="app-nav-item" data-title="Destination Updates">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                        <span>Destination Updates</span>
+                    </a>
+                    <a href="connections-reviews.html" class="app-nav-item" data-title="Connections & Reviews">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                        <span>Connections & Reviews</span>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Bottom Sidebar Destination Context Card -->
+            <div class="sidebar-destination-box">
+                <img id="sidebar-dest-img" src="" alt="Destination" class="sidebar-destination-thumb" style="display: none;">
+                <span class="sidebar-destination-label">Your Destination</span>
+                <strong id="sidebar-dest-name" class="sidebar-destination-name">Loading...</strong>
+                <span id="sidebar-dest-state" class="sidebar-destination-state"></span>
+            </div>
+        </aside>
+
+        <!-- ====================================================================
+             2. MAIN STAKEHOLDER WORKSPACE & TOPBAR
+             ==================================================================== -->
+        <main class="app-main">
+
+            <!-- Topbar Navigation Header -->
+            <header class="app-topbar stakeholder-topbar">
+                <div class="topbar-left" style="display: flex; align-items: center; gap: 1rem;">
+                    <button type="button" class="btn-sidebar-toggle" id="sidebar-toggle-btn" aria-label="Toggle Navigation">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+
+                    <!-- Breadcrumbs -->
+                    <div class="breadcrumbs">
+                        <a href="dashboard.html" class="breadcrumb-item">Stakeholder Hub</a>
+                        <span class="breadcrumb-sep">/</span>
+                        <span class="breadcrumb-item active" id="breadcrumb-active">Media & Listings</span>
+                    </div>
+                </div>
+
+                <!-- Topbar Right Controls -->
+                <div class="topbar-right" style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div class="topbar-action-wrapper">
+                        <button type="button" class="notification-btn" id="notification-btn" title="Notifications" aria-label="Notifications">🔔<span class="notification-badge" id="notification-badge">0</span></button>
+                    </div>
+
+                    <div class="user-profile-badge-wrapper">
+                        <div class="user-profile-badge" id="user-profile-badge">
+                            <div class="user-avatar" id="topbar-user-avatar">SD</div>
+                            <div class="user-info-text">
+                                <span class="user-name" id="topbar-user-name">Suresh Deshmukh</span>
+                                <span class="user-role" id="topbar-user-role">Tourism Stakeholder</span>
+                            </div>
+                            <span class="user-caret">▾</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content Container -->
+            <div class="dashboard-content" style="padding: 1.75rem;">
+
+                <div style="margin-bottom: 1.25rem;">
+                    <h1 style="font-size: 1.55rem; font-weight: 800; color: var(--sh-text-primary); margin: 0 0 0.25rem 0;">Media & Listings</h1>
+                    <p style="font-size: 0.88rem; color: var(--sh-text-secondary); margin: 0;">Upload photos, videos and posts to showcase your services to tourists.</p>
+                </div>
+
+                <!-- Unassigned Destination Warning Banner (Shown only when unassigned) -->
+                <div id="media-unassigned-banner" style="display: none; margin-bottom: 1.5rem;">
+                    <div style="padding: 2.25rem 1.5rem; text-align: center; background: var(--sh-card-bg); border: 1px solid var(--sh-card-border); border-radius: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📍</div>
+                        <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--sh-text-primary); margin: 0 0 0.35rem 0;">No Destination Assigned</h3>
+                        <p style="font-size: 0.88rem; color: var(--sh-text-secondary); margin: 0 0 1.25rem 0; max-width: 500px; margin-left: auto; margin-right: auto;">
+                            You currently do not have an active destination assigned to your stakeholder profile. Please configure your operating destination in My Business Profile before managing listings and media.
+                        </p>
+                        <a href="profile.html" class="btn-sh-orange" style="display: inline-flex; font-size: 0.85rem; padding: 0.55rem 1.25rem; text-decoration: none;">
+                            Configure Destination in My Business &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <div id="media-main-content">
+                    <!-- Tab Navigation Bar -->
+                    <div class="sh-quick-tabs-bar" style="margin-bottom: 1.5rem;">
+                        <div class="sh-quick-tabs-group" role="tablist" aria-label="Media & Listings Navigation">
+                            <button type="button" class="sh-tab-pill active" id="tab-btn-media" data-tab="media">📸 Photos & Videos</button>
+                            <button type="button" class="sh-tab-pill" id="tab-btn-posts" data-tab="posts">📝 Posts & Updates</button>
+                            <button type="button" class="sh-tab-pill" id="tab-btn-listings" data-tab="listings">🏪 Manage Listings</button>
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--sh-text-muted);" id="media-tab-info-text">
+                            Showing media catalog for <strong id="media-dest-tag-name">Rajgad Fort</strong>
+                        </div>
+                    </div>
+
+                    <!-- TAB 1: PHOTOS & VIDEOS -->
+                    <div id="tab-content-media">
+
+                        <!-- 1. Upload Media Card -->
+                        <div class="sh-card-box" style="margin-bottom: 1.75rem;">
+                            <div style="margin-bottom: 1rem;">
+                                <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--sh-text-primary); margin: 0 0 0.25rem 0;">Upload Media</h3>
+                                <p style="font-size: 0.85rem; color: var(--sh-text-secondary); margin: 0;">Add photos and videos of your services, facilities, trekking routes, food, stays, etc.</p>
+                            </div>
+
+                            <!-- Drag & Drop Zone -->
+                            <div class="sh-dropzone" id="sh-media-dropzone">
+                                <div style="font-size: 2.5rem; color: var(--sh-orange-accent); margin-bottom: 0.5rem;">☁️</div>
+                                <h4 style="font-size: 1rem; font-weight: 700; color: var(--sh-text-primary); margin: 0 0 0.35rem 0;">Drag & drop photos or videos here</h4>
+                                <span style="font-size: 0.82rem; color: var(--sh-text-muted); display: block; margin-bottom: 0.85rem;">or</span>
+                                <label for="sh-media-file-input" class="btn-sh-orange" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.55rem 1.25rem;">
+                                    📁 Choose Files
+                                </label>
+                                <input type="file" id="sh-media-file-input" accept="image/jpeg,image/png,video/mp4,video/quicktime" style="display: none;">
+                                <div style="font-size: 0.76rem; color: var(--sh-text-muted); margin-top: 0.75rem;">
+                                    Supported formats: <strong>JPG, PNG, MP4, MOV</strong> • Max file size: <strong>50MB</strong>
+                                </div>
+                            </div>
+
+                            <!-- Selected File Upload Form (Revealed when file is picked) -->
+                            <div id="upload-details-form" style="display: none; margin-top: 1.25rem; border-top: 1px solid var(--sh-card-border); padding-top: 1.25rem;">
+                                <div style="display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: flex-start;">
+                                    <!-- Selected File Preview Thumbnail -->
+                                    <div style="width: 140px; height: 105px; border-radius: 10px; overflow: hidden; background: #0F172A; position: relative; border: 1px solid var(--sh-card-border);">
+                                        <img id="upload-preview-img" src="" alt="Selected Preview" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                                        <div id="upload-preview-placeholder" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2rem;">📹</div>
+                                    </div>
+
+                                    <!-- Metadata Inputs -->
+                                    <div style="flex: 1; min-width: 260px;">
+                                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 0.85rem; margin-bottom: 0.75rem;">
+                                            <div>
+                                                <label for="upload-caption-input" class="sh-filter-label">Caption / Title *</label>
+                                                <input type="text" id="upload-caption-input" class="sh-input-control" placeholder="e.g. Sunrise view at Suvela Machi">
+                                            </div>
+                                            <div>
+                                                <label for="upload-type-select" class="sh-filter-label">Media Type</label>
+                                                <select id="upload-type-select" class="sh-input-control">
+                                                    <option value="photo">Photo (Image)</option>
+                                                    <option value="video">Video (Clip)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div style="margin-bottom: 0.75rem;">
+                                            <label for="upload-desc-input" class="sh-filter-label">Description / Guidance</label>
+                                            <textarea id="upload-desc-input" rows="2" class="sh-input-control" placeholder="Short description for tourists viewing your gallery..."></textarea>
+                                        </div>
+
+                                        <!-- Verification Disclaimer Callout -->
+                                        <div style="background: var(--sh-orange-light); border-left: 3px solid var(--sh-orange-accent); border-radius: 6px; padding: 0.6rem 0.85rem; font-size: 0.78rem; color: var(--sh-text-primary); margin-bottom: 0.85rem;">
+                                            🛡️ <strong>Session Preview & Approval Workflow:</strong> Selected files are displayed as local session previews and assigned <strong>Pending Approval</strong>. Only the authorized Destination Manager can verify and grant public approval for this destination. Permanent storage requires the backend service.
+                                        </div>
+
+                                        <!-- Simulated Progress Bar Container -->
+                                        <div id="upload-progress-container" style="display: none; margin-bottom: 0.85rem;">
+                                            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--sh-text-secondary); margin-bottom: 0.25rem;">
+                                                <span>Processing file upload...</span>
+                                                <span id="upload-progress-percentage">0%</span>
+                                            </div>
+                                            <div style="height: 6px; background: #E2E8F0; border-radius: 3px; overflow: hidden;">
+                                                <div id="upload-progress-fill" style="height: 100%; width: 0%; background: var(--sh-orange-accent); transition: width 0.15s ease;"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Action Buttons -->
+                                        <div style="display: flex; justify-content: flex-end; gap: 0.65rem;">
+                                            <button type="button" id="btn-cancel-upload" class="btn" style="background: #E2E8F0; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600; font-size: 0.82rem; cursor: pointer;">
+                                                Cancel
+                                            </button>
+                                            <button type="button" id="btn-submit-upload" class="btn-sh-orange" style="font-size: 0.82rem; padding: 0.5rem 1.25rem;">
+                                                Submit Media for Approval
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Media Gallery Section -->
+                        <div class="sh-card-box">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+                                <div>
+                                    <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--sh-text-primary); margin: 0 0 0.2rem 0;">Media Gallery</h3>
+                                    <span style="font-size: 0.8rem; color: var(--sh-text-muted);" id="media-gallery-counter">Showing 12 items</span>
+                                </div>
+
+                                <!-- Filter & Sort Controls -->
+                                <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                                    <div class="sh-media-type-pill-group">
+                                        <button type="button" class="sh-tab-pill active" data-media-filter="all">All (12)</button>
+                                        <button type="button" class="sh-tab-pill" data-media-filter="photo">Photos (8)</button>
+                                        <button type="button" class="sh-tab-pill" data-media-filter="video">Videos (4)</button>
+                                    </div>
+
+                                    <select id="sh-media-sort" class="sh-input-control" style="width: auto; padding: 0.45rem 0.75rem; font-size: 0.8rem;">
+                                        <option value="newest">Newest First</option>
+                                        <option value="oldest">Oldest First</option>
+                                        <option value="az">Title (A - Z)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Empty State for Gallery -->
+                            <div id="media-empty-state" style="display: none; padding: 3rem 1.5rem; text-align: center;">
+                                <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">📷</div>
+                                <h4 style="font-size: 1.05rem; font-weight: 800; color: var(--sh-text-primary); margin: 0 0 0.25rem 0;">No media matches your filter</h4>
+                                <p style="font-size: 0.82rem; color: var(--sh-text-secondary); margin: 0;">Try selecting a different filter option or upload photos and videos using the box above.</p>
+                            </div>
+
+                            <!-- Responsive Media Cards Grid -->
+                            <div class="sh-media-grid" id="sh-media-grid">
+                                <!-- Dynamically populated by stakeholder.js -->
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- TAB 2: POSTS & UPDATES -->
+                    <div id="tab-content-posts" style="display: none;">
+
+                        <!-- Create Post Form Card -->
+                        <div class="sh-card-box" style="margin-bottom: 1.75rem;">
+                            <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--sh-text-primary); margin: 0 0 0.35rem 0;">Create Service Update / Post</h3>
+                            <p style="font-size: 0.85rem; color: var(--sh-text-secondary); margin: 0 0 1.25rem 0;">Share seasonal availability, trek timings, special offers, or visitor safety tips with tourists.</p>
+
+                            <form id="sh-create-post-form">
+                                <div style="margin-bottom: 0.85rem;">
+                                    <label for="post-title-input" class="sh-filter-label">Update Title *</label>
+                                    <input type="text" id="post-title-input" class="sh-input-control" placeholder="e.g. Special Weekend Sunrise Ascent Batch Opened">
+                                </div>
+
+                                <div style="margin-bottom: 1rem;">
+                                    <label for="post-content-input" class="sh-filter-label">Update Content & Details *</label>
+                                    <textarea id="post-content-input" rows="3" class="sh-input-control" placeholder="Describe the details for tourists (schedules, meeting points, tips)..."></textarea>
+                                </div>
+
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--sh-card-border); padding-top: 1rem;">
+                                    <span style="font-size: 0.76rem; color: var(--sh-text-muted);">
+                                        📍 Published under <strong>Rajgad Fort</strong> destination feed
+                                    </span>
+                                    <button type="submit" class="btn-sh-orange" style="font-size: 0.82rem; padding: 0.55rem 1.25rem;">
+                                        Publish Update &rarr;
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Posts List -->
+                        <div class="sh-card-box">
+                            <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--sh-text-primary); margin: 0 0 1rem 0;">Published Posts & Updates</h3>
+                            <div id="sh-posts-list">
+                                <!-- Dynamically populated by stakeholder.js -->
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- TAB 3: MANAGE LISTINGS -->
+                    <div id="tab-content-listings" style="display: none;">
+
+                        <!-- Header & Create Action -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+                            <div>
+                                <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--sh-text-primary); margin: 0 0 0.2rem 0;">Your Verified Service Listings</h3>
+                                <p style="font-size: 0.85rem; color: var(--sh-text-secondary); margin: 0;">Manage public business cards and packages visible to tourists visiting your destination.</p>
+                            </div>
+                            <button type="button" id="btn-open-create-listing" class="btn-sh-orange">
+                                + Create New Service Listing
+                            </button>
+                        </div>
+
+                        <!-- Listing Cards Grid -->
+                        <div id="sh-listings-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 1.25rem;">
+                            <!-- Dynamically populated by stakeholder.js -->
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+    <!-- ====================================================================
+         MODAL 1: MEDIA PREVIEW MODAL (FULL PHOTO / VIDEO PLAYER)
+         ==================================================================== -->
+    <div id="mediaPreviewModal" class="sh-detail-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="preview-modal-title" style="display: none;">
+        <div class="sh-detail-modal-dialog" style="max-width: 650px;" tabindex="-1">
+            <div class="sh-detail-modal-header">
+                <div>
+                    <span id="preview-modal-badge" class="sh-status-badge accepted" style="margin-bottom: 0.35rem; display: inline-block;">Approved Media</span>
+                    <h3 id="preview-modal-title" style="font-size: 1.15rem; font-weight: 800; color: var(--sh-text-primary); margin: 0;">Media Preview</h3>
+                </div>
+                <button type="button" id="btn-close-media-preview" aria-label="Close dialog" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--sh-text-muted); line-height: 1;">&times;</button>
+            </div>
+
+            <div class="sh-detail-modal-body" style="padding: 1.25rem;">
+                <div style="border-radius: 10px; overflow: hidden; background: #0A1128; max-height: 340px; display: flex; align-items: center; justify-content: center; position: relative;">
+                    <img id="preview-modal-img" src="" alt="Full preview" style="width: 100%; height: 340px; object-fit: cover; display: none;">
+
+                    <div id="preview-modal-video-box" style="display: none; width: 100%; height: 340px; background: #000; position: relative; align-items: center; justify-content: center;">
+                        <img id="preview-modal-video-poster" src="" alt="Video Poster" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.7;">
+                        <div style="position: absolute; width: 68px; height: 68px; border-radius: 50%; background: rgba(234, 88, 12, 0.9); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.4);">
+                            ▶
+                        </div>
+                        <span id="preview-modal-duration-tag" style="position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,0.8); color: #fff; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700;"></span>
+                    </div>
+                </div>
+
+                <div id="preview-modal-meta-chips" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <!-- Metadata chips -->
+                </div>
+
+                <div>
+                    <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--sh-text-secondary); margin: 0 0 0.35rem 0; text-transform: uppercase;">Description</h4>
+                    <p id="preview-modal-desc" style="font-size: 0.88rem; color: var(--sh-text-primary); line-height: 1.5; margin: 0;"></p>
+                </div>
+            </div>
+
+            <div class="sh-detail-modal-footer">
+                <span style="font-size: 0.76rem; color: var(--sh-text-muted);">
+                    🔒 Tourism Stakeholder Asset Gallery
+                </span>
+                <button type="button" id="btn-footer-close-media-preview" class="btn" style="background: #E2E8F0; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer;">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         MODAL 2: DESTRUCTIVE ACTION CONFIRMATION MODAL
+         ==================================================================== -->
+    <div id="deleteConfirmModal" class="sh-detail-modal-backdrop" role="dialog" aria-modal="true" style="display: none;">
+        <div class="sh-detail-modal-dialog" style="max-width: 440px;" tabindex="-1">
+            <div class="sh-detail-modal-header" style="border-bottom-color: #FEE2E2;">
+                <div>
+                    <span class="sh-status-badge pending" style="background: #FEE2E2; color: #DC2626;">Destructive Action</span>
+                    <h3 id="delete-modal-title" style="font-size: 1.05rem; font-weight: 800; color: var(--sh-text-primary); margin: 0.25rem 0 0 0;">Confirm Removal</h3>
+                </div>
+                <button type="button" id="btn-close-delete-modal" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--sh-text-muted);">&times;</button>
+            </div>
+
+            <div class="sh-detail-modal-body" style="padding: 1.25rem;">
+                <p id="delete-modal-message" style="font-size: 0.88rem; color: var(--sh-text-secondary); margin: 0; line-height: 1.5;">
+                    Are you sure you want to remove this item? This action will permanently remove it from your stakeholder workspace and active tourist listings.
+                </p>
+            </div>
+
+            <div class="sh-detail-modal-footer">
+                <button type="button" id="btn-cancel-delete" class="btn" style="background: #E2E8F0; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600; font-size: 0.82rem; cursor: pointer;">
+                    Cancel
+                </button>
+                <button type="button" id="btn-confirm-delete" class="btn" style="background: #DC2626; color: #fff; border: none; padding: 0.5rem 1.15rem; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer;">
+                    Yes, Remove Item
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         MODAL 3: CREATE / EDIT LISTING MODAL
+         ==================================================================== -->
+    <div id="listingModal" class="sh-detail-modal-backdrop" role="dialog" aria-modal="true" style="display: none;">
+        <div class="sh-detail-modal-dialog" style="max-width: 680px;" tabindex="-1">
+            <div class="sh-detail-modal-header">
+                <div>
+                    <span id="listing-modal-badge" class="sh-status-badge accepted">Service Listing</span>
+                    <h3 id="listing-modal-title" style="font-size: 1.15rem; font-weight: 800; color: var(--sh-text-primary); margin: 0.25rem 0 0 0;">Create Service Listing</h3>
+                </div>
+                <button type="button" id="btn-close-listing-modal" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--sh-text-muted);">&times;</button>
+            </div>
+
+            <div class="sh-detail-modal-body" style="padding: 1.25rem; max-height: 72vh; overflow-y: auto;">
+                <form id="listing-editor-form">
+                    <input type="hidden" id="listing-form-id" value="">
+
+                    <!-- Service / Listing Title -->
+                    <div style="margin-bottom: 0.85rem;">
+                        <label for="listing-form-name" class="sh-filter-label">Listing / Service Name *</label>
+                        <input type="text" id="listing-form-name" class="sh-input-control" placeholder="e.g. Sahyadri Trekking Guides Co-op" required>
+                    </div>
+
+                    <!-- Category & Business Type -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+                        <div>
+                            <label for="listing-form-category" class="sh-filter-label">Service Category *</label>
+                            <select id="listing-form-category" class="sh-input-control">
+                                <option value="Tour & Trekking Guides">Tour & Trekking Guides</option>
+                                <option value="Stay & Accommodation">Stay & Accommodation</option>
+                                <option value="Local Transport & Safaris">Local Transport & Safaris</option>
+                                <option value="Food & Local Dining">Food & Local Dining</option>
+                                <option value="Community Board">Community Board</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="listing-form-type" class="sh-filter-label">Business Type *</label>
+                            <select id="listing-form-type" class="sh-input-control">
+                                <option value="visitor-facing">Visitor-Facing Service</option>
+                                <option value="info-contributor">Information Partner</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Operating Hours & Tariff -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+                        <div>
+                            <label for="listing-form-hours" class="sh-filter-label">Operating Schedule / Hours</label>
+                            <input type="text" id="listing-form-hours" class="sh-input-control" placeholder="e.g. Mon - Sun (06:00 - 18:00)">
+                        </div>
+                        <div>
+                            <label for="listing-form-price" class="sh-filter-label">Tariff / Price Range (₹)</label>
+                            <input type="text" id="listing-form-price" class="sh-input-control" placeholder="e.g. 500 - 1,500 per group">
+                        </div>
+                    </div>
+
+                    <!-- Base Location / Address -->
+                    <div style="margin-bottom: 0.85rem;">
+                        <label for="listing-form-address" class="sh-filter-label">Base Location / Pickup Point *</label>
+                        <input type="text" id="listing-form-address" class="sh-input-control" placeholder="e.g. Base Camp Office, Gunjavane Village" required>
+                    </div>
+
+                    <!-- Description -->
+                    <div style="margin-bottom: 0.85rem;">
+                        <label for="listing-form-desc" class="sh-filter-label">Description & Highlights *</label>
+                        <textarea id="listing-form-desc" rows="3" class="sh-input-control" placeholder="Describe the service offering, guide qualifications, and route safety..." required></textarea>
+                    </div>
+
+                    <!-- Listing Image URL -->
+                    <div style="margin-bottom: 0.85rem;">
+                        <label for="listing-form-img" class="sh-filter-label">Cover Photo URL</label>
+                        <input type="url" id="listing-form-img" class="sh-input-control" placeholder="https://example.com/photo.jpg">
+                    </div>
+
+                    <!-- Publication Status Selection -->
+                    <div style="margin-bottom: 0.5rem; background: #F8FAFC; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--sh-card-border);">
+                        <label for="listing-form-status" class="sh-filter-label">Submission Status</label>
+                        <select id="listing-form-status" class="sh-input-control">
+                            <option value="Pending Approval">Submit for Destination Manager Approval (Pending)</option>
+                            <option value="Draft">Save as Draft (Private)</option>
+                        </select>
+                        <span style="font-size: 0.74rem; color: var(--sh-text-muted); display: block; margin-top: 0.25rem;">
+                            Stakeholders cannot self-approve listings. Only the authorized Destination Manager can grant public approval for this destination.
+                        </span>
+                    </div>
+                </form>
+            </div>
+
+            <div class="sh-detail-modal-footer">
+                <button type="button" id="btn-cancel-listing" class="btn" style="background: #E2E8F0; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600; font-size: 0.82rem; cursor: pointer;">
+                    Cancel
+                </button>
+                <button type="button" id="btn-save-listing-submit" class="btn-sh-orange" style="font-size: 0.82rem; padding: 0.5rem 1.25rem;">
+                    Save Listing
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Dependencies -->
+    <script src="../js/manager-data.js"></script>
+    <script src="../js/stakeholder-data.js"></script>
+    <script src="../js/stakeholder.js"></script>
+    <script src="../js/dashboard.js"></script>
+</body>
+</html>

@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initStakeholderProfilePage();
     initStakeholderDestinationUpdates();
     initStakeholderConnectionsReviews();
+    initStakeholderMediaListings();
 });
 
 /**
@@ -454,9 +455,19 @@ function initStakeholderProfilePage() {
 
         // Save Destination Context to Session
         if (chosenDestId) {
+            if (profile.isBusinessApproved && chosenDestId !== profile.destinationId) {
+                alert('Operating destination is locked after official business approval. Only the Destination Manager or Administrator can reassign destinations.');
+                if (selectDest) selectDest.value = profile.destinationId || '';
+                return;
+            }
             sessionStorage.setItem('yatrasetu_destination_id', chosenDestId);
             profile.destinationId = chosenDestId;
         } else {
+            if (profile.isBusinessApproved) {
+                alert('Operating destination cannot be unassigned after official business approval.');
+                if (selectDest) selectDest.value = profile.destinationId || '';
+                return;
+            }
             sessionStorage.setItem('yatrasetu_destination_id', 'unassigned');
             profile.destinationId = null;
         }
@@ -1261,4 +1272,895 @@ function initStakeholderConnectionsReviews() {
             renderReviewsFeed();
         };
     }
+}
+
+/**
+ * 7. Media & Listings Controller (media-listings.html)
+ * Manages photo/video gallery, file validation, prototype uploads,
+ * media previews, destructive confirmation modals, post updates,
+ * and service listing CRUD with strict stakeholder ownership protection.
+ */
+function initStakeholderMediaListings() {
+    const isMediaPage = window.location.pathname.includes('media-listings.html');
+    if (!isMediaPage) return;
+
+    const dataStore = window.YatraSetuStakeholderData || {};
+    const profile = dataStore.profile || {};
+    const currentUserId = profile.id || 'sh-1';
+    const destId = profile.destinationId;
+
+    // 1. Destination Scope Gate
+    const unassignedBanner = document.getElementById('media-unassigned-banner');
+    const mainContent = document.getElementById('media-main-content');
+    const destTagName = document.getElementById('media-dest-tag-name');
+
+    if (!destId) {
+        if (unassignedBanner) unassignedBanner.style.display = 'block';
+        if (mainContent) mainContent.style.display = 'none';
+        return;
+    }
+
+    if (unassignedBanner) unassignedBanner.style.display = 'none';
+    if (mainContent) mainContent.style.display = 'block';
+    if (destTagName) destTagName.textContent = profile.destinationName || 'Rajgad Fort';
+
+    // 2. Tab Navigation
+    const tabBtnMedia = document.getElementById('tab-btn-media');
+    const tabBtnPosts = document.getElementById('tab-btn-posts');
+    const tabBtnListings = document.getElementById('tab-btn-listings');
+    const tabContentMedia = document.getElementById('tab-content-media');
+    const tabContentPosts = document.getElementById('tab-content-posts');
+    const tabContentListings = document.getElementById('tab-content-listings');
+    const allTabBtns = [tabBtnMedia, tabBtnPosts, tabBtnListings];
+    const allTabContents = [tabContentMedia, tabContentPosts, tabContentListings];
+
+    function switchTab(activeBtn, activeContent) {
+        allTabBtns.forEach(btn => { if (btn) btn.classList.remove('active'); });
+        allTabContents.forEach(content => { if (content) content.style.display = 'none'; });
+        if (activeBtn) activeBtn.classList.add('active');
+        if (activeContent) activeContent.style.display = 'block';
+    }
+
+    if (tabBtnMedia && tabContentMedia) {
+        tabBtnMedia.addEventListener('click', () => switchTab(tabBtnMedia, tabContentMedia));
+    }
+    if (tabBtnPosts && tabContentPosts) {
+        tabBtnPosts.addEventListener('click', () => {
+            switchTab(tabBtnPosts, tabContentPosts);
+            renderPostsFeed();
+        });
+    }
+    if (tabBtnListings && tabContentListings) {
+        tabBtnListings.addEventListener('click', () => {
+            switchTab(tabBtnListings, tabContentListings);
+            renderListingsGrid();
+        });
+    }
+
+    // =========================================================================
+    // 3. MEDIA GALLERY (PHOTOS & VIDEOS)
+    // =========================================================================
+    let currentMediaFilter = 'all';
+    const mediaGrid = document.getElementById('sh-media-grid');
+    const mediaEmptyState = document.getElementById('media-empty-state');
+    const mediaCounter = document.getElementById('media-gallery-counter');
+    const mediaSortSelect = document.getElementById('sh-media-sort');
+    const mediaFilterPills = document.querySelectorAll('.sh-media-type-pill-group .sh-tab-pill');
+
+    function renderMediaGallery() {
+        if (!mediaGrid) return;
+
+        // Show only records genuinely uploaded by the current stakeholder
+        const allMedia = (dataStore.media || []).filter(m => m.destination_id === destId && m.stakeholder_id === currentUserId);
+        const photoCount = allMedia.filter(m => m.type === 'photo').length;
+        const videoCount = allMedia.filter(m => m.type === 'video').length;
+
+        // Update pill counts
+        mediaFilterPills.forEach(pill => {
+            const filterType = pill.getAttribute('data-media-filter');
+            if (filterType === 'all') pill.textContent = `All (${allMedia.length})`;
+            if (filterType === 'photo') pill.textContent = `Photos (${photoCount})`;
+            if (filterType === 'video') pill.textContent = `Videos (${videoCount})`;
+        });
+
+        // Filter by selected media type
+        let filteredMedia = allMedia.filter(m => {
+            if (currentMediaFilter === 'all') return true;
+            return m.type === currentMediaFilter;
+        });
+
+        // Sort items
+        const sortVal = mediaSortSelect ? mediaSortSelect.value : 'newest';
+        if (sortVal === 'az') {
+            filteredMedia.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+        } else if (sortVal === 'oldest') {
+            filteredMedia.sort((a, b) => (a.uploadedAt || '').localeCompare(b.uploadedAt || ''));
+        }
+
+        // Update counter
+        if (mediaCounter) {
+            mediaCounter.textContent = allMedia.length === 0 ? 'No media uploaded' : `Showing ${filteredMedia.length} item${filteredMedia.length === 1 ? '' : 's'}`;
+        }
+
+        // Honest Empty States
+        if (allMedia.length === 0) {
+            if (mediaEmptyState) {
+                mediaEmptyState.innerHTML = `
+                    <div style="font-size: 2.4rem; margin-bottom: 0.5rem;">📷</div>
+                    <h4 style="font-size: 1.05rem; font-weight: 800; color: var(--sh-text-primary); margin: 0 0 0.35rem 0;">No media uploaded yet</h4>
+                    <p style="font-size: 0.84rem; color: var(--sh-text-secondary); margin: 0 0 0.35rem 0;">You have not uploaded any photos or videos for ${profile.destinationName}.</p>
+                    <p style="font-size: 0.78rem; color: var(--sh-text-muted); margin: 0;">Use the upload box above to add genuine photos or videos of your service, facilities, or guided routes.</p>
+                `;
+                mediaEmptyState.style.display = 'block';
+            }
+            mediaGrid.innerHTML = '';
+            return;
+        }
+
+        if (filteredMedia.length === 0) {
+            if (mediaEmptyState) {
+                mediaEmptyState.innerHTML = `
+                    <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">📷</div>
+                    <h4 style="font-size: 1.05rem; font-weight: 800; color: var(--sh-text-primary); margin: 0 0 0.25rem 0;">No ${currentMediaFilter}s found</h4>
+                    <p style="font-size: 0.84rem; color: var(--sh-text-secondary); margin: 0;">Try selecting a different filter option or upload new media using the box above.</p>
+                `;
+                mediaEmptyState.style.display = 'block';
+            }
+            mediaGrid.innerHTML = '';
+            return;
+        }
+
+        if (mediaEmptyState) mediaEmptyState.style.display = 'none';
+
+        // Render Cards
+        mediaGrid.innerHTML = filteredMedia.map(item => `
+            <div class="sh-media-card" data-media-id="${item.id}">
+                <div style="position: relative; height: 160px; overflow: hidden; background: #0F172A; display: flex; align-items: center; justify-content: center;">
+                    ${item.url ? `
+                        <img src="${item.url}" alt="${item.title}" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';" style="width: 100%; height: 100%; object-fit: cover;">
+                        <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; font-size: 2rem; color: #94A3B8;">${item.type === 'video' ? '📹' : '📷'}</div>
+                    ` : `
+                        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; color: #94A3B8;">${item.type === 'video' ? '📹' : '📷'}</div>
+                    `}
+                    ${item.type === 'video' ? `
+                        <div class="sh-video-duration-badge">${item.duration || 'Video'}</div>
+                        <div class="sh-video-play-overlay">
+                            <button type="button" class="btn-media-play" data-id="${item.id}" aria-label="Play video preview">▶</button>
+                        </div>
+                    ` : ''}
+                    <span class="sh-status-badge ${item.statusClass || 'pending'}" style="position: absolute; top: 8px; right: 8px; font-size: 0.68rem; box-shadow: 0 2px 5px rgba(0,0,0,0.25);">
+                        ${item.status}
+                    </span>
+                </div>
+                <div class="sh-media-info">
+                    <h4 class="sh-media-caption" title="${item.title}">${item.title}</h4>
+                    <div style="font-size: 0.74rem; color: var(--sh-text-muted); display: flex; justify-content: space-between; margin-bottom: 0.65rem;">
+                        <span>${item.type === 'video' ? '📹 Video' : '📷 Photo'} • ${item.fileSize || 'Standard'}</span>
+                        <span>${item.uploadedAt || 'Today'}</span>
+                    </div>
+                    <div class="sh-media-actions">
+                        <button type="button" class="btn-media-action btn-preview-media" data-id="${item.id}" title="Preview Media">
+                            👁️ Preview
+                        </button>
+                        <button type="button" class="btn-media-action btn-delete-media" data-id="${item.id}" title="Remove Media" style="color: #DC2626;">
+                            🗑️ Remove
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Filter pill click handlers
+    mediaFilterPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            mediaFilterPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            currentMediaFilter = pill.getAttribute('data-media-filter') || 'all';
+            renderMediaGallery();
+        });
+    });
+
+    if (mediaSortSelect) {
+        mediaSortSelect.addEventListener('change', renderMediaGallery);
+    }
+
+    // =========================================================================
+    // 4. UPLOAD MEDIA CONTROLLER (DRAG/DROP, VALIDATION, TEMPORARY PREVIEW)
+    // =========================================================================
+    const dropzone = document.getElementById('sh-media-dropzone');
+    const fileInput = document.getElementById('sh-media-file-input');
+    const uploadDetailsForm = document.getElementById('upload-details-form');
+    const uploadPreviewImg = document.getElementById('upload-preview-img');
+    const uploadPreviewPlaceholder = document.getElementById('upload-preview-placeholder');
+    const uploadCaptionInput = document.getElementById('upload-caption-input');
+    const uploadTypeSelect = document.getElementById('upload-type-select');
+    const uploadDescInput = document.getElementById('upload-desc-input');
+    const btnCancelUpload = document.getElementById('btn-cancel-upload');
+    const btnSubmitUpload = document.getElementById('btn-submit-upload');
+    const progressContainer = document.getElementById('upload-progress-container');
+    const progressPercentage = document.getElementById('upload-progress-percentage');
+    const progressFill = document.getElementById('upload-progress-fill');
+
+    let currentSelectedFile = null;
+    let currentPreviewUrl = '';
+
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'video/mp4', 'video/quicktime'];
+    const maxFileSizeBytes = 50 * 1024 * 1024; // 50MB
+
+    function handleFileSelection(file) {
+        if (!file) return;
+
+        // 1. Format validation
+        const fileExt = file.name.split('.').pop().toLowerCase();
+        const validExt = ['jpg', 'jpeg', 'png', 'mp4', 'mov'].includes(fileExt);
+        const validMime = allowedMimeTypes.includes(file.type);
+
+        if (!validExt && !validMime) {
+            alert('Unsupported file format. Please upload JPG, PNG, MP4, or MOV files.');
+            if (fileInput) fileInput.value = '';
+            return;
+        }
+
+        // 2. Size validation
+        if (file.size > maxFileSizeBytes) {
+            const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+            alert(`File size exceeds 50MB limit. Selected file size: ${sizeMB} MB.`);
+            if (fileInput) fileInput.value = '';
+            return;
+        }
+
+        // Revoke prior temporary object URL
+        if (currentPreviewUrl && currentPreviewUrl.startsWith('blob:')) {
+            URL.revokeObjectURL(currentPreviewUrl);
+            currentPreviewUrl = '';
+        }
+
+        currentSelectedFile = file;
+        const isVideo = file.type.startsWith('video/') || ['mp4', 'mov'].includes(fileExt);
+
+        if (uploadTypeSelect) {
+            uploadTypeSelect.value = isVideo ? 'video' : 'photo';
+        }
+
+        if (uploadCaptionInput && !uploadCaptionInput.value.trim()) {
+            const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+            uploadCaptionInput.value = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+        }
+
+        if (uploadDetailsForm) {
+            uploadDetailsForm.style.display = 'block';
+        }
+
+        // Generate genuine temporary browser preview using ObjectURL
+        try {
+            currentPreviewUrl = URL.createObjectURL(file);
+            if (isVideo) {
+                if (uploadPreviewImg) uploadPreviewImg.style.display = 'none';
+                if (uploadPreviewPlaceholder) {
+                    uploadPreviewPlaceholder.style.display = 'flex';
+                    uploadPreviewPlaceholder.innerHTML = '<span style="font-size: 2rem;">📹</span><span style="font-size: 0.68rem; color: #94A3B8; display: block; margin-top: 0.2rem;">Video Selected</span>';
+                }
+            } else {
+                if (uploadPreviewImg) {
+                    uploadPreviewImg.src = currentPreviewUrl;
+                    uploadPreviewImg.style.display = 'block';
+                }
+                if (uploadPreviewPlaceholder) uploadPreviewPlaceholder.style.display = 'none';
+            }
+        } catch (err) {
+            currentPreviewUrl = '';
+        }
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                handleFileSelection(e.target.files[0]);
+            }
+        });
+    }
+
+    if (dropzone) {
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                handleFileSelection(e.dataTransfer.files[0]);
+            }
+        });
+    }
+
+    function resetUploadForm() {
+        if (currentPreviewUrl && currentPreviewUrl.startsWith('blob:')) {
+            URL.revokeObjectURL(currentPreviewUrl);
+        }
+        currentSelectedFile = null;
+        currentPreviewUrl = '';
+        if (fileInput) fileInput.value = '';
+        if (uploadCaptionInput) uploadCaptionInput.value = '';
+        if (uploadDescInput) uploadDescInput.value = '';
+        if (uploadPreviewImg) {
+            uploadPreviewImg.style.display = 'none';
+            uploadPreviewImg.src = '';
+        }
+        if (uploadPreviewPlaceholder) {
+            uploadPreviewPlaceholder.style.display = 'flex';
+            uploadPreviewPlaceholder.textContent = '📹';
+        }
+        if (progressContainer) progressContainer.style.display = 'none';
+        if (progressFill) progressFill.style.width = '0%';
+        if (progressPercentage) progressPercentage.textContent = '0%';
+        if (uploadDetailsForm) uploadDetailsForm.style.display = 'none';
+    }
+
+    if (btnCancelUpload) {
+        btnCancelUpload.addEventListener('click', resetUploadForm);
+    }
+
+    if (btnSubmitUpload) {
+        btnSubmitUpload.addEventListener('click', () => {
+            if (!currentSelectedFile) {
+                alert('Please select a photo or video file to upload.');
+                return;
+            }
+
+            const caption = uploadCaptionInput ? uploadCaptionInput.value.trim() : '';
+            if (!caption) {
+                alert('Please provide a caption/title for your media.');
+                if (uploadCaptionInput) uploadCaptionInput.focus();
+                return;
+            }
+
+            const mediaType = uploadTypeSelect ? uploadTypeSelect.value : 'photo';
+            const description = uploadDescInput ? uploadDescInput.value.trim() : '';
+            const fileSizeStr = `${(currentSelectedFile.size / (1024 * 1024)).toFixed(1)} MB`;
+
+            // Simulate upload progress
+            if (progressContainer) progressContainer.style.display = 'block';
+            let progress = 0;
+            const timer = setInterval(() => {
+                progress += 25;
+                if (progressFill) progressFill.style.width = `${progress}%`;
+                if (progressPercentage) progressPercentage.textContent = `${progress}%`;
+
+                if (progress >= 100) {
+                    clearInterval(timer);
+
+                    // Add new media item in Pending Approval state
+                    const newMediaItem = {
+                        id: `med-${Date.now()}`,
+                        stakeholder_id: currentUserId,
+                        destination_id: destId,
+                        type: mediaType,
+                        title: caption,
+                        description: description || 'Stakeholder media submission awaiting official verification.',
+                        url: currentPreviewUrl,
+                        duration: mediaType === 'video' ? 'Clip' : '',
+                        fileSize: fileSizeStr,
+                        fileType: currentSelectedFile.type || 'image/jpeg',
+                        uploadedAt: 'Today',
+                        status: 'Pending Approval',
+                        statusClass: 'pending'
+                    };
+
+                    (dataStore.media = dataStore.media || []).unshift(newMediaItem);
+                    alert(`Media "${caption}" added to local session as a temporary preview (Status: Pending Approval). Note: Prototype mode does not perform permanent server storage. Only the authorized Destination Manager can verify and grant public approval.`);
+
+                    // Reset selected file reference but preserve preview in collection
+                    currentSelectedFile = null;
+                    currentPreviewUrl = '';
+                    if (fileInput) fileInput.value = '';
+                    if (uploadCaptionInput) uploadCaptionInput.value = '';
+                    if (uploadDescInput) uploadDescInput.value = '';
+                    if (progressContainer) progressContainer.style.display = 'none';
+                    if (uploadDetailsForm) uploadDetailsForm.style.display = 'none';
+
+                    renderMediaGallery();
+                }
+            }, 80);
+        });
+    }
+
+    // =========================================================================
+    // 5. MEDIA PREVIEW MODAL
+    // =========================================================================
+    const previewModal = document.getElementById('mediaPreviewModal');
+    const closePreviewBtn = document.getElementById('btn-close-media-preview');
+    const footerClosePreviewBtn = document.getElementById('btn-footer-close-media-preview');
+    const previewModalBadge = document.getElementById('preview-modal-badge');
+    const previewModalTitle = document.getElementById('preview-modal-title');
+    const previewModalImg = document.getElementById('preview-modal-img');
+    const previewModalVideoBox = document.getElementById('preview-modal-video-box');
+    const previewModalVideoPoster = document.getElementById('preview-modal-video-poster');
+    const previewModalDurationTag = document.getElementById('preview-modal-duration-tag');
+    const previewModalMeta = document.getElementById('preview-modal-meta-chips');
+    const previewModalDesc = document.getElementById('preview-modal-desc');
+
+    function openMediaPreview(itemId) {
+        const item = (dataStore.media || []).find(m => m.id === itemId);
+        if (!item || !previewModal) return;
+
+        if (previewModalBadge) {
+            previewModalBadge.textContent = `${item.status} Media`;
+            previewModalBadge.className = `sh-status-badge ${item.statusClass || 'pending'}`;
+        }
+        if (previewModalTitle) previewModalTitle.textContent = item.title;
+        if (previewModalDesc) previewModalDesc.textContent = item.description || 'No description provided.';
+
+        if (item.type === 'video') {
+            if (previewModalImg) previewModalImg.style.display = 'none';
+            if (previewModalVideoBox) previewModalVideoBox.style.display = 'flex';
+            if (previewModalVideoPoster) previewModalVideoPoster.src = item.url || '';
+            if (previewModalDurationTag) previewModalDurationTag.textContent = item.duration || 'Video Clip';
+        } else {
+            if (previewModalVideoBox) previewModalVideoBox.style.display = 'none';
+            if (previewModalImg) {
+                previewModalImg.src = item.url || '';
+                previewModalImg.style.display = 'block';
+            }
+        }
+
+        if (previewModalMeta) {
+            previewModalMeta.innerHTML = `
+                <span class="sh-detail-meta-chip">📍 ${profile.destinationName}</span>
+                <span class="sh-detail-meta-chip">🏷️ ${item.type === 'video' ? 'Video' : 'Photo'}</span>
+                <span class="sh-detail-meta-chip">💾 ${item.fileSize || 'Standard'}</span>
+                <span class="sh-detail-meta-chip">📅 Uploaded: ${item.uploadedAt || 'Today'}</span>
+                <span class="sh-detail-meta-chip">🛡️ Status: ${item.status}</span>
+            `;
+        }
+
+        previewModal.style.display = 'flex';
+    }
+
+    function closeMediaPreview() {
+        if (previewModal) previewModal.style.display = 'none';
+    }
+
+    if (closePreviewBtn) closePreviewBtn.addEventListener('click', closeMediaPreview);
+    if (footerClosePreviewBtn) footerClosePreviewBtn.addEventListener('click', closeMediaPreview);
+    if (previewModal) {
+        previewModal.addEventListener('click', (e) => {
+            if (e.target === previewModal) closeMediaPreview();
+        });
+    }
+
+    // =========================================================================
+    // 6. DESTRUCTIVE REMOVAL CONFIRMATION MODAL & OWNERSHIP PROTECTION
+    // =========================================================================
+    const deleteModal = document.getElementById('deleteConfirmModal');
+    const btnCloseDelete = document.getElementById('btn-close-delete-modal');
+    const btnCancelDelete = document.getElementById('btn-cancel-delete');
+    const btnConfirmDelete = document.getElementById('btn-confirm-delete');
+    const deleteModalMessage = document.getElementById('delete-modal-message');
+
+    let pendingDeleteAction = null;
+
+    function openDeleteConfirmation(message, onConfirm) {
+        if (!deleteModal) return;
+        if (deleteModalMessage) deleteModalMessage.textContent = message;
+        pendingDeleteAction = onConfirm;
+        deleteModal.style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+        if (deleteModal) deleteModal.style.display = 'none';
+        pendingDeleteAction = null;
+    }
+
+    if (btnCloseDelete) btnCloseDelete.addEventListener('click', closeDeleteModal);
+    if (btnCancelDelete) btnCancelDelete.addEventListener('click', closeDeleteModal);
+    if (deleteModal) {
+        deleteModal.addEventListener('click', (e) => {
+            if (e.target === deleteModal) closeDeleteModal();
+        });
+    }
+
+    if (btnConfirmDelete) {
+        btnConfirmDelete.addEventListener('click', () => {
+            if (typeof pendingDeleteAction === 'function') {
+                pendingDeleteAction();
+            }
+            closeDeleteModal();
+        });
+    }
+
+    // Delegated click for Media Preview, Play, and Delete
+    document.addEventListener('click', (e) => {
+        const previewBtn = e.target.closest('.btn-preview-media, .btn-media-play');
+        if (previewBtn) {
+            e.preventDefault();
+            const id = previewBtn.getAttribute('data-id');
+            openMediaPreview(id);
+            return;
+        }
+
+        const deleteMediaBtn = e.target.closest('.btn-delete-media');
+        if (deleteMediaBtn) {
+            e.preventDefault();
+            const id = deleteMediaBtn.getAttribute('data-id');
+            const item = (dataStore.media || []).find(m => m.id === id);
+            if (!item) return;
+
+            // Strict Ownership Verification
+            if (item.stakeholder_id !== currentUserId) {
+                alert(`Unauthorized: You cannot delete media owned by another stakeholder.`);
+                return;
+            }
+
+            openDeleteConfirmation(
+                `Are you sure you want to remove "${item.title}"? This action will permanently remove it from your media catalog.`,
+                () => {
+                    if (item.url && item.url.startsWith('blob:')) {
+                        URL.revokeObjectURL(item.url);
+                    }
+                    dataStore.media = (dataStore.media || []).filter(m => m.id !== id);
+                    alert(`Media item "${item.title}" successfully removed.`);
+                    renderMediaGallery();
+                }
+            );
+            return;
+        }
+    });
+
+    // =========================================================================
+    // 7. TAB 2: POSTS & UPDATES CONTROLLER
+    // =========================================================================
+    const postsList = document.getElementById('sh-posts-list');
+    const createPostForm = document.getElementById('sh-create-post-form');
+
+    function renderPostsFeed() {
+        if (!postsList) return;
+        const posts = (dataStore.posts || []).filter(p => p.destination_id === destId && p.stakeholder_id === currentUserId);
+
+        if (posts.length === 0) {
+            postsList.innerHTML = `
+                <div style="padding: 2.5rem 1.5rem; text-align: center; color: var(--sh-text-muted);">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📝</div>
+                    <h4 style="font-size: 1rem; font-weight: 700; color: var(--sh-text-primary); margin: 0 0 0.25rem 0;">No service updates published yet</h4>
+                    <p style="font-size: 0.82rem; color: var(--sh-text-secondary); margin: 0;">Use the form above to share verified trek schedules, seasonal availability, or visitor guidance for ${profile.destinationName}.</p>
+                </div>
+            `;
+            return;
+        }
+
+        postsList.innerHTML = posts.map(p => `
+            <div style="background: var(--sh-card-bg); border: 1px solid var(--sh-card-border); border-radius: 12px; padding: 1.15rem; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem;">
+                    <div>
+                        <h4 style="font-size: 0.98rem; font-weight: 700; color: var(--sh-text-primary); margin: 0 0 0.2rem 0;">${p.title}</h4>
+                        <span style="font-size: 0.75rem; color: var(--sh-text-muted);">📅 ${p.date} • 📍 ${profile.destinationName}</span>
+                    </div>
+                    <span class="sh-status-badge ${p.statusClass || 'pending'}" style="font-size: 0.72rem;">${p.status}</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--sh-text-secondary); line-height: 1.5; margin: 0 0 0.75rem 0;">${p.content}</p>
+                <div style="display: flex; justify-content: flex-end; border-top: 1px solid #F1F5F9; padding-top: 0.6rem;">
+                    <button type="button" class="btn-delete-post" data-id="${p.id}" style="background: none; border: none; color: #DC2626; font-size: 0.78rem; font-weight: 600; cursor: pointer;">
+                        🗑️ Delete Post
+                    </button>
+                </div>
+            </div>
+        `).join('');
+
+        // Attach Post Delete Handlers
+        document.querySelectorAll('.btn-delete-post').forEach(btn => {
+            btn.onclick = () => {
+                const postId = btn.getAttribute('data-id');
+                const targetPost = (dataStore.posts || []).find(p => p.id === postId);
+                if (!targetPost) return;
+
+                if (targetPost.stakeholder_id !== currentUserId) {
+                    alert('Unauthorized: You cannot delete a post owned by another stakeholder.');
+                    return;
+                }
+
+                openDeleteConfirmation(`Are you sure you want to delete post "${targetPost.title}"?`, () => {
+                    dataStore.posts = (dataStore.posts || []).filter(p => p.id !== postId);
+                    alert('Post removed successfully.');
+                    renderPostsFeed();
+                });
+            };
+        });
+    }
+
+    if (createPostForm) {
+        createPostForm.onsubmit = (e) => {
+            e.preventDefault();
+            const titleInput = document.getElementById('post-title-input');
+            const contentInput = document.getElementById('post-content-input');
+
+            if (!titleInput || !titleInput.value.trim() || !contentInput || !contentInput.value.trim()) {
+                alert('Please enter both title and content for your service update.');
+                return;
+            }
+
+            const newPost = {
+                id: `post-${Date.now()}`,
+                stakeholder_id: currentUserId,
+                destination_id: destId,
+                title: titleInput.value.trim(),
+                content: contentInput.value.trim(),
+                date: 'Today',
+                status: 'Pending Approval',
+                statusClass: 'pending'
+            };
+
+            (dataStore.posts = dataStore.posts || []).unshift(newPost);
+            alert('Service update submitted! Status is "Pending Approval" awaiting Destination Manager verification. (Saved in prototype store)');
+            createPostForm.reset();
+            renderPostsFeed();
+        };
+    }
+
+    // =========================================================================
+    // 8. TAB 3: MANAGE LISTINGS CONTROLLER (CREATE, EDIT, OWNERSHIP CHECK)
+    // =========================================================================
+    const listingsGrid = document.getElementById('sh-listings-grid');
+    const btnOpenCreateListing = document.getElementById('btn-open-create-listing');
+    const listingModal = document.getElementById('listingModal');
+    const btnCloseListingModal = document.getElementById('btn-close-listing-modal');
+    const btnCancelListing = document.getElementById('btn-cancel-listing');
+    const btnSaveListingSubmit = document.getElementById('btn-save-listing-submit');
+    const listingEditorForm = document.getElementById('listing-editor-form');
+
+    const listingFormId = document.getElementById('listing-form-id');
+    const listingFormName = document.getElementById('listing-form-name');
+    const listingFormCategory = document.getElementById('listing-form-category');
+    const listingFormType = document.getElementById('listing-form-type');
+    const listingFormHours = document.getElementById('listing-form-hours');
+    const listingFormPrice = document.getElementById('listing-form-price');
+    const listingFormAddress = document.getElementById('listing-form-address');
+    const listingFormDesc = document.getElementById('listing-form-desc');
+    const listingFormImg = document.getElementById('listing-form-img');
+    const listingFormStatus = document.getElementById('listing-form-status');
+    const listingModalTitle = document.getElementById('listing-modal-title');
+
+    function renderListingsGrid() {
+        if (!listingsGrid) return;
+
+        // Show only records genuinely registered by the current stakeholder
+        const listings = (dataStore.listings || []).filter(l => l.destination_id === destId && l.stakeholder_id === currentUserId);
+
+        if (listings.length === 0) {
+            listingsGrid.innerHTML = `
+                <div style="grid-column: 1 / -1; padding: 3rem 1.5rem; text-align: center; background: var(--sh-card-bg); border: 1px solid var(--sh-card-border); border-radius: 14px;">
+                    <div style="font-size: 2.4rem; margin-bottom: 0.5rem;">🏪</div>
+                    <h4 style="font-size: 1.1rem; font-weight: 800; color: var(--sh-text-primary); margin: 0 0 0.35rem 0;">No service listings registered yet</h4>
+                    <p style="font-size: 0.85rem; color: var(--sh-text-secondary); max-width: 480px; margin: 0 auto 1.25rem auto;">Create a verified service listing for ${profile.destinationName} so visitors can discover your services. All submissions require Destination Manager approval before appearing publicly to tourists.</p>
+                    <button type="button" class="btn-sh-orange" id="btn-create-empty-listing">+ Create Your First Service Listing</button>
+                </div>
+            `;
+            const emptyCreateBtn = document.getElementById('btn-create-empty-listing');
+            if (emptyCreateBtn) {
+                emptyCreateBtn.addEventListener('click', () => openListingModal(null));
+            }
+            return;
+        }
+
+        listingsGrid.innerHTML = listings.map(lst => `
+            <div class="sh-listing-card">
+                <div style="position: relative; height: 160px; overflow: hidden; background: #0F172A; display: flex; align-items: center; justify-content: center;">
+                    ${lst.img ? `
+                        <img src="${lst.img}" alt="${lst.name}" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';" style="width: 100%; height: 100%; object-fit: cover;">
+                        <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; font-size: 2.2rem; color: #94A3B8;">
+                            ${lst.category.includes('Guide') ? '🥾' : lst.category.includes('Stay') ? '🏡' : lst.category.includes('Transport') ? '🚐' : '🏪'}
+                        </div>
+                    ` : `
+                        <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #1E293B, #0F172A); color: #94A3B8;">
+                            <span style="font-size: 2.2rem;">${lst.category.includes('Guide') ? '🥾' : lst.category.includes('Stay') ? '🏡' : lst.category.includes('Transport') ? '🚐' : '🏪'}</span>
+                            <span style="font-size: 0.72rem; color: #CBD5E1; margin-top: 0.25rem;">No Cover Photo</span>
+                        </div>
+                    `}
+                    <span class="sh-status-badge ${lst.statusClass || 'pending'}" style="position: absolute; top: 10px; right: 10px; font-size: 0.72rem; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
+                        ${lst.status}
+                    </span>
+                </div>
+                <div style="padding: 1.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.35rem;">
+                        <h4 style="font-size: 1.05rem; font-weight: 800; color: var(--sh-text-primary); margin: 0;">${lst.name}</h4>
+                        <span style="font-size: 0.78rem; color: var(--sh-text-muted); font-weight: 600;">
+                            ${lst.rating ? '⭐ ' + lst.rating : '⭐ Unrated'}
+                        </span>
+                    </div>
+                    <span style="font-size: 0.78rem; color: var(--sh-orange-accent); font-weight: 700; display: block; margin-bottom: 0.65rem;">
+                        ${lst.category} • ${lst.type === 'visitor-facing' ? 'Visitor-Facing Service' : 'Information Partner'}
+                    </span>
+                    <p style="font-size: 0.84rem; color: var(--sh-text-secondary); line-height: 1.5; margin: 0 0 0.85rem 0;">
+                        ${lst.description}
+                    </p>
+                    <div style="font-size: 0.78rem; color: var(--sh-text-muted); margin-bottom: 0.85rem; line-height: 1.6; border-top: 1px solid #F1F5F9; padding-top: 0.65rem;">
+                        <div>📍 <strong>Address:</strong> ${lst.address}</div>
+                        <div>🕒 <strong>Hours:</strong> ${lst.hours || 'Standard Hours'}</div>
+                        <div>💳 <strong>Tariff:</strong> ${lst.priceRange ? '₹ ' + lst.priceRange : 'Free / Inquire'}</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #F1F5F9; padding-top: 0.85rem;">
+                        <button type="button" class="btn-edit-listing" data-id="${lst.id}" style="background: var(--sh-card-bg); border: 1px solid var(--sh-card-border); padding: 0.4rem 0.85rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer;">
+                            ✏️ Edit Listing
+                        </button>
+                        <button type="button" class="btn-delete-listing" data-id="${lst.id}" style="background: none; border: 1px solid #FEE2E2; color: #DC2626; padding: 0.4rem 0.85rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer;">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        // Attach Listing Edit & Delete Event Listeners
+        document.querySelectorAll('.btn-edit-listing').forEach(btn => {
+            btn.onclick = () => {
+                const id = btn.getAttribute('data-id');
+                const lst = (dataStore.listings || []).find(l => l.id === id);
+                if (!lst) return;
+
+                // Strict Ownership Verification
+                if (lst.stakeholder_id !== currentUserId) {
+                    alert(`Unauthorized: You cannot edit a listing owned by another stakeholder.`);
+                    return;
+                }
+
+                openListingModal(lst);
+            };
+        });
+
+        document.querySelectorAll('.btn-delete-listing').forEach(btn => {
+            btn.onclick = () => {
+                const id = btn.getAttribute('data-id');
+                const lst = (dataStore.listings || []).find(l => l.id === id);
+                if (!lst) return;
+
+                // Strict Ownership Verification
+                if (lst.stakeholder_id !== currentUserId) {
+                    alert(`Unauthorized: You cannot delete a listing owned by another stakeholder.`);
+                    return;
+                }
+
+                openDeleteConfirmation(`Are you sure you want to remove listing "${lst.name}"?`, () => {
+                    dataStore.listings = (dataStore.listings || []).filter(l => l.id !== id);
+                    alert(`Listing "${lst.name}" successfully removed.`);
+                    renderListingsGrid();
+                });
+            };
+        });
+    }
+
+    function openListingModal(listingToEdit) {
+        if (!listingModal) return;
+
+        if (listingToEdit) {
+            if (listingModalTitle) listingModalTitle.textContent = 'Edit Service Listing';
+            if (listingFormId) listingFormId.value = listingToEdit.id;
+            if (listingFormName) listingFormName.value = listingToEdit.name || '';
+            if (listingFormCategory) listingFormCategory.value = listingToEdit.category || 'Tour & Trekking Guides';
+            if (listingFormType) listingFormType.value = listingToEdit.type || 'visitor-facing';
+            if (listingFormHours) listingFormHours.value = listingToEdit.hours || '';
+            if (listingFormPrice) listingFormPrice.value = listingToEdit.priceRange || '';
+            if (listingFormAddress) listingFormAddress.value = listingToEdit.address || '';
+            if (listingFormDesc) listingFormDesc.value = listingToEdit.description || '';
+            if (listingFormImg) listingFormImg.value = listingToEdit.img || '';
+            if (listingFormStatus) listingFormStatus.value = listingToEdit.status === 'Draft' ? 'Draft' : 'Pending Approval';
+        } else {
+            if (listingModalTitle) listingModalTitle.textContent = 'Create New Service Listing';
+            if (listingEditorForm) listingEditorForm.reset();
+            if (listingFormId) listingFormId.value = '';
+            if (listingFormAddress) listingFormAddress.value = profile.address || '';
+            if (listingFormHours) listingFormHours.value = profile.hours || '';
+            if (listingFormPrice) listingFormPrice.value = profile.priceRange || '';
+            if (listingFormStatus) listingFormStatus.value = 'Pending Approval';
+        }
+
+        listingModal.style.display = 'flex';
+    }
+
+    function closeListingModal() {
+        if (listingModal) listingModal.style.display = 'none';
+    }
+
+    if (btnOpenCreateListing) {
+        btnOpenCreateListing.addEventListener('click', () => openListingModal(null));
+    }
+    if (btnCloseListingModal) btnCloseListingModal.addEventListener('click', closeListingModal);
+    if (btnCancelListing) btnCancelListing.addEventListener('click', closeListingModal);
+    if (listingModal) {
+        listingModal.addEventListener('click', (e) => {
+            if (e.target === listingModal) closeListingModal();
+        });
+    }
+
+    if (btnSaveListingSubmit) {
+        btnSaveListingSubmit.addEventListener('click', () => {
+            const name = listingFormName ? listingFormName.value.trim() : '';
+            const address = listingFormAddress ? listingFormAddress.value.trim() : '';
+            const desc = listingFormDesc ? listingFormDesc.value.trim() : '';
+
+            if (!name) {
+                alert('Please provide a listing/service name.');
+                if (listingFormName) listingFormName.focus();
+                return;
+            }
+            if (!address) {
+                alert('Please specify the base location or pickup point.');
+                if (listingFormAddress) listingFormAddress.focus();
+                return;
+            }
+            if (!desc) {
+                alert('Please describe your service offering.');
+                if (listingFormDesc) listingFormDesc.focus();
+                return;
+            }
+
+            const existingId = listingFormId ? listingFormId.value : '';
+            const statusVal = listingFormStatus ? listingFormStatus.value : 'Pending Approval';
+            const statusClass = statusVal === 'Draft' ? 'review' : 'pending';
+
+            if (existingId) {
+                // Edit existing listing
+                const lst = (dataStore.listings || []).find(l => l.id === existingId);
+                if (lst) {
+                    if (lst.stakeholder_id !== currentUserId) {
+                        alert('Unauthorized: You cannot edit a listing owned by another stakeholder.');
+                        return;
+                    }
+                    lst.name = name;
+                    lst.category = listingFormCategory ? listingFormCategory.value : lst.category;
+                    lst.type = listingFormType ? listingFormType.value : lst.type;
+                    lst.hours = listingFormHours ? listingFormHours.value.trim() : lst.hours;
+                    lst.priceRange = listingFormPrice ? listingFormPrice.value.trim() : lst.priceRange;
+                    lst.address = address;
+                    lst.description = desc;
+                    lst.img = listingFormImg && listingFormImg.value.trim() ? listingFormImg.value.trim() : '';
+                    lst.status = statusVal;
+                    lst.statusClass = statusClass;
+
+                    alert(`Listing "${name}" updated! Status set to "${statusVal}". Note: Only the authorized Destination Manager can grant public approval for this destination.`);
+                }
+            } else {
+                // Create new listing (Default: Pending Approval)
+                const newListing = {
+                    id: `lst-${Date.now()}`,
+                    stakeholder_id: currentUserId,
+                    destination_id: destId,
+                    name: name,
+                    type: listingFormType ? listingFormType.value : 'visitor-facing',
+                    category: listingFormCategory ? listingFormCategory.value : 'Tour & Trekking Guides',
+                    contactPerson: profile.contactPerson || profile.userName,
+                    phone: profile.phone,
+                    email: profile.email,
+                    address: address,
+                    hours: listingFormHours ? listingFormHours.value.trim() : 'Mon - Sun (06:00 - 18:00)',
+                    priceRange: listingFormPrice ? listingFormPrice.value.trim() : 'On Request',
+                    description: desc,
+                    status: statusVal,
+                    statusClass: statusClass,
+                    rating: null,
+                    img: listingFormImg && listingFormImg.value.trim() ? listingFormImg.value.trim() : ''
+                };
+
+                (dataStore.listings = dataStore.listings || []).unshift(newListing);
+                alert(`New listing "${name}" submitted with status "${statusVal}". Note: Only the authorized Destination Manager can grant public approval for this destination. (Saved in prototype store)`);
+            }
+
+            closeListingModal();
+            renderListingsGrid();
+        });
+    }
+
+    // Keyboard ESC listener for all media modals
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (previewModal && previewModal.style.display === 'flex') closeMediaPreview();
+            if (deleteModal && deleteModal.style.display === 'flex') closeDeleteModal();
+            if (listingModal && listingModal.style.display === 'flex') closeListingModal();
+        }
+    });
+
+    // Initial Gallery Render
+    renderMediaGallery();
 }

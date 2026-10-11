@@ -148,5 +148,14 @@ window.YatraSetuStakeholderData = {
         { id: 'notif-sh-1', title: '🚨 Weather & Trail Advisory (Prototype)', message: 'Monsoon trail guidelines updated for Rajgad Fort.', time: '2 hours ago', read: false },
         { id: 'notif-sh-2', title: '💬 Manager Suggestion Review (Prototype)', message: 'Manager reviewed your trail water point suggestion.', time: '1 day ago', read: false },
         { id: 'notif-sh-3', title: '⭐ Tourist Review (Prototype)', message: 'Anjali Patil left a 5-star sample review for your trekking guide service.', time: '3 days ago', read: true }
-    ]
+    ],
+
+    // Tourism Stakeholder Listings (Initial state: empty until created by stakeholder)
+    listings: [],
+
+    // Tourism Stakeholder Photos & Videos Gallery (Initial state: empty until uploaded by stakeholder)
+    media: [],
+
+    // Tourism Stakeholder Posts & Updates (Initial state: empty until published by stakeholder)
+    posts: []
 };
