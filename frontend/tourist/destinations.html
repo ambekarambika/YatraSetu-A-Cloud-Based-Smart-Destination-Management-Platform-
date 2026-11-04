@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore Destinations — YatraSetu Tourist Discovery</title>
+    <meta name="description" content="Explore India's smart destinations across Maharashtra, Kerala, Rajasthan, Goa, Tamil Nadu, Uttarakhand, Kashmir, and Assam. Filter by category, suitability, and season.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/tourist.css">
+</head>
+<body class="tourist-body">
+
+    <!-- Prototype Demo Disclaimer Banner -->
+    <div class="tourist-demo-banner">
+        <span>⚠️</span>
+        <strong>Prototype Demonstration Data:</strong> Destination records, ratings, and reviews reflect curated single-source-of-truth data. PostgreSQL database persistence will be integrated in Phase 10.
+    </div>
+
+    <!-- ====================================================================
+         1. TOPBAR NAVIGATION (Clean Tourist Travel Companion Nav)
+         ==================================================================== -->
+    <header class="tourist-header">
+        <div class="tourist-container tourist-header-inner">
+            
+            <!-- Brand Logo -->
+            <a href="dashboard.html" class="tourist-brand" id="tourist-brand-logo">
+                <div class="tourist-brand-crest">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                </div>
+                <div class="tourist-brand-text">
+                    <span class="tourist-brand-name">Yatra<span>Setu</span></span>
+                    <span class="tourist-brand-tagline">Explore • Experience • Preserve</span>
+                </div>
+            </a>
+
+            <!-- Center Navigation Links -->
+            <ul class="tourist-nav-links">
+                <li class="tourist-nav-item">
+                    <a href="dashboard.html">Discover</a>
+                </li>
+                <li class="tourist-nav-item active">
+                    <a href="destinations.html">Destinations</a>
+                </li>
+                <li class="tourist-nav-item">
+                    <a href="destinations.html?category=adventure-outdoor">Experiences</a>
+                </li>
+                <li class="tourist-nav-item">
+                    <a href="dashboard.html#plan-trip">Plan Your Trip</a>
+                </li>
+                <li class="tourist-nav-item">
+                    <a href="dashboard.html#curated-section">Stories</a>
+                </li>
+                <li class="tourist-nav-item">
+                    <a href="dashboard.html#travel-guide">Travel Guidance</a>
+                </li>
+            </ul>
+
+            <!-- Right Utilities -->
+            <div class="tourist-nav-actions">
+                <!-- Search Button -->
+                <button type="button" class="tourist-icon-btn" id="tourist-nav-search-btn" title="Focus Search" aria-label="Search destinations">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+
+                <!-- Favorites Wishlist Heart Button -->
+                <button type="button" class="tourist-icon-btn" id="tourist-nav-fav-btn" title="Saved Destinations" aria-label="View saved wishlist">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                    <span class="tourist-badge-count tourist-fav-badge" style="display: none;">0</span>
+                </button>
+
+                <!-- User Profile Badge & Dropdown -->
+                <div class="tourist-user-badge" id="tourist-user-badge">
+                    <div class="tourist-avatar">GE</div>
+                    <div class="tourist-user-info">
+                        <span class="tourist-user-name">Hi, Guest</span>
+                        <span class="tourist-user-role">Plan My Journey</span>
+                    </div>
+                    <span class="tourist-user-caret">▾</span>
+
+                    <!-- Dropdown Panel -->
+                    <div class="tourist-user-dropdown" id="tourist-user-dropdown"></div>
+                </div>
+
+                <!-- Mobile Hamburger Toggle -->
+                <button type="button" class="tourist-mobile-toggle" id="tourist-mobile-toggle" aria-label="Toggle Navigation">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="tourist-mobile-nav" class="tourist-drawer" style="left: -320px; right: auto; width: 300px;">
+        <div class="tourist-drawer-header">
+            <span class="tourist-brand-name">Yatra<span>Setu</span></span>
+            <button type="button" class="tourist-modal-close" onclick="document.getElementById('tourist-mobile-nav').classList.remove('show');" style="position:static;">×</button>
+        </div>
+        <div class="tourist-drawer-body">
+            <a href="dashboard.html" class="tourist-dropdown-item">🧭 Discover Home</a>
+            <a href="destinations.html" class="tourist-dropdown-item active" style="color:var(--tourist-forest); font-weight:700;">🗺️ Explore Destinations</a>
+            <a href="destinations.html?category=adventure-outdoor" class="tourist-dropdown-item">🧗 Experiences & Activities</a>
+            <a href="dashboard.html#plan-trip" class="tourist-dropdown-item">🎒 Plan Your Trip</a>
+            <a href="dashboard.html#travel-guide" class="tourist-dropdown-item">🌿 Travel Responsibly</a>
+            <div style="border-top:1px solid var(--tourist-border); margin:1rem 0;"></div>
+            <a href="../login.html" class="tourist-btn-primary" style="justify-content:center;">Sign In</a>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         2. EXPLORE DESTINATIONS PAGE HEADER & SEARCH (Mockup 2)
+         ==================================================================== -->
+    <div class="tourist-container">
+        
+        <div class="dest-page-hero">
+            <h1 class="dest-page-title">Explore Destinations</h1>
+            <p class="dest-page-subtitle">Discover incredible places across India's most beautiful and culturally rich states</p>
+
+            <!-- Large Search Bar Container -->
+            <div class="dest-page-search-container">
+                <form class="tourist-search-bar" id="dest-search-form">
+                    <svg class="tourist-search-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" class="tourist-search-input" id="dest-search-input" placeholder="Search destinations, states, or experiences..." autocomplete="off">
+                    <button type="submit" class="tourist-search-submit" title="Search Destinations" aria-label="Search">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+
+            <!-- State Filter Pills Row -->
+            <div class="dest-state-pills-row" id="dest-state-pills-container">
+                <button type="button" class="dest-state-pill active" data-state="all">All States</button>
+                <button type="button" class="dest-state-pill" data-state="maharashtra">Maharashtra</button>
+                <button type="button" class="dest-state-pill" data-state="kerala">Kerala</button>
+                <button type="button" class="dest-state-pill" data-state="rajasthan">Rajasthan</button>
+                <button type="button" class="dest-state-pill" data-state="goa">Goa</button>
+                <button type="button" class="dest-state-pill" data-state="tamilnadu">Tamil Nadu</button>
+                <button type="button" class="dest-state-pill" data-state="uttarakhand">Uttarakhand</button>
+                <button type="button" class="dest-state-pill" data-state="kashmir">Kashmir</button>
+                <button type="button" class="dest-state-pill" data-state="assam">Assam</button>
+            </div>
+        </div>
+
+        <!-- ====================================================================
+             3. MAIN TWO-COLUMN DESTINATIONS LAYOUT (SIDEBAR + GRID)
+             ==================================================================== -->
+        <div class="dest-layout-grid">
+            
+            <!-- 3A. Left Filter Sidebar -->
+            <aside class="dest-sidebar" id="dest-filters-sidebar">
+                <div class="dest-sidebar-header">
+                    <h3 class="dest-sidebar-title">Filters</h3>
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                        <button type="button" class="dest-clear-btn" id="dest-clear-filters-btn">Clear All</button>
+                        <button type="button" class="tourist-modal-close" id="dest-close-sidebar-btn" style="display:none; position:static;" aria-label="Close Filter Drawer">×</button>
+                    </div>
+                </div>
+
+                <!-- Filter Section 1: Category -->
+                <div class="dest-filter-group">
+                    <span class="dest-filter-label">Category</span>
+                    <label class="dest-checkbox-item">
+                        <input type="checkbox" class="category-filter-checkbox" value="forts-heritage">
+                        <span>Forts & Heritage</span>
+                    </label>
+                    <label class="dest-checkbox-item">
+                        <input type="checkbox" class="category-filter-checkbox" value="beaches-islands">
+                        <span>Beaches & Islands</span>
+                    </label>
+                    <label class="dest-checkbox-item">
+                        <input type="checkbox" class="category-filter-checkbox" value="nature-wildlife">
+                        <span>Nature & Wildlife</span>
+                    </label>
+                    <label class="dest-checkbox-item">
+                        <input type="checkbox" class="category-filter-checkbox" value="spiritual-pilgrimage">
+                        <span>Spiritual & Pilgrimage</span>
+                    </label>
+                    <label class="dest-checkbox-item">
+                        <input type="checkbox" class="category-filter-checkbox" value="cultural-historical">
+                        <span>Cultural & Historical</span>
+                    </label>
+                    <label class="dest-checkbox-item">
+                        <input type="checkbox" class="category-filter-checkbox" value="adventure-outdoor">
+                        <span>Adventure & Outdoor</span>
+                    </label>
+                </div>
+
+                <!-- Filter Section 2: Suitable For -->
+                <div class="dest-filter-group">
+                    <span class="dest-filter-label">Suitable For</span>
+                    <label class="dest-checkbox-item">
+                        <input type="checkbox" class="suitable-filter-checkbox" value="Family">
+                        <span>Family</span>
+                    </label>
+                    <label class="dest-checkbox-item">
+                        <input type="checkbox" class="suitable-filter-checkbox" value="Solo Travel">
+                        <span>Solo Travel</span>
+                    </label>
+                    <label class="dest-checkbox-item">
+                        <input type="checkbox" class="suitable-filter-checkbox" value="Group Travel">
+                        <span>Group Travel</span>
+                    </label>
+                    <label class="dest-checkbox-item">
+                        <input type="checkbox" class="suitable-filter-checkbox" value="Adventure Seekers">
+                        <span>Adventure Seekers</span>
+                    </label>
+                </div>
+
+                <!-- Filter Section 3: Season -->
+                <div class="dest-filter-group">
+                    <span class="dest-filter-label">Season</span>
+                    <label class="dest-checkbox-item">
+                        <input type="checkbox" class="season-filter-checkbox" value="Winter (Nov - Feb)">
+                        <span>Winter (Nov - Feb)</span>
+                    </label>
+                    <label class="dest-checkbox-item">
+                        <input type="checkbox" class="season-filter-checkbox" value="Summer (Mar - Jun)">
+                        <span>Summer (Mar - Jun)</span>
+                    </label>
+                    <label class="dest-checkbox-item">
+                        <input type="checkbox" class="season-filter-checkbox" value="Monsoon (Jul - Oct)">
+                        <span>Monsoon (Jul - Oct)</span>
+                    </label>
+                </div>
+            </aside>
+
+            <!-- 3B. Right Main Listing Area -->
+            <main class="dest-main-area">
+                
+                <!-- Main Header: Count & Sort Dropdown -->
+                <div class="dest-main-header">
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                        <button type="button" class="tourist-btn-outline" id="dest-mobile-filter-btn" style="display:none; padding:0.4rem 0.85rem; font-size:0.8rem;">
+                            <span>⚙️</span> Filters
+                        </button>
+                        <span class="dest-count-label" id="dest-results-count">40 Destinations</span>
+                    </div>
+
+                    <div class="dest-sort-group">
+                        <label for="dest-sort-select" style="font-size:0.82rem; font-weight:700; color:var(--tourist-text-muted);">Sort by:</label>
+                        <select id="dest-sort-select" class="dest-sort-select">
+                            <option value="popularity">Popularity</option>
+                            <option value="rating">Rating (Highest)</option>
+                            <option value="name-asc">Name (A-Z)</option>
+                            <option value="name-desc">Name (Z-A)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Active Filter Tags Bar -->
+                <div class="dest-active-tags-bar" id="dest-active-tags-bar"></div>
+
+                <!-- Destination Cards Grid -->
+                <div class="dest-cards-grid" id="dest-cards-grid">
+                    <div class="dest-state-panel">
+                        <span class="dest-state-icon">⏳</span>
+                        <h3 class="dest-state-title">Loading Smart Destinations...</h3>
+                        <p class="dest-state-desc">Retrieving destination directory from central repository.</p>
+                    </div>
+                </div>
+
+            </main>
+
+        </div>
+
+    </div>
+
+    <!-- ====================================================================
+         4. FOOTER
+         ==================================================================== -->
+    <footer class="tourist-footer">
+        <div class="tourist-container">
+            <div class="tourist-footer-grid">
+                <div>
+                    <div class="tourist-footer-brand">YatraSetu</div>
+                    <p class="tourist-footer-desc">
+                        A Smart Destination Management Platform connecting tourists, destination managers, and verified local stakeholders across India.
+                    </p>
+                </div>
+                <div>
+                    <div class="tourist-footer-heading">Featured States</div>
+                    <ul class="tourist-footer-links">
+                        <li><a href="destinations.html?state=maharashtra">Maharashtra</a></li>
+                        <li><a href="destinations.html?state=kerala">Kerala</a></li>
+                        <li><a href="destinations.html?state=rajasthan">Rajasthan</a></li>
+                        <li><a href="destinations.html?state=goa">Goa</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="tourist-footer-heading">Categories</div>
+                    <ul class="tourist-footer-links">
+                        <li><a href="destinations.html?category=forts-heritage">Forts & Heritage</a></li>
+                        <li><a href="destinations.html?category=nature-wildlife">Nature & Wildlife</a></li>
+                        <li><a href="destinations.html?category=beaches-islands">Beaches & Islands</a></li>
+                        <li><a href="destinations.html?category=spiritual-pilgrimage">Spiritual & Pilgrimage</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="tourist-footer-heading">Workspaces</div>
+                    <ul class="tourist-footer-links">
+                        <li><a href="dashboard.html">Tourist Discover</a></li>
+                        <li><a href="../manager/dashboard.html">Destination Manager</a></li>
+                        <li><a href="../stakeholder/dashboard.html">Tourism Stakeholder</a></li>
+                        <li><a href="../admin/dashboard.html">Platform Administrator</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tourist-footer-bottom">
+                <div>© 2026 YatraSetu Smart Destination Platform. All rights reserved.</div>
+                <div>Explore Destinations • Client-Side Prototype Directory</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Data and Controller -->
+    <script src="../js/manager-data.js"></script>
+    <script src="../js/tourist.js"></script>
+</body>
+</html>
+

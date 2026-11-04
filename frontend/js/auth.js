@@ -116,7 +116,12 @@ function initLoginForm() {
         e.preventDefault();
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value.trim();
-        const role = document.getElementById('selected-role') ? document.getElementById('selected-role').value : 'tourist';
+        let role = document.getElementById('selected-role') ? document.getElementById('selected-role').value : 'tourist';
+
+        // Auto-detect Admin role if admin governance email is entered
+        if (email.toLowerCase() === 'admin.governance@yatrasetu.in') {
+            role = 'admin';
+        }
 
         if (!email || !password) {
             showGlassAlert('error', 'Please enter both email address and password.');
@@ -128,9 +133,59 @@ function initLoginForm() {
             return;
         }
 
+        // Account status enforcement: check if account was deactivated by Platform Administrator
+        try {
+            const rawUsers = localStorage.getItem('yatrasetu_admin_users') || sessionStorage.getItem('yatrasetu_admin_users');
+            if (rawUsers) {
+                const adminUsers = JSON.parse(rawUsers);
+                const matched = adminUsers.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
+                if (matched && matched.account_status === 'Deactivated') {
+                    showGlassAlert('error', 'ACCOUNT SUSPENDED: This account has been deactivated by the Platform Administrator. Access is blocked.');
+                    return;
+                }
+                if (matched) {
+                    sessionStorage.setItem('yatrasetu_name', matched.name);
+                    sessionStorage.setItem('yatrasetu_user_id', matched.id);
+                    if (matched.state_id) sessionStorage.setItem('yatrasetu_active_state_id', matched.state_id);
+                    if (matched.destination_id) sessionStorage.setItem('yatrasetu_active_dest_id', matched.destination_id);
+                    if (matched.access_level) sessionStorage.setItem('yatrasetu_access_level', matched.access_level);
+                    if (matched.role === 'manager') {
+                        sessionStorage.setItem('yatrasetu_manager_scope', matched.access_level === 'State Manager' ? 'state' : 'destination');
+                        sessionStorage.setItem('yatrasetu_manager_access_level', matched.access_level);
+                        
+                        const isState = matched.access_level === 'State Manager';
+                        const mgrProfile = {
+                            id: matched.id,
+                            name: matched.name,
+                            email: matched.email,
+                            phone: matched.phone || '+91 98230 41092',
+                            organization: matched.organization || 'Tourism Authority',
+                            manager_type: matched.access_level,
+                            access_level: matched.access_level,
+                            scope: isState ? 'STATE' : 'DESTINATION',
+                            state_id: matched.state_id || 'maharashtra',
+                            state_name: matched.state_id === 'kerala' ? 'Kerala' : 'Maharashtra',
+                            destination_id: isState ? 'all' : matched.destination_id,
+                            destination: matched.destination_name,
+                            destination_name: matched.destination_name,
+                            destination_ids: isState ? ['raigad-fort', 'ajanta-caves', 'ellora-caves', 'lonavala', 'shirdi'] : [matched.destination_id],
+                            assigned_date: matched.created_at || '15 Jan 2026',
+                            status: matched.account_status || 'Active',
+                            account_status: matched.account_status || 'Active',
+                            avatar_initials: matched.name.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2)
+                        };
+                        sessionStorage.setItem('yatrasetu_manager_profile', JSON.stringify(mgrProfile));
+                    }
+                }
+            }
+        } catch (err) {}
+
         // Store active user session context
         sessionStorage.setItem('yatrasetu_role', role);
         sessionStorage.setItem('yatrasetu_email', email);
+        if (!sessionStorage.getItem('yatrasetu_name')) {
+            sessionStorage.setItem('yatrasetu_name', role === 'tourist' ? 'Ananya Sharma' : (role === 'manager' ? 'Rajesh Patil' : (role === 'stakeholder' ? 'Suresh Deshmukh' : 'Rajesh Verma')));
+        }
 
         showGlassAlert('success', `✨ Authenticated as <strong>${role.toUpperCase()}</strong>. Redirecting to workspace...`);
 
@@ -185,6 +240,63 @@ function initRegisterForm() {
         sessionStorage.setItem('yatrasetu_role', role);
         sessionStorage.setItem('yatrasetu_email', email);
         sessionStorage.setItem('yatrasetu_name', fullname);
+
+        // Auto-register stakeholder into AdminStore and Audit Trail
+        if (role === 'stakeholder') {
+            try {
+                const userKey = 'yatrasetu_admin_users';
+                const auditKey = 'yatrasetu_audit_trail';
+                const rawUsers = localStorage.getItem(userKey) || sessionStorage.getItem(userKey);
+                let users = [];
+                if (rawUsers) {
+                    try { users = JSON.parse(rawUsers); } catch (e) {}
+                }
+                const existing = users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
+                if (!existing) {
+                    const newSh = {
+                        id: `sh-${Date.now().toString(36)}`,
+                        name: fullname,
+                        email: email,
+                        role: 'stakeholder',
+                        access_level: 'Registered Business',
+                        state_id: 'maharashtra',
+                        destination_id: '',
+                        destination_name: 'Pending Assignment',
+                        organization: `${fullname} Enterprise`,
+                        category: 'Tourism Partner',
+                        account_status: 'Active',
+                        registration_status: 'Pending Approval',
+                        created_at: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+                        last_active: 'Just now'
+                    };
+                    users.unshift(newSh);
+                    localStorage.setItem(userKey, JSON.stringify(users));
+                    sessionStorage.setItem(userKey, JSON.stringify(users));
+
+                    const rawAudit = localStorage.getItem(auditKey) || sessionStorage.getItem(auditKey);
+                    let audit = [];
+                    if (rawAudit) {
+                        try { audit = JSON.parse(rawAudit); } catch (e) {}
+                    }
+                    audit.unshift({
+                        id: `aud-${Date.now().toString(36)}`,
+                        timestamp: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+                        action: 'USER_ACCOUNT_REGISTERED',
+                        stakeholder_id: newSh.id,
+                        stakeholder_name: newSh.organization,
+                        actor_name: fullname,
+                        actor_role: 'Tourism Stakeholder',
+                        details: `New tourism stakeholder self-registered account. Business registration is Pending Approval.`,
+                        previous_value: 'Unregistered',
+                        new_value: 'Pending Approval'
+                    });
+                    localStorage.setItem(auditKey, JSON.stringify(audit));
+                    sessionStorage.setItem(auditKey, JSON.stringify(audit));
+                }
+            } catch (err) {
+                console.warn('[auth.js] Error creating stakeholder record:', err);
+            }
+        }
 
         showGlassAlert('success', `✨ Account created for <strong>${fullname}</strong> as <strong>${role.toUpperCase()}</strong>! Redirecting...`);
 

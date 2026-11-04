@@ -208,59 +208,156 @@
                     <button class="btn-primary" data-modal-target="addDestinationModal">+ Add Destination</button>
                 </div>
 
-                <!-- Filter Pills Bar -->
-                <div class="filter-pill-bar">
-                    <a href="#" class="filter-pill active" data-category="all">All Destinations</a>
-                    <a href="#" class="filter-pill" data-category="heritage">Heritage</a>
-                    <a href="#" class="filter-pill" data-category="nature">Nature</a>
-                    <a href="#" class="filter-pill" data-category="spiritual">Spiritual</a>
-                    <a href="#" class="filter-pill" data-category="coastal">Coastal</a>
-                    <a href="#" class="filter-pill" data-category="adventure">Adventure</a>
+                <!-- Dual Horizontal Tab Navigation Pills -->
+                <div class="feedback-tabs-bar" style="margin-bottom: 1.25rem;">
+                    <button type="button" id="tab-btn-dest-profiles" class="feedback-tab-pill active">🏛️ Destination Profiles</button>
+                    <button type="button" id="tab-btn-dest-videos" class="feedback-tab-pill">🎬 Destination Videos <span id="dest-videos-tab-badge" class="badge" style="margin-left: 0.35rem; font-size: 0.72rem; background: var(--state-accent-light); color: var(--state-accent); padding: 0.1rem 0.45rem; border-radius: 10px;">10</span></button>
                 </div>
 
-                <!-- Featured Destination Hero Banner -->
-                <section class="destination-hero-banner" style="min-height: 220px;">
-                    <div class="destination-hero-bg"
-                        style="background-image: url('../assets/images/thumb-rajgad.jpg');"></div>
-                    <div class="destination-hero-overlay"></div>
-                    <div class="destination-hero-body">
-                        <div>
-                            <div class="hero-eyebrow">FEATURED DESTINATION</div>
-                            <h1 class="hero-title">Raigad Fort</h1>
-                            <p class="hero-subtitle">Raigad, Maharashtra • Historic capital of the Maratha Empire with
-                                stunning views and rich heritage.</p>
-                            <div
-                                style="display: flex; gap: 1.25rem; margin-top: 0.75rem; font-size: 0.85rem; opacity: 0.9;">
-                                <span>🏛️ <strong>12</strong> Attractions</span>
-                                <span>📅 <strong>6</strong> Events</span>
-                                <span>⭐ <strong>4.8</strong> Rating</span>
+                <!-- ========================================================
+                     TAB 1: DESTINATION PROFILES
+                     ======================================================== -->
+                <div id="tab-content-dest-profiles">
+                    <!-- Filter Pills Bar -->
+                    <div class="filter-pill-bar">
+                        <a href="#" class="filter-pill active" data-category="all">All Destinations</a>
+                        <a href="#" class="filter-pill" data-category="heritage">Heritage</a>
+                        <a href="#" class="filter-pill" data-category="nature">Nature</a>
+                        <a href="#" class="filter-pill" data-category="spiritual">Spiritual</a>
+                        <a href="#" class="filter-pill" data-category="coastal">Coastal</a>
+                        <a href="#" class="filter-pill" data-category="adventure">Adventure</a>
+                    </div>
+
+                    <!-- Featured Destination Hero Banner -->
+                    <section class="destination-hero-banner" style="min-height: 220px;">
+                        <div class="destination-hero-bg"
+                            style="background-image: url('../assets/images/thumb-rajgad.jpg');"></div>
+                        <div class="destination-hero-overlay"></div>
+                        <div class="destination-hero-body">
+                            <div>
+                                <div class="hero-eyebrow">FEATURED DESTINATION</div>
+                                <h1 class="hero-title">Raigad Fort</h1>
+                                <p class="hero-subtitle">Raigad, Maharashtra • Historic capital of the Maratha Empire with
+                                    stunning views and rich heritage.</p>
+                                <div
+                                    style="display: flex; gap: 1.25rem; margin-top: 0.75rem; font-size: 0.85rem; opacity: 0.9;">
+                                    <span>🏛️ <strong>12</strong> Attractions</span>
+                                    <span>📅 <strong>6</strong> Events</span>
+                                    <span>⭐ <strong>4.8</strong> Rating</span>
+                                </div>
+                            </div>
+                            <div class="hero-actions">
+                                <button class="btn-primary">View Details</button>
                             </div>
                         </div>
-                        <div class="hero-actions">
-                            <button class="btn-primary">View Details</button>
+                    </section>
+
+                    <!-- Section Directory Header -->
+                    <div class="page-header-row" style="margin-top: 0.5rem;">
+                        <h2 class="section-title">Destination Directory</h2>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Sort by:
+                                Popularity</span>
+                            <div
+                                style="display: flex; border: 1px solid var(--card-border); border-radius: 6px; overflow: hidden; background: #FFF;">
+                                <button
+                                    style="padding: 0.35rem 0.65rem; border: none; background: var(--state-accent-light); color: var(--state-accent); font-weight: 700; cursor: pointer;">Grid</button>
+                                <button
+                                    style="padding: 0.35rem 0.65rem; border: none; background: #FFF; color: var(--text-muted); cursor: pointer;">List</button>
+                            </div>
                         </div>
                     </div>
-                </section>
 
-                <!-- Section Directory Header -->
-                <div class="page-header-row" style="margin-top: 0.5rem;">
-                    <h2 class="section-title">Destination Directory</h2>
-                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Sort by:
-                            Popularity</span>
-                        <div
-                            style="display: flex; border: 1px solid var(--card-border); border-radius: 6px; overflow: hidden; background: #FFF;">
-                            <button
-                                style="padding: 0.35rem 0.65rem; border: none; background: var(--state-accent-light); color: var(--state-accent); font-weight: 700; cursor: pointer;">Grid</button>
-                            <button
-                                style="padding: 0.35rem 0.65rem; border: none; background: #FFF; color: var(--text-muted); cursor: pointer;">List</button>
-                        </div>
+                    <!-- Destination Grid -->
+                    <div class="destination-grid-4" id="destinations-cards-grid">
+                        <div style="grid-column: 1 / -1; padding: 2.5rem; text-align: center; color: #64748b; font-weight: 500;">Loading destinations...</div>
                     </div>
                 </div>
 
-                <!-- Destination Grid -->
-                <div class="destination-grid-4" id="destinations-cards-grid">
-                    <div style="grid-column: 1 / -1; padding: 2.5rem; text-align: center; color: #64748b; font-weight: 500;">Loading destinations...</div>
+                <!-- ========================================================
+                     TAB 2: DESTINATION INFORMATION VIDEOS (FR-15)
+                     ======================================================== -->
+                <div id="tab-content-dest-videos" style="display: none;">
+                    <!-- Videos Section Header & Actions -->
+                    <div class="page-header-row" style="margin-bottom: 1.25rem;">
+                        <div>
+                            <h2 class="section-title" style="margin: 0;">Official Destination Information Videos</h2>
+                            <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0.25rem 0 0 0;">Curate concise ~30-second audiovisual guides on heritage, culture, viewpoints, and visitor orientation.</p>
+                        </div>
+                        <div style="display: flex; gap: 0.75rem; align-items: center;">
+                            <button type="button" class="btn-primary" id="btn-open-add-video-modal" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                                <span>+</span> Add Video Entry
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Grid (Videos in Scope) -->
+                    <div class="metrics-grid-4" style="margin-bottom: 1.5rem;">
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-title">Videos in Scope</span>
+                                <span class="metric-icon">🎬</span>
+                            </div>
+                            <div class="metric-value" id="metric-video-total">0</div>
+                            <div class="metric-footer" id="metric-video-total-sub">Target: &ge; 10 per destination</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-title">Published (Active)</span>
+                                <span class="metric-icon">🌐</span>
+                            </div>
+                            <div class="metric-value" id="metric-video-published" style="color: #059669;">0</div>
+                            <div class="metric-footer">Accessible to tourists in future portal</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-title">Draft / In Review</span>
+                                <span class="metric-icon">📝</span>
+                            </div>
+                            <div class="metric-value" id="metric-video-draft" style="color: #D97706;">0</div>
+                            <div class="metric-footer">Unpublished; hidden from public views</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-title">Jurisdiction Scope</span>
+                                <span class="metric-icon">🛡️</span>
+                            </div>
+                            <div class="metric-value" id="metric-video-jurisdiction" style="font-size: 1.15rem; font-weight: 800;">Maharashtra</div>
+                            <div class="metric-footer" id="metric-video-jurisdiction-sub">Authorized Territory</div>
+                        </div>
+                    </div>
+
+                    <!-- Filter & Search Toolbar -->
+                    <div class="workspace-filter-bar" style="background: #FFFFFF; border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 0.85rem 1rem; display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                        <div style="display: flex; gap: 0.75rem; flex: 1; min-width: 280px; align-items: center; flex-wrap: wrap;">
+                            <input type="text" id="video-search-input" class="form-control" placeholder="Search by title, destination, category..." style="flex: 1; min-width: 200px;">
+                            <select id="video-category-filter" class="form-control" style="max-width: 220px;">
+                                <option value="all">All Categories</option>
+                                <option value="Heritage & Architecture">Heritage & Architecture</option>
+                                <option value="Nature & Landscapes">Nature & Landscapes</option>
+                                <option value="Spiritual & Temples">Spiritual & Temples</option>
+                                <option value="Adventure & Trekking">Adventure & Trekking</option>
+                                <option value="Coastal & Beaches">Coastal & Beaches</option>
+                                <option value="Culture & Traditions">Culture & Traditions</option>
+                                <option value="Wildlife & Parks">Wildlife & Parks</option>
+                            </select>
+                            <select id="video-status-filter" class="form-control" style="max-width: 150px;">
+                                <option value="all">All Status</option>
+                                <option value="Published">Published</option>
+                                <option value="Draft">Draft</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <button type="button" class="btn-secondary" id="btn-reset-video-filters" style="font-size: 0.8rem; padding: 0.45rem 0.85rem;">Reset Filters</button>
+                        </div>
+                    </div>
+
+                    <!-- Destination Videos Grid Container -->
+                    <div class="destination-video-grid" id="destination-videos-grid">
+                        <div style="grid-column: 1 / -1; padding: 3rem; text-align: center; color: var(--text-muted); font-weight: 500;">
+                            Loading destination information videos...
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -320,6 +417,162 @@
             </div>
             <div class="modal-footer" id="detail-modal-footer" style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: space-between;">
                 <!-- Action buttons rendered dynamically by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Dialog: Add/Edit Destination Information Video (FR-15) -->
+    <div class="modal-overlay app-modal" id="videoModal">
+        <div class="modal-card" style="max-width: 600px; width: 92%;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="video-modal-title">Add Video Entry</h3>
+                <button type="button" class="modal-close" id="btn-close-video-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Validation & Status Alerts -->
+                <div id="video-form-alert" style="display: none; padding: 0.65rem 0.85rem; border-radius: 6px; font-size: 0.82rem; margin-bottom: 1rem;"></div>
+
+                <form id="destination-video-form" onsubmit="return false;">
+                    <input type="hidden" id="video-form-id" value="">
+                    <input type="hidden" id="video-form-state-id" value="">
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
+                        <div class="form-group">
+                            <label for="video-form-dest">Destination *</label>
+                            <select id="video-form-dest" class="form-control" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="video-form-category">Category *</label>
+                            <select id="video-form-category" class="form-control" required>
+                                <option value="Heritage & Architecture">Heritage & Architecture</option>
+                                <option value="Nature & Landscapes">Nature & Landscapes</option>
+                                <option value="Spiritual & Temples">Spiritual & Temples</option>
+                                <option value="Adventure & Trekking">Adventure & Trekking</option>
+                                <option value="Coastal & Beaches">Coastal & Beaches</option>
+                                <option value="Culture & Traditions">Culture & Traditions</option>
+                                <option value="Wildlife & Parks">Wildlife & Parks</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 0.85rem;">
+                        <label for="video-form-title">Video Title *</label>
+                        <input type="text" id="video-form-title" class="form-control" placeholder="e.g. Raigad Fort Ropeway & Maha Darwaja Guide" required>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 0.85rem;">
+                        <label for="video-form-desc">Short Description (Tourist Orientation) *</label>
+                        <textarea id="video-form-desc" class="form-control" rows="3" placeholder="Provide a concise 1-2 sentence orientation summary suitable for a 30-second informative video." required></textarea>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 0.85rem; margin-top: 0.85rem;">
+                        <div class="form-group">
+                            <label for="video-form-url">Hosted Video URL / Stream Reference *</label>
+                            <input type="url" id="video-form-url" class="form-control" placeholder="https://assets.yatrasetu.org/media/videos/..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="video-form-duration">Duration (e.g. 0:30, 1:00)</label>
+                            <input type="text" id="video-form-duration" class="form-control" value="0:30" placeholder="0:30" title="Project prefers ~30s, record actual duration honestly">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 0.85rem;">
+                        <label for="video-form-thumb">Thumbnail Image URL (Optional)</label>
+                        <input type="text" id="video-form-thumb" class="form-control" placeholder="../assets/images/thumb-rajgad.jpg">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-top: 0.85rem;">
+                        <div class="form-group">
+                            <label for="video-form-status">Publication Status</label>
+                            <select id="video-form-status" class="form-control">
+                                <option value="Published">Published (Active for Tourists)</option>
+                                <option value="Draft">Draft (Manager Preview Only)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="justify-content: flex-end;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin-top: 1.5rem; font-size: 0.82rem; font-weight: 600;">
+                                <input type="checkbox" id="video-form-prototype-check" checked>
+                                Prototype Metadata (~30s)
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary modal-close" id="btn-cancel-video-modal">Cancel</button>
+                <button type="button" class="btn-primary" id="btn-save-video-entry">Save Video Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Dialog: Video Player & Verification Preview Modal -->
+    <div class="modal-overlay app-modal" id="videoPlayerModal">
+        <div class="modal-card" style="max-width: 680px; width: 92%; padding: 0; overflow: hidden;">
+            <div class="modal-header" style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--card-border);">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <h3 class="modal-title" id="player-modal-title" style="font-size: 1.05rem;">Video Preview</h3>
+                    <span id="player-modal-status-badge" class="badge">Published</span>
+                </div>
+                <button type="button" class="modal-close" id="btn-close-player-modal">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 1.25rem;">
+                <!-- Simulated 16:9 Video Canvas -->
+                <div class="video-player-container" id="player-container">
+                    <div class="video-prototype-screen" id="player-screen">
+                        <div class="video-screen-play-icon">▶</div>
+                        <div style="font-weight: 800; font-size: 1.1rem; margin-bottom: 0.35rem;" id="player-screen-title">Destination Guide</div>
+                        <div style="font-size: 0.82rem; opacity: 0.9;" id="player-screen-dest">Maharashtra • ~30s Informative Video</div>
+                        <div style="margin-top: 0.85rem; font-size: 0.72rem; background: rgba(0,0,0,0.4); padding: 0.25rem 0.65rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2);">
+                            Official Destination Audio-Visual Orientation • YatraSetu FR-15
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video Metadata Grid -->
+                <div style="margin-top: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div>
+                        <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin: 0 0 0.25rem 0;" id="player-info-title">Title</h4>
+                        <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5; margin: 0;" id="player-info-desc">Description</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 0.85rem; font-size: 0.8rem;">
+                        <div>
+                            <span style="display: block; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Destination</span>
+                            <strong id="player-info-dest">Raigad Fort</strong>
+                        </div>
+                        <div>
+                            <span style="display: block; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Category</span>
+                            <strong id="player-info-cat">Heritage</strong>
+                        </div>
+                        <div>
+                            <span style="display: block; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Duration</span>
+                            <strong id="player-info-duration">0:30 (~30s)</strong>
+                        </div>
+                        <div>
+                            <span style="display: block; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Publisher / Source</span>
+                            <strong id="player-info-publisher">Maharashtra Tourism</strong>
+                        </div>
+                        <div style="grid-column: span 2;">
+                            <span style="display: block; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Usage & Permissions</span>
+                            <span id="player-info-permissions" style="font-weight: 600; font-size: 0.76rem; color: var(--text-secondary);">YouTube Standard Player Embedding</span>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; padding-top: 0.25rem;">
+                        <span id="player-info-asset-flag">ℹ️ Prototype Metadata Record</span>
+                        <div style="display: flex; gap: 0.75rem; align-items: center;">
+                            <a id="player-info-link" href="#" target="_blank" rel="noopener noreferrer" style="color: var(--state-accent); font-weight: 600; text-decoration: none;">View Original Video ↗</a>
+                            <span id="player-info-updated">Updated: 12 Oct 2026</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 0.85rem 1.25rem; display: flex; justify-content: space-between; align-items: center;">
+                <div id="player-modal-auth-status" style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);"></div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="button" class="btn-secondary" id="btn-close-player-action">Close Preview</button>
+                    <button type="button" class="btn-primary" id="btn-player-edit-action" style="display: none;">Edit Metadata</button>
+                </div>
             </div>
         </div>
     </div>

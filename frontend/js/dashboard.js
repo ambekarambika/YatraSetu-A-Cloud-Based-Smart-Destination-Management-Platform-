@@ -90,7 +90,9 @@ function initAppSidebar() {
     const sidebarLogoutBtns = document.querySelectorAll('.btn-sidebar-logout');
     sidebarLogoutBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            sessionStorage.clear();
+            sessionStorage.removeItem('yatrasetu_role');
+            sessionStorage.removeItem('yatrasetu_email');
+            sessionStorage.removeItem('yatrasetu_name');
         });
     });
 }
@@ -111,9 +113,18 @@ function initAppTopbar() {
 
     if (currentPath.includes('/manager/')) {
         detectedRole = 'manager';
-        defaultUserName = 'Ambika Ambekar';
-        defaultRoleLabel = 'Destination Manager';
-        defaultAvatar = 'AA';
+        let mgrProfile = null;
+        try {
+            const rawProfile = sessionStorage.getItem('yatrasetu_manager_profile') || localStorage.getItem('yatrasetu_manager_profile');
+            if (rawProfile) mgrProfile = JSON.parse(rawProfile);
+        } catch (e) {}
+
+        const profileData = mgrProfile || (window.YatraSetuManagerData && window.YatraSetuManagerData.profile) || {};
+        defaultUserName = profileData.name || 'Rajesh Patil';
+        const accessLvl = profileData.access_level || profileData.manager_type || sessionStorage.getItem('yatrasetu_manager_access_level') || 'State Manager';
+        const terr = profileData.destination || profileData.destination_name || profileData.state_name || 'Maharashtra';
+        defaultRoleLabel = `${accessLvl} • ${terr}`;
+        defaultAvatar = profileData.avatar_initials || defaultUserName.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'RP';
     } else if (currentPath.includes('/stakeholder/')) {
         detectedRole = 'stakeholder';
         defaultUserName = 'Suresh Deshmukh';
@@ -223,17 +234,43 @@ function initTopbarUserDropdown(topbar, userName, initials, roleLabel) {
                             (window.location.pathname.includes('/stakeholder/') ? 'profile.html' : '#');
 
         userMenuPanel.innerHTML = `
-            <a href="${profilePath}" class="user-menu-item">👤 View Profile</a>
-            <a href="${profilePath}" class="user-menu-item">⚙️ Account Settings</a>
+            <a href="${profilePath}" class="user-menu-item" id="topbar-btn-profile">👤 View Profile</a>
+            <a href="${profilePath}" class="user-menu-item" id="topbar-btn-settings">⚙️ Account Settings</a>
             <button type="button" class="user-menu-item logout" id="topbar-btn-logout">🚪 Logout</button>
         `;
         badgeWrapper.appendChild(userMenuPanel);
+
+        const profileBtn = userMenuPanel.querySelector('#topbar-btn-profile');
+        if (profileBtn && window.location.pathname.includes('/admin/')) {
+            profileBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                userMenuPanel.classList.remove('show');
+                if (window.openAdminProfileModal) {
+                    window.openAdminProfileModal();
+                }
+            };
+        }
+
+        const settingsBtn = userMenuPanel.querySelector('#topbar-btn-settings');
+        if (settingsBtn && window.location.pathname.includes('/admin/')) {
+            settingsBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                userMenuPanel.classList.remove('show');
+                if (window.openAdminSettingsModal) {
+                    window.openAdminSettingsModal();
+                }
+            };
+        }
 
         const logoutBtn = userMenuPanel.querySelector('#topbar-btn-logout');
         if (logoutBtn) {
             logoutBtn.onclick = (e) => {
                 e.stopPropagation();
-                sessionStorage.clear();
+                sessionStorage.removeItem('yatrasetu_role');
+                sessionStorage.removeItem('yatrasetu_email');
+                sessionStorage.removeItem('yatrasetu_name');
                 window.location.href = loginPath;
             };
         }

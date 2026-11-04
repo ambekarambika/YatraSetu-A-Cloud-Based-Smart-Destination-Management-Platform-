@@ -3,264 +3,526 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tourist Workspace — YatraSetu</title>
-    <meta name="description" content="YatraSetu Tourist Workspace — Discover Indian destinations, explore heritage attractions, curate trip itineraries, and submit experience feedback.">
-    
+    <title>Tourist Workspace — YatraSetu Travel Companion</title>
+    <meta name="description" content="YatraSetu Tourist Workspace — Discover India's smart destinations, curate trip itineraries, explore heritage attractions, and travel responsibly.">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/tourist.css">
 </head>
-<body class="app-body" data-theme="maharashtra">
+<body class="tourist-body">
 
-    <div class="app-shell">
+    <!-- Prototype Demo Disclaimer Banner -->
+    <div class="tourist-demo-banner">
+        <span>⚠️</span>
+        <strong>Tourist Workspace Phase 1 Prototype:</strong> Discover verified smart destinations across India. Ratings, reviews, and highlights reflect prototype curated data. Commercial booking, payments, and administrative logs are intentionally excluded.
+    </div>
 
-        <!-- ====================================================================
-             1. TOURIST SIDEBAR NAVIGATION (8 SOURCE OF TRUTH ITEMS)
-             ==================================================================== -->
-        <aside class="app-sidebar" id="app-sidebar">
-            <div>
-                <!-- Sidebar Header -->
-                <div class="app-sidebar-header">
-                    <a href="../index.html" class="app-brand-link" id="sidebar-logo">
-                        <div class="app-brand-logo">Y</div>
-                        <div class="app-brand-title">Yatra<span>Setu</span></div>
-                    </a>
-                </div>
-
-                <!-- Role Badge Context -->
-                <div class="app-sidebar-role-badge">
-                    <span class="role-badge-label">Active Role</span>
-                    <span class="role-badge-val">TOURIST</span>
-                </div>
-
-                <!-- Tourist Navigation Items -->
-                <nav class="app-sidebar-nav" id="app-sidebar-nav">
-                    <div class="nav-section-title">TOURIST DISCOVERY</div>
-                    <a href="dashboard.html" class="app-nav-item active" data-title="Tourist Overview">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                        <span>Overview</span>
-                    </a>
-                    <a href="#" class="app-nav-item" data-title="Explore Destinations">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-                        <span>Explore Destinations</span>
-                    </a>
-                    <a href="#" class="app-nav-item" data-title="Attractions Directory">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18"></path><path d="M5 21V7l8-4 8 4v14"></path></svg>
-                        <span>Attractions</span>
-                    </a>
-                    <a href="#" class="app-nav-item" data-title="Tourism Events">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg>
-                        <span>Events</span>
-                    </a>
-                    <a href="#" class="app-nav-item" data-title="Trip Planner">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                        <span>Trip Planner</span>
-                    </a>
-                    <a href="#" class="app-nav-item" data-title="My Saved Trips">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-                        <span>My Trips</span>
-                    </a>
-                    <a href="#" class="app-nav-item" data-title="Submit Experience Feedback">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                        <span>Feedback</span>
-                    </a>
-                    <a href="#" class="app-nav-item" data-title="Tourist Profile">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                        <span>Profile</span>
-                    </a>
-                </nav>
-            </div>
-
-            <!-- Sidebar User Profile Footer -->
-            <div class="app-sidebar-footer">
-                <div class="sidebar-user">
-                    <div class="sidebar-avatar">TD</div>
-                    <div class="sidebar-user-info">
-                        <span class="user-name">Tourist User</span>
-                        <span class="user-role">Tourist Explorer</span>
-                    </div>
-                </div>
-                <a href="../login.html" class="btn-sidebar-logout" title="Sign Out" aria-label="Sign Out">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                        <polyline points="16 17 21 12 16 7"></polyline>
-                        <line x1="21" y1="12" x2="9" y2="12"></line>
-                    </svg>
-                </a>
-            </div>
-        </aside>
-
-        <!-- ====================================================================
-             2. MAIN TOURIST WORKSPACE & TOPBAR
-             ==================================================================== -->
-        <main class="app-main">
+    <!-- ====================================================================
+         1. TOPBAR NAVIGATION (Clean Tourist Travel Companion Nav)
+         ==================================================================== -->
+    <header class="tourist-header">
+        <div class="tourist-container tourist-header-inner">
             
-            <!-- Topbar Navigation -->
-            <header class="app-topbar">
-                <div class="topbar-left">
-                    <button type="button" class="btn-sidebar-toggle" id="sidebar-toggle-btn" aria-label="Toggle Sidebar Navigation">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <line x1="3" y1="12" x2="21" y2="12"></line>
-                            <line x1="3" y1="6" x2="21" y2="6"></line>
-                            <line x1="3" y1="18" x2="21" y2="18"></line>
+            <!-- Brand Logo -->
+            <a href="dashboard.html" class="tourist-brand" id="tourist-brand-logo">
+                <div class="tourist-brand-crest">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                </div>
+                <div class="tourist-brand-text">
+                    <span class="tourist-brand-name">Yatra<span>Setu</span></span>
+                    <span class="tourist-brand-tagline">Explore • Experience • Preserve</span>
+                </div>
+            </a>
+
+            <!-- Center Navigation Links -->
+            <ul class="tourist-nav-links">
+                <li class="tourist-nav-item active">
+                    <a href="dashboard.html">Discover</a>
+                </li>
+                <li class="tourist-nav-item">
+                    <a href="destinations.html">Destinations</a>
+                </li>
+                <li class="tourist-nav-item">
+                    <a href="destinations.html?category=adventure-outdoor">Experiences</a>
+                </li>
+                <li class="tourist-nav-item">
+                    <a href="#plan-trip" id="nav-link-plan-trip">Plan Your Trip</a>
+                </li>
+                <li class="tourist-nav-item">
+                    <a href="#curated-section">Stories</a>
+                </li>
+                <li class="tourist-nav-item">
+                    <a href="#travel-guide">Travel Guidance</a>
+                </li>
+            </ul>
+
+            <!-- Right Utilities -->
+            <div class="tourist-nav-actions">
+                <!-- Search Button -->
+                <button type="button" class="tourist-icon-btn" id="tourist-nav-search-btn" title="Quick Destination Search" aria-label="Search destinations">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+
+                <!-- Favorites Wishlist Heart Button -->
+                <button type="button" class="tourist-icon-btn" id="tourist-nav-fav-btn" title="Saved Destinations" aria-label="View saved wishlist">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                    <span class="tourist-badge-count tourist-fav-badge" style="display: none;">0</span>
+                </button>
+
+                <!-- User Profile Badge & Dropdown -->
+                <div class="tourist-user-badge" id="tourist-user-badge">
+                    <div class="tourist-avatar">GE</div>
+                    <div class="tourist-user-info">
+                        <span class="tourist-user-name">Hi, Guest</span>
+                        <span class="tourist-user-role">Plan My Journey</span>
+                    </div>
+                    <span class="tourist-user-caret">▾</span>
+
+                    <!-- Dropdown Panel -->
+                    <div class="tourist-user-dropdown" id="tourist-user-dropdown"></div>
+                </div>
+
+                <!-- Mobile Hamburger Toggle -->
+                <button type="button" class="tourist-mobile-toggle" id="tourist-mobile-toggle" aria-label="Toggle Navigation">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="tourist-mobile-nav" class="tourist-drawer" style="left: -320px; right: auto; width: 300px;">
+        <div class="tourist-drawer-header">
+            <span class="tourist-brand-name">Yatra<span>Setu</span></span>
+            <button type="button" class="tourist-modal-close" onclick="document.getElementById('tourist-mobile-nav').classList.remove('show');" style="position:static;">×</button>
+        </div>
+        <div class="tourist-drawer-body">
+            <a href="dashboard.html" class="tourist-dropdown-item">🧭 Discover Home</a>
+            <a href="destinations.html" class="tourist-dropdown-item">🗺️ Explore Destinations</a>
+            <a href="destinations.html?category=adventure-outdoor" class="tourist-dropdown-item">🧗 Experiences & Activities</a>
+            <a href="#plan-trip" class="tourist-dropdown-item">🎒 Plan Your Trip</a>
+            <a href="#travel-guide" class="tourist-dropdown-item">🌿 Travel Responsibly</a>
+            <div style="border-top:1px solid var(--tourist-border); margin:1rem 0;"></div>
+            <a href="../login.html" class="tourist-btn-primary" style="justify-content:center;">Sign In</a>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         2. HERO SECTION — EXPLORE MAHARASHTRA & WHERE HISTORY BREATHES
+         ==================================================================== -->
+    <div class="tourist-container">
+        <section class="tourist-hero" style="background-image: url('../assets/images/hero-maharashtra.jpg');">
+            <div class="tourist-hero-overlay"></div>
+
+            <div class="tourist-hero-content">
+                <div class="tourist-hero-eyebrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"></path></svg>
+                    EXPLORE MAHARASHTRA
+                </div>
+                <h1 class="tourist-hero-title">Where History Breathes</h1>
+                <p class="tourist-hero-subtitle">
+                    Forts, forests, festivals, and living traditions — experience the authentic soul of Maharashtra and India's finest smart destinations.
+                </p>
+
+                <!-- Hero Search Bar Form -->
+                <div class="tourist-hero-search-wrapper">
+                    <form class="tourist-search-bar" id="hero-search-form">
+                        <svg class="tourist-search-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
-                    </button>
-
-                    <div class="breadcrumbs">
-                        <a href="../index.html" class="breadcrumb-item">YatraSetu</a>
-                        <span>/</span>
-                        <span class="breadcrumb-item">Tourist Workspace</span>
-                        <span>/</span>
-                        <span class="breadcrumb-item active" id="breadcrumb-active">Overview</span>
-                    </div>
-                </div>
-
-                <div class="topbar-right">
-                    <div class="topbar-search">
-                        <svg class="topbar-search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                        <input type="text" class="topbar-search-input" placeholder="Search destinations...">
-                    </div>
-                </div>
-            </header>
-
-            <!-- Main App Content -->
-            <div class="app-content">
-
-                <!-- 3. PAGE HEADER BANNER -->
-                <div class="page-header-banner">
-                    <div class="page-header-info">
-                        <div class="page-eyebrow">
-                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-                            DISCOVER & PLAN WORKSPACE
-                        </div>
-                        <h1 class="page-title" id="active-page-title">Explore India's Smart Destinations</h1>
-                        <p class="page-subtitle">Curate your trip itineraries, discover heritage attractions, and share authentic experience feedback.</p>
-                    </div>
-
-                    <div class="page-header-actions">
-                        <button type="button" class="btn-app btn-app-primary">
-                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            Create New Trip Plan
+                        <input type="text" class="tourist-search-input" id="hero-search-input" placeholder="Search destinations, experiences, places..." autocomplete="off">
+                        <button type="submit" class="tourist-search-submit" title="Search Destinations" aria-label="Search">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
                         </button>
-                    </div>
-                </div>
-
-                <!-- 4. METRIC CARDS SYSTEM -->
-                <div class="metric-grid">
-                    <div class="metric-card accent-card">
-                        <div class="metric-card-top">
-                            <div class="metric-icon-box">
-                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-                            </div>
-                            <span class="sample-badge">SAMPLE DATA</span>
-                        </div>
-                        <div class="metric-value">3 Trips</div>
-                        <div class="metric-label">Saved Trip Itineraries</div>
-                    </div>
-
-                    <div class="metric-card">
-                        <div class="metric-card-top">
-                            <div class="metric-icon-box">
-                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                            </div>
-                            <span class="sample-badge">SAMPLE DATA</span>
-                        </div>
-                        <div class="metric-value">8 Places</div>
-                        <div class="metric-label">Bookmarked Destinations</div>
-                    </div>
-
-                    <div class="metric-card">
-                        <div class="metric-card-top">
-                            <div class="metric-icon-box">
-                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg>
-                            </div>
-                            <span class="sample-badge">SAMPLE DATA</span>
-                        </div>
-                        <div class="metric-value">2 Upcoming</div>
-                        <div class="metric-label">Saved Cultural Events</div>
-                    </div>
-
-                    <div class="metric-card">
-                        <div class="metric-card-top">
-                            <div class="metric-icon-box">
-                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                            </div>
-                            <span class="sample-badge">SAMPLE DATA</span>
-                        </div>
-                        <div class="metric-value">5 Reviews</div>
-                        <div class="metric-label">Submitted Feedback</div>
-                    </div>
-                </div>
-
-                <!-- 5. FEATURED DESTINATION DISCOVERY GRID -->
-                <div class="table-card" style="padding:1.5rem;">
-                    <h3 class="table-title" style="margin-bottom:1rem;">Explore Featured Destinations</h3>
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1.25rem;">
-                        <!-- Destination Card 1 -->
-                        <div style="background:var(--bg-surface-subtle); border:1px solid var(--border-light); border-radius:12px; padding:1.25rem; display:flex; flex-direction:column; gap:0.5rem;">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-size:0.75rem; font-weight:700; color:var(--state-accent);">MAHARASHTRA</span>
-                                <span class="status-pill active">● Sahyadri Forts</span>
-                            </div>
-                            <h4 style="margin:0.2rem 0; font-size:1.1rem; color:var(--brand-navy);">Rajgad & Torna Heritage</h4>
-                            <p style="font-size:0.825rem; color:var(--text-muted); margin:0;">Ancient Maratha forts, trekking trails, & valley views.</p>
-                            <button type="button" class="btn-app btn-app-outline" style="margin-top:0.5rem; justify-content:center;">View Destination →</button>
-                        </div>
-
-                        <!-- Destination Card 2 -->
-                        <div style="background:var(--bg-surface-subtle); border:1px solid var(--border-light); border-radius:12px; padding:1.25rem; display:flex; flex-direction:column; gap:0.5rem;">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-size:0.75rem; font-weight:700; color:var(--state-accent);">KERALA</span>
-                                <span class="status-pill active">● Backwaters</span>
-                            </div>
-                            <h4 style="margin:0.2rem 0; font-size:1.1rem; color:var(--brand-navy);">Alleppey & Munnar</h4>
-                            <p style="font-size:0.825rem; color:var(--text-muted); margin:0;">Serene backwater cruises & tea estate landscapes.</p>
-                            <button type="button" class="btn-app btn-app-outline" style="margin-top:0.5rem; justify-content:center;">View Destination →</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 6. SUBMIT EXPERIENCE FEEDBACK CARD -->
-                <div class="app-form-card">
-                    <h3 class="table-title" style="margin-bottom:1rem;">Submit Destination Feedback</h3>
-                    <form class="app-form-grid" onsubmit="event.preventDefault(); alert('Feedback submission received! Shared with Destination Managers.');">
-                        <div class="app-form-group">
-                            <label class="app-label" for="fb-destination">Destination Visited</label>
-                            <select id="fb-destination" class="app-select">
-                                <option value="Rajgad Fort">Rajgad Fort (Maharashtra)</option>
-                                <option value="Ajanta Caves">Ajanta Caves (Maharashtra)</option>
-                                <option value="Munnar Tea Gardens">Munnar Tea Gardens (Kerala)</option>
-                            </select>
-                        </div>
-                        <div class="app-form-group">
-                            <label class="app-label" for="fb-rating">Experience Rating</label>
-                            <select id="fb-rating" class="app-select">
-                                <option value="5">5 ★★★★★ — Excellent</option>
-                                <option value="4">4 ★★★★☆ — Good</option>
-                                <option value="3">3 ★★★☆☆ — Average</option>
-                            </select>
-                        </div>
-                        <div class="app-form-group full-width">
-                            <label class="app-label" for="fb-comment">Comments & Suggestions</label>
-                            <textarea id="fb-comment" class="app-textarea" rows="3" placeholder="Share details about cleanliness, facilities, guides, or accessibility..."></textarea>
-                        </div>
-                        <div class="app-form-group full-width" style="display:flex; justify-content:flex-end;">
-                            <button type="submit" class="btn-app btn-app-primary">Submit Feedback</button>
-                        </div>
                     </form>
                 </div>
 
+                <!-- Hero Category Chips -->
+                <div class="tourist-hero-chips">
+                    <a href="destinations.html?category=forts-heritage" class="tourist-chip hero-category-chip" data-category="forts-heritage">
+                        <span>🏰</span> Forts & Heritage
+                    </a>
+                    <a href="destinations.html?category=nature-wildlife" class="tourist-chip hero-category-chip" data-category="nature-wildlife">
+                        <span>🌿</span> Nature & Wildlife
+                    </a>
+                    <a href="destinations.html?category=beaches-islands" class="tourist-chip hero-category-chip" data-category="beaches-islands">
+                        <span>🏖️</span> Beaches & Islands
+                    </a>
+                    <a href="destinations.html?category=spiritual-pilgrimage" class="tourist-chip hero-category-chip" data-category="spiritual-pilgrimage">
+                        <span>🛕</span> Spiritual & Pilgrimage
+                    </a>
+                    <a href="destinations.html?category=cultural-historical" class="tourist-chip hero-category-chip" data-category="cultural-historical">
+                        <span>🎭</span> Culture & Festivals
+                    </a>
+                    <a href="destinations.html?category=adventure-outdoor" class="tourist-chip hero-category-chip" data-category="adventure-outdoor">
+                        <span>🧗</span> Adventure & Outdoor
+                    </a>
+                    <a href="destinations.html?category=cultural-historical" class="tourist-chip hero-category-chip" data-category="cultural-historical">
+                        <span>🍲</span> Food & Local Life
+                    </a>
+                    <a href="destinations.html?category=forts-heritage" class="tourist-chip hero-category-chip" data-category="forts-heritage">
+                        <span>🎨</span> Arts & Crafts
+                    </a>
+                </div>
             </div>
-        </main>
+
+            <!-- Location Badge -->
+            <a href="destination-detail.html?id=raigad-fort" class="tourist-hero-badge" style="text-decoration:none;">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                <div>
+                    <strong>Rajgad Fort</strong>
+                    <div style="font-size:0.72rem; opacity:0.85;">A timeless symbol of courage</div>
+                </div>
+            </a>
+        </section>
+
+        <!-- ====================================================================
+             3. SECTION 1: DISCOVER INDIA'S DESTINATIONS (8 STATES)
+             ==================================================================== -->
+        <section class="tourist-section">
+            <div class="tourist-section-header">
+                <div>
+                    <h2 class="tourist-section-title">Discover India's Destinations</h2>
+                    <p class="tourist-section-subtitle">Curated regional hubs with authenticated heritage and cultural trails</p>
+                </div>
+                <a href="destinations.html" class="tourist-link-arrow">
+                    Explore All Destinations <span>→</span>
+                </a>
+            </div>
+
+            <div class="tourist-states-grid">
+                <!-- 1. Maharashtra -->
+                <a href="destinations.html?state=maharashtra" class="tourist-state-card" data-state-id="maharashtra">
+                    <div class="tourist-state-card-bg" style="background-image: url('../assets/images/thumb-rajgad.jpg');"></div>
+                    <div class="tourist-state-card-overlay"></div>
+                    <div class="tourist-state-card-content">
+                        <div class="tourist-state-card-name">Maharashtra</div>
+                        <div class="tourist-state-card-sub">Forts, Culture, Coastline</div>
+                    </div>
+                </a>
+
+                <!-- 2. Kerala -->
+                <a href="destinations.html?state=kerala" class="tourist-state-card" data-state-id="kerala">
+                    <div class="tourist-state-card-bg" style="background-image: url('../assets/images/dest-munnar.jpg');"></div>
+                    <div class="tourist-state-card-overlay"></div>
+                    <div class="tourist-state-card-content">
+                        <div class="tourist-state-card-name">Kerala</div>
+                        <div class="tourist-state-card-sub">Backwaters, Nature, Wellness</div>
+                    </div>
+                </a>
+
+                <!-- 3. Goa -->
+                <a href="destinations.html?state=goa" class="tourist-state-card" data-state-id="goa">
+                    <div class="tourist-state-card-bg" style="background-image: url('../assets/images/dest-goa.jpg');"></div>
+                    <div class="tourist-state-card-overlay"></div>
+                    <div class="tourist-state-card-content">
+                        <div class="tourist-state-card-name">Goa</div>
+                        <div class="tourist-state-card-sub">Beaches, Nightlife, Heritage</div>
+                    </div>
+                </a>
+
+                <!-- 4. Rajasthan -->
+                <a href="destinations.html?state=rajasthan" class="tourist-state-card" data-state-id="rajasthan">
+                    <div class="tourist-state-card-bg" style="background-image: url('../assets/images/dest-jaipur.jpg');"></div>
+                    <div class="tourist-state-card-overlay"></div>
+                    <div class="tourist-state-card-content">
+                        <div class="tourist-state-card-name">Rajasthan</div>
+                        <div class="tourist-state-card-sub">Palaces, Desert, Traditions</div>
+                    </div>
+                </a>
+
+                <!-- 5. Tamil Nadu -->
+                <a href="destinations.html?state=tamilnadu" class="tourist-state-card" data-state-id="tamilnadu">
+                    <div class="tourist-state-card-bg" style="background-image: url('https://commons.wikimedia.org/wiki/Special:Redirect/file/Meenakshi_Amman_Temple,_Madurai.jpg');"></div>
+                    <div class="tourist-state-card-overlay"></div>
+                    <div class="tourist-state-card-content">
+                        <div class="tourist-state-card-name">Tamil Nadu</div>
+                        <div class="tourist-state-card-sub">Temples, Culture, Coast</div>
+                    </div>
+                </a>
+
+                <!-- 6. Uttarakhand -->
+                <a href="destinations.html?state=uttarakhand" class="tourist-state-card" data-state-id="uttarakhand">
+                    <div class="tourist-state-card-bg" style="background-image: url('../assets/images/dest-manali.jpg');"></div>
+                    <div class="tourist-state-card-overlay"></div>
+                    <div class="tourist-state-card-content">
+                        <div class="tourist-state-card-name">Uttarakhand</div>
+                        <div class="tourist-state-card-sub">Mountains, Spirituality</div>
+                    </div>
+                </a>
+
+                <!-- 7. Jammu & Kashmir -->
+                <a href="destinations.html?state=kashmir" class="tourist-state-card" data-state-id="kashmir">
+                    <div class="tourist-state-card-bg" style="background-image: url('https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/Dal_Lake_Hazratbal_Srinagar.jpg/960px-Dal_Lake_Hazratbal_Srinagar.jpg');"></div>
+                    <div class="tourist-state-card-overlay"></div>
+                    <div class="tourist-state-card-content">
+                        <div class="tourist-state-card-name">Kashmir</div>
+                        <div class="tourist-state-card-sub">Alpine Lakes, Valleys</div>
+                    </div>
+                </a>
+
+                <!-- 8. Assam -->
+                <a href="destinations.html?state=assam" class="tourist-state-card" data-state-id="assam">
+                    <div class="tourist-state-card-bg" style="background-image: url('https://commons.wikimedia.org/wiki/Special:Redirect/file/Kaziranga_Assam.jpg');"></div>
+                    <div class="tourist-state-card-overlay"></div>
+                    <div class="tourist-state-card-content">
+                        <div class="tourist-state-card-name">Assam</div>
+                        <div class="tourist-state-card-sub">Wildlife, Tea, Brahmaputra</div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- ====================================================================
+             4. SECTION 2: SPLIT PROMOTIONAL & ITINERARY PLANNING CARDS
+             ==================================================================== -->
+        <section class="tourist-section" id="plan-trip">
+            <div class="tourist-feature-split">
+                
+                <!-- Card 1: Plan Your Trip -->
+                <div class="tourist-promo-card hero-promo">
+                    <div>
+                        <div class="tourist-promo-eyebrow">PLAN YOUR TRIP</div>
+                        <h3 class="tourist-promo-title">From Inspiration to Itinerary</h3>
+                        <p class="tourist-promo-sub">
+                            Discover authentic places, create your personalized itinerary step-by-step, and travel responsibly with local community guidance.
+                        </p>
+                    </div>
+                    <a href="destinations.html" class="tourist-btn-primary">
+                        <span>🎒</span> Start Planning <span>→</span>
+                    </a>
+                </div>
+
+                <!-- Card 2: Interactive Travel Guide -->
+                <div class="tourist-guide-card" id="travel-guide">
+                    <div>
+                        <div style="font-size:0.78rem; font-weight:800; color:var(--tourist-forest); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.35rem;">REGIONAL DIRECTORY</div>
+                        <h3 style="font-size:1.35rem; font-weight:800; color:var(--tourist-text-heading); margin:0 0 0.35rem 0;">Interactive Travel Guide</h3>
+                        <p style="font-size:0.85rem; color:var(--tourist-text-muted); margin:0;">Explore destinations categorized across cultural pillars:</p>
+                        
+                        <div class="tourist-guide-pill-list">
+                            <div class="tourist-guide-pill">
+                                <span class="icon">🏛️</span>
+                                <span>Heritage & Historical Forts</span>
+                            </div>
+                            <div class="tourist-guide-pill">
+                                <span class="icon">🌿</span>
+                                <span>Nature & Wildlife Sanctuaries</span>
+                            </div>
+                            <div class="tourist-guide-pill">
+                                <span class="icon">🏖️</span>
+                                <span>Beaches & Coastal Backwaters</span>
+                            </div>
+                            <div class="tourist-guide-pill">
+                                <span class="icon">🛕</span>
+                                <span>Spiritual & Sacred Shrines</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="destinations.html" class="tourist-btn-outline" style="align-self:flex-start;">
+                        Explore Directory <span>→</span>
+                    </a>
+                </div>
+
+                <!-- Card 3: Featured Experience -->
+                <div class="tourist-exp-card">
+                    <div class="tourist-exp-img" style="background-image: url('../assets/images/thumb-lonavala.jpg');">
+                        <span class="tourist-exp-tag">NATURE</span>
+                    </div>
+                    <div class="tourist-exp-body">
+                        <span class="tourist-exp-loc">📍 Lonavala, Maharashtra</span>
+                        <h4 class="tourist-exp-title">Trek to Kataldhar Waterfall</h4>
+                        <p class="tourist-exp-desc">
+                            A scenic mountain trek through lush Sahyadri green trails leading to a breathtaking 300-foot seasonal waterfall.
+                        </p>
+                        <a href="destination-detail.html?id=lonavala" class="tourist-link-arrow">
+                            View Experience <span>→</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ====================================================================
+             5. SECTION 3: CURATED FOR YOU
+             ==================================================================== -->
+        <section class="tourist-section" id="curated-section">
+            <div class="tourist-section-header">
+                <div>
+                    <h2 class="tourist-section-title">Curated for You</h2>
+                    <p class="tourist-section-subtitle">Handpicked experiences, destinations, and cultural travel ideas</p>
+                </div>
+                <a href="destinations.html" class="tourist-link-arrow">
+                    View More <span>→</span>
+                </a>
+            </div>
+
+            <div class="tourist-curated-grid">
+                <!-- Curated 1 -->
+                <a href="destinations.html?state=maharashtra&category=forts-heritage" class="tourist-curated-card">
+                    <div class="tourist-curated-card-bg" style="background-image: url('../assets/images/thumb-rajgad.jpg');"></div>
+                    <div class="tourist-curated-card-overlay"></div>
+                    <div class="tourist-curated-card-content">
+                        <div>
+                            <div class="tourist-curated-title">Must-Visit Forts in Maharashtra</div>
+                            <div class="tourist-curated-desc">History, views, and unforgettable journeys</div>
+                        </div>
+                        <div class="tourist-curated-arrow">→</div>
+                    </div>
+                </a>
+
+                <!-- Curated 2 -->
+                <a href="destinations.html?category=beaches-islands" class="tourist-curated-card">
+                    <div class="tourist-curated-card-bg" style="background-image: url('../assets/images/dest-goa.jpg');"></div>
+                    <div class="tourist-curated-card-overlay"></div>
+                    <div class="tourist-curated-card-content">
+                        <div>
+                            <div class="tourist-curated-title">Top Beach Getaways in India</div>
+                            <div class="tourist-curated-desc">Sun, sand, and serene escapes</div>
+                        </div>
+                        <div class="tourist-curated-arrow">→</div>
+                    </div>
+                </a>
+
+                <!-- Curated 3 -->
+                <a href="destinations.html?category=cultural-historical" class="tourist-curated-card">
+                    <div class="tourist-curated-card-bg" style="background-image: url('https://commons.wikimedia.org/wiki/Special:Redirect/file/City_Palace_of_Udaipur.jpg');"></div>
+                    <div class="tourist-curated-card-overlay"></div>
+                    <div class="tourist-curated-card-content">
+                        <div>
+                            <div class="tourist-curated-title">Royal Heritage & Food Trails</div>
+                            <div class="tourist-curated-desc">Taste authentic regional flavours</div>
+                        </div>
+                        <div class="tourist-curated-arrow">→</div>
+                    </div>
+                </a>
+
+                <!-- Curated 4 -->
+                <a href="destinations.html?category=cultural-historical" class="tourist-curated-card">
+                    <div class="tourist-curated-card-bg" style="background-image: url('https://commons.wikimedia.org/wiki/Special:Redirect/file/Sunburn_Festival,_Goa,_Visuals.jpg');"></div>
+                    <div class="tourist-curated-card-overlay"></div>
+                    <div class="tourist-curated-card-content">
+                        <div>
+                            <div class="tourist-curated-title">Festivals & Cultural Events</div>
+                            <div class="tourist-curated-desc">Celebrate traditions, art, and people</div>
+                        </div>
+                        <div class="tourist-curated-arrow">→</div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- ====================================================================
+             6. SECTION 4: TRAVEL RESPONSIBLY BANNER
+             ==================================================================== -->
+        <section class="tourist-responsible-banner">
+            <div class="tourist-responsible-info">
+                <div class="tourist-leaf-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path>
+                        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="tourist-responsible-title">Travel Responsibly</h3>
+                    <p class="tourist-responsible-desc">
+                        Support local communities, respect regional culture, protect delicate ecology, and preserve our natural and heritage monuments for future generations.
+                    </p>
+                </div>
+            </div>
+            <a href="destinations.html" class="tourist-btn-outline">
+                Learn More <span>→</span>
+            </a>
+        </section>
 
     </div>
 
-    <!-- JavaScript -->
-    <script src="../js/dashboard.js"></script>
+    <!-- ====================================================================
+         7. TOURIST FOOTER
+         ==================================================================== -->
+    <footer class="tourist-footer">
+        <div class="tourist-container">
+            <div class="tourist-footer-grid">
+                
+                <!-- Brand Info -->
+                <div>
+                    <div class="tourist-footer-brand">YatraSetu</div>
+                    <p class="tourist-footer-desc">
+                        A Smart Destination Management Platform connecting tourists, destination managers, and verified local stakeholders across India.
+                    </p>
+                </div>
+
+                <!-- Destinations Column -->
+                <div>
+                    <div class="tourist-footer-heading">Featured States</div>
+                    <ul class="tourist-footer-links">
+                        <li><a href="destinations.html?state=maharashtra">Maharashtra Forts</a></li>
+                        <li><a href="destinations.html?state=kerala">Kerala Backwaters</a></li>
+                        <li><a href="destinations.html?state=rajasthan">Rajasthan Palaces</a></li>
+                        <li><a href="destinations.html?state=goa">Goa Coastal Havens</a></li>
+                    </ul>
+                </div>
+
+                <!-- Quick Discovery Column -->
+                <div>
+                    <div class="tourist-footer-heading">Discovery</div>
+                    <ul class="tourist-footer-links">
+                        <li><a href="destinations.html">Explore Destinations</a></li>
+                        <li><a href="destinations.html?category=forts-heritage">Forts & Heritage</a></li>
+                        <li><a href="destinations.html?category=nature-wildlife">Nature & Wildlife</a></li>
+                        <li><a href="destinations.html?category=adventure-outdoor">Adventure Trails</a></li>
+                    </ul>
+                </div>
+
+                <!-- Workspaces Column -->
+                <div>
+                    <div class="tourist-footer-heading">Platform Workspaces</div>
+                    <ul class="tourist-footer-links">
+                        <li><a href="dashboard.html">Tourist Companion</a></li>
+                        <li><a href="../manager/dashboard.html">Destination Manager</a></li>
+                        <li><a href="../stakeholder/dashboard.html">Tourism Stakeholder</a></li>
+                        <li><a href="../admin/dashboard.html">Administrator Governance</a></li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="tourist-footer-bottom">
+                <div>© 2026 YatraSetu Smart Destination Platform. Developed for sustainable heritage & tourism management.</div>
+                <div>Phase 1 Prototype • Client-Side Curated Data</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Data and Controller -->
+    <script src="../js/manager-data.js"></script>
+    <script src="../js/tourist.js"></script>
 </body>
 </html>

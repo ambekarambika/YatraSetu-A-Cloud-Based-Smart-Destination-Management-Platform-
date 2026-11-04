@@ -200,121 +200,193 @@
             <!-- Page Content -->
             <div class="app-content">
                 <!-- Page Header Row -->
-                <div class="page-header-row">
+                <div class="page-header-row" style="margin-bottom: 1.25rem;">
                     <div class="page-title-group">
-                        <h1>Feedback</h1>
-                        <p>Visitor reviews and experience feedback</p>
+                        <h1>Feedback &amp; Suggestions</h1>
+                        <p>Monitor visitor satisfaction and coordinate responses to local stakeholder suggestions.</p>
                     </div>
                 </div>
 
-                <!-- Filter Pills Bar -->
-                <div class="filter-pill-bar">
-                    <a href="#" class="filter-pill active">All Feedback</a>
-                    <a href="#" class="filter-pill">Reviews</a>
-                    <a href="#" class="filter-pill">Suggestions</a>
-                    <a href="#" class="filter-pill">Complaints</a>
-                    <select class="filter-select" style="margin-left: auto;">
-                        <option>All Destinations</option>
-                        <option>Ajanta Caves</option>
-                        <option>Lonavala</option>
-                        <option>Raigad Fort</option>
-                    </select>
+                <!-- Dual Horizontal Tab Navigation Pills (Matching Stakeholder Hub Pattern) -->
+                <div class="feedback-tabs-bar">
+                    <button type="button" id="tab-btn-tourist" class="feedback-tab-pill active">💬 Tourist Feedback</button>
+                    <button type="button" id="tab-btn-stakeholder" class="feedback-tab-pill">👥 Stakeholder Suggestions</button>
                 </div>
 
-                <!-- Top Analytics Header Grid -->
-                <div class="feedback-summary-grid">
-                    <!-- Overall Rating Card -->
-                    <div class="rating-overall-card">
-                        <span
-                            style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Overall
-                            Rating</span>
-                        <div class="overall-score">--</div>
-                        <div style="color: #94A3B8; font-size: 1.1rem; margin: 0.25rem 0;">☆☆☆☆☆</div>
-                        <span style="font-size: 0.75rem; color: var(--text-muted);">0 reviews recorded</span>
-                    </div>
+                <!-- ========================================================
+                     TAB 1: TOURIST FEEDBACK
+                     ======================================================== -->
+                <div id="tab-content-tourist">
+                    <!-- Top Analytics Header Grid -->
+                    <div class="feedback-summary-grid">
+                        <!-- Overall Rating Card -->
+                        <div class="rating-overall-card">
+                            <span
+                                style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Overall
+                                Rating</span>
+                            <div class="overall-score">--</div>
+                            <div style="color: #94A3B8; font-size: 1.1rem; margin: 0.25rem 0;">☆☆☆☆☆</div>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">0 reviews recorded</span>
+                        </div>
 
-                    <!-- Rating Distribution Card -->
-                    <div class="chart-card">
-                        <h4
-                            style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">
-                            Rating Distribution</h4>
-                        <div class="rating-bar-list">
-                            <div class="rating-bar-item">
-                                <span style="width: 20px;">5★</span>
-                                <div class="rating-bar-track">
-                                    <div class="rating-bar-fill" style="width: 0%;"></div>
+                        <!-- Rating Distribution Card -->
+                        <div class="chart-card">
+                            <h4
+                                style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">
+                                Rating Distribution</h4>
+                            <div class="rating-bar-list">
+                                <div class="rating-bar-item">
+                                    <span style="width: 20px;">5★</span>
+                                    <div class="rating-bar-track">
+                                        <div class="rating-bar-fill" style="width: 0%;"></div>
+                                    </div>
+                                    <span style="width: 32px; text-align: right; font-weight: 600;">0%</span>
                                 </div>
-                                <span style="width: 32px; text-align: right; font-weight: 600;">0%</span>
+                                <div class="rating-bar-item">
+                                    <span style="width: 20px;">4★</span>
+                                    <div class="rating-bar-track">
+                                        <div class="rating-bar-fill" style="width: 0%;"></div>
+                                    </div>
+                                    <span style="width: 32px; text-align: right; font-weight: 600;">0%</span>
+                                </div>
+                                <div class="rating-bar-item">
+                                    <span style="width: 20px;">3★</span>
+                                    <div class="rating-bar-track">
+                                        <div class="rating-bar-fill" style="width: 0%;"></div>
+                                    </div>
+                                    <span style="width: 32px; text-align: right; font-weight: 600;">0%</span>
+                                </div>
+                                <div class="rating-bar-item">
+                                    <span style="width: 20px;">2★</span>
+                                    <div class="rating-bar-track">
+                                        <div class="rating-bar-fill" style="width: 0%;"></div>
+                                    </div>
+                                    <span style="width: 32px; text-align: right; font-weight: 600;">0%</span>
+                                </div>
+                                <div class="rating-bar-item">
+                                    <span style="width: 20px;">1★</span>
+                                    <div class="rating-bar-track">
+                                        <div class="rating-bar-fill" style="width: 0%;"></div>
+                                    </div>
+                                    <span style="width: 32px; text-align: right; font-weight: 600;">0%</span>
+                                </div>
                             </div>
-                            <div class="rating-bar-item">
-                                <span style="width: 20px;">4★</span>
-                                <div class="rating-bar-track">
-                                    <div class="rating-bar-fill" style="width: 0%;"></div>
+                        </div>
+
+                        <!-- Feedback Categories Card -->
+                        <div class="chart-card">
+                            <h4
+                                style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">
+                                Feedback Categories</h4>
+                            <div style="display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.78rem;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span><span class="legend-dot" style="background: var(--state-accent);"></span>
+                                        Experience</span>
+                                    <strong>--</strong>
                                 </div>
-                                <span style="width: 32px; text-align: right; font-weight: 600;">0%</span>
-                            </div>
-                            <div class="rating-bar-item">
-                                <span style="width: 20px;">3★</span>
-                                <div class="rating-bar-track">
-                                    <div class="rating-bar-fill" style="width: 0%;"></div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span><span class="legend-dot" style="background: #3B82F6;"></span> Facilities</span>
+                                    <strong>--</strong>
                                 </div>
-                                <span style="width: 32px; text-align: right; font-weight: 600;">0%</span>
-                            </div>
-                            <div class="rating-bar-item">
-                                <span style="width: 20px;">2★</span>
-                                <div class="rating-bar-track">
-                                    <div class="rating-bar-fill" style="width: 0%;"></div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span><span class="legend-dot" style="background: #10B981;"></span> Cleanliness</span>
+                                    <strong>--</strong>
                                 </div>
-                                <span style="width: 32px; text-align: right; font-weight: 600;">0%</span>
-                            </div>
-                            <div class="rating-bar-item">
-                                <span style="width: 20px;">1★</span>
-                                <div class="rating-bar-track">
-                                    <div class="rating-bar-fill" style="width: 0%;"></div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span><span class="legend-dot" style="background: #F59E0B;"></span> Accessibility</span>
+                                    <strong>--</strong>
                                 </div>
-                                <span style="width: 32px; text-align: right; font-weight: 600;">0%</span>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span><span class="legend-dot" style="background: #8B5CF6;"></span> Other</span>
+                                    <strong>--</strong>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Feedback Categories Card -->
-                    <div class="chart-card">
-                        <h4
-                            style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">
-                            Feedback Categories</h4>
-                        <div style="display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.78rem;">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span><span class="legend-dot" style="background: var(--state-accent);"></span>
-                                    Experience</span>
-                                <strong>--</strong>
+                    <!-- Tourist Feedback Section Header & Filter Pills -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.75rem; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
+                        <h2 class="section-title" style="margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">
+                            Recent Tourist Reviews
+                        </h2>
+                        <!-- Category Filter Pills -->
+                        <div class="filter-pill-bar" id="tourist-feedback-filter-pills">
+                            <a href="#" class="filter-pill active" data-category="all">All Feedback</a>
+                            <a href="#" class="filter-pill" data-category="reviews">Reviews</a>
+                            <a href="#" class="filter-pill" data-category="suggestions">Suggestions</a>
+                            <a href="#" class="filter-pill" data-category="complaints">Complaints</a>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Tourist Feedback Card List (Full Width) -->
+                    <div style="display: flex; flex-direction: column; gap: 1rem;" id="feedback-list-container">
+                    </div>
+                </div>
+
+                <!-- ========================================================
+                     TAB 2: STAKEHOLDER SUGGESTIONS
+                     ======================================================== -->
+                <div id="tab-content-stakeholder" style="display: none;">
+                    <div class="page-header-row" style="margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                        <div class="page-title-group">
+                            <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+                                <h2 class="section-title" style="margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text-primary);">
+                                    Stakeholder Suggestions &amp; Inquiries
+                                </h2>
+                                <span class="badge" id="sh-msg-scope-badge" style="background: rgba(14, 165, 233, 0.12); color: #0284C7; font-weight: 700; font-size: 0.74rem; padding: 0.25rem 0.65rem; border-radius: 999px;">
+                                    📍 Scope: Loading...
+                                </span>
                             </div>
-                            <div style="display: flex; justify-content: space-between;">
-                                <span><span class="legend-dot" style="background: #3B82F6;"></span> Facilities</span>
-                                <strong>--</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between;">
-                                <span><span class="legend-dot" style="background: #10B981;"></span> Cleanliness</span>
-                                <strong>--</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between;">
-                                <span><span class="legend-dot" style="background: #F59E0B;"></span> Accessibility</span>
-                                <strong>--</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between;">
-                                <span><span class="legend-dot" style="background: #8B5CF6;"></span> Other</span>
-                                <strong>--</strong>
-                            </div>
+                            <p style="margin: 0.25rem 0 0 0; color: var(--text-muted); font-size: 0.85rem;">
+                                Operational inquiries, trail suggestions, and business coordination messages submitted by registered destination stakeholders.
+                            </p>
+                        </div>
+
+                        <!-- Prototype Storage Notice -->
+                        <div style="background: #F8FAFC; border: 1px solid var(--border-color, #E2E8F0); border-radius: 8px; padding: 0.5rem 0.85rem; font-size: 0.75rem; color: #64748B; max-width: 360px;">
+                            ⚡ <strong>Prototype Storage:</strong> Browser-synchronized records. Shared across manager and stakeholder views. Full server-side RBAC &amp; PostgreSQL persistence planned for Phase 11.
+                        </div>
+                    </div>
+
+                    <!-- Stakeholder Messages Status Filter Pills -->
+                    <div class="filter-pill-bar" id="sh-msg-status-filter-pills" style="margin-bottom: 1.25rem;">
+                        <button type="button" class="filter-pill active" data-msg-status="all">
+                            All Messages <span class="badge" id="count-sh-msg-all" style="margin-left: 0.35rem; font-size: 0.7rem; background: #E2E8F0; color: #334155;">0</span>
+                        </button>
+                        <button type="button" class="filter-pill" data-msg-status="Pending">
+                            Pending <span class="badge" id="count-sh-msg-pending" style="margin-left: 0.35rem; font-size: 0.7rem; background: #FEF3C7; color: #92400E;">0</span>
+                        </button>
+                        <button type="button" class="filter-pill" data-msg-status="In Review">
+                            In Review <span class="badge" id="count-sh-msg-review" style="margin-left: 0.35rem; font-size: 0.7rem; background: #DBEAFE; color: #1E40AF;">0</span>
+                        </button>
+                        <button type="button" class="filter-pill" data-msg-status="Responded">
+                            Responded <span class="badge" id="count-sh-msg-responded" style="margin-left: 0.35rem; font-size: 0.7rem; background: #D1FAE5; color: #065F46;">0</span>
+                        </button>
+                    </div>
+
+                    <!-- Full-Width Stakeholder Suggestions Table Card -->
+                    <div class="chart-card" style="padding: 0; overflow: hidden; border: 1px solid var(--card-border); border-radius: var(--radius-md); background: #fff; box-shadow: var(--card-shadow);">
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; text-align: left;" id="stakeholder-messages-table">
+                                <thead>
+                                    <tr style="background: #F8FAFC; border-bottom: 1px solid var(--card-border); font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em;">
+                                        <th style="padding: 0.85rem 1rem;">Stakeholder / Business</th>
+                                        <th style="padding: 0.85rem 1rem;">Destination</th>
+                                        <th style="padding: 0.85rem 1rem;">Topic &amp; Message</th>
+                                        <th style="padding: 0.85rem 1rem;">Submitted</th>
+                                        <th style="padding: 0.85rem 1rem;">Status</th>
+                                        <th style="padding: 0.85rem 1rem;">Manager Response</th>
+                                        <th style="padding: 0.85rem 1rem; text-align: right;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stakeholder-messages-tbody">
+                                    <!-- Rendered dynamically by manager-views.js -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- Recent Feedback List -->
-                <div class="page-header-row" style="margin-top: 0.5rem;">
-                    <h2 class="section-title">Recent Feedback</h2>
-                </div>
-
-                <div style="display: flex; flex-direction: column; gap: 1rem;" id="feedback-list-container">
-                </div>
             </div>
         </main>
     </div>
@@ -330,6 +402,25 @@
             </div>
             <div class="modal-footer" id="fb-detail-modal-footer" style="display: flex; gap: 0.5rem; justify-content: flex-end;">
                 <button type="button" class="btn-secondary modal-close" id="btn-close-fb-modal-footer">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Dialog: Stakeholder Message Review & Response -->
+    <div class="modal-overlay app-modal" id="stakeholderMessageModal" role="dialog" aria-modal="true" aria-labelledby="sh-msg-modal-title">
+        <div class="modal-card" style="max-width: 650px; width: 92%;">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                    <h3 class="modal-title" id="sh-msg-modal-title">Stakeholder Message</h3>
+                    <span id="sh-msg-modal-status-badge" class="badge">Pending</span>
+                </div>
+                <button class="modal-close" id="btn-close-sh-msg-modal" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body" id="sh-msg-modal-body" style="display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Rendered dynamically by JS -->
+            </div>
+            <div class="modal-footer" id="sh-msg-modal-footer" style="display: flex; gap: 0.65rem; justify-content: flex-end; align-items: center;">
+                <button type="button" class="btn-secondary modal-close" id="btn-close-sh-msg-modal-footer">Close</button>
             </div>
         </div>
     </div>

@@ -42,6 +42,59 @@ function initStakeholderContext() {
         profile.organizationName = sessionOrg;
     }
 
+    // Cross-sync with central Admin users and Manager stakeholders repositories
+    try {
+        const rawUsers = localStorage.getItem('yatrasetu_admin_users') || sessionStorage.getItem('yatrasetu_admin_users');
+        if (rawUsers) {
+            const adminUsers = JSON.parse(rawUsers);
+            const lookupEmail = sessionEmail || profile.email;
+            const matchedUser = adminUsers.find(u => (u.id && u.id === profile.id) || (u.email && u.email.toLowerCase() === (lookupEmail || '').toLowerCase()));
+            if (matchedUser) {
+                profile.id = matchedUser.id;
+                profile.userName = matchedUser.name;
+                profile.contactPerson = matchedUser.name;
+                profile.email = matchedUser.email;
+                if (matchedUser.organization) profile.organizationName = matchedUser.organization;
+                if (matchedUser.category) profile.category = matchedUser.category;
+                profile.account_status = matchedUser.account_status || 'Active';
+                profile.registration_status = matchedUser.registration_status || 'Pending Approval';
+                profile.status = matchedUser.registration_status || 'Pending Approval';
+                profile.isBusinessApproved = (profile.registration_status === 'Approved');
+
+                // If destination is assigned in Admin repository and no manual session override exists
+                if (matchedUser.destination_id && matchedUser.destination_id !== 'all' && (!sessionDestId || sessionDestId === '')) {
+                    sessionDestId = matchedUser.destination_id;
+                    sessionStorage.setItem('yatrasetu_destination_id', matchedUser.destination_id);
+                }
+            }
+        }
+    } catch (e) {
+        console.warn('[stakeholder.js] Cross-sync error:', e);
+    }
+
+    // Display Account Deactivation Alert if account was deactivated by Platform Administrator
+    const existingDeactBanner = document.getElementById('sh-deactivated-banner');
+    if (profile.account_status === 'Deactivated') {
+        if (!existingDeactBanner) {
+            const banner = document.createElement('div');
+            banner.id = 'sh-deactivated-banner';
+            banner.style.cssText = 'background: #FEE2E2; border: 1px solid #FECACA; color: #991B1B; padding: 0.85rem 1.25rem; border-radius: 8px; margin: 1rem 1.75rem 0 1.75rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.75rem;';
+            banner.innerHTML = `
+                <span style="font-size: 1.35rem;">🚫</span>
+                <div>
+                    <strong>Account Deactivated by Platform Administrator:</strong>
+                    <span> Login permissions and business services are suspended. Ordinary profile changes cannot be published until an Administrator reactivates this account.</span>
+                </div>
+            `;
+            const mainContent = document.querySelector('.dashboard-content') || document.querySelector('main');
+            if (mainContent && mainContent.parentNode) {
+                mainContent.parentNode.insertBefore(banner, mainContent);
+            }
+        }
+    } else if (existingDeactBanner) {
+        existingDeactBanner.remove();
+    }
+
     // Destination Resolution
     // Priority:
     // 1) sessionStorage 'yatrasetu_destination_id' if explicitly set
@@ -318,6 +371,39 @@ function initStakeholderProfilePage() {
 
         // Set current assigned destination value
         selectDest.value = profile.destinationId || '';
+
+        // Rule 3: Once approved, the stakeholder cannot change the registered destination through ordinary editing.
+        const isApproved = profile.status === 'Approved' || profile.registration_status === 'Approved' || profile.isBusinessApproved === true;
+        const isPending = profile.status === 'Pending Approval' || profile.registration_status === 'Pending Approval';
+        const destLockNotice = document.getElementById('sh-dest-lock-notice');
+        const destPendingNotice = document.getElementById('sh-dest-pending-notice');
+        const destLockNameDisplay = document.getElementById('locked-dest-name-display');
+
+        if (isApproved) {
+            selectDest.disabled = true;
+            selectDest.style.backgroundColor = '#F1F5F9';
+            selectDest.style.cursor = 'not-allowed';
+            selectDest.title = 'Destination locked: Reassignment requires an authorized administrative process with audit trail.';
+            if (destLockNotice) destLockNotice.style.display = 'block';
+            if (destPendingNotice) destPendingNotice.style.display = 'none';
+            if (destLockNameDisplay) destLockNameDisplay.textContent = profile.destinationName || 'Rajgad Fort';
+        } else {
+            selectDest.disabled = false;
+            if (destLockNotice) destLockNotice.style.display = 'none';
+            if (destPendingNotice) destPendingNotice.style.display = isPending ? 'block' : 'none';
+        }
+
+        // Account deactivation state enforcement: disable form controls if admin deactivated
+        if (profile.account_status === 'Deactivated') {
+            if (selectDest) selectDest.disabled = true;
+            const saveBtnEl = document.getElementById('btn-save-profile');
+            if (saveBtnEl) {
+                saveBtnEl.disabled = true;
+                saveBtnEl.style.opacity = '0.5';
+                saveBtnEl.style.cursor = 'not-allowed';
+                saveBtnEl.textContent = 'Account Suspended (Admin Action)';
+            }
+        }
     }
 
     // Bind Initial Form Values
@@ -423,6 +509,11 @@ function initStakeholderProfilePage() {
     const handleProfileSave = (e) => {
         if (e) e.preventDefault();
 
+        if (profile.account_status === 'Deactivated') {
+            alert('ACCOUNT SUSPENDED: Your stakeholder account has been deactivated by the Platform Administrator. Profile changes cannot be submitted.');
+            return;
+        }
+
         const nameVal = inputOrgName ? inputOrgName.value.trim() : '';
         const emailVal = inputEmail ? inputEmail.value.trim() : '';
 
@@ -453,18 +544,26 @@ function initStakeholderProfilePage() {
         profile.address = inputAddress ? inputAddress.value.trim() : '';
         profile.description = inputDesc ? inputDesc.value.trim() : '';
 
+        const isApproved = profile.status === 'Approved' || profile.registration_status === 'Approved' || profile.isBusinessApproved === true;
+        let isInitialSubmission = false;
+
         // Save Destination Context to Session
         if (chosenDestId) {
-            if (profile.isBusinessApproved && chosenDestId !== profile.destinationId) {
-                alert('Operating destination is locked after official business approval. Only the Destination Manager or Administrator can reassign destinations.');
+            if (isApproved && chosenDestId !== profile.destinationId) {
+                alert('SECURITY / INTEGRITY ENFORCEMENT: Operating destination is locked after official business approval. Stakeholders cannot alter approved destinations through ordinary editing. Reassignment requires an authorized process with an audit trail.');
                 if (selectDest) selectDest.value = profile.destinationId || '';
                 return;
+            }
+            if (!isApproved) {
+                if (profile.destinationId !== chosenDestId) isInitialSubmission = true;
+                profile.status = 'Pending Approval';
+                profile.registration_status = 'Pending Approval';
             }
             sessionStorage.setItem('yatrasetu_destination_id', chosenDestId);
             profile.destinationId = chosenDestId;
         } else {
-            if (profile.isBusinessApproved) {
-                alert('Operating destination cannot be unassigned after official business approval.');
+            if (isApproved) {
+                alert('SECURITY / INTEGRITY ENFORCEMENT: Operating destination cannot be unassigned after official business approval.');
                 if (selectDest) selectDest.value = profile.destinationId || '';
                 return;
             }
@@ -477,11 +576,113 @@ function initStakeholderProfilePage() {
         sessionStorage.setItem('yatrasetu_org', profile.organizationName);
         sessionStorage.setItem('yatrasetu_organization', profile.organizationName);
 
+        // Cross-sync: update/insert in window.YatraSetuManagerData.stakeholders
+        const managerData = window.YatraSetuManagerData || {};
+        if (managerData.stakeholders) {
+            const destObj = (managerData.destinations || []).find(d => d.id === profile.destinationId);
+            const stateId = destObj ? destObj.state_id : 'maharashtra';
+            const destName = destObj ? destObj.name : 'Unassigned';
+            profile.destinationName = destName;
+            const existingSh = managerData.stakeholders.find(s => s.id === profile.id || (s.email && s.email.toLowerCase() === profile.email.toLowerCase()));
+
+            if (existingSh) {
+                existingSh.name = profile.organizationName;
+                existingSh.contact_person = profile.contactPerson;
+                existingSh.contact = profile.phone;
+                existingSh.category = profile.category;
+                existingSh.type = profile.type;
+                existingSh.hours = profile.hours;
+                existingSh.price_range = profile.priceRange;
+                existingSh.address = profile.address;
+                existingSh.description = profile.description;
+                if (!isApproved) {
+                    existingSh.destination_id = profile.destinationId;
+                    existingSh.destination = destName;
+                    existingSh.state_id = stateId;
+                }
+            } else {
+                managerData.stakeholders.push({
+                    id: profile.id || `sh-${Date.now().toString(36)}`,
+                    state_id: stateId,
+                    destination_id: profile.destinationId,
+                    destination: destName,
+                    name: profile.organizationName,
+                    category: profile.category,
+                    type: profile.type,
+                    contact: profile.phone,
+                    email: profile.email,
+                    contact_person: profile.contactPerson,
+                    address: profile.address,
+                    hours: profile.hours,
+                    price_range: profile.priceRange,
+                    description: profile.description,
+                    status: profile.status || 'Pending Approval',
+                    account_status: profile.account_status || 'Active',
+                    registered_date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+                    reviewed_by: '',
+                    reviewed_date: '',
+                    manager_note: 'New registration submitted by stakeholder.'
+                });
+            }
+
+            if (window.YatraSetuManagerStore && typeof window.YatraSetuManagerStore.saveStakeholders === 'function') {
+                window.YatraSetuManagerStore.saveStakeholders(managerData.stakeholders);
+            }
+        }
+
+        // Cross-sync: update in AdminStore (yatrasetu_admin_users)
+        try {
+            const rawUsers = localStorage.getItem('yatrasetu_admin_users') || sessionStorage.getItem('yatrasetu_admin_users');
+            if (rawUsers) {
+                const adminUsers = JSON.parse(rawUsers);
+                const matchedUser = adminUsers.find(u => u.id === profile.id || (u.email && u.email.toLowerCase() === profile.email.toLowerCase()));
+                if (matchedUser) {
+                    matchedUser.organization = profile.organizationName;
+                    matchedUser.name = profile.contactPerson;
+                    matchedUser.category = profile.category;
+                    if (!isApproved && profile.destinationId) {
+                        matchedUser.destination_id = profile.destinationId;
+                        matchedUser.destination_name = profile.destinationName;
+                    }
+                    localStorage.setItem('yatrasetu_admin_users', JSON.stringify(adminUsers));
+                    sessionStorage.setItem('yatrasetu_admin_users', JSON.stringify(adminUsers));
+                }
+            }
+        } catch (e) {}
+
+        // Log audit event if new destination was registered by pending stakeholder
+        if (isInitialSubmission && profile.destinationId) {
+            try {
+                const auditKey = 'yatrasetu_audit_trail';
+                const rawAudit = localStorage.getItem(auditKey) || sessionStorage.getItem(auditKey);
+                let audit = [];
+                if (rawAudit) {
+                    try { audit = JSON.parse(rawAudit); } catch (e) {}
+                }
+                audit.unshift({
+                    id: `aud-${Date.now().toString(36)}`,
+                    timestamp: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+                    action: 'BUSINESS_REGISTRATION_SUBMITTED',
+                    stakeholder_id: profile.id,
+                    stakeholder_name: profile.organizationName,
+                    actor_name: profile.contactPerson,
+                    actor_role: 'Tourism Stakeholder',
+                    details: `Submitted business registration for destination "${profile.destinationName}" (${profile.destinationId}). Awaiting Destination Manager review.`,
+                    previous_value: 'Unassigned',
+                    new_value: `${profile.destinationName} (${profile.destinationId})`
+                });
+                localStorage.setItem(auditKey, JSON.stringify(audit));
+                sessionStorage.setItem(auditKey, JSON.stringify(audit));
+            } catch (e) {}
+        }
+
         // Re-initialize context to update sidebar and badges
         initStakeholderContext();
         renderLivePreview(radioVisitor ? radioVisitor.checked : true);
 
-        alert('Profile and operating destination updated successfully! (Changes saved to active browser session)');
+        alert(isApproved
+            ? 'Profile updated successfully! (Changes saved to active browser session)'
+            : 'Business registration submitted for review! Your destination selection is now pending approval by the Destination Manager.');
     };
 
     if (saveBtn) saveBtn.addEventListener('click', handleProfileSave);
@@ -1073,22 +1274,65 @@ function initStakeholderConnectionsReviews() {
             return;
         }
 
-        const suggestions = (dataStore.suggestions || []).filter(s => s.destination_id === destId);
+        // Read from shared prototype storage
+        let allMessages = [];
+        try {
+            const rawStored = sessionStorage.getItem('yatrasetu_stakeholder_messages') || localStorage.getItem('yatrasetu_stakeholder_messages');
+            if (rawStored) {
+                allMessages = JSON.parse(rawStored);
+            }
+        } catch (e) {}
+
+        if (!allMessages || allMessages.length === 0) {
+            if (window.YatraSetuManagerData && window.YatraSetuManagerData.stakeholderMessages) {
+                allMessages = window.YatraSetuManagerData.stakeholderMessages;
+            } else if (dataStore.suggestions) {
+                allMessages = dataStore.suggestions;
+            }
+        }
+
+        // Strict Access Control: Stakeholders must ONLY see their own messages and replies
+        const currentStakeholderId = profile.id || 'sh-1';
+        const suggestions = allMessages.filter(s => {
+            const matchesOwner = (s.stakeholder_id === currentStakeholderId || (!s.stakeholder_id && s.destination_id === destId));
+            const matchesDest = !destId || s.destination_id === destId;
+            return matchesOwner && matchesDest;
+        });
 
         if (suggestions.length === 0) {
             suggestionsTable.innerHTML = `<tr><td colspan="5" style="padding: 1.75rem; text-align: center; color: var(--sh-text-muted);">No suggestions submitted for ${profile.destinationName} yet. Use the "+ Suggest Update" button above.</td></tr>`;
         } else {
-            suggestionsTable.innerHTML = suggestions.map(s => `
-                <tr style="border-bottom: 1px solid var(--sh-card-border); font-size: 0.85rem;">
-                    <td style="padding: 0.85rem 1rem; font-weight: 700; color: var(--sh-text-primary);">${s.topic}</td>
-                    <td style="padding: 0.85rem 1rem; color: var(--sh-text-secondary);">${s.suggestionText}</td>
-                    <td style="padding: 0.85rem 1rem; color: var(--sh-text-muted);">${s.submittedAt}</td>
-                    <td style="padding: 0.85rem 1rem;">
-                        <span class="sh-status-badge ${s.statusClass || 'pending'}">${s.status}</span>
-                    </td>
-                    <td style="padding: 0.85rem 1rem; color: var(--sh-text-muted);">${s.managerNote}</td>
-                </tr>
-            `).join('');
+            suggestionsTable.innerHTML = suggestions.map(s => {
+                let badgeClass = 'pending';
+                if (s.status === 'In Review') badgeClass = 'review';
+                else if (s.status === 'Responded') badgeClass = 'accepted';
+
+                const responseHtml = s.manager_response ? `
+                    <div style="background: #F0FDF4; border-left: 3px solid #16A34A; padding: 0.45rem 0.75rem; border-radius: 4px; font-size: 0.8rem; color: #166534;">
+                        <strong style="color: #14532D; display: block; font-size: 0.76rem;">${s.responded_by || 'Destination Manager'}:</strong>
+                        "${s.manager_response}"
+                        <div style="font-size: 0.7rem; color: #64748B; margin-top: 0.25rem;">${s.responded_at || ''}</div>
+                    </div>
+                ` : (s.status === 'In Review' ? `
+                    <span style="color: #2563EB; font-style: italic; font-size: 0.8rem;">Under active review by Destination Manager</span>
+                ` : `
+                    <span style="color: var(--sh-text-muted); font-style: italic; font-size: 0.8rem;">Awaiting Manager Review</span>
+                `);
+
+                return `
+                    <tr style="border-bottom: 1px solid var(--sh-card-border); font-size: 0.85rem;">
+                        <td style="padding: 0.85rem 1rem; font-weight: 700; color: var(--sh-text-primary);">${s.topic}</td>
+                        <td style="padding: 0.85rem 1rem; color: var(--sh-text-secondary);">${s.message || s.suggestionText}</td>
+                        <td style="padding: 0.85rem 1rem; color: var(--sh-text-muted);">${s.submitted_at || s.submittedAt || 'Recently'}</td>
+                        <td style="padding: 0.85rem 1rem;">
+                            <span class="sh-status-badge ${badgeClass}">${s.status}</span>
+                        </td>
+                        <td style="padding: 0.85rem 1rem;">
+                            ${responseHtml}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
     }
 
@@ -1220,18 +1464,66 @@ function initStakeholderConnectionsReviews() {
                 return;
             }
 
+            const nowFormatted = new Date().toLocaleString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+
+            const currentStakeholderId = profile.id || 'sh-1';
             const newSug = {
-                id: `sug-${Date.now()}`,
+                id: `sh-msg-${Date.now()}`,
+                stakeholder_id: currentStakeholderId,
+                stakeholder_name: profile.userName || profile.contactPerson || 'Suresh Deshmukh',
+                business_name: profile.organizationName || 'Sahyadri Trekking Guides Co-op',
+                state_id: profile.stateId || 'maharashtra',
                 destination_id: destId,
+                destination_name: profile.destinationName || 'Rajgad Fort',
                 topic: topicInput.value.trim(),
-                suggestionText: textInput.value.trim(),
-                submittedAt: 'Today',
+                message: textInput.value.trim(),
+                submitted_at: nowFormatted,
                 status: 'Pending',
+                manager_response: null,
+                responded_by: null,
+                responded_at: null,
+                // Backward-compatibility aliases
+                suggestionText: textInput.value.trim(),
+                submittedAt: nowFormatted,
                 statusClass: 'pending',
-                managerNote: 'Pending Manager Review (Prototype)'
+                managerNote: 'Awaiting Manager Review'
             };
 
-            (dataStore.suggestions = dataStore.suggestions || []).unshift(newSug);
+            // Load all current messages from prototype store
+            let allMessages = [];
+            try {
+                const rawStored = sessionStorage.getItem('yatrasetu_stakeholder_messages') || localStorage.getItem('yatrasetu_stakeholder_messages');
+                if (rawStored) allMessages = JSON.parse(rawStored);
+            } catch (e) {}
+
+            if (!allMessages || allMessages.length === 0) {
+                if (window.YatraSetuManagerData && window.YatraSetuManagerData.stakeholderMessages) {
+                    allMessages = window.YatraSetuManagerData.stakeholderMessages;
+                } else {
+                    allMessages = dataStore.suggestions || [];
+                }
+            }
+
+            allMessages.unshift(newSug);
+
+            // Persist to storage
+            try {
+                sessionStorage.setItem('yatrasetu_stakeholder_messages', JSON.stringify(allMessages));
+                localStorage.setItem('yatrasetu_stakeholder_messages', JSON.stringify(allMessages));
+            } catch (e) {}
+
+            if (window.YatraSetuManagerData) {
+                window.YatraSetuManagerData.stakeholderMessages = allMessages;
+            }
+            dataStore.suggestions = allMessages;
+
             alert('Suggestion submitted to Destination Manager! (Saved in prototype store)');
             if (sugModal) sugModal.style.display = 'none';
             sugForm.reset();

@@ -22,7 +22,7 @@ async function renderConnectedViews(context) {
     destFilterSelects.forEach(select => {
         if (select) {
             const currentVal = activeDestinationId;
-            select.innerHTML = `<option value="all">All Destinations</option>` + 
+            select.innerHTML = `<option value="all">All Destinations</option>` +
                 destinationsForState.map(d => `<option value="${d.id}" ${d.id === currentVal ? 'selected' : ''}>${d.name}</option>`).join('');
             select.value = currentVal;
         }
@@ -71,7 +71,7 @@ async function renderConnectedViews(context) {
 
     // 1. DESTINATIONS VIEW (destinations.html)
     const destinations = await window.YatraSetuManagerStore.getDestinations(activeStateId);
-    const activeDest = (activeDestinationId !== 'all') 
+    const activeDest = (activeDestinationId !== 'all')
         ? (destinations.find(d => d.id === activeDestinationId) || destinations[0])
         : (destinations[0] || null);
 
@@ -174,6 +174,9 @@ async function renderConnectedViews(context) {
             destGrid.innerHTML = `<div style="grid-column: 1 / -1; padding: 2.5rem; text-align: center; color: #64748b; font-weight: 500;">No destination records available for ${formattedStateName}.</div>`;
         }
     }
+
+    // 1B. DESTINATION INFORMATION VIDEOS VIEW (destinations.html — FR-15)
+    await renderDestinationVideos(context);
 
     // 2. ATTRACTIONS VIEW (attractions.html)
     const attractionsTableBody = document.querySelector('#attractions-table-body');
@@ -327,48 +330,160 @@ async function renderConnectedViews(context) {
     // 4. STAKEHOLDERS VIEW (stakeholders.html)
     const stakeholdersTableBody = document.querySelector('#stakeholders-table-body');
     if (stakeholdersTableBody) {
-        const stakeholders = await window.YatraSetuManagerStore.getStakeholders(activeStateId, activeDestinationId);
-        if (stakeholders && stakeholders.length > 0) {
-            stakeholdersTableBody.innerHTML = stakeholders.map(sh => `
-                <tr data-category="${(sh.category || '').toLowerCase()}">
-                    <td><strong>${sh.name}</strong></td>
-                    <td>${sh.category}</td>
-                    <td>${sh.destination}</td>
-                    <td>${sh.contact}</td>
-                    <td><span class="status-pill active">${sh.status || 'Verified'}</span></td>
-                    <td style="text-align: right; white-space: nowrap;">
-                        <button type="button" class="btn-secondary btn-sh-view" data-sh-id="${sh.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; margin-right: 0.25rem;">View</button>
-                        <button type="button" class="btn-secondary btn-sh-edit" data-sh-id="${sh.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; margin-right: 0.25rem;">Edit</button>
-                        <button type="button" class="btn-secondary btn-sh-delete" data-sh-id="${sh.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; color: #DC2626; border-color: #FECACA;">Delete</button>
-                    </td>
-                </tr>
-            `).join('');
+        // Retrieve stakeholders for active state and destination context (fallback to state-wide if destination has 0 records)
+        let stakeholders = await window.YatraSetuManagerStore.getStakeholders(activeStateId, activeDestinationId);
+        if ((!stakeholders || stakeholders.length === 0) && activeDestinationId !== 'all') {
+            stakeholders = await window.YatraSetuManagerStore.getStakeholders(activeStateId, 'all');
+        }
 
-            stakeholdersTableBody.querySelectorAll('.btn-sh-view').forEach(btn => {
+        // Dynamic Category Card Counts
+        const categoryCounts = {
+            all: stakeholders.length,
+            guides: 0,
+            transport: 0,
+            homestays: 0,
+            food: 0,
+            crafts: 0,
+            operators: 0,
+            accommodation: 0,
+            other: 0
+        };
+
+        // Status Counts
+        const statusCounts = {
+            all: stakeholders.length,
+            pending: 0,
+            review: 0,
+            approved: 0,
+            rejected: 0
+        };
+
+        stakeholders.forEach(sh => {
+            const cat = (sh.category || '').toLowerCase();
+            if (cat.includes('guide')) categoryCounts.guides++;
+            else if (cat.includes('transport') || cat.includes('cab') || cat.includes('jeep') || cat.includes('shikara')) categoryCounts.transport++;
+            else if (cat.includes('homestay') || cat.includes('rural stay')) categoryCounts.homestays++;
+            else if (cat.includes('food') || cat.includes('dining') || cat.includes('chikki') || cat.includes('restaurant')) categoryCounts.food++;
+            else if (cat.includes('handicraft') || cat.includes('weaver') || cat.includes('artisan') || cat.includes('craft')) categoryCounts.crafts++;
+            else if (cat.includes('tour') || cat.includes('operator')) categoryCounts.operators++;
+            else if (cat.includes('accommodat') || cat.includes('hotel') || cat.includes('resort')) categoryCounts.accommodation++;
+            else categoryCounts.other++;
+
+            const st = (sh.status || '').toLowerCase();
+            if (st.includes('pending')) statusCounts.pending++;
+            else if (st.includes('review')) statusCounts.review++;
+            else if (st.includes('reject')) statusCounts.rejected++;
+            else statusCounts.approved++;
+        });
+
+        // Update Category Grid Numbers
+        for (const [key, count] of Object.entries(categoryCounts)) {
+            const el = document.getElementById(`sh-cat-count-${key}`);
+            if (el) el.textContent = count;
+        }
+
+        // Update Status Filter Numbers
+        const countAllEl = document.getElementById('count-sh-all');
+        const countPendingEl = document.getElementById('count-sh-pending');
+        const countReviewEl = document.getElementById('count-sh-review');
+        const countApprovedEl = document.getElementById('count-sh-approved');
+        const countRejectedEl = document.getElementById('count-sh-rejected');
+        if (countAllEl) countAllEl.textContent = statusCounts.all;
+        if (countPendingEl) countPendingEl.textContent = statusCounts.pending;
+        if (countReviewEl) countReviewEl.textContent = statusCounts.review;
+        if (countApprovedEl) countApprovedEl.textContent = statusCounts.approved;
+        if (countRejectedEl) countRejectedEl.textContent = statusCounts.rejected;
+
+        // Update Manager Scope Badge
+        const mgrScopeText = document.getElementById('manager-scope-text');
+        const profile = (typeof syncActiveManagerProfile === 'function' ? syncActiveManagerProfile() : null) || window.YatraSetuManagerData?.profile || {};
+        const isStateScope = (profile.scope || 'STATE') === 'STATE';
+        if (mgrScopeText) {
+            const isOutOfJurisdiction = isStateScope
+                ? (activeStateId !== profile.state_id)
+                : (activeStateId !== profile.state_id || (activeDestinationId !== 'all' && activeDestinationId !== profile.destination_id));
+
+            const scopeDesc = isStateScope
+                ? `State Manager (${profile.state_name || 'Maharashtra'}) • Review & approve registrations across all ${profile.state_name || 'Maharashtra'} destinations`
+                : `Destination Manager • Assigned to: <strong>${profile.destination || (profile.destination_ids || []).join(', ') || 'Rajgad Fort'}</strong>`;
+
+            mgrScopeText.innerHTML = `<strong>Authorized Scope:</strong> ${scopeDesc}${isOutOfJurisdiction ? ` <span style="color:#B45309; font-weight:700;">(Viewing ${formattedStateName} — Read-Only Mode)</span>` : ''}`;
+        }
+
+        // Setup filter card click listeners
+        const catCards = document.querySelectorAll('.category-card-grid .category-card');
+        catCards.forEach(card => {
+            card.onclick = (e) => {
+                e.preventDefault();
+                catCards.forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                if (typeof filterTableRows === 'function') filterTableRows();
+            };
+        });
+
+        // Setup status filter pill click listeners
+        const statusPills = document.querySelectorAll('#sh-status-filter-pills .filter-pill');
+        statusPills.forEach(pill => {
+            pill.onclick = (e) => {
+                e.preventDefault();
+                statusPills.forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                if (typeof filterTableRows === 'function') filterTableRows();
+            };
+        });
+
+        if (stakeholders && stakeholders.length > 0) {
+            stakeholdersTableBody.innerHTML = stakeholders.map(sh => {
+                const st = sh.status || 'Approved';
+                let pillHtml = '';
+                if (st === 'Pending Approval') {
+                    pillHtml = `<span class="status-pill pending" style="background:#FEF3C7; color:#B45309; border:1px solid #FCD34D; font-weight:700; font-size:0.73rem; padding:0.2rem 0.55rem; border-radius:12px;">⏳ Pending Approval</span>`;
+                } else if (st === 'Under Review') {
+                    pillHtml = `<span class="status-pill review" style="background:#EFF6FF; color:#1D4ED8; border:1px solid #BFDBFE; font-weight:700; font-size:0.73rem; padding:0.2rem 0.55rem; border-radius:12px;">🔍 Under Review</span>`;
+                } else if (st === 'Rejected') {
+                    pillHtml = `<span class="status-pill rejected" style="background:#FEE2E2; color:#B91C1C; border:1px solid #FECACA; font-weight:700; font-size:0.73rem; padding:0.2rem 0.55rem; border-radius:12px;">✕ Rejected</span>`;
+                } else {
+                    pillHtml = `<span class="status-pill active" style="background:#ECFDF5; color:#065F46; border:1px solid #A7F3D0; font-weight:700; font-size:0.73rem; padding:0.2rem 0.55rem; border-radius:12px;">✓ Approved</span>`;
+                }
+
+                const isActionNeeded = st === 'Pending Approval' || st === 'Under Review';
+                const actionBtn = isActionNeeded
+                    ? `<button type="button" class="btn-primary btn-sh-review" data-sh-id="${sh.id}" style="padding: 0.35rem 0.75rem; font-size: 0.76rem; font-weight: 700; border-radius: 6px;">Review & Decide</button>`
+                    : `<button type="button" class="btn-secondary btn-sh-review" data-sh-id="${sh.id}" style="padding: 0.35rem 0.75rem; font-size: 0.76rem; font-weight: 600; border-radius: 6px;">View Details</button>`;
+
+                const typeBadge = sh.type === 'info-contributor'
+                    ? `<span style="font-size: 0.68rem; color: #475569; background: #F1F5F9; padding: 0.15rem 0.4rem; border-radius: 4px; margin-left: 0.35rem;">Info Partner</span>`
+                    : `<span style="font-size: 0.68rem; color: #0284C7; background: #E0F2FE; padding: 0.15rem 0.4rem; border-radius: 4px; margin-left: 0.35rem;">Visitor Service</span>`;
+
+                return `
+                    <tr data-category="${(sh.category || '').toLowerCase()}" data-status="${st.toLowerCase()}">
+                        <td>
+                            <strong style="color: var(--text-primary); font-size: 0.9rem;">${sh.name}</strong>
+                            ${sh.contact_person ? `<div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.1rem;">👤 ${sh.contact_person}</div>` : ''}
+                        </td>
+                        <td>
+                            <span style="font-weight: 600;">${sh.category}</span>${typeBadge}
+                        </td>
+                        <td>
+                            <span title="Assigned Destination (Managed by administration)" style="font-weight: 600;">📍 ${sh.destination || 'State-wide'}</span>
+                        </td>
+                        <td>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">${sh.contact || 'N/A'}</div>
+                            ${sh.email ? `<div style="font-size: 0.72rem; color: var(--text-muted);">${sh.email}</div>` : ''}
+                        </td>
+                        <td>${pillHtml}</td>
+                        <td style="text-align: right; white-space: nowrap;">
+                            ${actionBtn}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            stakeholdersTableBody.querySelectorAll('.btn-sh-review').forEach(btn => {
                 btn.onclick = (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    openStakeholderDetailModal(btn.getAttribute('data-sh-id'), 'view');
-                };
-            });
-            stakeholdersTableBody.querySelectorAll('.btn-sh-edit').forEach(btn => {
-                btn.onclick = (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    openStakeholderDetailModal(btn.getAttribute('data-sh-id'), 'edit');
-                };
-            });
-            stakeholdersTableBody.querySelectorAll('.btn-sh-delete').forEach(btn => {
-                btn.onclick = async (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const shId = btn.getAttribute('data-sh-id');
-                    const shItem = (window.YatraSetuManagerData.stakeholders || []).find(s => s.id === shId);
-                    if (shItem && confirm(`Are you sure you want to delete stakeholder "${shItem.name}"?`)) {
-                        const idx = window.YatraSetuManagerData.stakeholders.findIndex(s => s.id === shId);
-                        if (idx !== -1) window.YatraSetuManagerData.stakeholders.splice(idx, 1);
-                        await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
-                    }
+                    openStakeholderDetailModal(btn.getAttribute('data-sh-id'));
                 };
             });
         } else {
@@ -410,12 +525,12 @@ async function renderConnectedViews(context) {
     const feedbackContainer = document.querySelector('#feedback-list-container');
     if (feedbackContainer) {
         const feedback = await window.YatraSetuManagerStore.getFeedback(activeStateId, activeDestinationId);
-        
+
         // Update Overall Rating Card & Rating Distribution if elements exist
         const overallScoreEl = document.querySelector('.rating-overall-card .overall-score');
         const overallReviewSub = document.querySelector('.rating-overall-card span:last-child');
         const starRatingDisplay = document.querySelector('.rating-overall-card div[style*="font-size"]');
-        
+
         if (overallScoreEl) {
             if (feedback && feedback.length > 0) {
                 const sumRating = feedback.reduce((acc, f) => acc + (f.rating || 5), 0);
@@ -487,6 +602,124 @@ async function renderConnectedViews(context) {
             });
         } else {
             feedbackContainer.innerHTML = `<div style="padding: 2.5rem; text-align: center; color: #64748b; font-weight: 500;">No visitor feedback records available for ${activeDestinationId !== 'all' ? activeDestinationId : formattedStateName}.</div>`;
+        }
+    }
+
+    // 6B. STAKEHOLDER MESSAGES (feedback.html)
+    const shMsgTbody = document.querySelector('#stakeholder-messages-tbody');
+    const shMsgScopeBadge = document.querySelector('#sh-msg-scope-badge');
+    if (shMsgTbody) {
+        let messages = await window.YatraSetuManagerStore.getStakeholderMessages(activeStateId, activeDestinationId);
+
+        // Fallback: If destination filtering yields 0 messages, show all messages for the active state so directory isn't empty
+        if ((!messages || messages.length === 0) && activeDestinationId !== 'all') {
+            const stateMessages = await window.YatraSetuManagerStore.getStakeholderMessages(activeStateId, 'all');
+            if (stateMessages && stateMessages.length > 0) {
+                messages = stateMessages;
+            }
+        }
+
+        // Update Scope Badge
+        if (shMsgScopeBadge) {
+            shMsgScopeBadge.textContent = activeDestinationId !== 'all' ? `📍 Scope: ${destLabel}` : `📍 Scope: All Destinations (${formattedStateName})`;
+        }
+
+        // Update Status Filter Pill Counts
+        const countAll = document.querySelector('#count-sh-msg-all');
+        const countPending = document.querySelector('#count-sh-msg-pending');
+        const countReview = document.querySelector('#count-sh-msg-review');
+        const countResponded = document.querySelector('#count-sh-msg-responded');
+
+        const pendingCount = messages.filter(m => m.status === 'Pending').length;
+        const reviewCount = messages.filter(m => m.status === 'In Review').length;
+        const respondedCount = messages.filter(m => m.status === 'Responded').length;
+
+        if (countAll) countAll.textContent = messages.length;
+        if (countPending) countPending.textContent = pendingCount;
+        if (countReview) countReview.textContent = reviewCount;
+        if (countResponded) countResponded.textContent = respondedCount;
+
+        // Check active status filter pill if any
+        const activeFilterBtn = document.querySelector('#sh-msg-status-filter-pills button.filter-pill.active');
+        const activeStatusFilter = activeFilterBtn ? activeFilterBtn.getAttribute('data-msg-status') : 'all';
+
+        let displayedMessages = messages;
+        if (activeStatusFilter && activeStatusFilter !== 'all') {
+            displayedMessages = messages.filter(m => m.status === activeStatusFilter);
+        }
+
+        if (displayedMessages.length > 0) {
+            shMsgTbody.innerHTML = displayedMessages.map(m => {
+                let statusBadgeClass = 'badge-warning';
+                if (m.status === 'In Review') statusBadgeClass = 'badge-info';
+                else if (m.status === 'Responded') statusBadgeClass = 'badge-success';
+
+                const responsePreview = m.manager_response
+                    ? `<div style="font-size: 0.82rem; color: #166534; max-width: 260px; line-height: 1.35;">
+                         <strong>${m.responded_by || 'Manager'}:</strong> "${m.manager_response.length > 55 ? m.manager_response.slice(0, 55) + '…' : m.manager_response}"
+                         <div style="font-size: 0.7rem; color: #64748B; margin-top: 2px;">${m.responded_at || ''}</div>
+                       </div>`
+                    : (m.status === 'In Review'
+                        ? `<span style="font-size: 0.8rem; color: #2563EB; font-style: italic;">Under Active Review</span>`
+                        : `<span style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">Awaiting Response</span>`);
+
+                return `
+                    <tr class="sh-msg-row" data-msg-status="${m.status}" style="border-bottom: 1px solid var(--border-color, #E2E8F0); font-size: 0.85rem; transition: background 0.15s ease;">
+                        <td style="padding: 0.9rem 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(234, 88, 12, 0.12); color: #EA580C; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; justify-content: center;">
+                                    ${(m.stakeholder_name || 'SH').slice(0, 2).toUpperCase()}
+                                </div>
+                                <div>
+                                    <strong style="color: var(--text-primary); display: block; font-size: 0.88rem;">${m.stakeholder_name}</strong>
+                                    <span style="font-size: 0.76rem; color: var(--text-muted);">${m.business_name}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding: 0.9rem 1rem; color: var(--text-secondary); font-weight: 600;">
+                            📍 ${m.destination_name || m.destination_id}
+                        </td>
+                        <td style="padding: 0.9rem 1rem; max-width: 280px;">
+                            <strong style="display: block; font-size: 0.84rem; color: var(--text-primary); margin-bottom: 0.2rem;">${m.topic || 'General Inquiry'}</strong>
+                            <p style="margin: 0; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                "${m.message}"
+                            </p>
+                        </td>
+                        <td style="padding: 0.9rem 1rem; color: var(--text-muted); font-size: 0.78rem; white-space: nowrap;">
+                            ${m.submitted_at || 'Recently'}
+                        </td>
+                        <td style="padding: 0.9rem 1rem;">
+                            <span class="badge ${statusBadgeClass}">${m.status}</span>
+                        </td>
+                        <td style="padding: 0.9rem 1rem;">
+                            ${responsePreview}
+                        </td>
+                        <td style="padding: 0.9rem 1rem; text-align: right; white-space: nowrap;">
+                            <button type="button" class="btn-secondary btn-sh-msg-open" data-msg-id="${m.id}" style="padding: 0.35rem 0.75rem; font-size: 0.78rem; font-weight: 600; cursor: pointer;">
+                                ${m.status === 'Responded' ? 'View Thread' : 'Review & Reply'}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Attach open modal click handlers
+            shMsgTbody.querySelectorAll('.btn-sh-msg-open').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const msgId = btn.getAttribute('data-msg-id');
+                    openStakeholderMessageModal(msgId);
+                };
+            });
+        } else {
+            shMsgTbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="padding: 2.5rem; text-align: center; color: #64748B; font-weight: 500;">
+                        No stakeholder messages found for this filter in ${destLabel}.
+                    </td>
+                </tr>
+            `;
         }
     }
 
@@ -615,35 +848,39 @@ function initManagerProfilePage() {
 
     if (!isProfilePage && !profileBannerName) return;
 
-    const data = window.YatraSetuManagerData || {};
-    const profile = data.profile || {
-        id: 'MGR-MH-40192',
+    const profile = (typeof syncActiveManagerProfile === 'function' ? syncActiveManagerProfile() : null) || window.YatraSetuManagerData.profile || {
+        id: 'usr-mgr-01',
         name: 'Rajesh Patil',
-        email: 'rajesh.patil@mahatourism.gov.in',
+        email: 'manager.maharashtra@yatrasetu.in',
         phone: '+91 98230 41092',
         manager_type: 'State Manager',
+        access_level: 'State Manager',
         scope: 'STATE',
         state_id: 'maharashtra',
         state_name: 'Maharashtra',
-        destination: 'All destinations in Maharashtra',
+        destination: 'Maharashtra (All Destinations)',
+        destination_name: 'Maharashtra (All Destinations)',
         status: 'Active',
         avatar_initials: 'RP'
     };
 
     // Render profile values to DOM
     const renderProfileDOM = () => {
-        const initials = profile.avatar_initials || (profile.name ? profile.name.split(' ').map(n=>n[0]).join('').toUpperCase() : 'AA');
+        const initials = profile.avatar_initials || (profile.name ? profile.name.split(' ').map(n=>n[0]).join('').toUpperCase() : 'RP');
+        const isState = (profile.access_level === 'State Manager' || profile.scope === 'STATE');
 
         // Banner Elements
         const bannerAvatar = document.getElementById('profile-banner-avatar');
         const bannerName = document.getElementById('profile-banner-name');
         const bannerRole = document.getElementById('profile-banner-role');
         const bannerStatus = document.getElementById('profile-banner-status');
+        const bannerScope = document.getElementById('profile-banner-scope');
 
         if (bannerAvatar) bannerAvatar.textContent = initials;
         if (bannerName) bannerName.textContent = profile.name;
-        if (bannerRole) bannerRole.innerHTML = `${profile.manager_type} — ${profile.state_name || 'Maharashtra'} • ID: <strong style="color: var(--text-primary);">${profile.id}</strong>`;
-        if (bannerStatus) bannerStatus.textContent = `${profile.status || 'Active'} / Verified`;
+        if (bannerRole) bannerRole.innerHTML = `${profile.manager_type || profile.access_level || 'Destination Manager'} — ${profile.destination || profile.state_name || 'Maharashtra'} • ID: <strong style="color: var(--text-primary);">${profile.id}</strong>`;
+        if (bannerStatus) bannerStatus.textContent = `${profile.account_status || profile.status || 'Active'} / Verified`;
+        if (bannerScope) bannerScope.textContent = `${isState ? 'STATE' : 'DESTINATION'} SCOPE`;
 
         // Card Text Elements
         const valName = document.getElementById('prof-val-name');
@@ -654,15 +891,19 @@ function initManagerProfilePage() {
         const valType = document.getElementById('prof-val-type');
         const valState = document.getElementById('prof-val-state');
         const valDest = document.getElementById('prof-val-dest-scope');
+        const valAccess = document.getElementById('prof-val-access');
+        const scopeBadge = document.querySelector('.chart-card .badge.badge-info');
 
         if (valName) valName.textContent = profile.name;
         if (valEmail) valEmail.textContent = profile.email;
         if (valPhone) valPhone.textContent = profile.phone;
         if (valId) valId.textContent = profile.id;
-        if (valRole) valRole.textContent = profile.manager_type || 'Destination Manager';
-        if (valType) valType.textContent = profile.manager_type || 'State Manager';
+        if (valRole) valRole.textContent = profile.manager_type || profile.access_level || 'Destination Manager';
+        if (valType) valType.textContent = profile.access_level || profile.manager_type || (isState ? 'State Manager' : 'Destination Manager');
         if (valState) valState.textContent = profile.state_name || 'Maharashtra';
-        if (valDest) valDest.textContent = profile.destination || 'All Destinations';
+        if (valDest) valDest.textContent = isState ? `All Destinations in ${profile.state_name || 'Maharashtra'}` : (profile.destination || profile.destination_name || profile.destination_id);
+        if (valAccess) valAccess.textContent = isState ? 'Full State Administrative Access' : 'Destination-specific approvals & local curation';
+        if (scopeBadge) scopeBadge.textContent = isState ? 'State Authority' : 'Destination Authority';
     };
 
     renderProfileDOM();
@@ -1238,9 +1479,11 @@ function openEventDetailModal(eventId, mode = 'view') {
 }
 
 /**
- * Stakeholder Details & Actions Modal Functionality
+ * Stakeholder Registration Review, Approval & Detail Modal
+ * Enforces role-based permissions: Destination Managers review & approve business registrations
+ * only for destinations within their authorized scope. Account deletion/deactivation is restricted to Administrator.
  */
-function openStakeholderDetailModal(shId, mode = 'view') {
+function openStakeholderDetailModal(shId) {
     if (!shId || !window.YatraSetuManagerData || !window.YatraSetuManagerData.stakeholders) return;
     const sh = window.YatraSetuManagerData.stakeholders.find(s => s.id === shId);
     if (!sh) return;
@@ -1253,93 +1496,288 @@ function openStakeholderDetailModal(shId, mode = 'view') {
 
     if (!modal || !bodyEl || !footerEl) return;
 
-    if (mode === 'view') {
-        if (titleEl) titleEl.textContent = `${sh.name} — Partner Profile`;
+    const profile = (typeof syncActiveManagerProfile === 'function' ? syncActiveManagerProfile() : null) || window.YatraSetuManagerData.profile || {};
+    const isStateScope = (profile.scope || 'STATE') === 'STATE';
 
-        bodyEl.innerHTML = `
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; font-size: 0.88rem;">
-                <div><strong>Stakeholder Name:</strong> <span>${sh.name}</span></div>
-                <div><strong>Category:</strong> <span>${sh.category}</span></div>
-                <div><strong>Destination/Scope:</strong> <span>${sh.destination || 'State-wide'}</span></div>
-                <div><strong>Contact Info:</strong> <span>${sh.contact}</span></div>
-                <div><strong>Status:</strong> <span class="status-pill active">${sh.status || 'Verified'}</span></div>
-                <div><strong>State:</strong> <span>${sh.state_id ? sh.state_id.toUpperCase() : 'MAHARASHTRA'}</span></div>
-            </div>
-        `;
+    // Authorization Check:
+    // State Manager can approve destinations within their assigned state territory.
+    // Destination Manager can only approve if destination_id matches their assigned destination.
+    let isAuthorized = false;
+    let authMessage = '';
 
-        footerEl.innerHTML = `
-            <div style="display: flex; gap: 0.5rem;">
-                <button type="button" class="btn-primary" id="btn-edit-sh-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Edit Details</button>
-                <button type="button" class="btn-secondary" id="btn-delete-sh-modal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; color: #DC2626; border-color: #FECACA;">Delete</button>
-            </div>
-            <button type="button" class="btn-secondary" id="btn-close-sh-modal-action" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Close</button>
-        `;
-
-        const editBtn = document.getElementById('btn-edit-sh-modal');
-        if (editBtn) editBtn.onclick = () => openStakeholderDetailModal(shId, 'edit');
-
-        const deleteBtn = document.getElementById('btn-delete-sh-modal');
-        if (deleteBtn) {
-            deleteBtn.onclick = async () => {
-                if (confirm(`Are you sure you want to delete stakeholder "${sh.name}"?`)) {
-                    const idx = window.YatraSetuManagerData.stakeholders.findIndex(s => s.id === shId);
-                    if (idx !== -1) window.YatraSetuManagerData.stakeholders.splice(idx, 1);
-                    modal.classList.remove('active');
-                    document.body.style.overflow = '';
-                    await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
-                }
-            };
+    if (profile.account_status === 'Deactivated' || profile.status === 'Deactivated') {
+        isAuthorized = false;
+        authMessage = 'Account Suspended: This Destination Manager account has been deactivated by the Platform Administrator. All approval actions are locked.';
+    } else if (isStateScope) {
+        if (sh.state_id === profile.state_id) {
+            isAuthorized = true;
+            authMessage = `Authorized: State Manager jurisdiction for ${profile.state_name || 'Maharashtra'}.`;
+        } else {
+            isAuthorized = false;
+            authMessage = `Unauthorized: This stakeholder is registered in ${sh.state_id ? sh.state_id.toUpperCase() : 'OTHER STATE'}. You are assigned to ${profile.state_id ? profile.state_id.toUpperCase() : 'MAHARASHTRA'}.`;
         }
+    } else {
+        if (sh.state_id !== profile.state_id) {
+            isAuthorized = false;
+            authMessage = `Unauthorized: This stakeholder is registered in ${sh.state_id ? sh.state_id.toUpperCase() : 'OTHER STATE'}. Your jurisdiction is limited to ${profile.destination || 'assigned destination'}.`;
+        } else {
+            const allowedDests = (profile.destination_ids && profile.destination_ids.length > 0)
+                ? profile.destination_ids
+                : (profile.destination_id ? [profile.destination_id] : ['raigad-fort']);
+            if (allowedDests.includes(sh.destination_id)) {
+                isAuthorized = true;
+                authMessage = `Authorized: You are the designated Destination Manager for ${sh.destination}.`;
+            } else {
+                isAuthorized = false;
+                authMessage = `Unauthorized: Your management jurisdiction is limited to: ${profile.destination || allowedDests.join(', ')}. You cannot approve registrations for ${sh.destination}.`;
+            }
+        }
+    }
 
-        const closeActionBtn = document.getElementById('btn-close-sh-modal-action');
-        if (closeActionBtn) closeActionBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+    if (titleEl) {
+        titleEl.textContent = `Review Registration — ${sh.name}`;
+    }
 
-    } else if (mode === 'edit') {
-        if (titleEl) titleEl.textContent = `Edit Partner — ${sh.name}`;
+    const currentStatus = sh.status || 'Pending Approval';
+    let statusBadgeHtml = '';
+    if (currentStatus === 'Approved') {
+        statusBadgeHtml = `<span class="status-pill active" style="background:#ECFDF5; color:#065F46; border:1px solid #A7F3D0; font-weight:700; padding:0.25rem 0.65rem; border-radius:12px;">✓ Approved</span>`;
+    } else if (currentStatus === 'Under Review') {
+        statusBadgeHtml = `<span class="status-pill review" style="background:#EFF6FF; color:#1D4ED8; border:1px solid #BFDBFE; font-weight:700; padding:0.25rem 0.65rem; border-radius:12px;">🔍 Under Review</span>`;
+    } else if (currentStatus === 'Rejected') {
+        statusBadgeHtml = `<span class="status-pill rejected" style="background:#FEE2E2; color:#B91C1C; border:1px solid #FECACA; font-weight:700; padding:0.25rem 0.65rem; border-radius:12px;">✕ Rejected</span>`;
+    } else {
+        statusBadgeHtml = `<span class="status-pill pending" style="background:#FEF3C7; color:#B45309; border:1px solid #FCD34D; font-weight:700; padding:0.25rem 0.65rem; border-radius:12px;">⏳ Pending Approval</span>`;
+    }
 
-        bodyEl.innerHTML = `
-            <div class="form-group" style="margin-bottom: 0.75rem;">
-                <label style="font-weight: 600; font-size: 0.85rem;">Partner / Organization Name</label>
-                <input type="text" id="edit-sh-name-input" class="form-control" value="${sh.name}">
+    const typeDesc = sh.type === 'info-contributor'
+        ? 'Information Contributor (Coordinates event & heritage info, not direct booking)'
+        : 'Visitor-Facing Service (Direct service provider discovered by tourists)';
+
+    bodyEl.innerHTML = `
+        <!-- Scope & Authorization Banner -->
+        <div style="background: ${isAuthorized ? '#F0FDF4' : '#FEF2F2'}; border: 1px solid ${isAuthorized ? '#BBF7D0' : '#FECACA'}; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.15rem; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <strong style="color: ${isAuthorized ? '#166534' : '#991B1B'}; font-size: 0.82rem; display: block;">
+                    ${isAuthorized ? '✓ Authorized Manager Jurisdiction' : '⚠️ Restricted Management Scope'}
+                </strong>
+                <span style="font-size: 0.76rem; color: ${isAuthorized ? '#15803D' : '#B91C1C'};">${authMessage}</span>
             </div>
-            <div class="form-group" style="margin-bottom: 0.75rem;">
-                <label style="font-weight: 600; font-size: 0.85rem;">Category</label>
-                <select id="edit-sh-cat-select" class="form-control">
-                    <option value="Guides" ${sh.category === 'Guides' ? 'selected' : ''}>Guide / Escort</option>
-                    <option value="Homestays" ${sh.category === 'Homestays' ? 'selected' : ''}>Homestay / Resort</option>
-                    <option value="Transport" ${sh.category === 'Transport' ? 'selected' : ''}>Transport Service</option>
-                    <option value="Handicrafts" ${sh.category === 'Handicrafts' ? 'selected' : ''}>Handicraft Artisan</option>
-                    <option value="Tourism Services" ${sh.category === 'Tourism Services' ? 'selected' : ''}>Tourism Operator</option>
-                </select>
+            <div>${statusBadgeHtml}</div>
+        </div>
+
+        <!-- Stakeholder Identity & Location Details -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 1rem; margin-bottom: 1.15rem; font-size: 0.85rem;">
+            <div>
+                <span style="color: var(--text-muted); font-size: 0.75rem; display: block;">Business / Entity Name</span>
+                <strong style="color: var(--text-primary); font-size: 0.95rem;">${sh.name}</strong>
             </div>
-            <div class="form-group" style="margin-bottom: 0.75rem;">
-                <label style="font-weight: 600; font-size: 0.85rem;">Contact Information</label>
-                <input type="text" id="edit-sh-contact-input" class="form-control" value="${sh.contact}">
+            <div>
+                <span style="color: var(--text-muted); font-size: 0.75rem; display: block;">Ecosystem Category</span>
+                <strong style="color: var(--text-primary);">${sh.category}</strong>
             </div>
-        `;
+            <div>
+                <span style="color: var(--text-muted); font-size: 0.75rem; display: block;">Assigned Destination Context</span>
+                <span style="font-weight: 700; color: #1E293B;">🔒 ${sh.destination || 'Rajgad Fort'}</span>
+                <span style="font-size: 0.68rem; color: #64748B; display: block; margin-top: 0.1rem;">(Protected: Stakeholders cannot change approved destination assignment)</span>
+            </div>
+            <div>
+                <span style="color: var(--text-muted); font-size: 0.75rem; display: block;">Service Model</span>
+                <span style="font-weight: 600; color: #334155;">${typeDesc}</span>
+            </div>
+            <div>
+                <span style="color: var(--text-muted); font-size: 0.75rem; display: block;">Contact Person & Details</span>
+                <span style="color: var(--text-secondary);">${sh.contact_person || 'Authorized Representative'} • ${sh.contact || 'N/A'}</span>
+                ${sh.email ? `<div style="font-size: 0.75rem; color: var(--text-muted);">${sh.email}</div>` : ''}
+            </div>
+            <div>
+                <span style="color: var(--text-muted); font-size: 0.75rem; display: block;">Hours & Tariff Range</span>
+                <span style="color: var(--text-secondary);">${sh.hours || 'Standard Hours'} • ${sh.price_range || 'Inquire'}</span>
+            </div>
+            <div style="grid-column: 1 / -1; border-top: 1px dashed #CBD5E1; padding-top: 0.5rem; margin-top: 0.25rem;">
+                <span style="color: var(--text-muted); font-size: 0.75rem; display: block;">Base Location / Trailhead Address</span>
+                <span style="color: var(--text-secondary); font-size: 0.82rem;">${sh.address || 'Local Destination Hub'}</span>
+            </div>
+        </div>
 
-        footerEl.innerHTML = `
-            <button type="button" class="btn-secondary" id="btn-cancel-edit-sh" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Cancel</button>
-            <button type="button" class="btn-primary" id="btn-save-edit-sh" style="padding: 0.45rem 1.1rem; font-size: 0.82rem;">Save Changes</button>
-        `;
+        <!-- Description & Offerings -->
+        <div style="margin-bottom: 1.15rem;">
+            <label style="font-weight: 700; font-size: 0.8rem; color: var(--text-secondary); display: block; margin-bottom: 0.35rem;">Service Description & Tourist Guidance</label>
+            <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 6px; padding: 0.75rem; font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">
+                ${sh.description || 'Verified local service partner.'}
+            </div>
+        </div>
 
-        const cancelBtn = document.getElementById('btn-cancel-edit-sh');
-        if (cancelBtn) cancelBtn.onclick = () => openStakeholderDetailModal(shId, 'view');
+        <!-- Prior Review History (if present) -->
+        ${sh.reviewed_by ? `
+            <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 6px; padding: 0.75rem; margin-bottom: 1.15rem; font-size: 0.8rem;">
+                <div style="font-weight: 700; color: #1E40AF; margin-bottom: 0.2rem;">Previous Manager Decision</div>
+                <div style="color: #1E3A8A;">Decision: <strong>${sh.status}</strong> • Reviewed by ${sh.reviewed_by} on ${sh.reviewed_date || 'Earlier'}</div>
+                ${sh.manager_note ? `<div style="color: #3B82F6; margin-top: 0.25rem; font-style: italic;">"${sh.manager_note}"</div>` : ''}
+            </div>
+        ` : ''}
 
-        const saveBtn = document.getElementById('btn-save-edit-sh');
-        if (saveBtn) {
-            saveBtn.onclick = async () => {
-                const nameVal = document.getElementById('edit-sh-name-input').value.trim();
-                const catVal = document.getElementById('edit-sh-cat-select').value;
-                const contactVal = document.getElementById('edit-sh-contact-input').value.trim();
+        <!-- Manager Decision Form Controls (Only active if authorized) -->
+        <div style="margin-bottom: 0.75rem;">
+            <label for="manager-review-decision-note" style="font-weight: 700; font-size: 0.82rem; color: var(--text-primary); display: flex; justify-content: space-between;">
+                <span>Manager Decision Remarks & Verification Notes</span>
+                <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 400;">Visible in coordination logs</span>
+            </label>
+            <textarea id="manager-review-decision-note" class="form-control" rows="3" placeholder="${isAuthorized ? 'e.g. Verified commercial permits, guide credentials, and health/safety adherence.' : 'Review controls disabled (out of authorized management scope).'}" ${isAuthorized ? '' : 'disabled'} style="font-size: 0.85rem; width: 100%; margin-top: 0.35rem;">${sh.manager_note || ''}</textarea>
+        </div>
 
-                if (!nameVal) { alert('Please enter partner name.'); return; }
-                sh.name = nameVal;
-                sh.category = catVal;
-                sh.contact = contactVal || sh.contact;
+        <!-- Platform RBAC Disclaimers -->
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 0.65rem 0.85rem; font-size: 0.74rem; color: #64748B; line-height: 1.4;">
+            🛡️ <strong>Platform RBAC Rule (FR-02):</strong> Destination Managers review and approve business registrations for their authorized destination. Account activation, deactivation, and permanent account deletion are strictly reserved for Platform Administrators.
+        </div>
+    `;
 
-                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
-                openStakeholderDetailModal(shId, 'view');
+    footerEl.innerHTML = `
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            ${isAuthorized ? `
+                ${currentStatus !== 'Approved' ? `
+                    <button type="button" class="btn-primary" id="btn-approve-sh-action" style="padding: 0.45rem 1rem; font-size: 0.82rem; background: #059669; border-color: #059669;">
+                        ✓ Approve Registration
+                    </button>
+                    <button type="button" class="btn-secondary" id="btn-review-sh-action" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; color: #2563EB; border-color: #BFDBFE;">
+                        🔍 Mark Under Review
+                    </button>
+                    <button type="button" class="btn-secondary" id="btn-reject-sh-action" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; color: #DC2626; border-color: #FECACA;">
+                        ✕ Reject Registration
+                    </button>
+                ` : `
+                    ${isStateScope ? `
+                        <button type="button" class="btn-secondary" id="btn-reassign-sh-dest" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; color: #0284C7; border-color: #BAE6FD; font-weight: 700;">
+                            🔄 Reassign Destination (Controlled)
+                        </button>
+                    ` : `
+                        <button type="button" class="btn-secondary" id="btn-reassign-sh-dest" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; color: #94A3B8; border-color: #E2E8F0; font-weight: 600; cursor: not-allowed;" title="Destination Managers cannot reassign operating destinations. Reassigning businesses across destinations requires State Manager or Administrator authority." disabled>
+                            🔒 Reassignment Locked (Destination Scope)
+                        </button>
+                    `}
+                    <button type="button" class="btn-secondary" id="btn-review-sh-action" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; color: #2563EB; border-color: #BFDBFE;">
+                        🔍 Re-evaluate Under Review
+                    </button>
+                `}
+            ` : `
+                <span style="font-size: 0.75rem; color: #DC2626; font-weight: 600; padding: 0.4rem 0;">Approval actions locked (Out of assigned destination scope)</span>
+            `}
+        </div>
+        <button type="button" class="btn-secondary" id="btn-close-sh-modal-action" style="padding: 0.45rem 1rem; font-size: 0.82rem;">Close</button>
+    `;
+
+    const closeActionBtn = document.getElementById('btn-close-sh-modal-action');
+    if (closeActionBtn) closeActionBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+
+    if (isAuthorized) {
+        const approveBtn = document.getElementById('btn-approve-sh-action');
+        const reviewBtn = document.getElementById('btn-review-sh-action');
+        const rejectBtn = document.getElementById('btn-reject-sh-action');
+        const reassignBtn = document.getElementById('btn-reassign-sh-dest');
+
+        const updateStatus = async (newStatus) => {
+            const noteInput = document.getElementById('manager-review-decision-note');
+            const noteVal = noteInput ? noteInput.value.trim() : '';
+
+            if (newStatus === 'Rejected' && !noteVal) {
+                alert('Please provide a decision note explaining the reason for rejection so the partner can resolve the discrepancy.');
+                if (noteInput) noteInput.focus();
+                return;
+            }
+
+            const prevStatus = sh.status || 'Pending Approval';
+            sh.status = newStatus;
+            sh.manager_note = noteVal || (newStatus === 'Approved' ? 'Verified partner business registration.' : 'Under evaluation.');
+            sh.reviewed_by = `${profile.name || 'Rajesh Patil'} (Destination Manager)`;
+            sh.reviewed_date = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+            // Persist changes in prototype store & sync
+            window.YatraSetuManagerStore.saveStakeholders(window.YatraSetuManagerData.stakeholders);
+
+            // Audit Trail Logging
+            if (window.YatraSetuAdminStore && typeof window.YatraSetuAdminStore.logAuditEvent === 'function') {
+                window.YatraSetuAdminStore.logAuditEvent({
+                    action: newStatus === 'Approved' ? 'BUSINESS_REGISTRATION_APPROVED' : (newStatus === 'Rejected' ? 'BUSINESS_REGISTRATION_REJECTED' : 'REGISTRATION_MARKED_UNDER_REVIEW'),
+                    stakeholder_id: sh.id,
+                    stakeholder_name: sh.name,
+                    actor_name: profile.name || 'Rajesh Patil',
+                    actor_role: `Destination Manager (${isStateScope ? 'State Scope' : 'Destination Scope'})`,
+                    details: `Decision: marked as "${newStatus}". Note: ${sh.manager_note}`,
+                    previous_value: prevStatus,
+                    new_value: newStatus
+                });
+            }
+
+            alert(`Registration for "${sh.name}" has been marked as "${newStatus}". (Saved with audit log)`);
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+
+            await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+        };
+
+        if (approveBtn) approveBtn.onclick = () => updateStatus('Approved');
+        if (reviewBtn) reviewBtn.onclick = () => updateStatus('Under Review');
+        if (rejectBtn) rejectBtn.onclick = () => {
+            if (confirm(`Are you sure you want to reject the registration for "${sh.name}"?`)) {
+                updateStatus('Rejected');
+            }
+        };
+
+        // Controlled Destination Reassignment Handler (Rule 4)
+        if (reassignBtn) {
+            reassignBtn.onclick = () => {
+                if (!isStateScope) {
+                    alert('Restricted Scope: Destination Managers cannot transfer businesses across destinations. Reassigning operating destinations requires State Manager or Platform Administrator authority.');
+                    return;
+                }
+                const managerData = window.YatraSetuManagerData || {};
+                const destinations = (managerData.destinations || []).filter(d => isStateScope ? d.state_id === profile.state_id : (profile.destination_ids || []).includes(d.id));
+
+                const destOptionsText = destinations.map(d => `${d.id} : ${d.name}`).join('\n');
+                const chosenDestId = prompt(`Controlled Destination Reassignment (Jurisdiction: ${profile.state_name || 'Maharashtra'})\n\nEnter destination ID from available list:\n${destOptionsText}\n\nCurrent: ${sh.destination_id}`);
+
+                if (!chosenDestId) return;
+                const destObj = destinations.find(d => d.id === chosenDestId.trim());
+                if (!destObj) {
+                    alert(`Invalid destination ID "${chosenDestId}". Reassignment aborted.`);
+                    return;
+                }
+
+                if (destObj.id === sh.destination_id) {
+                    alert(`"${destObj.name}" is already the assigned destination.`);
+                    return;
+                }
+
+                const reason = prompt(`Enter official administrative justification for reassigning "${sh.name}" to "${destObj.name}" (Mandatory for audit trail):`);
+                if (!reason || reason.trim().length < 6) {
+                    alert('Official justification (minimum 6 characters) is mandatory. Reassignment aborted.');
+                    return;
+                }
+
+                const prevDest = `${sh.destination} (${sh.destination_id})`;
+                sh.destination_id = destObj.id;
+                sh.destination = destObj.name;
+                sh.state_id = destObj.state_id;
+
+                window.YatraSetuManagerStore.saveStakeholders(window.YatraSetuManagerData.stakeholders);
+
+                if (window.YatraSetuAdminStore && typeof window.YatraSetuAdminStore.logAuditEvent === 'function') {
+                    window.YatraSetuAdminStore.logAuditEvent({
+                        action: 'CONTROLLED_DESTINATION_REASSIGNMENT',
+                        stakeholder_id: sh.id,
+                        stakeholder_name: sh.name,
+                        actor_name: profile.name || 'Rajesh Patil',
+                        actor_role: `Destination Manager (${isStateScope ? 'State Scope' : 'Destination Scope'})`,
+                        details: `Destination reassigned from "${prevDest}" to "${destObj.name}". Official Reason: ${reason.trim()}`,
+                        previous_value: prevDest,
+                        new_value: `${destObj.name} (${destObj.id})`
+                    });
+                }
+
+                alert(`✓ Controlled reassignment completed!\nNew Destination: ${destObj.name}\nLogged to administrative audit trail.`);
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+                renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
             };
         }
     }
@@ -1406,6 +1844,610 @@ function openFeedbackDetailModal(fbId) {
 
     if (closeBtn) {
         closeBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+    }
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * Stakeholder Message Review & Response Modal
+ * Supports destination scope checks, status transitions (In Review), and sending non-empty manager responses.
+ */
+async function openStakeholderMessageModal(msgId) {
+    if (!msgId) return;
+    const allMessages = (await window.YatraSetuManagerStore.getStakeholderMessages('all', 'all')) || [];
+    const msg = allMessages.find(m => m.id === msgId);
+    if (!msg) {
+        alert('Stakeholder message not found.');
+        return;
+    }
+
+    const modal = document.getElementById('stakeholderMessageModal');
+    const titleEl = document.getElementById('sh-msg-modal-title');
+    const statusBadgeEl = document.getElementById('sh-msg-modal-status-badge');
+    const bodyEl = document.getElementById('sh-msg-modal-body');
+    const footerEl = document.getElementById('sh-msg-modal-footer');
+    const closeBtn = document.getElementById('btn-close-sh-msg-modal');
+
+    if (!modal || !bodyEl || !footerEl) return;
+
+    // Check manager authorization scope
+    const profile = (typeof syncActiveManagerProfile === 'function' ? syncActiveManagerProfile() : null) || window.YatraSetuManagerData?.profile || {};
+    const isStateScope = (profile.scope || 'STATE') === 'STATE';
+    const isAuthorized = (profile.account_status !== 'Deactivated') && (isStateScope
+        ? (msg.state_id === profile.state_id)
+        : (msg.state_id === profile.state_id && (msg.destination_id === profile.destination_id || (profile.destination_ids || []).includes(msg.destination_id))));
+
+    if (titleEl) titleEl.textContent = `Message from ${msg.stakeholder_name}`;
+    if (statusBadgeEl) {
+        statusBadgeEl.textContent = msg.status;
+        statusBadgeEl.className = 'badge ' + (msg.status === 'Responded' ? 'badge-success' : (msg.status === 'In Review' ? 'badge-info' : 'badge-warning'));
+    }
+
+    const authBanner = isAuthorized
+        ? `<div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 8px; padding: 0.5rem 0.75rem; font-size: 0.78rem; color: #065F46; display: flex; align-items: center; gap: 0.5rem;">
+             <span>✓</span> <strong>Authorized Destination Jurisdiction:</strong> You have authority to review and respond for <em>${msg.destination_name}</em>.
+           </div>`
+        : `<div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 8px; padding: 0.5rem 0.75rem; font-size: 0.78rem; color: #92400E; display: flex; align-items: center; gap: 0.5rem;">
+             <span>🔒</span> <strong>Outside Jurisdiction:</strong> You are viewing this record outside your authorized territory. Action buttons are disabled.
+           </div>`;
+
+    const previousResponseSection = msg.manager_response ? `
+        <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 0.85rem; font-size: 0.85rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                <strong style="color: #166534; font-size: 0.82rem;">Official Manager Response:</strong>
+                <span style="font-size: 0.72rem; color: #64748B;">${msg.responded_at || ''}</span>
+            </div>
+            <p style="margin: 0; color: #166534; line-height: 1.5; font-style: italic;">
+                "${msg.manager_response}"
+            </p>
+            <div style="font-size: 0.74rem; color: #15803D; margin-top: 0.4rem; font-weight: 600;">
+                Responded by: ${msg.responded_by || 'Destination Manager'}
+            </div>
+        </div>
+    ` : '';
+
+    bodyEl.innerHTML = `
+        ${authBanner}
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 0.85rem; font-size: 0.82rem;">
+            <div><span style="color: var(--text-muted); display: block; font-size: 0.72rem; text-transform: uppercase;">Stakeholder</span><strong>${msg.stakeholder_name}</strong></div>
+            <div><span style="color: var(--text-muted); display: block; font-size: 0.72rem; text-transform: uppercase;">Business Entity</span><strong>${msg.business_name}</strong></div>
+            <div><span style="color: var(--text-muted); display: block; font-size: 0.72rem; text-transform: uppercase;">Operating Destination</span><strong>📍 ${msg.destination_name}</strong></div>
+            <div><span style="color: var(--text-muted); display: block; font-size: 0.72rem; text-transform: uppercase;">Submitted Timestamp</span><strong>${msg.submitted_at}</strong></div>
+        </div>
+
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 8px; padding: 1rem;">
+            <span style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">
+                Topic: ${msg.topic}
+            </span>
+            <p style="font-size: 0.9rem; color: var(--text-primary); line-height: 1.6; margin: 0; font-weight: 500;">
+                "${msg.message}"
+            </p>
+        </div>
+
+        ${previousResponseSection}
+
+        ${isAuthorized ? `
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label for="sh-msg-modal-reply-input" style="font-weight: 700; font-size: 0.82rem; color: var(--text-primary);">
+                        ${msg.manager_response ? 'Update Official Response' : 'Draft Official Response *'}
+                    </label>
+                    ${msg.status === 'Pending' ? `
+                        <button type="button" id="btn-modal-mark-in-review" class="btn-secondary" style="padding: 0.25rem 0.65rem; font-size: 0.75rem; color: #1E40AF; border-color: #BFDBFE; background: #EFF6FF; cursor: pointer;">
+                            ⏱️ Mark In Review
+                        </button>
+                    ` : ''}
+                </div>
+                <textarea id="sh-msg-modal-reply-input" rows="3" class="form-control" style="width: 100%; border: 1px solid #CBD5E1; border-radius: 8px; padding: 0.65rem; font-size: 0.85rem;" placeholder="Type official response, trail status confirmation, or operational advice...">${msg.manager_response || ''}</textarea>
+            </div>
+        ` : ''}
+    `;
+
+    footerEl.innerHTML = `
+        <button type="button" class="btn-secondary" id="btn-close-sh-msg-modal-action" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Close</button>
+        ${isAuthorized ? `
+            <button type="button" class="btn-primary" id="btn-submit-sh-msg-reply" style="padding: 0.45rem 1rem; font-size: 0.82rem; font-weight: 700;">
+                ${msg.manager_response ? 'Update Response' : 'Send Official Response'}
+            </button>
+        ` : ''}
+    `;
+
+    // Handler: Mark In Review
+    const markReviewBtn = document.getElementById('btn-modal-mark-in-review');
+    if (markReviewBtn) {
+        markReviewBtn.onclick = async () => {
+            msg.status = 'In Review';
+            window.YatraSetuManagerStore.updateStakeholderMessage(msg.id, { status: 'In Review' });
+            if (statusBadgeEl) {
+                statusBadgeEl.textContent = 'In Review';
+                statusBadgeEl.className = 'badge badge-info';
+            }
+            markReviewBtn.style.display = 'none';
+            if (typeof showManagerToast === 'function') {
+                showManagerToast('Message status updated to In Review.');
+            }
+            await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+        };
+    }
+
+    // Handler: Submit Response
+    const submitReplyBtn = document.getElementById('btn-submit-sh-msg-reply');
+    if (submitReplyBtn) {
+        submitReplyBtn.onclick = async () => {
+            const replyInput = document.getElementById('sh-msg-modal-reply-input');
+            const replyText = replyInput ? replyInput.value.trim() : '';
+
+            if (!replyText) {
+                alert('Please enter a non-empty response before sending.');
+                if (replyInput) replyInput.focus();
+                return;
+            }
+
+            const nowFormatted = new Date().toLocaleString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+
+            const respondingManager = (window.YatraSetuManagerData && window.YatraSetuManagerData.profile && window.YatraSetuManagerData.profile.name)
+                ? `${window.YatraSetuManagerData.profile.name} (Destination Manager)`
+                : 'Rajesh Patil (Destination Manager)';
+
+            window.YatraSetuManagerStore.updateStakeholderMessage(msg.id, {
+                status: 'Responded',
+                manager_response: replyText,
+                responded_by: respondingManager,
+                responded_at: nowFormatted
+            });
+
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+
+            if (typeof showManagerToast === 'function') {
+                showManagerToast(`Official response recorded and sent to ${msg.stakeholder_name}!`);
+            } else {
+                alert('Official response recorded and sent!');
+            }
+
+            await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+        };
+    }
+
+    const closeActionBtn = document.getElementById('btn-close-sh-msg-modal-action');
+    if (closeActionBtn) closeActionBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+    if (closeBtn) closeBtn.onclick = () => { modal.classList.remove('active'); document.body.style.overflow = ''; };
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * --------------------------------------------------------------------------
+ * FR-15: Destination Information Videos View & Modal Controllers
+ * --------------------------------------------------------------------------
+ */
+
+const NEUTRAL_VIDEO_PLACEHOLDER = "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20480%20270%22%20width%3D%22480%22%20height%3D%22270%22%3E%3Crect%20width%3D%22480%22%20height%3D%22270%22%20fill%3D%22%231E293B%22%2F%3E%3Cpath%20d%3D%22M210%20105%20L285%20135%20L210%20165%20Z%22%20fill%3D%22%2364748B%22%2F%3E%3Crect%20x%3D%2240%22%20y%3D%22210%22%20width%3D%22400%22%20height%3D%226%22%20rx%3D%223%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%22240%22%20y%3D%22195%22%20fill%3D%22%2394A3B8%22%20font-family%3D%22system-ui%2C%20sans-serif%22%20font-size%3D%2213%22%20font-weight%3D%22600%22%20text-anchor%3D%22middle%22%3E%F0%9F%8E%AC%20Pending%20Verified%20Asset%3C%2Ftext%3E%3C%2Fsvg%3E";
+
+/**
+ * Render Destination Information Videos Grid & Metrics
+ */
+async function renderDestinationVideos(context) {
+    const videoGrid = document.getElementById('destination-videos-grid');
+    if (!videoGrid || typeof window.YatraSetuManagerStore === 'undefined') return;
+
+    const { activeStateId, activeDestinationId } = context || window.YatraSetuManagerStore.getActiveContext();
+    const config = STATE_CONFIGS[activeStateId] || STATE_CONFIGS['maharashtra'];
+    const formattedStateName = config.badge ? config.badge.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : 'Maharashtra';
+
+    // Scope check: verified against active manager profile
+    const profile = (typeof syncActiveManagerProfile === 'function' ? syncActiveManagerProfile() : null) || window.YatraSetuManagerData?.profile || {};
+    const isStateScope = (profile.scope || 'STATE') === 'STATE';
+    const isStateAuthorized = (profile.account_status !== 'Deactivated') && (isStateScope
+        ? (activeStateId === profile.state_id)
+        : (activeStateId === profile.state_id && (activeDestinationId === 'all' || activeDestinationId === profile.destination_id)));
+
+    // Fetch videos for active context
+    const videos = await window.YatraSetuManagerStore.getDestinationVideos(activeStateId, activeDestinationId);
+
+    // Update Tab count badge
+    const tabBadge = document.getElementById('dest-videos-tab-badge');
+    if (tabBadge) tabBadge.textContent = videos.length;
+
+    // Update Metrics Strip
+    const totalMetric = document.getElementById('metric-video-total');
+    const pubMetric = document.getElementById('metric-video-published');
+    const draftMetric = document.getElementById('metric-video-draft');
+    const jurisMetric = document.getElementById('metric-video-jurisdiction');
+    const jurisSub = document.getElementById('metric-video-jurisdiction-sub');
+
+    if (totalMetric) totalMetric.textContent = videos.length;
+    if (pubMetric) pubMetric.textContent = videos.filter(v => v.status === 'Published').length;
+    if (draftMetric) draftMetric.textContent = videos.filter(v => v.status === 'Draft').length;
+    if (jurisMetric) {
+        jurisMetric.textContent = formattedStateName;
+        jurisMetric.style.color = isStateAuthorized ? 'var(--state-accent)' : '#B45309';
+    }
+    if (jurisSub) {
+        jurisSub.textContent = isStateAuthorized ? 'Authorized Jurisdiction' : 'Outside Jurisdiction (View Only)';
+    }
+
+    // Populate video form destination select with active state destinations
+    const destSelect = document.getElementById('video-form-dest');
+    if (destSelect) {
+        const stateDests = await window.YatraSetuManagerStore.getDestinations(activeStateId);
+        destSelect.innerHTML = stateDests.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+        if (activeDestinationId !== 'all') {
+            destSelect.value = activeDestinationId;
+        }
+    }
+
+    // Add Video button jurisdiction enforcement
+    const addVideoBtn = document.getElementById('btn-open-add-video-modal');
+    if (addVideoBtn) {
+        if (!isStateAuthorized) {
+            addVideoBtn.setAttribute('disabled', 'true');
+            addVideoBtn.style.opacity = '0.55';
+            addVideoBtn.style.cursor = 'not-allowed';
+            addVideoBtn.title = `Video management for ${formattedStateName} is restricted to authorized state managers.`;
+        } else {
+            addVideoBtn.removeAttribute('disabled');
+            addVideoBtn.style.opacity = '1';
+            addVideoBtn.style.cursor = 'pointer';
+            addVideoBtn.title = 'Add ~30-second informative destination video';
+        }
+    }
+
+    // Render Video Cards
+    if (videos && videos.length > 0) {
+        videoGrid.innerHTML = videos.map(v => {
+            const isPub = v.status === 'Published';
+            const statusClass = isPub ? 'published' : 'draft';
+            const statusText = isPub ? 'Published' : 'Draft';
+
+            // Distinguish the 3 verification states cleanly
+            let protoBadge = '';
+            if (v.verification_state === 'official_source') {
+                protoBadge = `<span class="video-prototype-badge official-source">🏛️ Official Source</span>`;
+            } else if (v.verification_state === 'verified_media') {
+                protoBadge = `<span class="video-prototype-badge verified-media">✓ Verified Media</span>`;
+            } else {
+                protoBadge = `<span class="video-prototype-badge prototype-meta">📋 Prototype Metadata</span>`;
+            }
+
+            const thumbSrc = v.thumbnail_url || NEUTRAL_VIDEO_PLACEHOLDER;
+
+            const actionButtons = isStateAuthorized ? `
+                <div class="video-entry-actions">
+                    <button type="button" class="btn-sm btn-secondary btn-edit-video" data-video-id="${v.id}" title="Edit metadata">✏️ Edit</button>
+                    <button type="button" class="btn-sm btn-publish-toggle" data-video-id="${v.id}" data-current-status="${v.status}" title="${isPub ? 'Unpublish to Draft' : 'Publish for Tourists'}">
+                        ${isPub ? '📥 Unpublish' : '🚀 Publish'}
+                    </button>
+                    <button type="button" class="btn-sm btn-delete-video" data-video-id="${v.id}" title="Remove entry">🗑️ Delete</button>
+                </div>
+            ` : `
+                <div class="video-entry-actions">
+                    <span style="font-size: 0.72rem; color: #94A3B8; font-style: italic;">🔒 View Only (Outside Jurisdiction)</span>
+                </div>
+            `;
+
+            return `
+                <div class="video-entry-card" data-video-id="${v.id}" data-category="${v.category || ''}" data-status="${v.status || ''}">
+                    <div class="video-thumb-container" data-video-id="${v.id}">
+                        <img src="${thumbSrc}" alt="${(v.title || '').replace(/"/g, '&quot;')}" class="video-thumb-img" onerror="this.onerror=null; this.src=NEUTRAL_VIDEO_PLACEHOLDER;">
+                        <button type="button" class="video-play-overlay-btn" data-video-id="${v.id}" title="Preview Video">▶</button>
+                        ${protoBadge}
+                        <span class="video-status-badge ${statusClass}">${statusText}</span>
+                        <span class="video-duration-badge">⏱️ ${v.duration || '0:30'}</span>
+                    </div>
+                    <div class="video-entry-body">
+                        <div class="video-entry-cat-tag">${v.category || 'General'}</div>
+                        <h3 class="video-entry-title">${v.title}</h3>
+                        <p class="video-entry-desc">${v.description}</p>
+                        <div class="video-entry-meta-row">
+                            <span>📍 <strong>${v.destination_name || 'Destination'}</strong></span>
+                            <span>${v.publisher ? `🏛️ ${v.publisher}` : (v.created_at || 'Recently added')}</span>
+                        </div>
+                        ${actionButtons}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Wire click for Play/Preview
+        videoGrid.querySelectorAll('.video-thumb-container, .video-play-overlay-btn').forEach(el => {
+            el.onclick = (e) => {
+                if (e.target.closest('.video-entry-actions')) return;
+                const vId = el.getAttribute('data-video-id');
+                if (vId) openVideoPlayerModal(vId);
+            };
+        });
+
+        // Wire Edit buttons
+        videoGrid.querySelectorAll('.btn-edit-video').forEach(btn => {
+            btn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const vId = btn.getAttribute('data-video-id');
+                openVideoModal(vId);
+            };
+        });
+
+        // Wire Publish Toggle buttons with Publication Integrity Enforcement
+        videoGrid.querySelectorAll('.btn-publish-toggle').forEach(btn => {
+            btn.onclick = async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const vId = btn.getAttribute('data-video-id');
+                const currStatus = btn.getAttribute('data-current-status');
+                const targetVideo = videos.find(v => v.id === vId);
+
+                if (currStatus !== 'Published') {
+                    // Manager is attempting to publish
+                    const isProto = !targetVideo || !targetVideo.is_verified_asset || targetVideo.verification_state === 'prototype_metadata' || (targetVideo.video_url && targetVideo.video_url.includes('prototype'));
+                    if (isProto) {
+                        const alertMsg = 'Cannot publish prototype metadata. A confirmed, playable media asset from an authorized source is required before publishing for tourists.';
+                        if (typeof showManagerToast === 'function') {
+                            showManagerToast(alertMsg, 'warning');
+                        } else {
+                            alert(alertMsg);
+                        }
+                        return;
+                    }
+                }
+
+                const nextStatus = currStatus === 'Published' ? 'Draft' : 'Published';
+
+                window.YatraSetuManagerStore.updateDestinationVideo(vId, {
+                    status: nextStatus,
+                    updated_at: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                });
+
+                if (typeof showManagerToast === 'function') {
+                    showManagerToast(`Video status updated to "${nextStatus}".`);
+                }
+                await renderDestinationVideos(window.YatraSetuManagerStore.getActiveContext());
+            };
+        });
+
+        // Wire Delete buttons
+        videoGrid.querySelectorAll('.btn-delete-video').forEach(btn => {
+            btn.onclick = async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const vId = btn.getAttribute('data-video-id');
+                const targetVideo = videos.find(v => v.id === vId);
+                const confirmTitle = targetVideo ? targetVideo.title : 'this video entry';
+
+                if (confirm(`Are you sure you want to remove "${confirmTitle}"? This action cannot be undone.`)) {
+                    window.YatraSetuManagerStore.deleteDestinationVideo(vId);
+                    if (typeof showManagerToast === 'function') {
+                        showManagerToast(`Video entry "${confirmTitle}" was deleted.`);
+                    }
+                    await renderDestinationVideos(window.YatraSetuManagerStore.getActiveContext());
+                }
+            };
+        });
+
+    } else {
+        videoGrid.innerHTML = `
+            <div style="grid-column: 1 / -1; padding: 3rem 1.5rem; text-align: center; background: #FFFFFF; border: 1px dashed var(--card-border); border-radius: 8px;">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎬</div>
+                <h4 style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin: 0 0 0.35rem 0;">No Video Entries Found</h4>
+                <p style="font-size: 0.84rem; color: var(--text-muted); margin: 0 0 1rem 0;">No destination information videos match the current selection in ${formattedStateName}.</p>
+                ${isStateAuthorized ? `<button type="button" class="btn-primary" onclick="openVideoModal()">+ Add First Video Entry</button>` : ''}
+            </div>
+        `;
+    }
+}
+
+/**
+ * Open Video Modal (Add or Edit)
+ */
+async function openVideoModal(videoId = null) {
+    const modal = document.getElementById('videoModal');
+    if (!modal) return;
+
+    const modalTitle = document.getElementById('video-modal-title');
+    const formId = document.getElementById('video-form-id');
+    const formStateId = document.getElementById('video-form-state-id');
+    const formDest = document.getElementById('video-form-dest');
+    const formCat = document.getElementById('video-form-category');
+    const formTitle = document.getElementById('video-form-title');
+    const formDesc = document.getElementById('video-form-desc');
+    const formUrl = document.getElementById('video-form-url');
+    const formDuration = document.getElementById('video-form-duration');
+    const formThumb = document.getElementById('video-form-thumb');
+    const formStatus = document.getElementById('video-form-status');
+    const formProtoCheck = document.getElementById('video-form-prototype-check');
+    const alertBox = document.getElementById('video-form-alert');
+
+    if (alertBox) alertBox.style.display = 'none';
+
+    const activeCtx = window.YatraSetuManagerStore.getActiveContext();
+    const activeStateId = activeCtx.activeStateId || 'maharashtra';
+
+    // Populate destination dropdown preserving the record's actual destination
+    const destinations = await window.YatraSetuManagerStore.getDestinations(activeStateId);
+    let targetV = null;
+    if (videoId) {
+        const allVideos = await window.YatraSetuManagerStore.getDestinationVideos('all', 'all');
+        targetV = allVideos.find(item => item.id === videoId);
+    }
+
+    if (formDest && destinations) {
+        let options = destinations.map(d => `<option value="${d.id}">${d.name}</option>`);
+        if (targetV && targetV.destination_id && !destinations.some(d => d.id === targetV.destination_id)) {
+            options.push(`<option value="${targetV.destination_id}">${targetV.destination_name || targetV.destination_id}</option>`);
+        }
+        formDest.innerHTML = options.join('');
+    }
+
+    if (videoId && targetV) {
+        const v = targetV;
+        if (modalTitle) modalTitle.textContent = 'Edit Video Entry';
+        if (formId) formId.value = v.id;
+        if (formStateId) formStateId.value = v.state_id || activeStateId;
+        if (formDest) formDest.value = v.destination_id;
+        if (formCat) formCat.value = v.category || 'Heritage & Architecture';
+        if (formTitle) formTitle.value = v.title || '';
+        if (formDesc) formDesc.value = v.description || '';
+        if (formUrl) formUrl.value = v.video_url || '';
+        if (formDuration) formDuration.value = v.duration || '0:30';
+        if (formThumb) formThumb.value = v.thumbnail_url || '';
+        if (formStatus) formStatus.value = v.status || 'Draft';
+        if (formProtoCheck) formProtoCheck.checked = !v.is_verified_asset;
+    } else {
+        // Add mode
+        if (modalTitle) modalTitle.textContent = 'Add Destination Information Video (~30s)';
+        if (formId) formId.value = '';
+        if (formStateId) formStateId.value = activeStateId;
+        if (formDest && activeCtx.activeDestinationId !== 'all') {
+            formDest.value = activeCtx.activeDestinationId;
+        }
+        if (formCat) formCat.selectedIndex = 0;
+        if (formTitle) formTitle.value = '';
+        if (formDesc) formDesc.value = '';
+        if (formUrl) formUrl.value = 'https://assets.yatrasetu.org/media/videos/prototype/' + activeStateId + '-clip.mp4';
+        if (formDuration) formDuration.value = '0:30';
+        if (formThumb) formThumb.value = NEUTRAL_VIDEO_PLACEHOLDER;
+        if (formStatus) formStatus.value = 'Draft';
+        if (formProtoCheck) formProtoCheck.checked = true;
+    }
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * Open Video Player Preview Modal (Interactive YouTube player / Prototype Screen)
+ */
+async function openVideoPlayerModal(videoId) {
+    if (!videoId) return;
+    const modal = document.getElementById('videoPlayerModal');
+    if (!modal) return;
+
+    const allVideos = await window.YatraSetuManagerStore.getDestinationVideos('all', 'all');
+    const v = allVideos.find(item => item.id === videoId);
+    if (!v) return;
+
+    const titleEl = document.getElementById('player-modal-title');
+    const statusBadge = document.getElementById('player-modal-status-badge');
+    const playerContainer = document.getElementById('player-container');
+    const infoTitle = document.getElementById('player-info-title');
+    const infoDesc = document.getElementById('player-info-desc');
+    const infoDest = document.getElementById('player-info-dest');
+    const infoCat = document.getElementById('player-info-cat');
+    const infoDuration = document.getElementById('player-info-duration');
+    const infoPublisher = document.getElementById('player-info-publisher');
+    const infoPermissions = document.getElementById('player-info-permissions');
+    const infoLink = document.getElementById('player-info-link');
+    const infoAssetFlag = document.getElementById('player-info-asset-flag');
+    const infoUpdated = document.getElementById('player-info-updated');
+    const authStatus = document.getElementById('player-modal-auth-status');
+    const editBtn = document.getElementById('btn-player-edit-action');
+
+    const activeProfile = (window.YatraSetuManagerCore && window.YatraSetuManagerCore.syncActiveManagerProfile)
+        ? window.YatraSetuManagerCore.syncActiveManagerProfile()
+        : (window.YatraSetuManagerData ? window.YatraSetuManagerData.profile : null);
+
+    const isSuspended = activeProfile && (activeProfile.status === 'Suspended' || activeProfile.account_status === 'Suspended' || activeProfile.status === 'Inactive' || activeProfile.account_status === 'Inactive');
+
+    let isAuthorized = false;
+    if (!isSuspended && activeProfile) {
+        if (activeProfile.scope === 'STATE' || activeProfile.manager_type === 'State Manager' || activeProfile.access_level === 'State Manager') {
+            isAuthorized = (v.state_id === activeProfile.state_id);
+        } else {
+            isAuthorized = (v.state_id === activeProfile.state_id && (v.destination_id === activeProfile.destination_id || (activeProfile.destination_ids || []).includes(v.destination_id)));
+        }
+    }
+
+    if (titleEl) titleEl.textContent = `Video Preview: ${v.title}`;
+    if (statusBadge) {
+        statusBadge.textContent = v.status || 'Draft';
+        statusBadge.className = 'badge ' + (v.status === 'Published' ? 'badge-success' : 'badge-warning');
+    }
+
+    // Embed genuine video player if verified YouTube asset, otherwise show animated prototype screen
+    if (playerContainer) {
+        const ytMatch = (v.video_url || '').match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/)|&v=)([\w-]{11})/);
+        if (v.is_verified_asset && ytMatch && ytMatch[1]) {
+            playerContainer.innerHTML = `
+                <iframe id="active-yt-player" width="100%" height="100%"
+                    src="https://www.youtube-nocookie.com/embed/${ytMatch[1]}?autoplay=1&rel=0"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allowfullscreen
+                    title="${(v.title || '').replace(/"/g, '&quot;')}"
+                    style="position: absolute; inset: 0; width: 100%; height: 100%; border: none;">
+                </iframe>
+            `;
+        } else {
+            playerContainer.innerHTML = `
+                <div class="video-prototype-screen" id="player-screen">
+                    <div class="video-screen-play-icon">▶</div>
+                    <div style="font-weight: 800; font-size: 1.1rem; margin-bottom: 0.35rem;" id="player-screen-title">${v.title}</div>
+                    <div style="font-size: 0.82rem; opacity: 0.9;" id="player-screen-dest">${v.destination_name || 'Destination'} • Prototype Metadata Simulation</div>
+                    <div style="margin-top: 0.85rem; font-size: 0.72rem; background: rgba(0,0,0,0.4); padding: 0.25rem 0.65rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2);">
+                        Official Destination Audio-Visual Orientation • YatraSetu FR-15
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    if (infoTitle) infoTitle.textContent = v.title;
+    if (infoDesc) infoDesc.textContent = v.description;
+    if (infoDest) infoDest.textContent = v.destination_name || v.destination_id;
+    if (infoCat) infoCat.textContent = v.category;
+    if (infoDuration) infoDuration.textContent = `${v.duration || '0:30'} (${v.is_verified_asset ? 'actual duration' : '~30s prototype'})`;
+    if (infoPublisher) infoPublisher.textContent = v.publisher || 'Official Tourism Source';
+    if (infoPermissions) infoPermissions.textContent = v.embed_permission || (v.is_verified_asset ? 'YouTube Standard Player Embedding' : 'Prototype Media Record');
+
+    if (infoLink) {
+        if (v.video_url && v.video_url.startsWith('http')) {
+            infoLink.href = v.video_url;
+            infoLink.style.display = 'inline';
+            infoLink.textContent = v.is_verified_asset ? 'View Official Source ↗' : 'View Prototype Reference ↗';
+        } else {
+            infoLink.style.display = 'none';
+        }
+    }
+
+    if (infoAssetFlag) {
+        if (v.verification_state === 'official_source') {
+            infoAssetFlag.innerHTML = '🏛️ <strong>Official Tourism Source</strong> (Verified Authority Asset)';
+        } else if (v.verification_state === 'verified_media') {
+            infoAssetFlag.innerHTML = '✓ <strong>Verified Media Asset</strong> (Confirmed Playable Creator Stream)';
+        } else {
+            infoAssetFlag.innerHTML = '📋 <strong>Prototype Metadata Record</strong> (~30s simulation, awaiting confirmed media)';
+        }
+    }
+    if (infoUpdated) infoUpdated.textContent = `Updated: ${v.updated_at || v.created_at || '12 Oct 2026'}`;
+
+    if (authStatus) {
+        authStatus.textContent = isAuthorized ? 'Authorized Manager' : 'Outside Jurisdiction (Read-Only)';
+    }
+
+    if (editBtn) {
+        if (isAuthorized) {
+            editBtn.style.display = 'inline-block';
+            editBtn.onclick = () => {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+                if (playerContainer) playerContainer.innerHTML = '';
+                openVideoModal(v.id);
+            };
+        } else {
+            editBtn.style.display = 'none';
+        }
     }
 
     modal.classList.add('active');

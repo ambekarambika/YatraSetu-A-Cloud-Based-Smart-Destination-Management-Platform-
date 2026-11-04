@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administrator Governance — YatraSetu</title>
-    <meta name="description" content="YatraSetu Administrator Control Panel — Manage user accounts, role-based access control (RBAC), and global platform content.">
+    <meta name="description" content="YatraSetu Administrator Control Panel — Manage stakeholder accounts, business registrations, RBAC, and platform governance.">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,48 +14,65 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/admin.css">
 </head>
-<body class="app-body" data-theme="maharashtra">
+<body class="app-body admin-workspace" data-role="admin" data-theme="maharashtra">
 
     <div class="app-shell">
 
         <!-- ====================================================================
-             1. ADMIN SIDEBAR NAVIGATION (4 SOURCE OF TRUTH ITEMS)
+             1. ADMIN SIDEBAR NAVIGATION (Navy #0E1E38 Matching Reference UI)
              ==================================================================== -->
         <aside class="app-sidebar" id="app-sidebar">
             <div>
-                <!-- Sidebar Header -->
+                <!-- Sidebar Header with Official Approved Logo -->
                 <div class="app-sidebar-header">
                     <a href="../index.html" class="app-brand-link" id="sidebar-logo">
-                        <div class="app-brand-logo">Y</div>
-                        <div class="app-brand-title">Yatra<span>Setu</span></div>
+                        <div class="app-brand-crest">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
+                                <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
+                                <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
+                            </svg>
+                        </div>
+                        <div class="app-brand-info">
+                            <span class="app-brand-name">Yatra<span>Setu</span></span>
+                            <span class="app-role-label">Tourism Collaboration Platform</span>
+                        </div>
                     </a>
                 </div>
 
-                <!-- Role Badge Context -->
-                <div class="app-sidebar-role-badge">
-                    <span class="role-badge-label">Active Role</span>
-                    <span class="role-badge-val">ADMINISTRATOR</span>
-                </div>
-
-                <!-- Admin Navigation Items -->
+                <!-- Admin Navigation Items (7 Canonical Governance Tabs) -->
                 <nav class="app-sidebar-nav" id="app-sidebar-nav">
-                    <div class="nav-section-title">ADMIN GOVERNANCE</div>
-                    <a href="dashboard.html" class="app-nav-item active" data-title="Administrator Overview">
+                    <a href="#" class="app-nav-item active" data-tab="overview" id="nav-tab-overview">
                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                        <span>Overview</span>
+                        <span>Dashboard</span>
                     </a>
-                    <a href="#" class="app-nav-item" data-title="User Account Management">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
-                        <span>Users</span>
+                    <a href="#" class="app-nav-item" data-tab="users" id="nav-tab-users">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        <span>Stakeholder Accounts</span>
                     </a>
-                    <a href="#" class="app-nav-item" data-title="Global Destinations Management">
+                    <a href="#" class="app-nav-item" data-tab="registrations" id="nav-tab-registrations">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18"></path><path d="M5 21V7l8-4 8 4v14"></path><path d="M9 10h2"></path><path d="M9 14h2"></path><path d="M9 18h2"></path></svg>
+                        <span>Business Registrations</span>
+                    </a>
+                    <a href="#" class="app-nav-item" data-tab="destinations" id="nav-tab-destinations">
                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                         <span>Destinations</span>
                     </a>
-                    <a href="#" class="app-nav-item" data-title="RBAC Roles & Permissions">
+                    <a href="#" class="app-nav-item" data-tab="roles" id="nav-tab-roles">
                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                        <span>Roles / Access</span>
+                        <span>Roles &amp; Permissions</span>
+                    </a>
+                    <a href="#" class="app-nav-item" data-tab="managers" id="nav-tab-managers">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><polyline points="16 11 18 13 22 9"></polyline></svg>
+                        <span>Manager Authority</span>
+                    </a>
+                    <a href="#" class="app-nav-item" data-tab="audit" id="nav-tab-audit">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>
+                        <span>Audit Trail</span>
                     </a>
                 </nav>
             </div>
@@ -63,9 +80,9 @@
             <!-- Sidebar User Profile Footer -->
             <div class="app-sidebar-footer">
                 <div class="sidebar-user">
-                    <div class="sidebar-avatar">AD</div>
+                    <div class="sidebar-avatar">RV</div>
                     <div class="sidebar-user-info">
-                        <span class="user-name">System Admin</span>
+                        <span class="user-name">Rajesh Verma</span>
                         <span class="user-role">Platform Administrator</span>
                     </div>
                 </div>
@@ -80,7 +97,7 @@
         </aside>
 
         <!-- ====================================================================
-             2. MAIN ADMIN WORKSPACE & TOPBAR
+             2. MAIN ADMIN WORKSPACE & TOPBAR (White Workspace)
              ==================================================================== -->
         <main class="app-main">
             
@@ -97,17 +114,24 @@
 
                     <div class="breadcrumbs">
                         <a href="../index.html" class="breadcrumb-item">YatraSetu</a>
-                        <span>/</span>
-                        <span class="breadcrumb-item">System Governance</span>
-                        <span>/</span>
-                        <span class="breadcrumb-item active" id="breadcrumb-active">Overview</span>
+                        <span class="breadcrumb-sep">/</span>
+                        <span class="breadcrumb-item">Governance</span>
+                        <span class="breadcrumb-sep">/</span>
+                        <span class="breadcrumb-item active" id="breadcrumb-active">Dashboard</span>
                     </div>
                 </div>
 
                 <div class="topbar-right">
-                    <div class="topbar-search">
-                        <svg class="topbar-search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                        <input type="text" class="topbar-search-input" placeholder="Search accounts & roles...">
+                    <button type="button" class="notification-btn" id="notification-btn" title="Notifications" aria-label="Notifications">
+                        🔔<span class="notification-badge" id="notification-badge">1</span>
+                    </button>
+                    <div class="user-profile-badge" id="topbar-user-badge">
+                        <div class="user-avatar">RV</div>
+                        <div class="user-info-text">
+                            <span class="user-name">Rajesh Verma</span>
+                            <span class="user-role">Platform Administrator</span>
+                        </div>
+                        <span class="user-caret">▾</span>
                     </div>
                 </div>
             </header>
@@ -115,117 +139,558 @@
             <!-- Main App Content -->
             <div class="app-content">
 
-                <!-- 3. PAGE HEADER BANNER -->
-                <div class="page-header-banner">
-                    <div class="page-header-info">
-                        <div class="page-eyebrow">
-                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                            PLATFORM GOVERNANCE & ACCESS CONTROL
+                <!-- ============================================================
+                     SECTION 1: OVERVIEW / DASHBOARD (Panel A Reference)
+                     ============================================================ -->
+                <div id="admin-section-overview">
+
+                    <!-- Page Header Banner -->
+                    <div class="admin-page-header">
+                        <div>
+                            <h1 class="admin-page-header-title">Administrator Dashboard</h1>
+                            <p class="admin-page-header-subtitle">Manage stakeholder accounts, registrations, and platform governance</p>
                         </div>
-                        <h1 class="page-title" id="active-page-title">Administrator Control Panel</h1>
-                        <p class="page-subtitle">Enforce Role-Based Access Control (RBAC), manage system users, and configure cloud infrastructure parameters.</p>
+                        <div>
+                            <button type="button" class="admin-btn-primary" id="btn-add-system-user">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                Add System User
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="page-header-actions">
-                        <button type="button" class="btn-app btn-app-primary">
-                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            Add New System User
-                        </button>
+                    <!-- 4 Metric Cards Grid (Panel A Reference) -->
+                    <div class="admin-metric-grid">
+                        <!-- Card 1: Total Stakeholders -->
+                        <div class="admin-metric-card">
+                            <div class="admin-metric-info">
+                                <span class="admin-metric-label">Total Stakeholders</span>
+                                <div class="admin-metric-value" id="metric-total-stakeholders">--</div>
+                                <span class="admin-metric-badge blue" id="metric-total-stakeholders-sub">Registered</span>
+                            </div>
+                            <div class="admin-metric-icon-circle blue">
+                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Pending Approvals -->
+                        <div class="admin-metric-card">
+                            <div class="admin-metric-info">
+                                <span class="admin-metric-label">Pending Approvals</span>
+                                <div class="admin-metric-value" id="metric-pending-approvals">--</div>
+                                <span class="admin-metric-badge amber" id="metric-pending-approvals-sub">Awaiting Review</span>
+                            </div>
+                            <div class="admin-metric-icon-circle amber">
+                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Active Businesses -->
+                        <div class="admin-metric-card">
+                            <div class="admin-metric-info">
+                                <span class="admin-metric-label">Active Businesses</span>
+                                <div class="admin-metric-value" id="metric-active-businesses">--</div>
+                                <span class="admin-metric-badge green" id="metric-active-businesses-sub">Approved &amp; Operating</span>
+                            </div>
+                            <div class="admin-metric-icon-circle green">
+                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18"></path><path d="M5 21V7l8-4 8 4v14"></path><path d="M9 10h2"></path><path d="M9 14h2"></path><path d="M9 18h2"></path></svg>
+                            </div>
+                        </div>
+
+                        <!-- Card 4: Inactive Accounts -->
+                        <div class="admin-metric-card">
+                            <div class="admin-metric-info">
+                                <span class="admin-metric-label">Inactive Accounts</span>
+                                <div class="admin-metric-value" id="metric-inactive-accounts">--</div>
+                                <span class="admin-metric-badge red" id="metric-inactive-accounts-sub">Suspended</span>
+                            </div>
+                            <div class="admin-metric-icon-circle red">
+                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="18" y1="8" x2="23" y2="13"></line><line x1="23" y1="8" x2="18" y2="13"></line></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Two-Column Section: Recent Registrations & Account Activity (Panel A Reference) -->
+                    <div class="admin-two-col-grid">
+                        <!-- Left: Recent Registrations Card -->
+                        <div class="admin-card-widget">
+                            <div class="admin-card-widget-header">
+                                <h3 class="admin-card-widget-title">Recent Registrations</h3>
+                                <a href="#" class="admin-link-view-all" id="link-view-all-registrations">View All</a>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Business Name</th>
+                                            <th>Stakeholder</th>
+                                            <th>Destination</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-recent-registrations-body">
+                                        <!-- Populated dynamically by admin.js -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Right: Account Activity Card -->
+                        <div class="admin-card-widget">
+                            <div class="admin-card-widget-header">
+                                <h3 class="admin-card-widget-title">Account Activity</h3>
+                                <a href="#" class="admin-link-view-all" id="link-view-all-activity">View All</a>
+                            </div>
+                            <div id="admin-account-activity-stream">
+                                <!-- Populated dynamically by admin.js -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Architectural Governance Principles Notice Card -->
+                    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(15,23,42,0.04);">
+                        <h3 style="font-size: 0.95rem; font-weight: 800; color: #0F172A; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🛡️</span> YatraSetu Architectural Governance Principles
+                        </h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; font-size: 0.8rem; color: #334155;">
+                            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 0.85rem; border-radius: 8px;">
+                                <strong style="color: #0F172A; display: block; margin-bottom: 0.25rem;">1. Locked Destination Integrity</strong>
+                                Once a stakeholder registration is approved by the Destination Manager, the stakeholder cannot alter their operating destination via ordinary profile editing.
+                            </div>
+                            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 0.85rem; border-radius: 8px;">
+                                <strong style="color: #0F172A; display: block; margin-bottom: 0.25rem;">2. Controlled Reassignment &amp; Audit Trail</strong>
+                                Authorized corrections or reassignments require an official written justification and generate an administrative audit log with actor attribution.
+                            </div>
+                            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 0.85rem; border-radius: 8px;">
+                                <strong style="color: #0F172A; display: block; margin-bottom: 0.25rem;">3. Exclusive Account Governance</strong>
+                                Only the Platform Administrator holds the authority to activate, deactivate, or delete user and stakeholder accounts.
+                            </div>
+                            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 0.85rem; border-radius: 8px;">
+                                <strong style="color: #0F172A; display: block; margin-bottom: 0.25rem;">4. Four Official Roles</strong>
+                                "State Manager" is an elevated access level within Destination Manager (<code>scope: 'STATE'</code>), not a separate fifth role.
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 4. METRIC CARDS SYSTEM -->
-                <div class="metric-grid">
-                    <div class="metric-card accent-card">
-                        <div class="metric-card-top">
-                            <div class="metric-icon-box">
-                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
-                            </div>
-                            <span class="sample-badge">SAMPLE DATA</span>
+                <!-- ============================================================
+                     SECTION 2: STAKEHOLDER ACCOUNTS LIST (Panel B Reference)
+                     ============================================================ -->
+                <div id="admin-section-users" style="display: none;">
+
+                    <!-- Page Header Banner -->
+                    <div class="admin-page-header">
+                        <div>
+                            <h1 class="admin-page-header-title">Stakeholder Accounts</h1>
+                            <p class="admin-page-header-subtitle">View and manage all stakeholder accounts</p>
                         </div>
-                        <div class="metric-value">142</div>
-                        <div class="metric-label">Total System Users</div>
+                        <div>
+                            <button type="button" class="admin-btn-primary" id="btn-export-stakeholders">
+                                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                Export List
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="metric-card">
-                        <div class="metric-card-top">
-                            <div class="metric-icon-box">
-                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18"></path><path d="M5 21V7l8-4 8 4v14"></path></svg>
+                    <!-- Filter Toolbar Card (Panel B Reference) -->
+                    <div class="admin-filter-toolbar">
+                        <div class="admin-filter-group">
+                            <div class="admin-search-box">
+                                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <input type="text" id="admin-accounts-search" class="admin-search-input" placeholder="Search by name, email, org, or ID (e.g. sh-101)...">
                             </div>
-                            <span class="sample-badge">SAMPLE DATA</span>
+
+                            <select id="admin-accounts-role-filter" class="admin-select-filter">
+                                <option value="all">All Roles</option>
+                                <option value="stakeholder" selected>Tourism Stakeholders</option>
+                                <option value="manager">Destination Managers</option>
+                                <option value="admin">Administrators</option>
+                                <option value="tourist">Tourists</option>
+                            </select>
+
+                            <select id="admin-accounts-status-filter" class="admin-select-filter">
+                                <option value="all">All Status</option>
+                                <option value="Active">Active</option>
+                                <option value="Deactivated">Inactive / Deactivated</option>
+                            </select>
+
+                            <select id="admin-accounts-dest-filter" class="admin-select-filter">
+                                <option value="all">All Destinations</option>
+                                <!-- Populated dynamically by admin.js -->
+                            </select>
+
+                            <button type="button" class="admin-btn-reset" id="btn-reset-accounts-filter">Reset</button>
                         </div>
-                        <div class="metric-value">18</div>
-                        <div class="metric-label">Destination Managers</div>
                     </div>
 
-                    <div class="metric-card">
-                        <div class="metric-card-top">
-                            <div class="metric-icon-box">
-                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path></svg>
-                            </div>
-                            <span class="sample-badge">SAMPLE DATA</span>
+                    <!-- Table Card (Panel B Reference) -->
+                    <div class="admin-table-container">
+                        <div class="table-responsive">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40px;"><input type="checkbox" id="check-all-accounts" aria-label="Select all accounts"></th>
+                                        <th>Name</th>
+                                        <th>Business Name</th>
+                                        <th>Destination</th>
+                                        <th>Status</th>
+                                        <th>Registered On</th>
+                                        <th style="text-align: right;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-accounts-table-body">
+                                    <!-- Rendered dynamically by admin.js -->
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="metric-value">46</div>
-                        <div class="metric-label">Tourism Stakeholders</div>
-                    </div>
 
-                    <div class="metric-card">
-                        <div class="metric-card-top">
-                            <div class="metric-icon-box">
-                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        <!-- Table Footer Pagination -->
+                        <div class="admin-table-footer">
+                            <span id="accounts-pagination-info">Showing accounts</span>
+                            <div class="admin-pagination">
+                                <button type="button" class="admin-page-btn" aria-label="Previous Page">&lt;</button>
+                                <button type="button" class="admin-page-btn active">1</button>
+                                <button type="button" class="admin-page-btn">2</button>
+                                <button type="button" class="admin-page-btn" aria-label="Next Page">&gt;</button>
                             </div>
-                            <span class="sample-badge">SAMPLE DATA</span>
                         </div>
-                        <div class="metric-value">Active</div>
-                        <div class="metric-label">RBAC Enforcement Status</div>
                     </div>
                 </div>
 
-                <!-- 5. USERS MANAGEMENT TABLE -->
-                <div class="table-card">
-                    <div class="table-header-bar">
-                        <h3 class="table-title">System User Accounts & Role Assignments</h3>
+                <!-- ============================================================
+                     SECTION 3: BUSINESS REGISTRATIONS LIST (Panel F Reference)
+                     ============================================================ -->
+                <div id="admin-section-registrations" style="display: none;">
+
+                    <!-- Page Header Banner -->
+                    <div class="admin-page-header">
+                        <div>
+                            <h1 class="admin-page-header-title">Business Registrations</h1>
+                            <p class="admin-page-header-subtitle">Monitor and oversee all business registrations</p>
+                        </div>
+                        <div>
+                            <button type="button" class="admin-btn-primary" id="btn-export-registrations">
+                                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                Export List
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="table-responsive">
-                        <table class="app-table">
-                            <thead>
-                                <tr>
-                                    <th>User Name</th>
-                                    <th>Email Address</th>
-                                    <th>Assigned Role</th>
-                                    <th>Account Status</th>
-                                    <th>Last Active</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><strong>Aditi Sharma</strong></td>
-                                    <td>aditi@yatrasetu.in</td>
-                                    <td>Destination Manager</td>
-                                    <td><span class="status-pill active">● Verified Active</span></td>
-                                    <td>Today, 18:42</td>
-                                    <td>
-                                        <div class="table-actions">
-                                            <button type="button" class="btn-icon-table" title="Edit Role"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path></svg></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Rajesh Kulkarni</strong></td>
-                                    <td>rajesh@konkanboating.in</td>
-                                    <td>Tourism Stakeholder</td>
-                                    <td><span class="status-pill active">● Verified Active</span></td>
-                                    <td>Yesterday, 14:15</td>
-                                    <td>
-                                        <div class="table-actions">
-                                            <button type="button" class="btn-icon-table" title="Edit Role"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path></svg></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <!-- Filter Toolbar Card (Panel F Reference) -->
+                    <div class="admin-filter-toolbar">
+                        <div class="admin-filter-group">
+                            <div class="admin-search-box">
+                                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <input type="text" id="admin-registrations-search" class="admin-search-input" placeholder="Search business, stakeholder, or category...">
+                            </div>
+
+                            <select id="admin-registrations-status-filter" class="admin-select-filter">
+                                <option value="all">All Status</option>
+                                <option value="Approved">Approved</option>
+                                <option value="Pending Approval">Pending Approval</option>
+                                <option value="Under Review">Under Review</option>
+                                <option value="Rejected">Rejected</option>
+                            </select>
+
+                            <select id="admin-registrations-state-filter" class="admin-select-filter">
+                                <option value="all">All States</option>
+                                <option value="maharashtra">Maharashtra</option>
+                                <option value="kerala">Kerala</option>
+                            </select>
+
+                            <select id="admin-registrations-dest-filter" class="admin-select-filter">
+                                <option value="all">All Destinations</option>
+                                <!-- Populated dynamically by admin.js -->
+                            </select>
+
+                            <select id="admin-registrations-category-filter" class="admin-select-filter">
+                                <option value="all">All Categories</option>
+                                <option value="Guides">Guides</option>
+                                <option value="Homestays">Homestays</option>
+                                <option value="Transport">Transport</option>
+                                <option value="Food & Dining">Food & Dining</option>
+                                <option value="Adventure">Adventure</option>
+                            </select>
+
+                            <button type="button" class="admin-btn-reset" id="btn-reset-registrations-filter">Reset</button>
+                        </div>
+                    </div>
+
+                    <!-- Table Card (Panel F Reference) -->
+                    <div class="admin-table-container">
+                        <div class="table-responsive">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40px;"><input type="checkbox" id="check-all-registrations" aria-label="Select all registrations"></th>
+                                        <th>Business Name</th>
+                                        <th>Stakeholder</th>
+                                        <th>Destination</th>
+                                        <th>Category</th>
+                                        <th>Status</th>
+                                        <th>Submitted On</th>
+                                        <th style="text-align: right;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-registrations-table-body">
+                                    <!-- Rendered dynamically by admin.js -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Table Footer Pagination -->
+                        <div class="admin-table-footer">
+                            <span id="registrations-pagination-info">Showing registrations</span>
+                            <div class="admin-pagination">
+                                <button type="button" class="admin-page-btn" aria-label="Previous Page">&lt;</button>
+                                <button type="button" class="admin-page-btn active">1</button>
+                                <button type="button" class="admin-page-btn">2</button>
+                                <button type="button" class="admin-page-btn" aria-label="Next Page">&gt;</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================
+                     SECTION 4: DESTINATIONS CATALOG & JURISDICTIONS
+                     ============================================================ -->
+                <div id="admin-section-destinations" style="display: none;">
+                    <div class="admin-page-header">
+                        <div>
+                            <h1 class="admin-page-header-title">Destinations Catalog &amp; Jurisdictions</h1>
+                            <p class="admin-page-header-subtitle">Global oversight across state territories, verified destination catalogs, and operating stakeholders</p>
+                        </div>
+                    </div>
+
+                    <!-- Destination Filter Toolbar -->
+                    <div class="admin-filter-toolbar">
+                        <div class="admin-filter-group">
+                            <div class="admin-search-box">
+                                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <input type="text" id="admin-destinations-search" class="admin-search-input" placeholder="Search destination name, category, or ID...">
+                            </div>
+
+                            <select id="admin-destinations-state-filter" class="admin-select-filter">
+                                <option value="all">All States</option>
+                                <option value="maharashtra">Maharashtra</option>
+                                <option value="kerala">Kerala</option>
+                            </select>
+
+                            <button type="button" class="admin-btn-reset" id="btn-reset-destinations-filter">Reset</button>
+                        </div>
+                    </div>
+
+                    <div id="admin-destinations-container">
+                        <!-- Populated dynamically by admin.js -->
+                    </div>
+                </div>
+
+                <!-- ============================================================
+                     SECTION 5: ROLES & PERMISSIONS (RBAC)
+                     ============================================================ -->
+                <div id="admin-section-roles" style="display: none;">
+                    <div class="admin-page-header">
+                        <div>
+                            <h1 class="admin-page-header-title">Roles &amp; Permissions (RBAC)</h1>
+                            <p class="admin-page-header-subtitle">Platform governance boundaries, permitted scopes, and architectural role definitions</p>
+                        </div>
+                    </div>
+
+                    <div id="admin-roles-view-container">
+                        <!-- Populated dynamically by admin.js -->
+                    </div>
+                </div>
+
+                <!-- ============================================================
+                     SECTION 6: MANAGER AUTHORITY & JURISDICTIONS
+                     ============================================================ -->
+                <div id="admin-section-managers" style="display: none;">
+                    <div class="admin-page-header">
+                        <div>
+                            <h1 class="admin-page-header-title">Manager Authority &amp; Jurisdictions</h1>
+                            <p class="admin-page-header-subtitle">Regional oversight, scope configuration, and controlled manager jurisdiction reassignment</p>
+                        </div>
+                    </div>
+
+                    <!-- 3 Authority Scope Architecture Cards -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(15,23,42,0.04);">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <span style="font-size: 1.3rem;">🏛️</span>
+                                <strong style="font-size: 0.95rem; color: #0F172A;">State-Level Access (State Manager)</strong>
+                            </div>
+                            <p style="font-size: 0.8rem; color: #475569; line-height: 1.5; margin-bottom: 0.75rem;">
+                                Elevated permission scope within Destination Manager (<code>scope: 'STATE'</code>). Visibility extends across all destinations within the assigned state.
+                            </p>
+                            <div style="font-size: 0.75rem; background: #FEF3C7; color: #B45309; padding: 0.5rem 0.75rem; border-radius: 6px;">
+                                ⚠️ State visibility does not authorize reviews outside assigned state, and does NOT grant account activation, deactivation, or deletion privileges.
+                            </div>
+                        </div>
+
+                        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(15,23,42,0.04);">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <span style="font-size: 1.3rem;">📍</span>
+                                <strong style="font-size: 0.95rem; color: #0F172A;">Destination-Level Access</strong>
+                            </div>
+                            <p style="font-size: 0.8rem; color: #475569; line-height: 1.5; margin-bottom: 0.75rem;">
+                                Standard scope (<code>scope: 'DESTINATION'</code>). Operational and business registration approvals remain strictly confined to the single assigned destination jurisdiction.
+                            </p>
+                            <div style="font-size: 0.75rem; background: #EFF6FF; color: #1E40AF; padding: 0.5rem 0.75rem; border-radius: 6px;">
+                                🛡️ Cannot review or decide business registrations outside the assigned destination territory.
+                            </div>
+                        </div>
+
+                        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(15,23,42,0.04);">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <span style="font-size: 1.3rem;">⚖️</span>
+                                <strong style="font-size: 0.95rem; color: #0F172A;">Controlled Reassignment</strong>
+                            </div>
+                            <p style="font-size: 0.8rem; color: #475569; line-height: 1.5; margin-bottom: 0.75rem;">
+                                Only Platform Administrators can alter manager territory or promote/demote scope. Requires mandatory written administrative justification.
+                            </p>
+                            <div style="font-size: 0.75rem; background: #DCFCE7; color: #15803D; padding: 0.5rem 0.75rem; border-radius: 6px;">
+                                📜 Every reassignment creates an audit trail entry with actor attribution, previous/new jurisdiction, and reason.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Manager Directory Filter Toolbar -->
+                    <div class="admin-filter-toolbar">
+                        <div class="admin-filter-group">
+                            <div class="admin-search-box">
+                                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <input type="text" id="admin-managers-search" class="admin-search-input" placeholder="Search manager name, email, or org...">
+                            </div>
+
+                            <select id="admin-managers-scope-filter" class="admin-select-filter">
+                                <option value="all">All Access Levels</option>
+                                <option value="State Manager">State Manager (State-wide Scope)</option>
+                                <option value="Destination Manager">Destination Manager (Local)</option>
+                            </select>
+
+                            <select id="admin-managers-state-filter" class="admin-select-filter">
+                                <option value="all">All States</option>
+                                <option value="maharashtra">Maharashtra</option>
+                                <option value="kerala">Kerala</option>
+                            </select>
+
+                            <button type="button" class="admin-btn-reset" id="btn-reset-managers-filter">Reset</button>
+                        </div>
+                    </div>
+
+                    <!-- Manager Directory Table -->
+                    <div class="admin-table-container">
+                        <div class="table-responsive">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Manager</th>
+                                        <th>Role &amp; Access Level</th>
+                                        <th>Assigned Territory</th>
+                                        <th>Status</th>
+                                        <th>Authorized Scope &amp; Capabilities</th>
+                                        <th style="text-align: right;">Authority Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-managers-table-body">
+                                    <!-- Populated dynamically by admin.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Manager Authority Audit Trail Card -->
+                    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.25rem; margin-top: 1.75rem; box-shadow: 0 1px 3px rgba(15,23,42,0.04);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <div>
+                                <h3 style="font-size: 0.95rem; font-weight: 800; color: #0F172A; margin: 0;">📜 Manager Authority &amp; Governance Log</h3>
+                                <p style="font-size: 0.78rem; color: #64748B; margin: 0.15rem 0 0 0;">Recent administrative authority assignments and controlled reassignment events</p>
+                            </div>
+                            <span class="admin-badge blue">Prototype Audit Store</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Event Type</th>
+                                        <th>Target Manager</th>
+                                        <th>Jurisdiction Change &amp; Justification</th>
+                                        <th>Authorized By</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-managers-audit-body">
+                                    <!-- Populated dynamically by admin.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================
+                     SECTION 7: SYSTEM AUDIT TRAIL
+                     ============================================================ -->
+                <div id="admin-section-audit" style="display: none;">
+                    <div class="admin-page-header">
+                        <div>
+                            <h1 class="admin-page-header-title">System Audit Trail</h1>
+                            <p class="admin-page-header-subtitle">Comprehensive administrative log of destination reassignments, account status changes, and manager authority events</p>
+                        </div>
+                        <div>
+                            <button type="button" class="admin-btn-primary" id="btn-export-audit">
+                                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                Export Audit Log (CSV)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filter Toolbar -->
+                    <div class="admin-filter-toolbar">
+                        <div class="admin-filter-group">
+                            <div class="admin-search-box">
+                                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <input type="text" id="admin-audit-search" class="admin-search-input" placeholder="Search target, actor, or action details...">
+                            </div>
+
+                            <select id="admin-audit-action-filter" class="admin-select-filter">
+                                <option value="all">All Action Types</option>
+                                <option value="ACCOUNT_DEACTIVATED">Account Deactivation</option>
+                                <option value="ACCOUNT_ACTIVATED">Account Activation</option>
+                                <option value="ACCOUNT_DELETED">Account Deletion</option>
+                                <option value="CONTROLLED_DESTINATION_REASSIGNMENT">Destination Reassignment</option>
+                                <option value="MANAGER_AUTHORITY_REASSIGNED">Manager Authority Change</option>
+                                <option value="BUSINESS_REGISTRATION_APPROVED">Registration Approval</option>
+                                <option value="USER_ACCOUNT_CREATED">User Account Creation</option>
+                            </select>
+
+                            <button type="button" class="admin-btn-reset" id="btn-reset-audit-filter">Reset</button>
+                        </div>
+                    </div>
+
+                    <!-- Prototype Notice -->
+                    <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.78rem; color: #92400E; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>ℹ️</span>
+                        <span><strong>Prototype Storage Notice:</strong> Audit entries are currently stored in browser storage (<code>yatrasetu_audit_trail</code>) for interface evaluation. Persistent, cryptographically verifiable, server-controlled audit logging belongs to the upcoming Phase 11 PostgreSQL + FastAPI backend.</span>
+                    </div>
+
+                    <!-- Audit Table -->
+                    <div class="admin-table-container">
+                        <div class="table-responsive">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Action Type</th>
+                                        <th>Target Entity</th>
+                                        <th>Details &amp; Change Justification</th>
+                                        <th>Authorized Actor</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-audit-table-body">
+                                    <!-- Populated dynamically by admin.js -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -234,7 +699,595 @@
 
     </div>
 
-    <!-- JavaScript -->
-    <script src="../js/dashboard.js"></script>
+    <!-- ====================================================================
+         MODAL DIALOGS (Panels C, D, E, G Matching Visual Reference)
+         ==================================================================== -->
+
+    <!-- Modal 1: Stakeholder Account Details (Panel C Reference) -->
+    <div class="admin-modal-overlay" id="adminAccountDetailsModal" role="dialog" aria-modal="true" aria-labelledby="modal-details-title">
+        <div class="admin-modal-card">
+            <div class="admin-modal-header">
+                <h3 class="admin-modal-title" id="modal-details-title">Stakeholder Account Details</h3>
+                <button type="button" class="admin-modal-close" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="admin-modal-body">
+                <!-- User Profile Header Snippet -->
+                <div class="admin-user-profile-header">
+                    <div style="display: flex; align-items: center; gap: 0.85rem;">
+                        <div class="admin-profile-avatar-circle" id="details-avatar">R</div>
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <strong style="font-size: 1.1rem; color: #0F172A;" id="details-name">Rahul Patil</strong>
+                                <span class="admin-badge active" id="details-status-badge">Active</span>
+                            </div>
+                            <div style="font-size: 0.8rem; color: #64748B; margin-top: 0.15rem;" id="details-email">rahul@sahyadritrek.com</div>
+                        </div>
+                    </div>
+                    <button type="button" class="admin-btn-secondary" id="btn-details-reassign" style="font-size: 0.78rem;">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                        Reassign Destination
+                    </button>
+                </div>
+
+                <!-- Navigation Tabs (Panel C Reference) -->
+                <div class="admin-modal-tabs">
+                    <button type="button" class="admin-modal-tab-btn active" data-tab="info">Account Information</button>
+                    <button type="button" class="admin-modal-tab-btn" data-tab="business">Registered Business</button>
+                    <button type="button" class="admin-modal-tab-btn" data-tab="activity">Activity History</button>
+                </div>
+
+                <!-- Tab Content 1: Account Information -->
+                <div id="modal-tab-content-info">
+                    <div class="admin-modal-field-grid">
+                        <div class="admin-modal-field">
+                            <span class="admin-modal-field-label">Full Name</span>
+                            <span class="admin-modal-field-value" id="field-detail-name">--</span>
+                        </div>
+                        <div class="admin-modal-field">
+                            <span class="admin-modal-field-label">Email Address</span>
+                            <span class="admin-modal-field-value" id="field-detail-email">--</span>
+                        </div>
+                        <div class="admin-modal-field">
+                            <span class="admin-modal-field-label">Organization</span>
+                            <span class="admin-modal-field-value" id="field-detail-org">--</span>
+                        </div>
+                        <div class="admin-modal-field">
+                            <span class="admin-modal-field-label">Account Status</span>
+                            <span class="admin-modal-field-value" id="field-detail-status">--</span>
+                        </div>
+                        <div class="admin-modal-field">
+                            <span class="admin-modal-field-label">Registered On</span>
+                            <span class="admin-modal-field-value" id="field-detail-created">--</span>
+                        </div>
+                        <div class="admin-modal-field">
+                            <span class="admin-modal-field-label">Last Active</span>
+                            <span class="admin-modal-field-value" id="field-detail-active">--</span>
+                        </div>
+                    </div>
+
+                    <!-- Registered Business Preview with Destination Locked Banner -->
+                    <div style="margin-top: 1.25rem;">
+                        <h4 style="font-size: 0.85rem; font-weight: 700; color: #0F172A; margin-bottom: 0.65rem;">Registered Business</h4>
+                        <div class="admin-modal-business-card">
+                            <div class="admin-modal-business-thumb" style="display: flex; align-items: center; justify-content: center; font-size: 1.5rem; background: #E0E7FF; color: #4338CA;">
+                                ⛰️
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <strong style="color: #0F172A; font-size: 0.92rem;" id="details-biz-name">Sahyadri Trekking Co.</strong>
+                                    <span class="admin-badge approved" id="details-biz-status">Approved</span>
+                                </div>
+                                <div style="font-size: 0.78rem; color: #64748B;" id="details-biz-cat">Adventure &amp; Trekking</div>
+                                <div style="font-size: 0.76rem; color: #475569; margin-top: 0.2rem;" id="details-biz-loc">📍 Lonavala, Maharashtra</div>
+                            </div>
+                        </div>
+
+                        <!-- DESTINATION LOCKED BANNER (CRITICAL REQUIREMENT) -->
+                        <div class="admin-banner-warning">
+                            <span class="admin-banner-warning-icon">🔒</span>
+                            <div class="admin-banner-warning-content">
+                                <div class="admin-banner-warning-title">Destination Locked</div>
+                                This business is registered and approved for <strong id="details-lock-dest">Lonavala</strong>. The destination cannot be changed by the stakeholder. Any reassignment requires administrative authorization.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content 2: Registered Business Details -->
+                <div id="modal-tab-content-business" style="display: none;">
+                    <div class="admin-modal-field-grid">
+                        <div class="admin-modal-field">
+                            <span class="admin-modal-field-label">Business Title</span>
+                            <span class="admin-modal-field-value" id="biz-tab-title">--</span>
+                        </div>
+                        <div class="admin-modal-field">
+                            <span class="admin-modal-field-label">Service Category</span>
+                            <span class="admin-modal-field-value" id="biz-tab-category">--</span>
+                        </div>
+                        <div class="admin-modal-field">
+                            <span class="admin-modal-field-label">Operating Jurisdiction</span>
+                            <span class="admin-modal-field-value" id="biz-tab-jurisdiction">--</span>
+                        </div>
+                        <div class="admin-modal-field">
+                            <span class="admin-modal-field-label">Registration Status</span>
+                            <span class="admin-modal-field-value" id="biz-tab-status">--</span>
+                        </div>
+                    </div>
+                    <div class="admin-banner-warning">
+                        <span class="admin-banner-warning-icon">🔒</span>
+                        <div class="admin-banner-warning-content">
+                            <div class="admin-banner-warning-title">Destination Locked</div>
+                            The operating destination is locked to maintain administrative integrity across jurisdictions.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content 3: Activity History -->
+                <div id="modal-tab-content-activity" style="display: none;">
+                    <div id="details-activity-list" style="font-size: 0.8rem; color: #475569;">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </div>
+            </div>
+            <div class="admin-modal-footer">
+                <button type="button" class="admin-btn-secondary admin-modal-close">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Change Account Status (Activate / Deactivate) (Panel D Reference) -->
+    <div class="admin-modal-overlay" id="adminDeactivateModal" role="dialog" aria-modal="true" aria-labelledby="modal-deactivate-title">
+        <div class="admin-modal-card" style="max-width: 520px;">
+            <div class="admin-modal-header">
+                <h3 class="admin-modal-title" id="modal-deactivate-title">Change Account Status</h3>
+                <button type="button" class="admin-modal-close" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="admin-modal-body">
+                <!-- User Snippet -->
+                <div style="display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.25rem;">
+                    <div class="admin-profile-avatar-circle" id="deactivate-avatar" style="width: 42px; height: 42px; font-size: 1rem;">U</div>
+                    <div>
+                        <strong style="color: #0F172A; font-size: 0.95rem; display: block;" id="deactivate-user-name">Rahul Patil</strong>
+                        <div style="font-size: 0.78rem; color: #64748B;" id="deactivate-user-email">rahul@sahyadritrek.com</div>
+                        <div style="font-size: 0.74rem; color: #475569;" id="deactivate-user-meta">Sahyadri Trekking Co. • Lonavala</div>
+                    </div>
+                </div>
+
+                <!-- Amber Warning Banner (Panel D Reference) -->
+                <div class="admin-banner-warning" id="deactivate-warning-banner">
+                    <span class="admin-banner-warning-icon">ℹ️</span>
+                    <div class="admin-banner-warning-content" id="deactivate-warning-msg">
+                        This will deactivate the stakeholder account. They will not be able to log in or manage their business until reactivated.
+                    </div>
+                </div>
+
+                <!-- Reason Field -->
+                <div class="admin-form-group">
+                    <label for="deactivate-reason-input" class="admin-form-label">Reason (Required)</label>
+                    <textarea id="deactivate-reason-input" class="admin-form-textarea" rows="3" placeholder="Enter reason for deactivation..." required></textarea>
+                </div>
+            </div>
+            <div class="admin-modal-footer">
+                <button type="button" class="admin-btn-secondary admin-modal-close">Cancel</button>
+                <button type="button" class="admin-btn-danger" id="btn-confirm-status-toggle">Deactivate Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Delete Stakeholder Account (Panel E Reference) -->
+    <div class="admin-modal-overlay" id="adminDeleteModal" role="dialog" aria-modal="true" aria-labelledby="modal-delete-title">
+        <div class="admin-modal-card" style="max-width: 520px;">
+            <div class="admin-modal-header">
+                <h3 class="admin-modal-title" id="modal-delete-title">Delete Stakeholder Account</h3>
+                <button type="button" class="admin-modal-close" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="admin-modal-body">
+                <!-- Red Danger Alert Banner (Panel E Reference) -->
+                <div class="admin-banner-danger">
+                    <div class="admin-banner-danger-icon-circle">!</div>
+                    <div class="admin-banner-danger-content">
+                        <div class="admin-banner-danger-title">This action cannot be undone.</div>
+                        This will permanently delete the stakeholder account and all associated data, including business information and content.
+                    </div>
+                </div>
+
+                <!-- Summary Metadata -->
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 0.85rem; margin-bottom: 1.15rem; font-size: 0.82rem;">
+                    <div style="margin-bottom: 0.4rem;">
+                        <span style="color: #64748B;">Stakeholder:</span>
+                        <strong style="color: #0F172A; margin-left: 0.35rem;" id="delete-summary-user">--</strong>
+                    </div>
+                    <div>
+                        <span style="color: #64748B;">Business:</span>
+                        <strong style="color: #0F172A; margin-left: 0.35rem;" id="delete-summary-biz">--</strong>
+                    </div>
+                </div>
+
+                <!-- Reason Field -->
+                <div class="admin-form-group">
+                    <label for="delete-reason-input" class="admin-form-label">Reason (Required)</label>
+                    <textarea id="delete-reason-input" class="admin-form-textarea" rows="3" placeholder="Enter reason for deletion..." required></textarea>
+                </div>
+            </div>
+            <div class="admin-modal-footer">
+                <button type="button" class="admin-btn-secondary admin-modal-close">Cancel</button>
+                <button type="button" class="admin-btn-danger" id="btn-confirm-delete-account">Delete Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Business Registration Details (Panel G Reference) -->
+    <div class="admin-modal-overlay" id="adminRegistrationDetailsModal" role="dialog" aria-modal="true" aria-labelledby="modal-reg-title">
+        <div class="admin-modal-card">
+            <div class="admin-modal-header">
+                <h3 class="admin-modal-title" id="modal-reg-title">Business Registration Details</h3>
+                <button type="button" class="admin-modal-close" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="admin-modal-body">
+                <!-- Registration Header Banner -->
+                <div class="admin-modal-business-card" style="margin-bottom: 1.25rem;">
+                    <div class="admin-modal-business-thumb" style="display: flex; align-items: center; justify-content: center; font-size: 1.5rem; background: #DCFCE7; color: #15803D;">
+                        🏨
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <strong style="color: #0F172A; font-size: 1rem;" id="reg-modal-name">Sahyadri Trekking Co.</strong>
+                            <span class="admin-badge approved" id="reg-modal-status">Approved</span>
+                        </div>
+                        <div style="font-size: 0.78rem; color: #64748B;" id="reg-modal-category">Adventure &amp; Trekking</div>
+                        <div style="font-size: 0.76rem; color: #475569; margin-top: 0.15rem;" id="reg-modal-location">📍 Lonavala, Maharashtra</div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="admin-modal-tabs">
+                    <button type="button" class="admin-modal-tab-btn active">Business Information</button>
+                    <button type="button" class="admin-modal-tab-btn">Stakeholder</button>
+                    <button type="button" class="admin-modal-tab-btn">Media &amp; Content</button>
+                    <button type="button" class="admin-modal-tab-btn">Approval History</button>
+                </div>
+
+                <div class="admin-modal-field-grid">
+                    <div class="admin-modal-field">
+                        <span class="admin-modal-field-label">Business Name</span>
+                        <span class="admin-modal-field-value" id="reg-modal-field-name">Sahyadri Trekking Co.</span>
+                    </div>
+                    <div class="admin-modal-field">
+                        <span class="admin-modal-field-label">Category</span>
+                        <span class="admin-modal-field-value" id="reg-modal-field-category">Adventure &amp; Trekking</span>
+                    </div>
+                </div>
+
+                <!-- DESTINATION LOCKED BANNER (CRITICAL REQUIREMENT) -->
+                <div class="admin-banner-warning">
+                    <span class="admin-banner-warning-icon">🔒</span>
+                    <div class="admin-banner-warning-content">
+                        <div class="admin-banner-warning-title">Destination Locked</div>
+                        This registration is approved for <strong id="reg-modal-lock-dest">Lonavala</strong>. The destination cannot be changed by the stakeholder. Any changes must be processed by an Administrator.
+                    </div>
+                </div>
+            </div>
+            <div class="admin-modal-footer">
+                <button type="button" class="admin-btn-secondary admin-modal-close">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 5: Controlled Destination Reassignment -->
+    <div class="admin-modal-overlay" id="adminReassignModal" role="dialog" aria-modal="true" aria-labelledby="modal-reassign-title">
+        <div class="admin-modal-card" style="max-width: 580px;">
+            <div class="admin-modal-header">
+                <h3 class="admin-modal-title" id="modal-reassign-title">Controlled Destination Reassignment</h3>
+                <button type="button" class="admin-modal-close" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="admin-modal-body">
+                <div class="admin-banner-warning">
+                    <span class="admin-banner-warning-icon">🛡️</span>
+                    <div class="admin-banner-warning-content">
+                        <div class="admin-banner-warning-title">Integrity Rule</div>
+                        Stakeholders cannot modify their approved destination through ordinary editing. Any reassignment requires administrative authorization and creates a permanent entry in the system audit log.
+                    </div>
+                </div>
+
+                <div class="admin-form-group">
+                    <span class="admin-modal-field-label">Target Partner Entity</span>
+                    <div id="reassign-sh-name" style="font-weight: 700; color: #0F172A; font-size: 0.95rem;">--</div>
+                </div>
+
+                <div class="admin-form-group">
+                    <span class="admin-modal-field-label">Current Assigned Destination</span>
+                    <div id="reassign-sh-current-dest" style="font-weight: 600; color: #B45309; background: #FEF3C7; padding: 0.35rem 0.65rem; border-radius: 6px; display: inline-block; font-size: 0.85rem;">--</div>
+                </div>
+
+                <div class="admin-form-group">
+                    <label for="reassign-dest-select" class="admin-form-label">New Destination Jurisdiction <span style="color: #DC2626;">*</span></label>
+                    <select id="reassign-dest-select" class="admin-select-filter" style="width: 100%;">
+                        <!-- Populated dynamically by admin.js -->
+                    </select>
+                </div>
+
+                <div class="admin-form-group">
+                    <label for="reassign-reason-input" class="admin-form-label">Official Justification / Administrative Reason <span style="color: #DC2626;">*</span></label>
+                    <textarea id="reassign-reason-input" class="admin-form-textarea" rows="3" placeholder="e.g. Official relocation verified via municipal license renewal, approved by State Tourism Board."></textarea>
+                    <span style="font-size: 0.72rem; color: #64748B; display: block; margin-top: 0.25rem;">This rationale will be recorded in the administrative platform audit log.</span>
+                </div>
+            </div>
+            <div class="admin-modal-footer">
+                <button type="button" class="admin-btn-secondary admin-modal-close">Cancel</button>
+                <button type="button" class="admin-btn-primary" id="btn-confirm-reassign">Authorize &amp; Log Reassignment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 6: Provision New System User -->
+    <div class="admin-modal-overlay" id="adminAddUserModal" role="dialog" aria-modal="true" aria-labelledby="modal-adduser-title">
+        <div class="admin-modal-card" style="max-width: 580px;">
+            <div class="admin-modal-header">
+                <h3 class="admin-modal-title" id="modal-adduser-title">Provision New System Account</h3>
+                <button type="button" class="admin-modal-close" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="admin-modal-body">
+                <div class="admin-modal-field-grid">
+                    <div class="admin-form-group">
+                        <label for="new-user-name" class="admin-form-label">Full Name *</label>
+                        <input type="text" id="new-user-name" class="admin-search-input" style="padding-left: 0.75rem;" placeholder="e.g. Vikram Shinde" required>
+                    </div>
+                    <div class="admin-form-group">
+                        <label for="new-user-email" class="admin-form-label">Email Address *</label>
+                        <input type="email" id="new-user-email" class="admin-search-input" style="padding-left: 0.75rem;" placeholder="e.g. vikram@tourism.org" required>
+                    </div>
+                </div>
+
+                <div class="admin-modal-field-grid">
+                    <div class="admin-form-group">
+                        <label for="new-user-role" class="admin-form-label">Platform Role *</label>
+                        <select id="new-user-role" class="admin-select-filter" style="width: 100%;">
+                            <option value="stakeholder" selected>Tourism Stakeholder</option>
+                            <option value="manager">Destination Manager</option>
+                            <option value="admin">Platform Administrator</option>
+                            <option value="tourist">Tourist Member</option>
+                        </select>
+                    </div>
+                    <div class="admin-form-group">
+                        <label for="new-user-scope" class="admin-form-label">Access Level</label>
+                        <select id="new-user-scope" class="admin-select-filter" style="width: 100%;">
+                            <option value="Registered Business">Registered Business (Stakeholder)</option>
+                            <option value="State Manager">State Manager (State-wide Scope)</option>
+                            <option value="Destination Manager">Destination Manager (Single Dest)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="admin-modal-field-grid">
+                    <div class="admin-form-group">
+                        <label for="new-user-dest" class="admin-form-label">Destination Jurisdiction *</label>
+                        <select id="new-user-dest" class="admin-select-filter" style="width: 100%;">
+                            <option value="lonavala">Lonavala (Maharashtra)</option>
+                            <option value="raigad-fort">Rajgad Fort (Maharashtra)</option>
+                            <option value="ajanta-caves">Ajanta Caves (Maharashtra)</option>
+                            <option value="ellora-caves">Ellora Caves (Maharashtra)</option>
+                            <option value="tadoba">Tadoba National Park (Maharashtra)</option>
+                            <option value="munnar">Munnar (Kerala)</option>
+                            <option value="fort-kochi">Fort Kochi (Kerala)</option>
+                        </select>
+                    </div>
+                    <div class="admin-form-group">
+                        <label for="new-user-org" class="admin-form-label">Business / Enterprise Name</label>
+                        <input type="text" id="new-user-org" class="admin-search-input" style="padding-left: 0.75rem;" placeholder="e.g. Sahyadri Trekking Co.">
+                    </div>
+                </div>
+            </div>
+            <div class="admin-modal-footer">
+                <button type="button" class="admin-btn-secondary admin-modal-close">Cancel</button>
+                <button type="button" class="admin-btn-primary" id="btn-save-new-user">Create System User</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 7: Manager Authority Details & Controlled Jurisdiction Reassignment -->
+    <div class="admin-modal-overlay" id="adminManagerAuthorityModal" role="dialog" aria-modal="true" aria-labelledby="modal-mgr-title">
+        <div class="admin-modal-card" style="max-width: 640px;">
+            <div class="admin-modal-header">
+                <h3 class="admin-modal-title" id="modal-mgr-title">Manager Authority &amp; Jurisdiction Governance</h3>
+                <button type="button" class="admin-modal-close" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="admin-modal-body">
+                <!-- Manager Header Snippet -->
+                <div style="display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.25rem; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 1rem; border-radius: 8px;">
+                    <div class="admin-profile-avatar-circle" id="mgr-modal-avatar" style="width: 44px; height: 44px; font-size: 1.1rem; background: #FEF3C7; color: #B45309;">M</div>
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <strong style="color: #0F172A; font-size: 1.05rem;" id="mgr-modal-name">--</strong>
+                            <span class="admin-badge approved" id="mgr-modal-status">Active</span>
+                        </div>
+                        <div style="font-size: 0.78rem; color: #64748B;" id="mgr-modal-email">--</div>
+                        <div style="font-size: 0.74rem; color: #475569; margin-top: 0.2rem;" id="mgr-modal-org">--</div>
+                    </div>
+                </div>
+
+                <!-- Tabs: Authority Scope vs Reassign Jurisdiction -->
+                <div class="admin-modal-tabs">
+                    <button type="button" class="admin-modal-tab-btn active" id="btn-mgr-tab-overview" data-mgr-tab="overview">Authority Scope &amp; Capabilities</button>
+                    <button type="button" class="admin-modal-tab-btn" id="btn-mgr-tab-reassign" data-mgr-tab="reassign">Reassign Jurisdiction</button>
+                </div>
+
+                <!-- Tab 1: Authority Scope Overview -->
+                <div id="mgr-modal-content-overview">
+                    <div class="admin-modal-field-grid" style="margin-bottom: 1rem;">
+                        <div class="admin-modal-field">
+                            <span class="admin-modal-field-label">Platform Role</span>
+                            <span class="admin-modal-field-value" style="font-weight: 700; color: #0F172A;">Destination Manager</span>
+                        </div>
+                        <div class="admin-modal-field">
+                            <span class="admin-modal-field-label">Access Level</span>
+                            <span class="admin-modal-field-value" id="mgr-modal-access-level" style="font-weight: 700; color: #B45309;">--</span>
+                        </div>
+                        <div class="admin-modal-field">
+                            <span class="admin-modal-field-label">Assigned Territory</span>
+                            <span class="admin-modal-field-value" id="mgr-modal-territory" style="font-weight: 700; color: #1E40AF;">--</span>
+                        </div>
+                        <div class="admin-modal-field">
+                            <span class="admin-modal-field-label">Account Status</span>
+                            <span class="admin-modal-field-value" id="mgr-modal-acct-status">Active</span>
+                        </div>
+                    </div>
+
+                    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 0.85rem; margin-bottom: 1rem;">
+                        <h4 style="font-size: 0.82rem; font-weight: 700; color: #0F172A; margin: 0 0 0.5rem 0;">Authorized Governance Scope</h4>
+                        <div id="mgr-modal-capabilities" style="font-size: 0.78rem; color: #334155; line-height: 1.6;">
+                            <!-- Populated dynamically based on access level -->
+                        </div>
+                    </div>
+
+                    <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 0.85rem;">
+                        <h4 style="font-size: 0.82rem; font-weight: 700; color: #991B1B; margin: 0 0 0.35rem 0;">Explicit Prohibitions &amp; Architectural Limits</h4>
+                        <ul style="font-size: 0.76rem; color: #B91C1C; margin: 0; padding-left: 1.2rem; line-height: 1.5;">
+                            <li>Cannot activate, deactivate, or delete user or stakeholder accounts (Exclusive Platform Administrator privilege).</li>
+                            <li>Cannot decide registrations outside authorized jurisdiction.</li>
+                            <li>State Manager visibility across state does NOT grant cross-state authority.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Reassign Jurisdiction -->
+                <div id="mgr-modal-content-reassign" style="display: none;">
+                    <div class="admin-banner-warning">
+                        <span class="admin-banner-warning-icon">⚖️</span>
+                        <div class="admin-banner-warning-content">
+                            <div class="admin-banner-warning-title">Administrative Jurisdiction Control</div>
+                            Only Platform Administrators are authorized to modify manager scopes or jurisdictions. All changes require an official justification and are logged permanently in the system audit trail.
+                        </div>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="mgr-reassign-level-select" class="admin-form-label">New Access Level <span style="color: #DC2626;">*</span></label>
+                        <select id="mgr-reassign-level-select" class="admin-select-filter" style="width: 100%;">
+                            <option value="State Manager">State Manager (State-wide Scope)</option>
+                            <option value="Destination Manager">Destination Manager (Single Destination)</option>
+                        </select>
+                    </div>
+
+                    <div class="admin-modal-field-grid">
+                        <div class="admin-form-group">
+                            <label for="mgr-reassign-state-select" class="admin-form-label">State Territory <span style="color: #DC2626;">*</span></label>
+                            <select id="mgr-reassign-state-select" class="admin-select-filter" style="width: 100%;">
+                                <option value="maharashtra">Maharashtra</option>
+                                <option value="kerala">Kerala</option>
+                            </select>
+                        </div>
+                        <div class="admin-form-group" id="mgr-dest-select-group">
+                            <label for="mgr-reassign-dest-select" class="admin-form-label">Assigned Destination Jurisdiction</label>
+                            <select id="mgr-reassign-dest-select" class="admin-select-filter" style="width: 100%;">
+                                <!-- Populated dynamically based on state -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="mgr-reassign-reason-input" class="admin-form-label">Administrative Reason &amp; Rationale <span style="color: #DC2626;">*</span></label>
+                        <textarea id="mgr-reassign-reason-input" class="admin-form-textarea" rows="3" placeholder="e.g. Official government transfer order #MTDC-2026/89 approved by Directorate of Tourism."></textarea>
+                        <span style="font-size: 0.72rem; color: #64748B; display: block; margin-top: 0.25rem;">Mandatory administrative record (minimum 6 characters) for audit trail attribution.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="admin-modal-footer">
+                <button type="button" class="admin-btn-secondary admin-modal-close">Close</button>
+                <button type="button" class="admin-btn-primary" id="btn-save-mgr-reassign" style="display: none;">Authorize &amp; Log Jurisdiction Change</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 8: Administrator Profile Modal -->
+    <div class="admin-modal-overlay" id="adminProfileModal" role="dialog" aria-modal="true" aria-labelledby="modal-admin-profile-title">
+        <div class="admin-modal-card" style="max-width: 580px;">
+            <div class="admin-modal-header">
+                <h3 class="admin-modal-title" id="modal-admin-profile-title">Administrator Profile</h3>
+                <button type="button" class="admin-modal-close" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="admin-modal-body">
+                <!-- User Header -->
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; padding-bottom: 1.25rem; border-bottom: 1px solid #E2E8F0;">
+                    <div class="admin-profile-avatar-circle" style="width: 54px; height: 54px; font-size: 1.35rem; background: #0E1E38; color: #FFFFFF;">RV</div>
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <h4 style="font-size: 1.15rem; font-weight: 800; color: #0F172A; margin: 0;" id="admin-profile-name">Rajesh Verma</h4>
+                            <span class="admin-badge active" id="admin-profile-status">Active</span>
+                        </div>
+                        <div style="font-size: 0.82rem; color: #2563EB; font-weight: 600; margin-top: 0.2rem;">Platform Administrator (Global Governance)</div>
+                        <div style="font-size: 0.78rem; color: #64748B; margin-top: 0.15rem;" id="admin-profile-email">admin.governance@yatrasetu.in</div>
+                    </div>
+                </div>
+
+                <!-- Profile Details Grid -->
+                <div class="admin-modal-field-grid">
+                    <div class="admin-modal-field">
+                        <span class="admin-modal-field-label">Administrator ID</span>
+                        <span class="admin-modal-field-value" id="admin-profile-id">usr-adm-01</span>
+                    </div>
+                    <div class="admin-modal-field">
+                        <span class="admin-modal-field-label">System Role</span>
+                        <span class="admin-modal-field-value">Platform Administrator (admin)</span>
+                    </div>
+                    <div class="admin-modal-field">
+                        <span class="admin-modal-field-label">Department / Organization</span>
+                        <span class="admin-modal-field-value" id="admin-profile-org">Ministry of Tourism / YatraSetu Gov</span>
+                    </div>
+                    <div class="admin-modal-field">
+                        <span class="admin-modal-field-label">Jurisdiction Level</span>
+                        <span class="admin-modal-field-value">All Jurisdictions (Global / Pan-India)</span>
+                    </div>
+                    <div class="admin-modal-field">
+                        <span class="admin-modal-field-label">Account Created</span>
+                        <span class="admin-modal-field-value" id="admin-profile-created">01 Jan 2026</span>
+                    </div>
+                    <div class="admin-modal-field">
+                        <span class="admin-modal-field-label">Last Active Session</span>
+                        <span class="admin-modal-field-value" id="admin-profile-active">Just now</span>
+                    </div>
+                </div>
+
+                <!-- Authority & Privileges Card -->
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 1rem; margin-top: 0.75rem;">
+                    <div style="font-weight: 700; font-size: 0.82rem; color: #0F172A; margin-bottom: 0.5rem;">Assigned Administrative Governance Scopes</div>
+                    <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.78rem; color: #475569; line-height: 1.6;">
+                        <li>Sole authority to activate, deactivate, or delete user and stakeholder accounts.</li>
+                        <li>Controlled Manager Authority jurisdiction assignment and scope configuration.</li>
+                        <li>Controlled stakeholder destination reassignment with audit trail logging.</li>
+                        <li>Full read access to platform-wide system audit logs and CSV export.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="admin-modal-footer">
+                <button type="button" class="admin-btn-secondary admin-modal-close">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 9: Account Settings Notice Modal (Reporting Gap Transparently) -->
+    <div class="admin-modal-overlay" id="adminSettingsGapModal" role="dialog" aria-modal="true" aria-labelledby="modal-settings-gap-title">
+        <div class="admin-modal-card" style="max-width: 500px;">
+            <div class="admin-modal-header">
+                <h3 class="admin-modal-title" id="modal-settings-gap-title">Account Settings</h3>
+                <button type="button" class="admin-modal-close" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="admin-modal-body">
+                <div style="text-align: center; padding: 1rem 0;">
+                    <div style="font-size: 2.2rem; margin-bottom: 0.75rem;">⚙️</div>
+                    <h4 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.5rem;">Settings Not Yet Implemented</h4>
+                    <p style="font-size: 0.82rem; color: #475569; line-height: 1.5; margin: 0 auto; max-width: 400px;">
+                        Platform configuration, administrative credential management, and notification preferences belong to the planned Phase 11 FastAPI backend. In accordance with project governance, no mock settings page has been created to avoid fake implementations.
+                    </p>
+                </div>
+            </div>
+            <div class="admin-modal-footer">
+                <button type="button" class="admin-btn-secondary admin-modal-close">Understood</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Dependencies -->
+    <script src="../js/manager-data.js"></script>
+    <script src="../js/admin.js"></script>
+    <script src="../js/dashboard.js?v=3"></script>
 </body>
 </html>

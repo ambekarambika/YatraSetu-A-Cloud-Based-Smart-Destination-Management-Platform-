@@ -8,9 +8,71 @@
 /**
  * State Data Configurations for Dynamic UI Transformation (Derived from YatraSetuManagerData)
  */
-var STATE_CONFIGS = window.STATE_CONFIGS = (window.YatraSetuManagerData && window.YatraSetuManagerData.stateConfigs) 
-    ? window.YatraSetuManagerData.stateConfigs 
+var STATE_CONFIGS = window.STATE_CONFIGS = (window.YatraSetuManagerData && window.YatraSetuManagerData.stateConfigs)
+    ? window.YatraSetuManagerData.stateConfigs
     : {};
+
+/**
+ * Synchronize active manager profile with shared application state (yatrasetu_manager_profile / yatrasetu_admin_users).
+ */
+function syncActiveManagerProfile() {
+    let profile = null;
+    try {
+        const rawProfile = sessionStorage.getItem('yatrasetu_manager_profile') || localStorage.getItem('yatrasetu_manager_profile');
+        if (rawProfile) profile = JSON.parse(rawProfile);
+    } catch (e) {}
+
+    if (!profile) {
+        try {
+            const rawUsers = localStorage.getItem('yatrasetu_admin_users') || sessionStorage.getItem('yatrasetu_admin_users');
+            if (rawUsers) {
+                const users = JSON.parse(rawUsers);
+                const sessionEmail = sessionStorage.getItem('yatrasetu_email');
+                const manager = users.find(u => u.role === 'manager' && (sessionEmail ? u.email.toLowerCase() === sessionEmail.toLowerCase() : u.id === 'usr-mgr-01')) || users.find(u => u.role === 'manager');
+                if (manager) {
+                    const managerData = window.YatraSetuManagerData || {};
+                    const destinations = managerData.destinations || [];
+                    const states = managerData.states || [];
+                    const stateObj = states.find(s => s.id === manager.state_id);
+                    const stateName = stateObj ? stateObj.name : (manager.state_id === 'kerala' ? 'Kerala' : 'Maharashtra');
+                    const isState = manager.access_level === 'State Manager';
+
+                    profile = {
+                        id: manager.id,
+                        name: manager.name,
+                        email: manager.email,
+                        phone: manager.phone || '+91 98230 41092',
+                        organization: manager.organization || 'Tourism Authority',
+                        manager_type: manager.access_level,
+                        access_level: manager.access_level,
+                        scope: isState ? 'STATE' : 'DESTINATION',
+                        state_id: manager.state_id || 'maharashtra',
+                        state_name: stateName,
+                        destination_id: isState ? 'all' : manager.destination_id,
+                        destination: manager.destination_name,
+                        destination_name: manager.destination_name,
+                        destination_ids: isState
+                            ? destinations.filter(d => d.state_id === manager.state_id).map(d => d.id)
+                            : [manager.destination_id],
+                        assigned_date: manager.created_at || '15 Jan 2026',
+                        status: manager.account_status || 'Active',
+                        account_status: manager.account_status || 'Active',
+                        avatar_initials: manager.name.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2)
+                    };
+                }
+            }
+        } catch (e) {}
+    }
+
+    if (profile && window.YatraSetuManagerData) {
+        window.YatraSetuManagerData.profile = {
+            ...(window.YatraSetuManagerData.profile || {}),
+            ...profile
+        };
+    }
+    return (window.YatraSetuManagerData && window.YatraSetuManagerData.profile) ? window.YatraSetuManagerData.profile : profile;
+}
+window.syncActiveManagerProfile = syncActiveManagerProfile;
 
 /**
  * YatraSetu — Relational Data Access Adapter / Authoritative Store
@@ -18,6 +80,11 @@ var STATE_CONFIGS = window.STATE_CONFIGS = (window.YatraSetuManagerData && windo
  * Consumes central data repository in manager-data.js.
  */
 window.YatraSetuManagerStore = {
+    syncActiveManagerProfile,
+    getProfile() {
+        return syncActiveManagerProfile();
+    },
+
     getActiveContext() {
         if (window.YatraSetuManagerContext) {
             return window.YatraSetuManagerContext.getActiveContext();
@@ -56,8 +123,60 @@ window.YatraSetuManagerStore = {
     },
 
     async getStakeholders(stateId, destinationId = 'all') {
-        if (!window.YatraSetuManagerData || !window.YatraSetuManagerData.stakeholders) return [];
-        let list = window.YatraSetuManagerData.stakeholders;
+        if (!window.YatraSetuManagerData) return [];
+
+        // Restore from session storage if present (in-memory prototype persistence)
+        try {
+            const saved = sessionStorage.getItem('yatrasetu_manager_stakeholders');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    window.YatraSetuManagerData.stakeholders = parsed;
+                }
+            }
+        } catch (e) {
+            // fallback to default in-memory list
+        }
+
+        let list = window.YatraSetuManagerData.stakeholders || [];
+
+        // Harmonize dynamic listings from Stakeholder workspace if present
+        if (window.YatraSetuStakeholderData && Array.isArray(window.YatraSetuStakeholderData.listings)) {
+            window.YatraSetuStakeholderData.listings.forEach(listing => {
+                const existingIdx = list.findIndex(s => s.id === listing.id || s.name.toLowerCase() === listing.name.toLowerCase());
+                const destObj = (window.YatraSetuManagerData.destinations || []).find(d => d.id === listing.destination_id);
+                const inferredState = destObj ? destObj.state_id : 'maharashtra';
+                const formattedStatus = listing.status === 'Approved' ? 'Approved' : (listing.status === 'Under Review' ? 'Under Review' : (listing.status === 'Rejected' ? 'Rejected' : 'Pending Approval'));
+
+                if (existingIdx === -1) {
+                    list.push({
+                        id: listing.id,
+                        state_id: inferredState,
+                        destination_id: listing.destination_id,
+                        destination: destObj ? destObj.name : 'Rajgad Fort',
+                        name: listing.name,
+                        category: listing.category || 'Guides',
+                        type: listing.type || 'visitor-facing',
+                        contact: listing.contact || '+91 98220 11223',
+                        email: listing.email || 'partner@tourism.org',
+                        contact_person: listing.contactPerson || 'Registered Partner',
+                        address: listing.address || 'Local Destination Hub',
+                        hours: listing.hours || 'Standard Hours',
+                        price_range: listing.priceRange ? `₹${listing.priceRange}` : 'Free / Inquire',
+                        description: listing.description || 'Verified local tourism service listing.',
+                        status: formattedStatus,
+                        registered_date: listing.uploadedAt || 'Recently',
+                        reviewed_by: '',
+                        reviewed_date: '',
+                        manager_note: ''
+                    });
+                } else {
+                    // Keep status in sync if manager previously updated it
+                    list[existingIdx].status = formattedStatus;
+                }
+            });
+        }
+
         if (stateId && stateId !== 'all') {
             list = list.filter(s => s.state_id === stateId);
         }
@@ -65,6 +184,46 @@ window.YatraSetuManagerStore = {
             list = list.filter(s => s.destination_id === destinationId || s.destination_id.includes(destinationId));
         }
         return list;
+    },
+
+    saveStakeholders(updatedList) {
+        if (!window.YatraSetuManagerData) return;
+        window.YatraSetuManagerData.stakeholders = updatedList;
+        try {
+            sessionStorage.setItem('yatrasetu_manager_stakeholders', JSON.stringify(updatedList));
+            localStorage.setItem('yatrasetu_manager_stakeholders', JSON.stringify(updatedList));
+        } catch (e) {
+            // session storage quota or disabled
+        }
+
+        // Cross-workspace sync: update any corresponding listing in Stakeholder store
+        if (window.YatraSetuStakeholderData && Array.isArray(window.YatraSetuStakeholderData.listings)) {
+            updatedList.forEach(sh => {
+                const matchListing = window.YatraSetuStakeholderData.listings.find(l => l.id === sh.id || l.name.toLowerCase() === sh.name.toLowerCase());
+                if (matchListing) {
+                    matchListing.status = sh.status;
+                    matchListing.statusClass = sh.status === 'Approved' ? 'accepted' : (sh.status === 'Under Review' ? 'review' : (sh.status === 'Rejected' ? 'rejected' : 'pending'));
+                }
+            });
+        }
+
+        // Cross-workspace sync: update Admin user accounts repository
+        try {
+            const rawUsers = localStorage.getItem('yatrasetu_admin_users') || sessionStorage.getItem('yatrasetu_admin_users');
+            if (rawUsers) {
+                const adminUsers = JSON.parse(rawUsers);
+                updatedList.forEach(sh => {
+                    const matchUser = adminUsers.find(u => u.id === sh.id || (u.email && u.email.toLowerCase() === (sh.email || '').toLowerCase()));
+                    if (matchUser) {
+                        matchUser.registration_status = sh.status;
+                        matchUser.destination_id = sh.destination_id;
+                        matchUser.destination_name = sh.destination;
+                    }
+                });
+                localStorage.setItem('yatrasetu_admin_users', JSON.stringify(adminUsers));
+                sessionStorage.setItem('yatrasetu_admin_users', JSON.stringify(adminUsers));
+            }
+        } catch (e) {}
     },
 
     async getVisitorStats(stateId, destinationId = 'all') {
@@ -87,6 +246,220 @@ window.YatraSetuManagerStore = {
             list = list.filter(f => f.destination_id === destinationId || f.destination_id.includes(destinationId));
         }
         return list;
+    },
+
+    async getStakeholderMessages(stateId, destinationId = 'all') {
+        if (!window.YatraSetuManagerData) return [];
+        let list = window.YatraSetuManagerData.stakeholderMessages || [];
+
+        // Try restoring from browser storage (sessionStorage / localStorage)
+        try {
+            const rawStored = sessionStorage.getItem('yatrasetu_stakeholder_messages') || localStorage.getItem('yatrasetu_stakeholder_messages');
+            if (rawStored) {
+                const parsed = JSON.parse(rawStored);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    list = parsed;
+                    window.YatraSetuManagerData.stakeholderMessages = parsed;
+                }
+            } else if (list.length > 0) {
+                sessionStorage.setItem('yatrasetu_stakeholder_messages', JSON.stringify(list));
+                localStorage.setItem('yatrasetu_stakeholder_messages', JSON.stringify(list));
+            }
+        } catch (e) {
+            // storage error fallback
+        }
+
+        // Cross-workspace sync with Stakeholder Data if active in window
+        if (window.YatraSetuStakeholderData) {
+            window.YatraSetuStakeholderData.suggestions = list.map(m => ({
+                ...m,
+                suggestionText: m.message,
+                submittedAt: m.submitted_at,
+                managerNote: m.manager_response || (m.status === 'In Review' ? 'Under active review by Destination Manager' : 'Awaiting Manager Review'),
+                statusClass: m.status === 'Responded' ? 'accepted' : (m.status === 'In Review' ? 'review' : 'pending')
+            }));
+        }
+
+        if (stateId && stateId !== 'all') {
+            list = list.filter(m => m.state_id === stateId);
+        }
+        if (destinationId && destinationId !== 'all') {
+            list = list.filter(m => m.destination_id === destinationId || (m.destination_id && m.destination_id.includes(destinationId)));
+        }
+        return list;
+    },
+
+    saveStakeholderMessages(updatedList) {
+        if (!window.YatraSetuManagerData) return;
+        window.YatraSetuManagerData.stakeholderMessages = updatedList;
+        try {
+            sessionStorage.setItem('yatrasetu_stakeholder_messages', JSON.stringify(updatedList));
+            localStorage.setItem('yatrasetu_stakeholder_messages', JSON.stringify(updatedList));
+        } catch (e) {
+            // storage quota/access guard
+        }
+
+        // Cross-workspace synchronization with Stakeholder Store
+        if (window.YatraSetuStakeholderData) {
+            window.YatraSetuStakeholderData.suggestions = updatedList.map(m => ({
+                ...m,
+                suggestionText: m.message,
+                submittedAt: m.submitted_at,
+                managerNote: m.manager_response || (m.status === 'In Review' ? 'Under active review by Destination Manager' : 'Awaiting Manager Review'),
+                statusClass: m.status === 'Responded' ? 'accepted' : (m.status === 'In Review' ? 'review' : 'pending')
+            }));
+        }
+    },
+
+    updateStakeholderMessage(msgId, updates) {
+        let fullList = (window.YatraSetuManagerData && window.YatraSetuManagerData.stakeholderMessages) || [];
+        try {
+            const rawStored = sessionStorage.getItem('yatrasetu_stakeholder_messages') || localStorage.getItem('yatrasetu_stakeholder_messages');
+            if (rawStored) {
+                const parsed = JSON.parse(rawStored);
+                if (Array.isArray(parsed)) fullList = parsed;
+            }
+        } catch (e) {}
+
+        const target = fullList.find(m => m.id === msgId);
+        if (target) {
+            Object.assign(target, updates);
+            this.saveStakeholderMessages(fullList);
+            return target;
+        }
+        return null;
+    },
+
+    // FR-15 Destination Information Videos Store Engine
+    async getDestinationVideos(stateId, destinationId = 'all') {
+        if (!window.YatraSetuManagerData) return [];
+        let list = window.YatraSetuManagerData.destinationVideos || [];
+
+        // Try restoring from browser storage (sessionStorage / localStorage)
+        try {
+            const rawStored = sessionStorage.getItem('yatrasetu_destination_videos') || localStorage.getItem('yatrasetu_destination_videos');
+            if (rawStored) {
+                const parsed = JSON.parse(rawStored);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    // Smart merge: synchronize authoritative catalog data while preserving user additions
+                    const baseMap = new Map((window.YatraSetuManagerData.destinationVideos || []).map(v => [v.id, v]));
+                    const merged = parsed.map(storedItem => {
+                        const baseItem = baseMap.get(storedItem.id);
+                        if (baseItem) {
+                            const item = {
+                                ...storedItem,
+                                title: baseItem.title,
+                                description: baseItem.description,
+                                destination_id: baseItem.destination_id,
+                                destination_name: baseItem.destination_name,
+                                category: baseItem.category,
+                                video_url: baseItem.video_url,
+                                thumbnail_url: baseItem.thumbnail_url,
+                                duration: baseItem.duration,
+                                publisher: baseItem.publisher,
+                                is_verified_asset: baseItem.is_verified_asset,
+                                verification_state: baseItem.verification_state,
+                                verification_status: baseItem.verification_status,
+                                embed_permission: baseItem.embed_permission
+                            };
+                            // Enforce publication integrity on prototypes
+                            if (!item.is_verified_asset || item.verification_state === 'prototype_metadata' || (item.video_url && item.video_url.includes('prototype'))) {
+                                item.status = 'Draft';
+                            }
+                            return item;
+                        }
+                        return storedItem;
+                    });
+                    const storedIds = new Set(parsed.map(p => p.id));
+                    (window.YatraSetuManagerData.destinationVideos || []).forEach(baseItem => {
+                        if (!storedIds.has(baseItem.id)) {
+                            merged.push(baseItem);
+                        }
+                    });
+                    list = merged;
+                    window.YatraSetuManagerData.destinationVideos = merged;
+                }
+            } else if (list.length > 0) {
+                sessionStorage.setItem('yatrasetu_destination_videos', JSON.stringify(list));
+                localStorage.setItem('yatrasetu_destination_videos', JSON.stringify(list));
+            }
+        } catch (e) {}
+
+        if (stateId && stateId !== 'all') {
+            list = list.filter(v => v.state_id === stateId);
+        }
+        if (destinationId && destinationId !== 'all') {
+            list = list.filter(v => v.destination_id === destinationId || (v.destination_id && v.destination_id.includes(destinationId)));
+        }
+        return list;
+    },
+
+    saveDestinationVideos(updatedList) {
+        if (!window.YatraSetuManagerData) return;
+        window.YatraSetuManagerData.destinationVideos = updatedList;
+        try {
+            sessionStorage.setItem('yatrasetu_destination_videos', JSON.stringify(updatedList));
+            localStorage.setItem('yatrasetu_destination_videos', JSON.stringify(updatedList));
+        } catch (e) {}
+    },
+
+    updateDestinationVideo(videoId, updates) {
+        let fullList = (window.YatraSetuManagerData && window.YatraSetuManagerData.destinationVideos) || [];
+        try {
+            const rawStored = sessionStorage.getItem('yatrasetu_destination_videos') || localStorage.getItem('yatrasetu_destination_videos');
+            if (rawStored) {
+                const parsed = JSON.parse(rawStored);
+                if (Array.isArray(parsed)) fullList = parsed;
+            }
+        } catch (e) {}
+
+        const target = fullList.find(v => v.id === videoId);
+        if (target) {
+            Object.assign(target, updates);
+            target.updated_at = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            this.saveDestinationVideos(fullList);
+            return target;
+        }
+        return null;
+    },
+
+    addDestinationVideo(videoData) {
+        let fullList = (window.YatraSetuManagerData && window.YatraSetuManagerData.destinationVideos) || [];
+        try {
+            const rawStored = sessionStorage.getItem('yatrasetu_destination_videos') || localStorage.getItem('yatrasetu_destination_videos');
+            if (rawStored) {
+                const parsed = JSON.parse(rawStored);
+                if (Array.isArray(parsed)) fullList = parsed;
+            }
+        } catch (e) {}
+
+        const newVideo = {
+            id: 'vid-' + (videoData.state_id ? videoData.state_id.slice(0, 2) : 'gen') + '-' + Date.now().toString().slice(-4),
+            created_at: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+            updated_at: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+            duration: videoData.duration || '0:30',
+            is_verified_asset: Boolean(videoData.is_verified_asset),
+            status: videoData.status || 'Draft',
+            ...videoData
+        };
+        fullList.unshift(newVideo);
+        this.saveDestinationVideos(fullList);
+        return newVideo;
+    },
+
+    deleteDestinationVideo(videoId) {
+        let fullList = (window.YatraSetuManagerData && window.YatraSetuManagerData.destinationVideos) || [];
+        try {
+            const rawStored = sessionStorage.getItem('yatrasetu_destination_videos') || localStorage.getItem('yatrasetu_destination_videos');
+            if (rawStored) {
+                const parsed = JSON.parse(rawStored);
+                if (Array.isArray(parsed)) fullList = parsed;
+            }
+        } catch (e) {}
+
+        const filtered = fullList.filter(v => v.id !== videoId);
+        this.saveDestinationVideos(filtered);
+        return true;
     }
 };
 
@@ -105,12 +478,15 @@ window.YatraSetuManagerContext = {
     _listeners: [],
 
     init() {
+        const profile = syncActiveManagerProfile() || {};
+        const isStateScope = (profile.scope || 'STATE') === 'STATE';
+
         const urlParams = new URLSearchParams(window.location.search);
         const urlDest = urlParams.get('dest');
         const urlState = urlParams.get('state');
 
-        let savedState = urlState || sessionStorage.getItem('yatrasetu_active_state_id') || sessionStorage.getItem('yatrasetu_state_theme') || 'maharashtra';
-        let savedDest = urlDest || sessionStorage.getItem('yatrasetu_active_dest_id') || 'all';
+        let savedState = urlState || sessionStorage.getItem('yatrasetu_active_state_id') || profile.state_id || 'maharashtra';
+        let savedDest = urlDest || sessionStorage.getItem('yatrasetu_active_dest_id') || (isStateScope ? 'all' : (profile.destination_id || 'all'));
 
         if (urlDest && window.YatraSetuManagerData && window.YatraSetuManagerData.destinations) {
             const matchDest = window.YatraSetuManagerData.destinations.find(d => d.id === urlDest);
@@ -119,10 +495,10 @@ window.YatraSetuManagerContext = {
             }
         }
 
-        this._state.activeStateId = STATE_CONFIGS[savedState] ? savedState : 'maharashtra';
+        this._state.activeStateId = STATE_CONFIGS[savedState] ? savedState : (profile.state_id || 'maharashtra');
         this._state.activeDestinationId = savedDest;
-        this._state.managerScope = sessionStorage.getItem('yatrasetu_manager_scope') || 'state';
-        this._state.managerRole = sessionStorage.getItem('yatrasetu_manager_role') || 'state_manager';
+        this._state.managerScope = isStateScope ? 'state' : 'destination';
+        this._state.managerRole = isStateScope ? 'state_manager' : 'destination_manager';
 
         this.persist();
         this.applyContextToDOM();
@@ -208,6 +584,28 @@ window.YatraSetuManagerContext = {
         const sidebarRoleState = document.getElementById('sidebar-role-state');
         if (sidebarRoleState && config.badge) {
             sidebarRoleState.textContent = config.badge;
+        }
+
+        // Check account deactivation
+        const profile = (window.YatraSetuManagerData && window.YatraSetuManagerData.profile) || {};
+        let deactBanner = document.getElementById('mgr-account-deactivated-banner');
+        if (profile.account_status === 'Deactivated' || profile.status === 'Deactivated') {
+            if (!deactBanner) {
+                deactBanner = document.createElement('div');
+                deactBanner.id = 'mgr-account-deactivated-banner';
+                deactBanner.style.cssText = 'background: #FEF2F2; border-bottom: 2px solid #EF4444; color: #991B1B; padding: 0.75rem 1.25rem; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 8px rgba(220,38,38,0.1);';
+                deactBanner.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                        <span style="font-size: 1.1rem;">⚠️</span>
+                        <span><strong>Account Suspended:</strong> This Destination Manager account has been deactivated by the Platform Administrator. Operational actions, approvals, and content modifications are locked.</span>
+                    </div>
+                    <span style="font-size: 0.75rem; background: #DC2626; color: #FFFFFF; padding: 0.2rem 0.6rem; border-radius: 4px;">Deactivated</span>
+                `;
+                const main = document.querySelector('.app-main') || document.body;
+                main.insertBefore(deactBanner, main.firstChild);
+            }
+        } else if (deactBanner) {
+            deactBanner.remove();
         }
 
         // Apply hero image & texts if present
@@ -307,8 +705,8 @@ window.YatraSetuManagerContext = {
         document.addEventListener('click', (e) => {
             const card = e.target.closest('[data-destination-id], .dest-card, .dest-directory-card, .ranking-item');
             if (card) {
-                const destId = card.getAttribute('data-destination-id') || 
-                               card.getAttribute('data-destination') || 
+                const destId = card.getAttribute('data-destination-id') ||
+                               card.getAttribute('data-destination') ||
                                card.querySelector('.destination-title, .dest-card-title, h3, h4, span')?.textContent?.trim().toLowerCase().replace(/\s+/g, '-');
                 if (destId) {
                     const parentState = card.getAttribute('data-state-id') || this._state.activeStateId;
@@ -613,16 +1011,22 @@ function initTopbarSharedFeatures() {
             userBadge.appendChild(caret);
         }
 
-        const profile = (window.YatraSetuManagerData && window.YatraSetuManagerData.profile) ? window.YatraSetuManagerData.profile : {
-            name: 'Ambika Ambekar',
-            avatar_initials: 'AA',
-            manager_type: 'State Manager'
+        const profile = syncActiveManagerProfile() || {
+            name: 'Rajesh Patil',
+            avatar_initials: 'RP',
+            manager_type: 'State Manager',
+            destination: 'Maharashtra (All Destinations)'
         };
 
         const userAvatarEl = userBadge.querySelector('.user-avatar');
         const userNameEl = userBadge.querySelector('.user-name');
+        const userRoleEl = userBadge.querySelector('.user-role') || userBadge.querySelector('span[style*="font-size: 0.7rem"]');
         if (userAvatarEl && profile.avatar_initials) userAvatarEl.textContent = profile.avatar_initials;
         if (userNameEl && profile.name) userNameEl.textContent = profile.name;
+        if (userRoleEl) {
+            const terr = profile.destination || profile.state_name || 'Maharashtra';
+            userRoleEl.textContent = `${profile.manager_type || profile.access_level || 'Destination Manager'} • ${terr}`;
+        }
 
         let userMenuPanel = document.getElementById('user-menu-dropdown-panel');
         if (!userMenuPanel) {
@@ -700,7 +1104,7 @@ let currentStateIdx = 0;
  */
 function initDestinationStateContext() {
     window.YatraSetuManagerContext.init();
-    
+
     const stateBtn = document.getElementById('topbar-state-btn');
     if (stateBtn) {
         stateBtn.addEventListener('click', () => {

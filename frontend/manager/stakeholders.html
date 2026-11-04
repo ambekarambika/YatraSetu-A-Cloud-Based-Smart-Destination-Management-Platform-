@@ -210,45 +210,65 @@
 
                 <!-- Ecosystem Category Icon Grid -->
                 <div class="category-card-grid">
-                    <div class="category-card active">
+                    <div class="category-card active" data-category="all" title="View all categories">
+                        <span class="category-card-icon">🌐</span>
+                        <span class="category-card-title">All Categories</span>
+                        <span class="category-card-count" id="sh-cat-count-all">0</span>
+                    </div>
+                    <div class="category-card" data-category="guides">
                         <span class="category-card-icon">🧭</span>
                         <span class="category-card-title">Guides</span>
-                        <span class="category-card-count">0</span>
+                        <span class="category-card-count" id="sh-cat-count-guides">0</span>
                     </div>
-                    <div class="category-card">
+                    <div class="category-card" data-category="transport">
                         <span class="category-card-icon">🚗</span>
                         <span class="category-card-title">Transport</span>
-                        <span class="category-card-count">0</span>
+                        <span class="category-card-count" id="sh-cat-count-transport">0</span>
                     </div>
-                    <div class="category-card">
+                    <div class="category-card" data-category="homestays">
                         <span class="category-card-icon">🏡</span>
                         <span class="category-card-title">Homestays</span>
-                        <span class="category-card-count">0</span>
+                        <span class="category-card-count" id="sh-cat-count-homestays">0</span>
                     </div>
-                    <div class="category-card">
+                    <div class="category-card" data-category="food & dining">
                         <span class="category-card-icon">🍲</span>
                         <span class="category-card-title">Food & Dining</span>
-                        <span class="category-card-count">0</span>
+                        <span class="category-card-count" id="sh-cat-count-food">0</span>
                     </div>
-                    <div class="category-card">
+                    <div class="category-card" data-category="handicrafts">
                         <span class="category-card-icon">🎨</span>
                         <span class="category-card-title">Handicrafts</span>
-                        <span class="category-card-count">0</span>
+                        <span class="category-card-count" id="sh-cat-count-crafts">0</span>
                     </div>
-                    <div class="category-card">
+                    <div class="category-card" data-category="tour operators">
                         <span class="category-card-icon">🎒</span>
                         <span class="category-card-title">Tour Operators</span>
-                        <span class="category-card-count">0</span>
+                        <span class="category-card-count" id="sh-cat-count-operators">0</span>
                     </div>
-                    <div class="category-card">
+                    <div class="category-card" data-category="accommodation">
                         <span class="category-card-icon">🏨</span>
                         <span class="category-card-title">Accommodation</span>
-                        <span class="category-card-count">0</span>
+                        <span class="category-card-count" id="sh-cat-count-accommodation">0</span>
                     </div>
-                    <div class="category-card">
+                    <div class="category-card" data-category="other">
                         <span class="category-card-icon">⚙️</span>
                         <span class="category-card-title">Other</span>
-                        <span class="category-card-count">0</span>
+                        <span class="category-card-count" id="sh-cat-count-other">0</span>
+                    </div>
+                </div>
+
+                <!-- Registration Status Filter Bar & Management Scope Badge -->
+                <div class="stakeholder-control-toolbar" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.85rem; margin: 1.5rem 0 1rem 0;">
+                    <div class="filter-pill-bar" id="sh-status-filter-pills" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button type="button" class="filter-pill active" data-status="all">All Registrations (<span id="count-sh-all">0</span>)</button>
+                        <button type="button" class="filter-pill" data-status="pending approval" style="border-color: #FCD34D;">⏳ Pending Approval (<span id="count-sh-pending" style="font-weight: 800; color: #D97706;">0</span>)</button>
+                        <button type="button" class="filter-pill" data-status="under review">🔍 Under Review (<span id="count-sh-review">0</span>)</button>
+                        <button type="button" class="filter-pill" data-status="approved">✓ Approved (<span id="count-sh-approved">0</span>)</button>
+                        <button type="button" class="filter-pill" data-status="rejected">✕ Rejected (<span id="count-sh-rejected">0</span>)</button>
+                    </div>
+                    <div class="manager-scope-badge" id="manager-scope-indicator" style="display: flex; align-items: center; gap: 0.5rem; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.76rem; color: #334155;">
+                        <span style="font-size: 0.85rem;">🛡️</span>
+                        <span id="manager-scope-text"><strong>Authorized Scope:</strong> State Manager (Maharashtra) • Review & approve business registrations</span>
                     </div>
                 </div>
 
@@ -257,12 +277,12 @@
                     <table class="data-table app-table">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Category</th>
-                                <th>Destination</th>
-                                <th>Contact</th>
-                                <th>Status</th>
-                                <th style="text-align: right;">Action</th>
+                                <th>Partner / Business Entity</th>
+                                <th>Category & Type</th>
+                                <th>Assigned Destination</th>
+                                <th>Contact Information</th>
+                                <th>Registration Status</th>
+                                <th style="text-align: right;">Review Action</th>
                             </tr>
                         </thead>
                         <tbody id="stakeholders-table-body">
@@ -277,7 +297,7 @@
     </div>
 
     <!-- Modal Dialog: Add Stakeholder -->
-    <div class="modal-overlay app-modal" id="addStakeholderModal">
+    <div class="modal-overlay app-modal" id="addStakeholderModal" role="dialog" aria-modal="true">
         <div class="modal-card">
             <div class="modal-header">
                 <h3 class="modal-title">Register New Tourism Stakeholder</h3>
@@ -285,31 +305,54 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Partner / Entity Name</label>
-                    <input type="text" id="add-sh-name" class="form-control" placeholder="e.g. Sahyadri Trekking Guides Assn">
+                    <label>Partner / Entity Name <span style="color: #DC2626;">*</span></label>
+                    <input type="text" id="add-sh-name" class="form-control" placeholder="e.g. Sahyadri Trekking Guides Assn" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                    <div class="form-group">
+                        <label>Ecosystem Category</label>
+                        <select id="add-sh-category" class="form-control">
+                            <option value="Guides">Guides</option>
+                            <option value="Transport">Transport</option>
+                            <option value="Homestays">Homestays</option>
+                            <option value="Food & Dining">Food & Dining</option>
+                            <option value="Handicrafts">Handicrafts</option>
+                            <option value="Tour Operators">Tour Operators</option>
+                            <option value="Accommodation">Accommodation</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Service Model Type</label>
+                        <select id="add-sh-type" class="form-control">
+                            <option value="visitor-facing">Visitor-Facing Service</option>
+                            <option value="info-contributor">Information Contributor</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                    <div class="form-group">
+                        <label>Destination Context</label>
+                        <select id="add-sh-dest" class="form-control">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Initial Status</label>
+                        <select id="add-sh-status" class="form-control">
+                            <option value="Approved">Approved (Verified Direct)</option>
+                            <option value="Pending Approval">Pending Approval (Review Required)</option>
+                            <option value="Under Review">Under Review</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label>Ecosystem Category</label>
-                    <select id="add-sh-category" class="form-control">
-                        <option value="Guides">Guides</option>
-                        <option value="Transport">Transport</option>
-                        <option value="Homestays">Homestays</option>
-                        <option value="Food & Dining">Food & Dining</option>
-                        <option value="Handicrafts">Handicrafts</option>
-                        <option value="Tour Operators">Tour Operators</option>
-                        <option value="Accommodation">Accommodation</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Destination Context</label>
-                    <select id="add-sh-dest" class="form-control">
-                        <!-- Populated dynamically -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Contact Information</label>
+                    <label>Contact Phone / Email</label>
                     <input type="text" id="add-sh-contact" class="form-control" placeholder="e.g. +91 98765 43210 / info@partner.org">
+                </div>
+                <div class="form-group">
+                    <label>Operating Address / Trailhead</label>
+                    <input type="text" id="add-sh-address" class="form-control" placeholder="e.g. Base Camp Office, Gunjavane Village">
                 </div>
             </div>
             <div class="modal-footer">
@@ -318,17 +361,18 @@
             </div>
         </div>
     </div>
-    <!-- Modal Dialog: Stakeholder Details & Actions -->
-    <div class="modal-overlay app-modal" id="stakeholderDetailModal">
-        <div class="modal-card" style="max-width: 600px; width: 90%;">
+
+    <!-- Modal Dialog: Stakeholder Review, Approval & Details -->
+    <div class="modal-overlay app-modal" id="stakeholderDetailModal" role="dialog" aria-modal="true">
+        <div class="modal-card" style="max-width: 650px; width: 95%;">
             <div class="modal-header">
-                <h3 class="modal-title" id="sh-detail-modal-title">Stakeholder Profile & Actions</h3>
+                <h3 class="modal-title" id="sh-detail-modal-title">Stakeholder Review & Management</h3>
                 <button class="modal-close" id="btn-close-sh-detail-modal">&times;</button>
             </div>
-            <div class="modal-body" id="sh-detail-modal-body">
+            <div class="modal-body" id="sh-detail-modal-body" style="max-height: 75vh; overflow-y: auto;">
                 <!-- Rendered dynamically by JS -->
             </div>
-            <div class="modal-footer" id="sh-detail-modal-footer" style="display: flex; gap: 0.5rem; justify-content: space-between;">
+            <div class="modal-footer" id="sh-detail-modal-footer" style="display: flex; gap: 0.5rem; justify-content: space-between; align-items: center;">
                 <!-- Action buttons rendered dynamically by JS -->
             </div>
         </div>
@@ -336,6 +380,7 @@
 
     <script src="../js/manager-data.js"></script>
     <script src="../js/manager-core.js"></script>
+    <script src="../js/admin.js"></script>
     <script src="../js/manager-views.js"></script>
     <script src="../js/manager.js"></script>
     <script src="../js/dashboard.js"></script>

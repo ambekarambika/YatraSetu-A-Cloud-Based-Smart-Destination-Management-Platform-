@@ -15,7 +15,7 @@ window.YatraSetuStakeholderData = {
 
     // Current Stakeholder Profile Identity (In-Memory Prototype)
     profile: {
-        id: 'sh-1',
+        id: 'sh-101',
         userName: 'Suresh Deshmukh',
         organizationName: 'Sahyadri Trekking Guides Co-op',
         type: 'visitor-facing', // 'visitor-facing' | 'info-contributor'
@@ -30,8 +30,8 @@ window.YatraSetuStakeholderData = {
         hours: 'Mon - Sun (06:00 - 18:00)',
         address: 'Base Camp Office, Gunjavane Village, Velhe, Pune - 412213',
         priceRange: '500 - 1,500 per group',
-        description: 'Certified local trekking guide cooperative specializing in heritage fort trails and monsoon safety.',
-        status: 'Prototype Partner (Demo Profile)',
+        status: 'Approved',
+        isBusinessApproved: true,
         avatarInitials: 'SD'
     },
 
@@ -79,27 +79,47 @@ window.YatraSetuStakeholderData = {
         }
     ],
 
-    // Manager Coordination — Stakeholder Suggestions (Prototype Sample Records Only)
+    // Manager Coordination — Stakeholder Messages & Suggestions (Synchronized Prototype Data)
     suggestions: [
         {
-            id: 'sug-1',
+            id: 'sh-msg-1',
+            stakeholder_id: 'sh-101',
+            stakeholder_name: 'Suresh Deshmukh',
+            business_name: 'Sahyadri Trekking Guides Co-op',
+            state_id: 'maharashtra',
             destination_id: 'raigad-fort',
-            topic: 'Trail Information',
-            suggestionText: 'Add water point near Gunjavane trail',
-            submittedAt: '8 Oct 2026',
-            status: 'Pending',
-            statusClass: 'pending',
-            managerNote: 'Pending Manager Review (Prototype)'
+            destination_name: 'Rajgad Fort',
+            topic: 'Trail Safety / Water Point',
+            message: 'Requesting potable water station installation near the Gunjavane base trail junction before the upcoming weekend influx.',
+            suggestionText: 'Requesting potable water station installation near the Gunjavane base trail junction before the upcoming weekend influx.',
+            submitted_at: '08 Oct 2026, 10:30 AM',
+            submittedAt: '08 Oct 2026, 10:30 AM',
+            status: 'In Review',
+            statusClass: 'review',
+            manager_response: 'Forest department liaison has been initiated. Site inspection scheduled for Wednesday.',
+            managerNote: 'Forest department liaison has been initiated. Site inspection scheduled for Wednesday.',
+            responded_by: 'Rajesh Patil (Destination Manager)',
+            responded_at: '09 Oct 2026, 02:15 PM'
         },
         {
-            id: 'sug-2',
+            id: 'sh-msg-2',
+            stakeholder_id: 'sh-101',
+            stakeholder_name: 'Suresh Deshmukh',
+            business_name: 'Sahyadri Trekking Guides Co-op',
+            state_id: 'maharashtra',
             destination_id: 'raigad-fort',
-            topic: 'Facility Hours',
-            suggestionText: 'Extend base camp helpdesk timing',
-            submittedAt: '1 Oct 2026',
-            status: 'Under Review',
-            statusClass: 'review',
-            managerNote: 'Under Manager Evaluation (Prototype)'
+            destination_name: 'Rajgad Fort',
+            topic: 'Emergency Contact Board',
+            message: 'Requesting updated emergency rescue contact boards at Padmavati Machi as older numbers are disconnected.',
+            suggestionText: 'Requesting updated emergency rescue contact boards at Padmavati Machi as older numbers are disconnected.',
+            submitted_at: '11 Oct 2026, 09:15 AM',
+            submittedAt: '11 Oct 2026, 09:15 AM',
+            status: 'Pending',
+            statusClass: 'pending',
+            manager_response: null,
+            managerNote: 'Awaiting Manager Review',
+            responded_by: null,
+            responded_at: null
         }
     ],
 

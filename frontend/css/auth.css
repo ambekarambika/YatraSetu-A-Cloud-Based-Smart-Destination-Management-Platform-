@@ -278,20 +278,21 @@ body.auth-cinematic-body {
     justify-content: space-between;
 }
 
-/* Login Compact Pills */
+/* Login Compact Pills (Single Row 4-Role Grid) */
 .glass-role-pills {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.6rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.35rem;
+    width: 100%;
 }
 
 .glass-role-pill {
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 10px;
-    padding: 0.6rem 0.5rem;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.825rem;
+    border-radius: 8px;
+    padding: 0.42rem 0.2rem;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.74rem;
     font-weight: 600;
     cursor: pointer;
     text-align: center;
@@ -299,7 +300,17 @@ body.auth-cinematic-body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.glass-role-pill span {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.01em;
 }
 
 .glass-role-pill:hover {
@@ -316,6 +327,9 @@ body.auth-cinematic-body {
 }
 
 .glass-role-pill svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
     color: rgba(255, 255, 255, 0.7);
     transition: var(--transition, all 0.2s);
 }
@@ -597,10 +611,20 @@ body.auth-cinematic-body {
 
 @media (max-width: 520px) {
     .auth-glass-panel {
-        padding: 2rem 1.5rem;
+        padding: 2rem 1.25rem;
     }
-    
-    .glass-role-pills, .glass-role-cards-grid {
+
+    .glass-role-cards-grid {
         grid-template-columns: 1fr;
+    }
+
+    .glass-role-pills {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.25rem;
+    }
+
+    .glass-role-pill {
+        padding: 0.38rem 0.15rem;
+        font-size: 0.68rem;
     }
 }
