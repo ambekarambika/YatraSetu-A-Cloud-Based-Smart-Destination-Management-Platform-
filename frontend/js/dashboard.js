@@ -211,11 +211,14 @@ function initTopbarUserDropdown(topbar, userName, initials, roleLabel) {
 
     // Ensure Badge Wrapper
     let badgeWrapper = userBadge.parentElement;
-    if (!badgeWrapper.classList.contains('user-profile-badge-wrapper')) {
-        badgeWrapper = document.createElement('div');
-        badgeWrapper.className = 'user-profile-badge-wrapper';
-        userBadge.parentNode.insertBefore(badgeWrapper, userBadge);
-        badgeWrapper.appendChild(userBadge);
+    if (badgeWrapper && !badgeWrapper.classList.contains('user-profile-badge-wrapper')) {
+        const parent = userBadge.parentNode;
+        if (parent) {
+            badgeWrapper = document.createElement('div');
+            badgeWrapper.className = 'user-profile-badge-wrapper';
+            parent.insertBefore(badgeWrapper, userBadge);
+            badgeWrapper.appendChild(userBadge);
+        }
     }
 
     // Floating User Dropdown Panel
@@ -238,7 +241,11 @@ function initTopbarUserDropdown(topbar, userName, initials, roleLabel) {
             <a href="${profilePath}" class="user-menu-item" id="topbar-btn-settings">⚙️ Account Settings</a>
             <button type="button" class="user-menu-item logout" id="topbar-btn-logout">🚪 Logout</button>
         `;
-        badgeWrapper.appendChild(userMenuPanel);
+        if (badgeWrapper) {
+            badgeWrapper.appendChild(userMenuPanel);
+        } else if (rightArea) {
+            rightArea.appendChild(userMenuPanel);
+        }
 
         const profileBtn = userMenuPanel.querySelector('#topbar-btn-profile');
         if (profileBtn && window.location.pathname.includes('/admin/')) {
@@ -308,11 +315,14 @@ function initTopbarNotifications(topbar, role) {
     if (!notifBtn) return;
 
     let notifWrapper = notifBtn.parentElement;
-    if (!notifWrapper.classList.contains('topbar-action-wrapper')) {
-        notifWrapper = document.createElement('div');
-        notifWrapper.className = 'topbar-action-wrapper';
-        notifBtn.parentNode.insertBefore(notifWrapper, notifBtn);
-        notifWrapper.appendChild(notifBtn);
+    if (notifWrapper && !notifWrapper.classList.contains('topbar-action-wrapper')) {
+        const parent = notifBtn.parentNode;
+        if (parent) {
+            notifWrapper = document.createElement('div');
+            notifWrapper.className = 'topbar-action-wrapper';
+            parent.insertBefore(notifWrapper, notifBtn);
+            notifWrapper.appendChild(notifBtn);
+        }
     }
 
     // Role-Specific Prototype Notification Store
@@ -358,7 +368,11 @@ function initTopbarNotifications(topbar, role) {
         notifPanel = document.createElement('div');
         notifPanel.id = 'notification-dropdown-panel';
         notifPanel.className = 'topbar-dropdown-panel notif-dropdown-floating';
-        notifWrapper.appendChild(notifPanel);
+        if (notifWrapper) {
+            notifWrapper.appendChild(notifPanel);
+        } else if (rightArea) {
+            rightArea.appendChild(notifPanel);
+        }
     }
 
     const renderNotifList = () => {

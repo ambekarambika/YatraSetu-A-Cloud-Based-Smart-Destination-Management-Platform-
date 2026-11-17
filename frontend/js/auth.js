@@ -17,6 +17,20 @@ document.addEventListener('DOMContentLoaded', () => {
 function initGlassRoleSelectors() {
     const roleItems = document.querySelectorAll('.glass-role-pill, .glass-role-card');
     const hiddenRoleInput = document.getElementById('selected-role');
+    const destGroup = document.getElementById('destination-select-group');
+
+    const updateDestGroupVisibility = (role) => {
+        if (!destGroup) return;
+        if (role === 'stakeholder' || role === 'manager') {
+            destGroup.style.display = 'block';
+        } else {
+            destGroup.style.display = 'none';
+        }
+    };
+
+    if (hiddenRoleInput) {
+        updateDestGroupVisibility(hiddenRoleInput.value);
+    }
 
     if (!roleItems.length) return;
 
@@ -26,6 +40,8 @@ function initGlassRoleSelectors() {
             if (hiddenRoleInput) {
                 hiddenRoleInput.value = role;
             }
+
+            updateDestGroupVisibility(role);
 
             roleItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
@@ -94,7 +110,7 @@ function fillDemoCredentialsForRole(role) {
     const demoAccounts = {
         tourist: { email: 'tourist.demo@yatrasetu.in', pass: 'Tourist@123' },
         manager: { email: 'manager.maharashtra@yatrasetu.in', pass: 'Manager@123' },
-        stakeholder: { email: 'stakeholder.local@yatrasetu.in', pass: 'Stakeholder@123' },
+        stakeholder: { email: 'sahyadri.guides@gmail.com', pass: 'Stakeholder@123' },
         admin: { email: 'admin.governance@yatrasetu.in', pass: 'Admin@123' }
     };
 
@@ -138,7 +154,8 @@ function initLoginForm() {
             const rawUsers = localStorage.getItem('yatrasetu_admin_users') || sessionStorage.getItem('yatrasetu_admin_users');
             if (rawUsers) {
                 const adminUsers = JSON.parse(rawUsers);
-                const matched = adminUsers.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
+                const normEmail = email.toLowerCase();
+                const matched = adminUsers.find(u => u.email && (u.email.toLowerCase() === normEmail || (normEmail === 'stakeholder.local@yatrasetu.in' && u.id === 'sh-101')));
                 if (matched && matched.account_status === 'Deactivated') {
                     showGlassAlert('error', 'ACCOUNT SUSPENDED: This account has been deactivated by the Platform Administrator. Access is blocked.');
                     return;
@@ -183,9 +200,10 @@ function initLoginForm() {
         // Store active user session context
         sessionStorage.setItem('yatrasetu_role', role);
         sessionStorage.setItem('yatrasetu_email', email);
-        if (!sessionStorage.getItem('yatrasetu_name')) {
-            sessionStorage.setItem('yatrasetu_name', role === 'tourist' ? 'Ananya Sharma' : (role === 'manager' ? 'Rajesh Patil' : (role === 'stakeholder' ? 'Suresh Deshmukh' : 'Rajesh Verma')));
+        if (!sessionStorage.getItem('yatrasetu_user_id')) {
+            sessionStorage.setItem('yatrasetu_user_id', role === 'tourist' ? 'usr-tourist-01' : (role === 'manager' ? 'usr-mgr-01' : (role === 'stakeholder' ? 'sh-101' : 'usr-adm-01')));
         }
+        sessionStorage.setItem('yatrasetu_name', (typeof matched !== 'undefined' && matched) ? matched.name : (role === 'tourist' ? 'Ananya Sharma' : (role === 'manager' ? 'Rajesh Patil' : (role === 'stakeholder' ? 'Suresh Deshmukh' : 'Rajesh Verma'))));
 
         showGlassAlert('success', `✨ Authenticated as <strong>${role.toUpperCase()}</strong>. Redirecting to workspace...`);
 
@@ -202,6 +220,19 @@ function initLoginForm() {
 function initRegisterForm() {
     const form = document.getElementById('register-form');
     if (!form) return;
+
+    // Populate registration destination dropdown if present
+    const destSelect = document.getElementById('registration-destination');
+    if (destSelect && window.YatraSetuManagerData && Array.isArray(window.YatraSetuManagerData.destinations)) {
+        destSelect.innerHTML = '<option value="" style="color: #1E293B; background: #FFFFFF;">-- No Destination Assigned (Pending Review) --</option>';
+        window.YatraSetuManagerData.destinations.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.id;
+            opt.textContent = `${d.name} (${d.state_id ? d.state_id.charAt(0).toUpperCase() + d.state_id.slice(1) : 'Maharashtra'})`;
+            opt.style.cssText = 'color: #1E293B; background: #FFFFFF;';
+            destSelect.appendChild(opt);
+        });
+    }
 
     form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -237,11 +268,33 @@ function initRegisterForm() {
             return;
         }
 
+        // Determine destination selection from user choice (no invented destinations or hardcoded Rajgad Fort)
+        const selectedDestId = (destSelect ? destSelect.value.trim() : '');
+        let assignedDestId = '';
+        let assignedDestName = 'Pending Assignment';
+        let assignedStateId = 'maharashtra';
+
+        if (selectedDestId && window.YatraSetuManagerData && Array.isArray(window.YatraSetuManagerData.destinations)) {
+            const matchedDest = window.YatraSetuManagerData.destinations.find(d => d.id === selectedDestId);
+            if (matchedDest) {
+                assignedDestId = matchedDest.id;
+                assignedDestName = matchedDest.name;
+                assignedStateId = matchedDest.state_id || 'maharashtra';
+            }
+        }
+
         sessionStorage.setItem('yatrasetu_role', role);
         sessionStorage.setItem('yatrasetu_email', email);
         sessionStorage.setItem('yatrasetu_name', fullname);
+        if (assignedDestId) {
+            sessionStorage.setItem('yatrasetu_destination_id', assignedDestId);
+            sessionStorage.setItem('yatrasetu_active_dest_id', assignedDestId);
+        } else {
+            sessionStorage.removeItem('yatrasetu_destination_id');
+            sessionStorage.removeItem('yatrasetu_active_dest_id');
+        }
 
-        // Auto-register stakeholder into AdminStore and Audit Trail
+        // Auto-register stakeholder into AdminStore and Manager Review Workflow
         if (role === 'stakeholder') {
             try {
                 const userKey = 'yatrasetu_admin_users';
@@ -253,15 +306,16 @@ function initRegisterForm() {
                 }
                 const existing = users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
                 if (!existing) {
+                    const stableId = `sh-${Date.now().toString(36)}`;
                     const newSh = {
-                        id: `sh-${Date.now().toString(36)}`,
+                        id: stableId,
                         name: fullname,
                         email: email,
                         role: 'stakeholder',
                         access_level: 'Registered Business',
-                        state_id: 'maharashtra',
-                        destination_id: '',
-                        destination_name: 'Pending Assignment',
+                        state_id: assignedStateId,
+                        destination_id: assignedDestId,
+                        destination_name: assignedDestName,
                         organization: `${fullname} Enterprise`,
                         category: 'Tourism Partner',
                         account_status: 'Active',
@@ -272,6 +326,45 @@ function initRegisterForm() {
                     users.unshift(newSh);
                     localStorage.setItem(userKey, JSON.stringify(users));
                     sessionStorage.setItem(userKey, JSON.stringify(users));
+
+                    // Connect to Destination Manager review workflow (BUG-04)
+                    const mgrShKey = 'yatrasetu_manager_stakeholders';
+                    const rawMgrSh = localStorage.getItem(mgrShKey) || sessionStorage.getItem(mgrShKey);
+                    let mgrStakeholders = [];
+                    if (rawMgrSh) {
+                        try { mgrStakeholders = JSON.parse(rawMgrSh); } catch (e) {}
+                    }
+                    if (!Array.isArray(mgrStakeholders) || mgrStakeholders.length === 0) {
+                        mgrStakeholders = (window.YatraSetuManagerData && window.YatraSetuManagerData.stakeholders) ? [...window.YatraSetuManagerData.stakeholders] : [];
+                    }
+                    const existingMgrSh = mgrStakeholders.find(s => (s.id && s.id === stableId) || (s.email && s.email.toLowerCase() === email.toLowerCase()));
+                    if (!existingMgrSh) {
+                        const mgrRecord = {
+                            id: stableId,
+                            state_id: newSh.state_id,
+                            destination_id: newSh.destination_id,
+                            destination: newSh.destination_name,
+                            name: newSh.organization,
+                            category: 'Guides',
+                            type: 'visitor-facing',
+                            contact: '+91 98220 00000',
+                            email: email,
+                            contact_person: fullname,
+                            address: assignedDestId ? `${newSh.destination_name} Base, ${assignedStateId.charAt(0).toUpperCase() + assignedStateId.slice(1)}` : 'Pending Destination Assignment',
+                            hours: '08:00 - 18:00',
+                            price_range: '₹500 - ₹1,500',
+                            description: `Registered local tourism service for ${fullname}.`,
+                            status: 'Pending Approval',
+                            account_status: 'Active',
+                            registered_date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+                            reviewed_by: '',
+                            reviewed_date: '',
+                            manager_note: ''
+                        };
+                        mgrStakeholders.unshift(mgrRecord);
+                        localStorage.setItem(mgrShKey, JSON.stringify(mgrStakeholders));
+                        sessionStorage.setItem(mgrShKey, JSON.stringify(mgrStakeholders));
+                    }
 
                     const rawAudit = localStorage.getItem(auditKey) || sessionStorage.getItem(auditKey);
                     let audit = [];

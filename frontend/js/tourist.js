@@ -53,6 +53,11 @@
             subtitle: 'Historic capital of the Maratha Empire under Chhatrapati Shivaji Maharaj',
             location: 'Pune / Raigad, Maharashtra',
             description: 'Perched at 2,700 feet above sea level in the Sahyadri mountains, Rajgad Fort served as the capital of the Maratha Empire for over 26 years. Known for its strategic architecture, Padmavati Machi, and panoramic mountain ridges, it offers some of India\'s finest heritage trekking trails.',
+            history_background: 'Originating in medieval antiquity under the Bahmani rulers as Murumdev, the fort was captured by Chhatrapati Shivaji Maharaj in 1646 at the age of 16. Recognizing its supreme natural elevation, he extensively fortified it, renamed it Rajgad (The King of Forts), and established it as the primary capital of the Maratha sovereign state (Swarajya) for over 26 years before the coronation at Raigad. The citadel served as the strategic command center during the consolidation of the Western Ghats and witnessed pivotal Maratha treaties.',
+            heritage_architecture: 'Engineered as an impregnable triangular hill citadel perched at 2,700 feet above sea level, Rajgad is celebrated for its three expansive fortified sub-plateaus (machis): Padmavati Machi, Sanjivani Machi, and Suvela Machi. The construction features double-walled curtain bastions (chilkhati buruj), concealed sally ports (Chor Darwaza), and the iconic natural rock eyelet (Nedhe) perforated through a towering volcanic ridge on Suvela Machi.',
+            cultural_significance: 'Revered across Maharashtra as a sacred temple of Maratha sovereignty. It enshrines the consecrated Padmavati Temple, houses the historic memorial Samadhi of Maharani Saibai, and remains the primary pilgrimage destination for annual trekking festivals, Shiv Jayanti rallies, and historical preservation summits.',
+            geography_landmarks: 'Situated on a soaring volcanic spur in the Sahyadri ranges of the Western Ghats, bounded by the Kaal, Velvandi, and Gandhari river valleys. Prominent topographic landmarks include Padmavati Lake, the monumental Maha Darwaza, the Gunjavane approach stairs, Balekilla (the high royal citadel), and the sheer vertical drop of Takmak Tok.',
+            traditions_culture: 'Sustained by local Mavala villager cooperatives from Gunjavane, Pali, and Sakhar. Traditions include community-led heritage trail maintenance, traditional pithla-bhakri and thecha rustic cuisine, and vocal povada ballad singing honoring Sahyadri history.',
             highlights: [
                 'Historic Maratha citadel with rich royal architecture',
                 'Scenic trekking trails with Padmavati and Suvela Machi viewpoints',
@@ -68,6 +73,11 @@
             subtitle: 'Misty Western Ghats hill station celebrated for waterfalls and fort lookouts',
             location: 'Pune District, Maharashtra',
             description: 'A popular hill station in the Sahyadris, Lonavala is surrounded by green valleys, cascading seasonal waterfalls, Buddhist rock-cut caves at Karla and Bhaja, and vantage points like Tiger\'s Leap.',
+            history_background: 'Dating back to the 2nd century BCE, the Lonavala-Khandala plateau was an essential arterial trade corridor linking the Arabian Sea ports of Kalyan and Chaul to the interior Deccan plateau. The trade route was fortified with hill redoubts such as Lohagad and Visapur and consecrated by ancient Buddhist monastic cave sanctuaries at Karla and Bhaja.',
+            heritage_architecture: 'Features pristine rock-cut Buddhist architecture at Karla and Bhaja caves, showcasing colossal Chaitya halls with arched teakwood ribbing that has survived over 2,200 years, monolithic Ashokan stupas, and ancient vihara monk cells carved directly into basalt cliff faces.',
+            cultural_significance: 'Celebrated as the heart of Sahyadri monsoon tourism and outdoor trekking culture, harmonizing ancient Buddhist contemplative heritage with Maharashtra’s celebrated mountain trail ethos.',
+            geography_landmarks: 'Located along the crest of the Western Ghats at 2,047 feet, flanked by the Indrayani river basin, Duke\'s Nose (Nagphani) monolith, Tiger\'s Leap sheer precipice, and Bushi Lake cascading overflow.',
+            traditions_culture: 'Famous for its traditional cottage candy industry (Lonavala Chikki, crushed peanut and jaggery fudge), artisanal fudge confectioneries, and seasonal farmer markets offering Western Ghats wild honey and berries.',
             highlights: [
                 'Spectacular valley viewpoints including Tiger\'s Leap',
                 'Historic rock-cut Karla & Bhaja Caves nearby',
@@ -143,6 +153,11 @@
             subtitle: 'Serene palm-fringed waterways, traditional kettuvallam houseboats, and lagoons',
             location: 'Alappuzha, Kerala',
             description: 'Known as the Venice of the East, Alappuzha is famous for its intricate network of tranquil canals, paddy fields, lagoons, and overnight houseboat journeys.',
+            history_background: 'Developed in the late 18th century by Raja Kesavadas, the Prime Minister of Travancore, who constructed the pier, canals, and warehousing infrastructure to establish a flourishing global coir and spice trading port connecting the Arabian Sea to the interior backwater network.',
+            heritage_architecture: 'Distinguished by traditional Kettuvallam architecture—wooden cargo barges assembled from Anjili (wild jackfruit) wood planks tied securely with coir rope without a single iron nail, coated with boiled black resin and curved bamboo canopies.',
+            cultural_significance: 'Epicenter of Kerala backwater folklore and the historic Nehru Trophy Snake Boat Race (Vallam Kali), which draws thousands of rhythmic rowers singing Vanchipattu boat songs on Punnamada Lake every monsoon.',
+            geography_landmarks: 'Set within the unique Kuttanad delta system, one of the few places in the world where farming is practiced 1 to 3 meters below sea level, crisscrossed by Vembanad Lake, Pamba River, and vast emerald paddy wetlands.',
+            traditions_culture: 'Rich riparian culture centered around toddy tapping, coir fiber spinning, duck farming, and the preparation of spicy freshwater Karimeen Pollichathu wrapped in banana leaves.',
             highlights: [
                 'Overnight luxury and traditional kettuvallam houseboat cruises',
                 'Scenic labyrinth of canals, Vembanad Lake, and rural life',
@@ -158,6 +173,11 @@
             subtitle: 'Opulent red sandstone and marble fortress overlooking Maota Lake',
             location: 'Jaipur, Rajasthan',
             description: 'Constructed by Raja Man Singh I, Amer Fort is a grand hilltop stronghold showcasing a fusion of Rajput and Mughal architecture, Sheesh Mahal (Mirror Palace), and courtyards.',
+            history_background: 'Founded in 967 CE by the Chanda clan of Meenas and later established by Raja Man Singh I in 1592 as the formidable royal seat of the Kachwaha Rajputs. Amer served as Rajasthan’s foremost strategic capital until Sawai Jai Singh II founded Jaipur in 1727.',
+            heritage_architecture: 'A masterwork of Rajput-Mughal military and palace architecture, featuring yellow and pink sandstone battlements, marble courtyards, the world-famous Sheesh Mahal (Hall of Mirrors) inlaid with concave Belgian convex glass, and ancient Persian-wheel water lifting mechanisms.',
+            cultural_significance: 'A UNESCO World Heritage Hill Fort embodying centuries of Rajput chivalry, ceremonial royal pageantry, and classical Dhundhar court traditions, home to the revered Shila Devi Temple.',
+            geography_landmarks: 'Perched on the rugged Aravalli hill ranges overlooking Maota Lake and the Sun Gate (Suraj Pol), connected to the higher fortress of Jaigarh via subterranean defensive rampart corridors.',
+            traditions_culture: 'Living artisanal heritage of blue pottery, Sanganeri block printing, Kathputli puppet chronicles, and Jaipur court classical music performances under the desert moonlight.',
             highlights: [
                 'Sheesh Mahal: Breathtaking hall of thousand mirrors',
                 'Magnificent Rajput-Mughal fortress overlooking Maota Lake',
@@ -326,11 +346,717 @@
     };
 
     /**
+     * Curated Multi-Image Visual Galleries
+     * Verified photographs with perspectives, titles, and captions
+     */
+    const DESTINATION_GALLERIES = {
+        'raigad-fort': [
+            { url: '../assets/images/thumb-rajgad.jpg', title: 'Padmavati Machi Panoramic Ramparts', tag: 'Landscape Ridge', caption: 'Sweeping view across the vast fortifications of Padmavati Machi facing the Sahyadris.' },
+            { url: '../assets/images/hero-maharashtra.jpg', title: 'Balekilla Highest Citadel Ascent', tag: 'Citadel Peak', caption: 'Steep stone steps ascending to the royal throne residence at Balekilla.' },
+            { url: '../assets/images/thumb-rajgad.jpg', title: 'Mountaineous Trekking Route', tag: 'Trek Trail', caption: 'The rugged forest ascent from Gunjavane base village leading to Chor Darwaja.' },
+            { url: '../assets/images/thumb-rajgad.jpg', title: 'Padmavati Temple Complex', tag: 'Sacred Heritage', caption: 'Historic stone shrine dedicated to Goddess Padmavati, offering shelter to heritage trekkers.' },
+            { url: '../assets/images/hero-maharashtra.jpg', title: 'Sanjeevani Machi Triple Ramparts', tag: 'Military Architecture', caption: 'Massive multi-tiered defensive bastions engineered to protect the southern ridge.' },
+            { url: '../assets/images/thumb-rajgad.jpg', title: 'Suvela Machi & Natural Needle Rock', tag: 'Natural Wonder', caption: 'The iconic natural rock arch (Nedhe) perforated through the sheer basalt ridge.' }
+        ],
+        'lonavala': [
+            { url: '../assets/images/thumb-lonavala.jpg', title: "Tiger's Leap Cliff Viewpoint", tag: 'Scenic Valley', caption: 'Sheer 650-meter drop into the emerald valleys of Khandala and the Western Ghats.' },
+            { url: '../assets/images/thumb-lonavala.jpg', title: 'Tiger Point Sunset Lookout', tag: 'Golden Hour', caption: 'Panoramic twilight view across winding mountain ghat roads and mist.' },
+            { url: '../assets/images/thumb-ajanta.jpg', title: 'Karla Rock-Cut Buddhist Chaitya', tag: 'Ancient Caves', caption: 'Magnificent 2nd-century BC rock-cut vaulted prayer hall with ribbed teak ceilings.' },
+            { url: '../assets/images/thumb-ajanta.jpg', title: 'Bhaja Caves Monolithic Stupas', tag: 'Monolithic Art', caption: 'Ancient Buddhist relic stupas sculpted into sheer Sahyadri cliff rock.' },
+            { url: '../assets/images/thumb-lonavala.jpg', title: "Duke's Nose (Nagphani) Peak", tag: 'Adventure Trek', caption: 'Dramatic pointed cliff resembling a cobra hood, popular for rappelling.' },
+            { url: '../assets/images/thumb-lonavala.jpg', title: 'Bhushi Dam Overflow Steps', tag: 'Monsoon Stream', caption: 'Gentle stepped water cascades active during peak July–August monsoon rainfall.' }
+        ],
+        'alleppey-backwaters': [
+            { url: '../assets/images/hero-kerala.jpg', title: 'Traditional Kettuvallam Houseboat', tag: 'Waterway Cruise', caption: 'Handcrafted wooden houseboat thatched with coir and bamboo gliding on Vembanad Lake.' },
+            { url: '../assets/images/hero-kerala.jpg', title: 'Vembanad Lake Horizon', tag: 'Serene Lagoon', caption: 'Tranquil sunset over India’s longest freshwater backwater lake network.' },
+            { url: '../assets/images/hero-kerala.jpg', title: 'Snake Boat Regatta Racing', tag: 'Cultural Festival', caption: 'Chundan Vallams powered by 100 synchronized oarsmen battling in the annual trophy race.' },
+            { url: '../assets/images/hero-kerala.jpg', title: 'Emerald Canal Pathways', tag: 'Canal Village', caption: 'Quiet palm-fringed channels connecting secluded island hamlets and coir weavers.' },
+            { url: '../assets/images/hero-kerala.jpg', title: 'Kuttanad Below-Sea-Level Farms', tag: 'Bio-Heritage', caption: 'Unique UNESCO-recognized agricultural delta farmed 2 meters below sea level.' },
+            { url: '../assets/images/hero-kerala.jpg', title: 'Marari Secluded Beach Coast', tag: 'Golden Shore', caption: 'Pristine fishing village beach lined with coconut palms and traditional kattumarams.' }
+        ],
+        'munnar-hills': [
+            { url: '../assets/images/dest-munnar.jpg', title: 'Endless Rolling Tea Slopes', tag: 'Tea Plantations', caption: 'Manicured tea carpets stretching across the misty high ranges of Idukki.' },
+            { url: '../assets/images/dest-munnar.jpg', title: 'Munnar Morning Mist Valleys', tag: 'Cloud Cover', caption: 'Cool mountain air hovering over plantation trails at dawn.' },
+            { url: '../assets/images/hero-kerala.jpg', title: 'Eravikulam Nilgiri Tahr Habitat', tag: 'High-Altitude Wildlife', caption: 'Protected shola-grassland sanctuary preserving the endangered mountain ungulate.' },
+            { url: '../assets/images/dest-munnar.jpg', title: 'Mattupetty Storage Dam & Lake', tag: 'Mountain Lake', caption: 'Peaceful reservoir cradled by evergreen hills and grazing elephants.' },
+            { url: '../assets/images/dest-munnar.jpg', title: 'Anamudi Peak Summit Ridge', tag: 'Highest Peak', caption: 'The pinnacle of South India rising to 2,695 meters in the Western Ghats.' },
+            { url: '../assets/images/dest-munnar.jpg', title: 'Attukal Cascading Falls', tag: 'Water Cascade', caption: 'Rushing mountain stream crashing through boulders and jungle greenery.' }
+        ],
+        'dal-lake-srinagar': [
+            { url: '../assets/images/dest-manali.jpg', title: 'Dal Lake & Pir Panjal Mountains', tag: 'Alpine Mirror', caption: 'Mirror-still waters reflecting the snow-clad peaks of the Kashmir valley.' },
+            { url: '../assets/images/dest-manali.jpg', title: 'Char Chinar Island Grove', tag: 'Historic Island', caption: 'Four century-old chinar trees planted on a royal island pavilion by Prince Murad Baksh.' },
+            { url: '../assets/images/dest-manali.jpg', title: 'Canopied Wooden Shikara', tag: 'Traditional Boat', caption: 'Carved cedar-wood gondola floating through water lily pads and floating gardens.' },
+            { url: '../assets/images/dest-manali.jpg', title: 'Dawn Floating Vegetable Market', tag: 'Living Heritage', caption: 'Centuries-old dawn trading conducted on boats amidst misty lake channels.' },
+            { url: '../assets/images/dest-manali.jpg', title: 'Nishat Bagh Mughal Terraces', tag: 'Mughal Garden', caption: 'Twelve tiered terraces of water cascades, fountains, and vibrant flowerbeds.' },
+            { url: '../assets/images/dest-manali.jpg', title: 'Heritage Houseboats in Sunset Glow', tag: 'Twilight Serenity', caption: 'Handcrafted walnut-wood houseboats bathed in amber evening illumination.' }
+        ],
+        'amber-fort': [
+            { url: '../assets/images/dest-jaipur.jpg', title: 'Amer Fort Citadel & Maota Lake', tag: 'Royal Fort', caption: 'Imposing red sandstone and marble ramparts reflected in the calm waters of Maota Lake.' },
+            { url: '../assets/images/dest-jaipur.jpg', title: 'Sheesh Mahal (Palace of Mirrors)', tag: 'Intricate Craft', caption: 'Convex Belgian glass mirrors embedded into floral plaster walls to capture candlelight.' },
+            { url: '../assets/images/dest-jaipur.jpg', title: 'Ganesh Pol Royal Gate & Frescoes', tag: 'Rajput Murals', caption: 'Stunning three-story gateway adorned with classical vegetable-dye Rajput paintings.' },
+            { url: '../assets/images/dest-jaipur.jpg', title: 'Diwan-e-Khas Marble Pavilion', tag: 'Hall of Audience', caption: 'Pillar hall designed for private royal councils with alabaster latticework.' },
+            { url: '../assets/images/dest-jaipur.jpg', title: 'Kesar Kyari Floating Garden', tag: 'Mughal Garden', caption: 'Star-shaped geometric garden beds constructed in the center of Maota Lake.' },
+            { url: '../assets/images/dest-jaipur.jpg', title: 'Evening Illumination & Sound Show', tag: 'Night Heritage', caption: 'Vibrant amber and crimson lighting highlighting fort ramparts against the night sky.' }
+        ]
+    };
+
+    /**
+     * Curated Editorial Details for Verified Attractions
+     */
+    const ATTRACTION_EDITORIAL = {
+        'attr-padmavati-temple': {
+            timings: '06:00 AM – 06:30 PM (Daily)',
+            duration: '45 – 60 Minutes',
+            bestTime: 'Sunrise or early morning during temple aarti',
+            guidelines: 'Remove footwear before stepping onto the inner stone sabhamandap. Maintain quiet reverence.',
+            description: 'A stone shrine dedicated to Goddess Padmavati, the guardian deity of Rajgad Fort. Built during the era of Chhatrapati Shivaji Maharaj, the temple features a traditional sabhamandap and stone pillars. Trekkers often rest in its courtyard before making the final push to Balekilla.'
+        },
+        'attr-tigers-leap': {
+            timings: '06:00 AM – 06:30 PM (Daily)',
+            duration: '1 – 2 Hours',
+            bestTime: 'Early morning to catch valleys clearing or late sunset',
+            guidelines: 'Stay behind designated safety railings. Sheer vertical drop into the valley below.',
+            description: 'A cliff-top viewpoint with a sheer drop of over 650 meters that resembles a leaping tiger when viewed from the valley. It provides sweeping views of the Western Ghats, seasonal waterfalls, and the curving railway tracks through the Khandala Ghat pass.'
+        },
+        'attr-vembanad-houseboats': {
+            timings: 'Day Cruise: 11:30 AM – 05:30 PM | Overnight Check-in: 12:30 PM',
+            duration: 'Half-Day to Overnight Stay',
+            bestTime: 'September to March for pleasant breeze and calm waters',
+            guidelines: 'Ensure houseboats carry valid government tourism safety certification and life jackets.',
+            description: 'Traditional kettuvallams converted into luxurious eco-friendly floating residences. Powered through palm-shaded canals and the open expanse of Vembanad Lake, providing freshly cooked Kuttanad cuisine and views of rural backwater village life.'
+        },
+        'attr-eravikulam-np': {
+            timings: '07:30 AM – 04:00 PM (Closed Feb–Mar for calving season)',
+            duration: '2.5 – 3.5 Hours',
+            bestTime: '08:00 AM – 10:30 AM for active Nilgiri Tahr sightings',
+            guidelines: 'Book official forest department bus entry online in advance. Plastic-free zone.',
+            description: 'Kerala’s first national park, set across rolling high-altitude shola grasslands. It is home to the largest surviving population of the endangered Nilgiri Tahr (mountain goat) and blooms with the rare purple Neelakurinji flowers once every twelve years.'
+        },
+        'attr-char-chinar': {
+            timings: '07:00 AM – 07:00 PM (Accessible via Shikara)',
+            duration: '1 Hour',
+            bestTime: 'Late afternoon when the Pir Panjal mountains turn golden',
+            guidelines: 'Do not disembark on the fragile root systems of the historic chinar trees.',
+            description: 'A picturesque island located in the Ropa Lank basin of Dal Lake, famous for four magnificent Chinar trees planted symmetrically by Murad Baksh, brother of Mughal Emperor Aurangzeb. A quintessential postcard view of Srinagar.'
+        },
+        'attr-sheesh-mahal': {
+            timings: '09:00 AM – 05:00 PM | Night Show: 06:30 PM – 09:00 PM',
+            duration: '1 – 1.5 Hours',
+            bestTime: 'Morning for optimal sunlight reflection or during evening illumination',
+            guidelines: 'Touching the mirror inlays is prohibited to preserve fragile historic plasterwork.',
+            description: 'The Hall of Mirrors within Amer Fort, designed with intricate Belgian convex mirror mosaics and colored glass set into carved marble and lime plaster. When illuminated by a single candle at night, the entire hall glitters like a starry night sky.'
+        },
+        'attr-baga-water-sports': {
+            timings: '08:30 AM – 06:00 PM (Subject to sea conditions)',
+            duration: '2 – 3 Hours',
+            bestTime: 'October to May (Operations suspend during monsoon rough seas)',
+            guidelines: 'Wear approved life jackets at all times. Use certified operators carrying department badges.',
+            description: 'A bustling shoreline adventure hub offering parasailing with bird’s-eye views of Baga Beach, jet-ski circuits, banana boat rides, and bumper rides monitored by certified local water safety supervisors.'
+        },
+        'attr-thousand-pillar-hall': {
+            timings: '05:00 AM – 12:30 PM | 04:00 PM – 09:30 PM',
+            duration: '1.5 – 2 Hours',
+            bestTime: 'Morning hours for quiet contemplation of architectural details',
+            guidelines: 'Dress code: Shoulders and knees must be covered. Photography permits strictly required.',
+            description: 'An architectural wonder built in 1569 by Ariyanatha Mudaliar inside Meenakshi Amman Temple. Features 985 exquisitely carved stone pillars portraying mythical yalis, gods, and musicians, along with musical pillars that emit distinct notes when tapped.'
+        },
+        'attr-triveni-ghat-aarti': {
+            timings: 'Maha Aarti starts at 06:00 PM (Winter) / 06:45 PM (Summer)',
+            duration: '1.5 Hours',
+            bestTime: 'Arrive by 05:30 PM to secure seating near the river steps',
+            guidelines: 'Remove footwear before stepping onto the paved ghat steps. Dispose of leaf diya lamps responsibly.',
+            description: 'The sacred confluence of the Ganges, Yamuna, and Saraswati rivers where the daily evening Maha Aarti is conducted with chanting Vedic hymns, rhythmic drums, and multi-tiered brass oil lamps floated on the flowing river.'
+        },
+        'attr-kaziranga-elephant-safari': {
+            timings: '05:30 AM – 07:30 AM (Two early morning batches)',
+            duration: '1 Hour',
+            bestTime: 'First morning slot at 05:30 AM for misty encounters with rhinos',
+            guidelines: 'Pre-book at Western (Bagori) or Central (Kohora) range offices. Maintain absolute silence.',
+            description: 'An early-morning guided wildlife safari that allows visitors to traverse high elephant-grass floodplains quietly and observe the prehistoric Great Indian One-Horned Rhinoceros, swamp deer, and wild water buffalo up close.'
+        }
+    };
+
+    /**
+     * Curated Experiences & Outdoor Trails Catalog (Single Source of Truth)
+     */
+    const EXPERIENCES_DATA = [
+        {
+            id: 'exp-rajgad-trek',
+            state_id: 'maharashtra',
+            destination_id: 'raigad-fort',
+            title: 'Monsoon Rajgad Fort Citadel Trek',
+            category: 'trekking',
+            category_label: 'Trekking & Hiking',
+            location: 'Pune / Raigad, Maharashtra',
+            duration: '5 - 6 Hours',
+            difficulty: 'Moderate - Difficult',
+            season: 'Jul – Feb',
+            guide: 'Certified Guide Recommended',
+            img: '../assets/images/thumb-rajgad.jpg',
+            desc: 'High-ridge mountain ascent starting from Gunjavane village to Padmavati Machi and the supreme royal citadel of Balekilla with panoramic Sahyadri views.',
+            gear: 'Ankle-support trekking boots, 2.5L water, windcheater in monsoon, and hiking pole.'
+        },
+        {
+            id: 'exp-padmavati-machhi',
+            state_id: 'maharashtra',
+            destination_id: 'raigad-fort',
+            title: 'Padmavati Machi Heritage Bastion Exploration',
+            category: 'heritage',
+            category_label: 'Heritage & Architecture',
+            location: 'Rajgad Fort, Maharashtra',
+            duration: '3 Hours',
+            difficulty: 'Moderate',
+            season: 'Oct – Mar',
+            guide: 'Heritage Guide Recommended',
+            img: '../assets/images/thumb-rajgad.jpg',
+            desc: 'In-depth historical exploration of the royal court grounds, ancient Padmavati temple, water tanks, and the monumental sally-ports of the Maratha capital.',
+            gear: 'Comfortable walking shoes, wide-brim hat, camera, and hydration pack.'
+        },
+        {
+            id: 'exp-suvela-nedhe',
+            state_id: 'maharashtra',
+            destination_id: 'raigad-fort',
+            title: 'Suvela Machi Nedhe Rock-Eyelet Ridge Walk',
+            category: 'nature',
+            category_label: 'Nature & Wildlife',
+            location: 'Rajgad Fort, Maharashtra',
+            duration: '3 - 4 Hours',
+            difficulty: 'Difficult',
+            season: 'Oct – Feb',
+            guide: 'Mandatory Certified Guide',
+            img: '../assets/images/thumb-rajgad.jpg',
+            desc: 'Trek along the narrow volcanic spine of Suvela Machi to reach the colossal natural rock hole (Nedhe) perforated through the sheer basalt mountain edge.',
+            gear: 'Grip shoes, safety tether, headlamp, and high energy snacks.'
+        },
+        {
+            id: 'exp-lonavala-karla',
+            state_id: 'maharashtra',
+            destination_id: 'lonavala',
+            title: 'Karla & Bhaja Rock-Cut Buddhist Cave Exploration',
+            category: 'heritage',
+            category_label: 'Heritage & Architecture',
+            location: 'Lonavala, Maharashtra',
+            duration: '3 Hours',
+            difficulty: 'Easy - Moderate',
+            season: 'Oct – Mar',
+            guide: 'Archaeological Guide Available',
+            img: '../assets/images/dest-lonavala.jpg',
+            desc: 'Discover 2,200-year-old Buddhist Chaitya halls, monolithic stone stupas, and ancient Ashokan inscriptions carved into the Western Ghats cliffs.',
+            gear: 'Comfortable footwear for stone stairs, sun protection, and camera.'
+        },
+        {
+            id: 'exp-tigers-leap-hike',
+            state_id: 'maharashtra',
+            destination_id: 'lonavala',
+            title: 'Khandala Valley & Tiger’s Leap Sunrise Hike',
+            category: 'trekking',
+            category_label: 'Trekking & Hiking',
+            location: 'Khandala / Lonavala, Maharashtra',
+            duration: '2.5 Hours',
+            difficulty: 'Moderate',
+            season: 'Jul – Mar',
+            guide: 'Local Guide Available',
+            img: '../assets/images/dest-manali.jpg',
+            desc: 'Early morning hike along the Khandala ridge with views overlooking 650-meter vertical sheer cliffs, seasonal waterfalls, and misty mountain passes.',
+            gear: 'Trekking shoes, warm light jacket for dawn breeze, and water bottle.'
+        },
+        {
+            id: 'exp-alleppey-houseboat',
+            state_id: 'kerala',
+            destination_id: 'alleppey-backwaters',
+            title: 'Vembanad Heritage Houseboat Cruise',
+            category: 'water',
+            category_label: 'Water & Coastal',
+            location: 'Alappuzha, Kerala',
+            duration: 'Half-Day / Overnight',
+            difficulty: 'Leisure / Easy',
+            season: 'Sep – Mar',
+            guide: 'Licensed Captain & Crew',
+            img: '../assets/images/dest-alleppey.jpg',
+            desc: 'Cruise along the tranquil palm-shaded canals of Vembanad Lake on a traditional coir-tied Kettuvallam, accompanied by authentic freshly cooked Kuttanad meals.',
+            gear: 'Sun hat, sunglasses, cotton attire, and mosquito repellent.'
+        },
+        {
+            id: 'exp-alleppey-canoe',
+            state_id: 'kerala',
+            destination_id: 'alleppey-backwaters',
+            title: 'Kuttanad Village Coir Weaving & Canoe Tour',
+            category: 'spiritual',
+            category_label: 'Cultural & Spiritual',
+            location: 'Alappuzha, Kerala',
+            duration: '3 Hours',
+            difficulty: 'Easy',
+            season: 'Oct – Apr',
+            guide: 'Community Eco-Guide',
+            img: '../assets/images/hero-kerala.jpg',
+            desc: 'Navigate narrow shallow village canals by traditional hand-paddled country canoe to meet local coir spinning artisans and learn about below-sea-level paddy farming.',
+            gear: 'Light clothing, rain poncho, and cash for village handicraft stalls.'
+        },
+        {
+            id: 'exp-munnar-tea-trek',
+            state_id: 'kerala',
+            destination_id: 'munnar-hills',
+            title: 'Kolukkumalai High-Altitude Tea Estate Trail',
+            category: 'trekking',
+            category_label: 'Trekking & Hiking',
+            location: 'Munnar, Kerala',
+            duration: '4 Hours',
+            difficulty: 'Moderate',
+            season: 'Sep – Apr',
+            guide: 'Certified Plantation Guide',
+            img: '../assets/images/dest-munnar.jpg',
+            desc: 'Traverse the world’s highest organic tea plantations at 7,900 feet with cloud-covered valley vistas and visit an authentic century-old orthodox tea factory.',
+            gear: 'Light woolens, hiking boots, camera, and hydration pack.'
+        },
+        {
+            id: 'exp-eravikulam-tahr',
+            state_id: 'kerala',
+            destination_id: 'munnar-hills',
+            title: 'Eravikulam Nilgiri Tahr & Shola Grassland Walk',
+            category: 'nature',
+            category_label: 'Nature & Wildlife',
+            location: 'Eravikulam National Park, Munnar',
+            duration: '3 Hours',
+            difficulty: 'Moderate',
+            season: 'Sep – Feb',
+            guide: 'Forest Warden Escorted',
+            img: '../assets/images/dest-munnar.jpg',
+            desc: 'Observe the rare and endangered Nilgiri Tahr in their native montane grassland habitat beneath the soaring granite slopes of Anamudi Peak.',
+            gear: 'Warm layer, binoculars, camera with zoom lens, and zero-plastic bottles.'
+        },
+        {
+            id: 'exp-amer-sheesh',
+            state_id: 'rajasthan',
+            destination_id: 'amber-fort',
+            title: 'Amer Fort Sheesh Mahal & Royal Courts Walk',
+            category: 'heritage',
+            category_label: 'Heritage & Architecture',
+            location: 'Amer, Jaipur, Rajasthan',
+            duration: '3 Hours',
+            difficulty: 'Easy Walking',
+            season: 'Oct – Mar',
+            guide: 'Certified Heritage Guide',
+            img: '../assets/images/dest-jaipur.jpg',
+            desc: 'Explore Rajput-Mughal architectural synthesis, intricate Belgian glass inlay mosaics at Sheesh Mahal, Diwan-e-Khas courtyards, and ancient Persian waterwheels.',
+            gear: 'Comfortable walking shoes, sun hat, and camera.'
+        },
+        {
+            id: 'exp-amer-light-sound',
+            state_id: 'rajasthan',
+            destination_id: 'amber-fort',
+            title: 'Amer Fort Ramparts Light & Sound Evening Show',
+            category: 'spiritual',
+            category_label: 'Cultural & Spiritual',
+            location: 'Amer Fort, Jaipur, Rajasthan',
+            duration: '1.5 Hours',
+            difficulty: 'Leisure / Seated',
+            season: 'Oct – Mar',
+            guide: 'Narrated Historical Soundscape',
+            img: '../assets/images/dest-jaipur.jpg',
+            desc: 'A vivid evening historical chronicle illuminating the 600-year history of the Kachwaha dynasty against the dramatic backdrop of Amer’s sandstone battlements.',
+            gear: 'Warm evening shawl or jacket during winter months.'
+        },
+        {
+            id: 'exp-dal-lake-shikara',
+            state_id: 'kashmir',
+            destination_id: 'dal-lake-srinagar',
+            title: 'Dawn Shikara Floating Market & Lotus Garden Cruise',
+            category: 'water',
+            category_label: 'Water & Coastal',
+            location: 'Dal Lake, Srinagar, Kashmir',
+            duration: '2.5 Hours',
+            difficulty: 'Leisure / Easy',
+            season: 'Apr – Nov',
+            guide: 'Traditional Shikara Boatman',
+            img: '../assets/images/dest-manali.jpg',
+            desc: 'Glide through morning mist on Dal Lake to observe traditional vegetable bartering among lakeside growers, drifting past blooming lotus pods and Char Chinar island.',
+            gear: 'Warm morning jacket, camera, and cash for floating flower vendors.'
+        },
+        {
+            id: 'exp-hazratbal-walk',
+            state_id: 'kashmir',
+            destination_id: 'dal-lake-srinagar',
+            title: 'Hazratbal Promenade & Chinar Heritage Walk',
+            category: 'spiritual',
+            category_label: 'Cultural & Spiritual',
+            location: 'Srinagar, Jammu & Kashmir',
+            duration: '2 Hours',
+            difficulty: 'Easy',
+            season: 'Apr – Oct',
+            guide: 'Local Cultural Guide',
+            img: '../assets/images/dest-manali.jpg',
+            desc: 'Stroll along the historic waterfront promenade facing the white marble dome of Hazratbal, surrounded by ancient Mughal chinar groves and artisan woodcarvers.',
+            gear: 'Modest respectful attire covering shoulders and headscarf for shrines.'
+        },
+        {
+            id: 'exp-old-goa-walk',
+            state_id: 'goa',
+            destination_id: 'old-goa-churches',
+            title: 'UNESCO Basilicas & Portuguese Baroque Heritage Walk',
+            category: 'heritage',
+            category_label: 'Heritage & Architecture',
+            location: 'Old Goa, Goa',
+            duration: '2.5 Hours',
+            difficulty: 'Easy Walking',
+            season: 'Oct – Apr',
+            guide: 'Historian Led Walk',
+            img: '../assets/images/dest-goa.jpg',
+            desc: 'Walk through the Basilica of Bom Jesus, Sé Cathedral, and Church of St. Francis of Assisi, exploring 16th-century Manueline and Baroque stone craftsmanship.',
+            gear: 'Respectful attire for religious shrines and comfortable sandals.'
+        },
+        {
+            id: 'exp-calangute-water',
+            state_id: 'goa',
+            destination_id: 'calangute-coast',
+            title: 'Calangute Coastal Catamaran & Dolphin Sighting Cruise',
+            category: 'water',
+            category_label: 'Water & Coastal',
+            location: 'Calangute / Baga Coast, Goa',
+            duration: '2 Hours',
+            difficulty: 'Easy',
+            season: 'Oct – May',
+            guide: 'Certified Coastal Skipper',
+            img: '../assets/images/dest-goa.jpg',
+            desc: 'Sail on an open-sea catamaran along North Goa’s golden coast to spot Indo-Pacific humpback dolphins playing in the Arabian Sea waves.',
+            gear: 'Life jacket (provided), sunglasses, sunscreen, and water-resistant bag.'
+        },
+        {
+            id: 'exp-meenakshi-heritage',
+            state_id: 'tamilnadu',
+            destination_id: 'meenakshi-amman-temple',
+            title: 'Madurai Meenakshi Thousand Pillar Hall Heritage Tour',
+            category: 'spiritual',
+            category_label: 'Cultural & Spiritual',
+            location: 'Madurai, Tamil Nadu',
+            duration: '2.5 Hours',
+            difficulty: 'Easy Walking',
+            season: 'Oct – Mar',
+            guide: 'Temple Certified Guide',
+            img: '../assets/images/dest-hampi.jpg',
+            desc: 'Marvel at 985 sculpted granite pillars, musical acoustic columns, Dravidian temple gopurams soaring over 50 meters, and sacred golden lotus pond precincts.',
+            gear: 'Strict traditional modest dress code (no shorts/sleeveless), socks for warm stone.'
+        },
+        {
+            id: 'exp-kaziranga-safari',
+            state_id: 'assam',
+            destination_id: 'kaziranga-national-park',
+            title: 'Kaziranga Central Range Rhino Jeep Safari',
+            category: 'nature',
+            category_label: 'Nature & Wildlife',
+            location: 'Kohora, Kaziranga, Assam',
+            duration: '3.5 Hours',
+            difficulty: 'Moderate Ride',
+            season: 'Nov – Apr',
+            guide: 'Government Forest Naturalist',
+            img: '../assets/images/hero-india.jpg',
+            desc: 'Traverse elephant-grass marshes and water hyacinth swamps to track the prehistoric Great Indian One-Horned Rhino, wild elephants, and migratory water birds.',
+            gear: 'Binoculars, telephoto camera, neutral-toned clothing (khaki/green), and dust mask.'
+        },
+        {
+            id: 'exp-rishikesh-aarti',
+            state_id: 'uttarakhand',
+            destination_id: 'rishikesh-ganga-ghats',
+            title: 'Triveni Ghat Evening Ganga Aarti & Sacred Chants',
+            category: 'spiritual',
+            category_label: 'Cultural & Spiritual',
+            location: 'Rishikesh, Uttarakhand',
+            duration: '2 Hours',
+            difficulty: 'Leisure / Easy',
+            season: 'All Year',
+            guide: 'Ashram Coordinator',
+            img: '../assets/images/dest-varanasi.jpg',
+            desc: 'Experience the mystical evening prayers on the banks of the sacred Ganges river with multi-tiered brass lamps, conch shells, and floating flower diyas.',
+            gear: 'Comfortable footwear (removed at ghat steps), modest attire, and coin offerings.'
+        }
+    ];
+
+    /**
+     * Curated Multi-Day Regional Travel Circuits
+     */
+    const CURATED_ITINERARIES = {
+        mh: {
+            title: 'Maharashtra Maratha Fort & Western Ghats Trail',
+            duration: '3 Days / 2 Nights',
+            theme: 'Heritage Forts & Mountain Treks',
+            days: [
+                {
+                    day: 1,
+                    dest: 'Rajgad Fort',
+                    destId: 'raigad-fort',
+                    loc: 'Velhe, Pune District',
+                    time: '06:00 AM – 05:00 PM',
+                    highlight: 'Historical citadel climb, Padmavati Machi, and royal palace ruins.',
+                    desc: 'Begin at dawn from Gunjavane base village. Ascend via Chor Darwaja to Padmavati plateau. Explore the temple, water tanks, and hike up to the supreme citadel of Balekilla for 360° Sahyadri views.'
+                },
+                {
+                    day: 2,
+                    dest: 'Torna Fort & Sahyadri Valleys',
+                    destId: 'raigad-fort',
+                    loc: 'Velhe, Maharashtra',
+                    time: '07:00 AM – 04:30 PM',
+                    highlight: 'Highest hill fort in Pune district, Zunjar Machi, and alpine ridge traverse.',
+                    desc: 'Embark on the dramatic ridge trail between Rajgad and Torna. Traverse massive stone ramparts and examine the bastion architecture of the first fort captured by Shivaji Maharaj in 1646.'
+                },
+                {
+                    day: 3,
+                    dest: 'Lonavala & Karla Caves',
+                    destId: 'lonavala',
+                    loc: 'Western Ghats, Maharashtra',
+                    time: '08:30 AM – 06:00 PM',
+                    highlight: 'Ancient Buddhist rock-cut monasteries and dramatic valley viewpoints.',
+                    desc: 'Descend to Lonavala hill station. Explore the monolithic 2nd-century BC Karla and Bhaja caves, visit Tiger’s Leap lookout for valley panoramas, and taste local artisanal chikki sweets.'
+                }
+            ]
+        },
+        kl: {
+            title: 'Kerala Backwaters & Western Ghats Nature Circuit',
+            duration: '4 Days / 3 Nights',
+            theme: 'Backwaters, Tea Valleys & Eco-Tourism',
+            days: [
+                {
+                    day: 1,
+                    dest: 'Fort Kochi Heritage Port',
+                    destId: 'fort-kochi',
+                    loc: 'Kochi, Kerala',
+                    time: '08:00 AM – 06:00 PM',
+                    highlight: 'Chinese fishing nets, colonial spice warehouses, and Kathakali cultural theater.',
+                    desc: 'Walk along the historic Fort Kochi harbor. Witness the counterweight-operated Chinese fishing nets, explore Jew Town and spice markets, and conclude with an evening Kathakali classical dance recital.'
+                },
+                {
+                    day: 2,
+                    dest: 'Munnar Tea Plantations',
+                    destId: 'munnar-hills',
+                    loc: 'Idukki, Kerala',
+                    time: '07:30 AM – 05:30 PM',
+                    highlight: 'Scenic ghat ascent, century-old tea estates, and Tata Tea Museum.',
+                    desc: 'Drive through misty mountain passes into Munnar. Tour organic tea gardens, understand artisanal tea manufacturing at the Tea Museum, and take an evening walk through scented cardamom groves.'
+                },
+                {
+                    day: 3,
+                    dest: 'Eravikulam National Park',
+                    destId: 'munnar-hills',
+                    loc: 'Munnar, Kerala',
+                    time: '07:00 AM – 03:00 PM',
+                    highlight: 'High-altitude shola grasslands, Nilgiri Tahr sightings, and Anamudi peak views.',
+                    desc: 'Board the official safari bus to the high-altitude plateau of Eravikulam. Observe the endangered Nilgiri Tahr grazing on steep grassy slopes beneath South India’s highest mountain.'
+                },
+                {
+                    day: 4,
+                    dest: 'Alappuzha Backwaters',
+                    destId: 'alleppey-backwaters',
+                    loc: 'Alappuzha, Kerala',
+                    time: '11:00 AM – 06:00 PM',
+                    highlight: 'Kettuvallam houseboat cruise along palm-fringed lagoons and Vembanad Lake.',
+                    desc: 'Embark on a traditional thatch-roofed houseboat from Punnamada jetty. Glide through peaceful palm-lined canals, observe village duck farming, and enjoy a fresh traditional banana-leaf Karimeen meal.'
+                }
+            ]
+        },
+        rj: {
+            title: 'Rajasthan Royal Fortresses & Desert Trail',
+            duration: '5 Days / 4 Nights',
+            theme: 'Imperial Palaces, Forts & Desert Culture',
+            days: [
+                {
+                    day: 1,
+                    dest: 'Amer Fort & Jaipur Heritage',
+                    destId: 'amber-fort',
+                    loc: 'Jaipur, Rajasthan',
+                    time: '08:00 AM – 06:30 PM',
+                    highlight: 'Sheesh Mahal mirror mosaics, royal courtyards, and Maota Lake views.',
+                    desc: 'Explore the monumental hilltop palace-fort of Amer. Walk through Ganesh Pol, marvel at the optical wonders of Sheesh Mahal, and view the pink-hued cityscape from fort ramparts.'
+                },
+                {
+                    day: 2,
+                    dest: 'Mehrangarh Fort',
+                    destId: 'mehrangarh-fort',
+                    loc: 'Jodhpur, Rajasthan',
+                    time: '09:00 AM – 05:00 PM',
+                    highlight: 'Basalt cliff citadel, royal palanquin gallery, and blue city panoramas.',
+                    desc: 'Travel to the Blue City. Ascend to Mehrangarh Fort towering 400 feet above the city on a sheer cliff. Admire carved red sandstone latticework, historic cannon bastions, and armory.'
+                },
+                {
+                    day: 3,
+                    dest: 'Jaisalmer Living Fort',
+                    destId: 'jaisalmer-desert',
+                    loc: 'Jaisalmer, Rajasthan',
+                    time: '08:30 AM – 06:00 PM',
+                    highlight: 'Golden sandstone ramparts, medieval havelis, and Jain temple carvings.',
+                    desc: 'Arrive in the golden city. Walk inside Sonar Qila—one of the world’s few living forts where thousands still reside. Admire the intricate stone filigree of Patwon Ki Haveli.'
+                },
+                {
+                    day: 4,
+                    dest: 'Thar Desert Sam Sand Dunes',
+                    destId: 'jaisalmer-desert',
+                    loc: 'Thar Desert, Rajasthan',
+                    time: '04:00 PM – 10:00 PM',
+                    highlight: 'Sunset camel ride, golden sand ridges, and folk Kalbelia music under the stars.',
+                    desc: 'Head out into the rolling desert dunes of Sam. Experience golden sunset across shifting sand ripples followed by an authentic desert camp featuring Manganiyar musical chronicles.'
+                },
+                {
+                    day: 5,
+                    dest: 'Udaipur City Palace & Lake Pichola',
+                    destId: 'udaipur-city-palace',
+                    loc: 'Udaipur, Rajasthan',
+                    time: '09:00 AM – 05:00 PM',
+                    highlight: 'Mewar royal palace complex, crystal gallery, and sunset boat cruise.',
+                    desc: 'Conclude in the City of Lakes. Wander through the four-century-old City Palace complex with panoramic views of the Lake Palace floating gracefully on azure waters of Lake Pichola.'
+                }
+            ]
+        },
+        goa: {
+            title: 'Goa Coastal Heritage & Waterfall Circuit',
+            duration: '3 Days / 2 Nights',
+            theme: 'Churches, Forts & Ocean Horizons',
+            days: [
+                {
+                    day: 1,
+                    dest: 'Old Goa UNESCO Basilicas',
+                    destId: 'old-goa-churches',
+                    loc: 'Old Goa, Goa',
+                    time: '08:30 AM – 04:30 PM',
+                    highlight: 'Baroque architecture, Basilica of Bom Jesus, and Sé Cathedral.',
+                    desc: 'Begin exploration of Old Goa’s 16th-century religious architecture. Tour the sacred relics of St. Francis Xavier, observe gilded wood altars, and stroll through historic monastic courtyards.'
+                },
+                {
+                    day: 2,
+                    dest: 'Fort Aguada & Coastal Lighthouse',
+                    destId: 'calangute-coast',
+                    loc: 'Sinquerim, Goa',
+                    time: '09:00 AM – 06:00 PM',
+                    highlight: '17th-century Portuguese fortress, giant freshwater cistern, and Arabian Sea views.',
+                    desc: 'Explore the coastal artillery ramparts overlooking the mouth of the Mandovi River. Walk along the upper fort battlement walls and view the historic four-story lighthouse built in 1864.'
+                },
+                {
+                    day: 3,
+                    dest: 'Dudhsagar Waterfalls & Spice Plantation',
+                    destId: 'calangute-coast',
+                    loc: 'Mollem, Goa',
+                    time: '07:00 AM – 04:00 PM',
+                    highlight: 'Four-tiered milky waterfall, Bhagwan Mahavir Wildlife Sanctuary, and organic spice trail.',
+                    desc: 'Embark on a morning 4x4 jungle jeep safari through Western Ghats forests to witness the roaring Dudhsagar falls cascading 310 meters down sheer rock cliffs.'
+                }
+            ]
+        },
+        jk: {
+            title: 'Kashmir Alpine Valleys & Dal Lake Circuit',
+            duration: '4 Days / 3 Nights',
+            theme: 'Lakes, Meadows & Himalayan Panoramas',
+            days: [
+                {
+                    day: 1,
+                    dest: 'Dal Lake & Mughal Terraced Gardens',
+                    destId: 'dal-lake-srinagar',
+                    loc: 'Srinagar, Jammu & Kashmir',
+                    time: '07:00 AM – 06:00 PM',
+                    highlight: 'Dawn Shikara ride, Char Chinar island, Shalimar Bagh, and Nishat Bagh.',
+                    desc: 'Start with a morning glide past floating lotus gardens. Disembark at Nishat Bagh and Shalimar Bagh to explore cascading water channels and centuries-old chinar tree avenues.'
+                },
+                {
+                    day: 2,
+                    dest: 'Gulmarg Meadow of Flowers & Gondola',
+                    destId: 'dal-lake-srinagar',
+                    loc: 'Gulmarg, Kashmir',
+                    time: '08:00 AM – 05:00 PM',
+                    highlight: 'High-altitude gondola ascent to Apharwat Peak at 13,780 ft and alpine meadows.',
+                    desc: 'Drive to Gulmarg through pine-covered slopes. Board the two-stage Gulmarg Gondola for panoramic views of snow-clad peaks and alpine skiing slopes.'
+                },
+                {
+                    day: 3,
+                    dest: 'Pahalgam & Lidder River Valley',
+                    destId: 'dal-lake-srinagar',
+                    loc: 'Pahalgam, Kashmir',
+                    time: '08:30 AM – 05:30 PM',
+                    highlight: 'Glacial river trails, Betaab Valley, and saffron fields of Pampore.',
+                    desc: 'Follow the rushing crystal-clear Lidder River to the scenic meadows of Betaab Valley and Aru. Stop along the highway to experience traditional saffron cultivation.'
+                },
+                {
+                    day: 4,
+                    dest: 'Old Srinagar Artisans & Jamia Masjid',
+                    destId: 'dal-lake-srinagar',
+                    loc: 'Old City, Srinagar',
+                    time: '09:00 AM – 04:00 PM',
+                    highlight: 'Wooden Deodar architecture, walnut woodcraft workshops, and Pashmina weaving.',
+                    desc: 'Walk through the historical Downtown Srinagar along the Jhelum river. Tour the 378 deodar-columned Jamia Masjid and watch master artisans handcraft papier-mâché and carpets.'
+                }
+            ]
+        }
+    };
+
+    /**
+     * Curated Travel Stories & Chronicles
+     */
+    const TRAVEL_STORIES = [
+        {
+            id: 'story-rajgad-sunrise',
+            title: 'Conquering Padmavati Machi at Sunrise: A Trekker’s Chronicle of Rajgad Fort',
+            author: 'Ananya Sharma',
+            readTime: '4 min read',
+            category: 'Heritage & Trekking',
+            destId: 'raigad-fort',
+            img: '../assets/images/thumb-rajgad.jpg',
+            excerpt: 'Scaling the sheer basalt rock steps in pre-dawn darkness to watch the golden sunrise spill across the misty Sahyadri valleys from the ramparts of Rajgad.',
+            content: `
+                <p>There is an unspoken reverence in the Sahyadris at 05:00 AM. Starting from Gunjavane village, our flashlights swept over dewy grass and loose shale as the trail climbed steeply toward the Chor Darwaja of Rajgad Fort.</p>
+                <p>As we reached the crest of Padmavati Machi, the eastern horizon cracked open in brilliant gradients of saffron and gold. The sheer scale of Chhatrapati Shivaji Maharaj's capital became breathtakingly apparent: kilometers of three-tiered stone ramparts hugging mountain contours like the spine of a sleeping dragon.</p>
+                <p>Standing on the edge of Balekilla, looking down at the clouds rolling beneath our feet, one understands why Rajgad was deemed unconquerable. For sustainable heritage travelers, this fort is not merely a weekend trek—it is an enduring sanctuary of resilience, biodiversity, and Maratha engineering.</p>
+            `
+        },
+        {
+            id: 'story-munnar-tea',
+            title: 'Munnar’s Mist & Cloud Trails: Walking through Century-Old Tea Sanctuaries',
+            author: 'Rohan Mehra',
+            readTime: '3 min read',
+            category: 'Nature & Wellness',
+            destId: 'munnar-hills',
+            img: '../assets/images/dest-munnar.jpg',
+            excerpt: 'Navigating the emerald green plantation trails of Idukki, learning the rhythm of artisanal tea pluckers and the quiet beauty of high-altitude shola forests.',
+            content: `
+                <p>In Munnar, morning does not arrive with sudden sunlight. It drifts in silently as tendrils of mist rise from deep mountain gorges, weaving through endless velvet-green terraces of tea bushes.</p>
+                <p>Walking with a local certified guide through the Lockhart Estate, we observed the precise rhythm of the estate workers plucking 'two leaves and a bud' with practiced grace. The crisp aroma of crushed tea leaves and wild eucalyptus filled the mountain air.</p>
+                <p>Later in the day, a short hike into the shola forest fringe of Eravikulam brought an unexpected encounter: a pair of Nilgiri Tahrs calmly grazing on sheer granite ledges, completely at peace in their protected sanctuary.</p>
+            `
+        },
+        {
+            id: 'story-jaisalmer-living-fort',
+            title: 'Echoes of the Golden Fortress: Living Culture Inside Jaisalmer',
+            author: 'Kavita Nair',
+            readTime: '5 min read',
+            category: 'Living Culture',
+            destId: 'jaisalmer-desert',
+            img: '../assets/images/dest-jaipur.jpg',
+            excerpt: 'Wandering through the inhabited labyrinth of Sonar Qila, where four generations of families, artisans, and musicians breathe daily life into golden medieval sandstone.',
+            content: `
+                <p>Unlike monuments sealed behind museum ropes, Jaisalmer’s Sonar Qila is an astonishing living organism. As morning dawns over the Thar Desert, the yellow sandstone ramparts glow like burnished gold, and temple bells mingle with the call of chai-walas inside the bastions.</p>
+                <p>Stepping through the Suraj Pol gateway, the stone alleys reveal families who have occupied the same carved havelis for centuries. Intricate jali stone screens cast delicate geometric shadows across cobblestones, and children run down streets that once echoed with Rajput cavalry.</p>
+                <p>As evening settled, we sat on the fort ramparts watching the sun sink into the desert horizon while an elder played the ravanahatha—a timeless melody suspended between stone and sand.</p>
+            `
+        },
+        {
+            id: 'story-rishikesh-ganga',
+            title: 'The Sacred Bells of Triveni Ghat: An Evening on the Banks of the Ganga',
+            author: 'Amitabh Sen',
+            readTime: '4 min read',
+            category: 'Spiritual Heritage',
+            destId: 'rishikesh-ganga-ghats',
+            img: '../assets/images/dest-varanasi.jpg',
+            excerpt: 'The transformative peace of the dusk Maha Aarti in Rishikesh, where rhythmic bells, Vedic chants, and floating leaf lamps illuminate the emerald river.',
+            content: `
+                <p>As twilight settles over the Shivalik foothills, crowds gather in quiet unison on the broad stone steps of Triveni Ghat in Rishikesh. The river Ganges flows swift, cold, and emerald-green from the higher Himalayas.</p>
+                <p>When the conch shells sound, the priests elevate heavy brass multi-tiered aarti lamps in sweeping circular arcs. The chanting of Vedic mantras vibrates through the gathering crowd, accompanied by rhythmic brass bells and drums.</p>
+                <p>Hundreds of tourists and pilgrims gently place leaf cups containing marigold blossoms and flickering camphor into the river. Watching the constellations of floating lamps drift down the holy current is a deeply humbling reminder of spiritual continuity.</p>
+            `
+        }
+    ];
+
+    /**
      * Tourist Store & Controller
      */
     const TouristApp = {
         destinations: [],
         favorites: new Set(),
+        currentLightboxIndex: 0,
+        currentLightboxGallery: [],
+        currentLightboxDest: 'Destination',
         currentFilters: {
             search: '',
             state: 'all',
@@ -338,6 +1064,443 @@
             suitable: [],
             seasons: [],
             sortBy: 'popularity'
+        },
+
+        getDestinationGallery(dest) {
+            if (DESTINATION_GALLERIES[dest.id]) {
+                return DESTINATION_GALLERIES[dest.id];
+            }
+            return [
+                { url: dest.img, title: `${dest.name} Panoramic Landscape`, tag: 'Landscape Panorama', caption: `Sweeping perspective highlighting the distinct topography and regional setting of ${dest.name}.` },
+                { url: dest.img, title: `${dest.name} Cultural Monument`, tag: 'Heritage Architecture', caption: `Architectural craftsmanship and historical masonry preserved at ${dest.name}.` },
+                { url: dest.img, title: `Scenic Trail Lookout`, tag: 'Scenic Viewpoint', caption: `Natural viewpoints and panoramic ridge vistas accessible to visiting travelers.` },
+                { url: dest.img, title: `Visitor Approach Trail`, tag: 'Visitor Trail', caption: `Approved access pathway maintained under Destination Manager coordination.` },
+                { url: dest.img, title: `Twilight Atmosphere`, tag: 'Golden Hour', caption: `Evening light settling across the landscape and monuments of ${dest.name}.` },
+                { url: dest.img, title: `Regional Conservation Zone`, tag: 'Regional Ecology', caption: `Protected natural habitat and community surrounds in the vicinity of ${dest.name}.` }
+            ];
+        },
+
+        openLightbox(index, gallery, destTitle) {
+            const modal = document.getElementById('touristLightboxModal');
+            if (!modal || !gallery || !gallery.length) return;
+            this.currentLightboxGallery = gallery;
+            this.currentLightboxIndex = index || 0;
+            this.currentLightboxDest = destTitle || 'Destination';
+
+            this.renderLightboxImage(this.currentLightboxIndex);
+            modal.classList.add('active', 'show');
+            document.body.style.overflow = 'hidden';
+        },
+
+        renderLightboxImage(idx) {
+            const gallery = this.currentLightboxGallery;
+            if (!gallery || !gallery[idx]) return;
+            const item = gallery[idx];
+
+            const titleEl = document.getElementById('lightbox-dest-title');
+            const counterEl = document.getElementById('lightbox-counter');
+            const mainImg = document.getElementById('lightbox-main-img');
+            const captionEl = document.getElementById('lightbox-caption');
+            const subcaptionEl = document.getElementById('lightbox-subcaption');
+            const thumbsContainer = document.getElementById('lightbox-thumbs-strip');
+
+            if (titleEl) titleEl.textContent = this.currentLightboxDest;
+            if (counterEl) counterEl.textContent = `Photo ${idx + 1} of ${gallery.length}`;
+            if (mainImg) {
+                mainImg.src = item.url;
+                mainImg.alt = item.title;
+            }
+            if (captionEl) captionEl.textContent = item.title;
+            if (subcaptionEl) subcaptionEl.textContent = `Perspective: ${item.tag} • ${item.caption}`;
+
+            if (thumbsContainer) {
+                thumbsContainer.innerHTML = gallery.map((g, gIdx) => `
+                    <button type="button" class="lightbox-thumb-btn ${gIdx === idx ? 'active' : ''}" data-thumb-idx="${gIdx}" aria-label="Jump to photo ${gIdx + 1}">
+                        <img src="${g.url}" alt="${g.title}">
+                    </button>
+                `).join('');
+
+                thumbsContainer.querySelectorAll('.lightbox-thumb-btn').forEach(btn => {
+                    btn.onclick = () => {
+                        const targetIdx = parseInt(btn.getAttribute('data-thumb-idx'), 10);
+                        this.currentLightboxIndex = targetIdx;
+                        this.renderLightboxImage(targetIdx);
+                    };
+                });
+            }
+        },
+
+        nextLightbox() {
+            if (!this.currentLightboxGallery || !this.currentLightboxGallery.length) return;
+            this.currentLightboxIndex = (this.currentLightboxIndex + 1) % this.currentLightboxGallery.length;
+            this.renderLightboxImage(this.currentLightboxIndex);
+        },
+
+        prevLightbox() {
+            if (!this.currentLightboxGallery || !this.currentLightboxGallery.length) return;
+            this.currentLightboxIndex = (this.currentLightboxIndex - 1 + this.currentLightboxGallery.length) % this.currentLightboxGallery.length;
+            this.renderLightboxImage(this.currentLightboxIndex);
+        },
+
+        closeLightbox() {
+            const modal = document.getElementById('touristLightboxModal');
+            if (!modal) return;
+            modal.classList.remove('active', 'show');
+            document.body.style.overflow = '';
+        },
+
+        openAttractionModal(attr) {
+            const modal = document.getElementById('touristAttractionModal');
+            if (!modal || !attr) return;
+
+            const editorial = ATTRACTION_EDITORIAL[attr.id] || {
+                timings: '06:00 AM – 06:00 PM (Daily)',
+                duration: '1.5 – 2 Hours',
+                bestTime: 'Morning or late afternoon for scenic lighting',
+                guidelines: 'Follow verified trail signs, carry drinking water, and respect heritage guidelines.',
+                description: `A verified destination attraction under ${attr.name}. Cataloged by Destination Managers for visitor orientation, historical interpretation, and regional discovery.`
+            };
+
+            const imgEl = document.getElementById('attr-modal-img');
+            const catEl = document.getElementById('attr-modal-category');
+            const statusEl = document.getElementById('attr-modal-status');
+            const ratingEl = document.getElementById('attr-modal-rating');
+            const titleEl = document.getElementById('attr-modal-title');
+            const descEl = document.getElementById('attr-modal-desc');
+            const timingsEl = document.getElementById('attr-modal-timings');
+            const durationEl = document.getElementById('attr-modal-duration');
+            const bestTimeEl = document.getElementById('attr-modal-best-time');
+            const guidelinesEl = document.getElementById('attr-modal-guidelines');
+
+            if (imgEl) {
+                imgEl.src = attr.img;
+                imgEl.alt = attr.name;
+            }
+            if (catEl) catEl.textContent = attr.category || 'Attraction';
+            if (statusEl) statusEl.textContent = `✓ ${attr.status || 'Verified Attraction'}`;
+            if (ratingEl) ratingEl.textContent = `★ ${attr.rating || '4.8'}`;
+            if (titleEl) titleEl.textContent = attr.name;
+            if (descEl) descEl.textContent = editorial.description;
+            if (timingsEl) timingsEl.textContent = editorial.timings;
+            if (durationEl) durationEl.textContent = editorial.duration;
+            if (bestTimeEl) bestTimeEl.textContent = editorial.bestTime;
+            if (guidelinesEl) guidelinesEl.textContent = editorial.guidelines;
+
+            modal.classList.add('active', 'show');
+            document.body.style.overflow = 'hidden';
+        },
+
+        closeAttractionModal() {
+            const modal = document.getElementById('touristAttractionModal');
+            if (!modal) return;
+            modal.classList.remove('active', 'show');
+            document.body.style.overflow = '';
+        },
+
+        openStoryModal(story) {
+            const modal = document.getElementById('touristStoryModal');
+            if (!modal || !story) return;
+
+            const tagEl = document.getElementById('story-modal-tag');
+            const titleEl = document.getElementById('story-modal-title');
+            const metaEl = document.getElementById('story-modal-meta');
+            const authorEl = document.getElementById('story-modal-author');
+            const dateEl = document.getElementById('story-modal-date');
+            const imgEl = document.getElementById('story-modal-img');
+            const contentEl = document.getElementById('story-modal-content') || document.getElementById('story-modal-body');
+            const takeawaysEl = document.getElementById('story-modal-takeaways');
+            const linkEl = document.getElementById('story-modal-dest-link');
+
+            if (tagEl) tagEl.textContent = story.category || 'Travel Chronicle';
+            if (titleEl) titleEl.textContent = story.title;
+            if (metaEl) metaEl.textContent = `By ${story.author} • ${story.readTime}`;
+            if (authorEl) authorEl.textContent = story.author;
+            if (dateEl) dateEl.textContent = story.date || 'Verified Expedition';
+            if (imgEl) {
+                if (imgEl.tagName === 'IMG') {
+                    imgEl.src = story.img;
+                } else {
+                    imgEl.style.backgroundImage = `url('${story.img}')`;
+                }
+            }
+            if (contentEl) contentEl.innerHTML = story.content;
+            if (takeawaysEl) {
+                const takeaways = story.takeaways || [
+                    'Engage certified local village guides for steep mountain and forest approaches.',
+                    'Carry reusable water containers to maintain zero-plastic heritage zones.',
+                    'Observe sunrise or golden hour for panoramic photography across the ramparts.'
+                ];
+                takeawaysEl.innerHTML = takeaways.map(t => `<li>${t}</li>`).join('');
+            }
+            if (linkEl) {
+                linkEl.href = `destination-detail.html?id=${story.destId}`;
+            }
+
+            modal.classList.add('active', 'show');
+            document.body.style.overflow = 'hidden';
+        },
+
+        closeStoryModal() {
+            const modal = document.getElementById('touristStoryModal');
+            if (!modal) return;
+            modal.classList.remove('active', 'show');
+            document.body.style.overflow = '';
+        },
+
+        getDestinationExperiences(destId) {
+            const matches = EXPERIENCES_DATA.filter(e => e.destination_id === destId);
+            if (matches.length > 0) return matches;
+            const dest = this.destinations.find(d => d.id === destId);
+            if (dest) {
+                const stateMatches = EXPERIENCES_DATA.filter(e => e.state_id === dest.state_id);
+                if (stateMatches.length > 0) return stateMatches;
+            }
+            return EXPERIENCES_DATA.slice(0, 3);
+        },
+
+        openEventModal(ev) {
+            const modal = document.getElementById('touristEventModal');
+            if (!modal || !ev) return;
+
+            const imgEl = document.getElementById('event-modal-img');
+            const dateEl = document.getElementById('event-modal-date');
+            const statusEl = document.getElementById('event-modal-status');
+            const titleEl = document.getElementById('event-modal-title');
+            const locEl = document.getElementById('event-modal-loc');
+            const descEl = document.getElementById('event-modal-desc');
+            const timingEl = document.getElementById('event-modal-timing');
+            const orgEl = document.getElementById('event-modal-organizer');
+            const entryEl = document.getElementById('event-modal-entry');
+            const guideEl = document.getElementById('event-modal-guidelines');
+
+            if (imgEl) imgEl.src = ev.img || '../assets/images/thumb-rajgad.jpg';
+            if (dateEl) dateEl.textContent = `📅 ${ev.dateNum || '15'} ${ev.dateMonth || 'OCT'} 2026`;
+            if (statusEl) {
+                statusEl.textContent = ev.status || 'Active';
+                statusEl.className = `event-status-pill ${ev.statusClass || 'active'}`;
+            }
+            if (titleEl) titleEl.textContent = ev.title;
+            if (locEl) locEl.textContent = `📍 ${ev.location || ev.loc || 'Destination'}`;
+            if (descEl) descEl.textContent = ev.description || `An official tourism festivity organized under Destination Manager supervision. Bringing together certified eco-guides, local cultural performers, and visitors for sustainable heritage exploration and regional community celebration.`;
+            if (timingEl) timingEl.textContent = ev.timing || '08:00 AM – 06:00 PM (Scheduled Program)';
+            if (orgEl) orgEl.textContent = ev.organizer || 'State Department of Tourism & Village Committee';
+            if (entryEl) entryEl.textContent = ev.entry || 'Open to All Verified Visitors (Free Entry)';
+            if (guideEl) guideEl.textContent = ev.guidelines || 'Carry valid photo ID. Respect monument heritage rules and dispose of all waste in municipal base camp bins.';
+
+            modal.classList.add('active', 'show');
+            document.body.style.overflow = 'hidden';
+        },
+
+        closeEventModal() {
+            const modal = document.getElementById('touristEventModal');
+            if (!modal) return;
+            modal.classList.remove('active', 'show');
+            document.body.style.overflow = '';
+        },
+
+        openExperienceModal(exp) {
+            const modal = document.getElementById('touristExperienceModal');
+            if (!modal) return;
+            if (!exp) {
+                console.warn('Experience details not available.');
+                return;
+            }
+
+            const imgEl = document.getElementById('exp-modal-img');
+            const catEl = document.getElementById('exp-modal-category');
+            const stateEl = document.getElementById('exp-modal-state');
+            const titleEl = document.getElementById('exp-modal-title');
+            const locEl = document.getElementById('exp-modal-loc');
+            const descEl = document.getElementById('exp-modal-desc');
+            const durEl = document.getElementById('exp-modal-duration');
+            const diffEl = document.getElementById('exp-modal-difficulty');
+            const seasonEl = document.getElementById('exp-modal-season');
+            const guideEl = document.getElementById('exp-modal-guide');
+            const gearEl = document.getElementById('exp-modal-gear');
+            const linkEl = document.getElementById('exp-modal-dest-link');
+
+            if (imgEl) {
+                imgEl.src = exp.img || '../assets/images/hero-india.jpg';
+                imgEl.alt = exp.title || 'Experience Photo';
+            }
+            if (catEl) catEl.textContent = exp.category_label || exp.category || 'Curated Experience';
+            if (stateEl) stateEl.textContent = (exp.state_id || 'India').toUpperCase();
+            if (titleEl) titleEl.textContent = exp.title || 'Experience Overview';
+            if (locEl) locEl.textContent = exp.location ? `📍 ${exp.location}` : '';
+            if (descEl) descEl.textContent = exp.desc || 'Experience details curated by certified regional guides.';
+            if (durEl) durEl.textContent = exp.duration || 'Flexible';
+            if (diffEl) diffEl.textContent = exp.difficulty || 'Moderate';
+            if (seasonEl) seasonEl.textContent = exp.season || 'All Seasons';
+            if (guideEl) guideEl.textContent = exp.guide || 'Available on request';
+            if (gearEl) gearEl.textContent = exp.gear || 'Comfortable footwear, hydration, and weather-appropriate gear.';
+            if (linkEl) {
+                if (exp.destination_id) {
+                    linkEl.href = `destination-detail.html?id=${encodeURIComponent(exp.destination_id)}`;
+                    linkEl.style.display = 'inline-flex';
+                    linkEl.onclick = (e) => {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        if (urlParams.get('id') === exp.destination_id) {
+                            e.preventDefault();
+                            this.closeExperienceModal();
+                            const overviewTabBtn = document.querySelector('.detail-tab-btn[data-tab="overview"]');
+                            if (overviewTabBtn) overviewTabBtn.click();
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                    };
+                } else {
+                    linkEl.style.display = 'none';
+                }
+            }
+
+            modal.classList.add('active', 'show');
+            document.body.style.overflow = 'hidden';
+        },
+
+        closeExperienceModal() {
+            const modal = document.getElementById('touristExperienceModal');
+            if (!modal) return;
+            modal.classList.remove('active', 'show');
+            document.body.style.overflow = '';
+        },
+
+        renderCuratedItinerary(circuitKey) {
+            const container = document.getElementById('itinerary-days-display');
+            if (!container) return;
+            const circuit = CURATED_ITINERARIES[circuitKey] || CURATED_ITINERARIES.mh;
+
+            container.innerHTML = `
+                <div style="background:var(--tourist-bg-surface); border:1px solid var(--tourist-border); border-radius:10px; padding:1.25rem 1.5rem; margin-bottom:1.25rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+                    <div>
+                        <h3 style="font-size:1.15rem; font-weight:800; color:var(--tourist-text-heading); margin:0 0 0.25rem 0;">${circuit.title}</h3>
+                        <div style="font-size:0.8rem; color:var(--tourist-text-muted);">Duration: ${circuit.duration} • Focus: ${circuit.theme}</div>
+                    </div>
+                    <span style="font-size:0.75rem; background:var(--tourist-forest-light); color:var(--tourist-forest); padding:0.3rem 0.75rem; border-radius:9999px; font-weight:700;">
+                        ✓ Manager Verified Circuit
+                    </span>
+                </div>
+                ${circuit.days.map(d => `
+                    <div class="itinerary-day-card">
+                        <div class="itinerary-day-badge">
+                            <div class="itinerary-day-badge-num">Day ${d.day}</div>
+                            <div class="itinerary-day-badge-lbl">Stop ${d.day}</div>
+                        </div>
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.35rem; flex-wrap:wrap; gap:0.5rem;">
+                                <h4 style="font-size:1.05rem; font-weight:800; color:var(--tourist-text-heading); margin:0;">
+                                    ${d.dest} <span style="font-size:0.78rem; color:var(--tourist-text-light); font-weight:500;">(${d.loc})</span>
+                                </h4>
+                                <a href="destination-detail.html?id=${d.destId}" class="tourist-link-arrow" style="font-size:0.82rem;">
+                                    View Destination Guide →
+                                </a>
+                            </div>
+                            <div style="font-size:0.78rem; color:var(--tourist-forest); font-weight:700; margin-bottom:0.45rem;">
+                                ⏱️ Schedule: ${d.time} • ⭐ Highlight: ${d.highlight}
+                            </div>
+                            <p style="font-size:0.88rem; color:var(--tourist-text-muted); line-height:1.6; margin:0;">
+                                ${d.desc}
+                            </p>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        },
+
+        generateCustomItinerary(stateId, days, style) {
+            const container = document.getElementById('custom-itinerary-output');
+            if (!container) return;
+
+            const stateDestinations = this.destinations.filter(d => d.state_id === stateId);
+            const stateObj = (window.YatraSetuManagerData.states || []).find(s => s.id === stateId) || { name: stateId };
+
+            if (!stateDestinations.length) {
+                container.innerHTML = `<div style="padding:1.5rem; text-align:center; color:var(--tourist-text-muted);">No destinations found for ${stateObj.name}.</div>`;
+                return;
+            }
+
+            const planDays = [];
+            for (let i = 0; i < days; i++) {
+                const dest = stateDestinations[i % stateDestinations.length];
+                const dayNum = i + 1;
+                planDays.push({
+                    day: dayNum,
+                    destName: dest.name,
+                    destId: dest.id,
+                    loc: dest.location,
+                    category: dest.category,
+                    time: `Day ${dayNum} • 07:30 AM – 05:00 PM`,
+                    highlight: `Explore ${dest.name} highlights, local craft hubs, and scenic view ridges.`,
+                    desc: `Immerse in ${dest.name} (${dest.category}). Visit cataloged attractions, follow local conservation advisories, and connect with authorized ${stateObj.name} guides.`
+                });
+            }
+
+            container.innerHTML = `
+                <div style="background:var(--tourist-forest-light); border:1px solid rgba(26,61,50,0.15); border-radius:10px; padding:1.25rem 1.5rem; margin-bottom:1.25rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+                    <div>
+                        <h4 style="font-size:1.1rem; font-weight:800; color:var(--tourist-forest); margin:0 0 0.25rem 0;">
+                            Custom ${days}-Day ${stateObj.name} Journey Plan
+                        </h4>
+                        <div style="font-size:0.8rem; color:var(--tourist-text-muted);">Theme: ${style.toUpperCase()} • Generated with authentic destination records</div>
+                    </div>
+                    <span style="font-size:0.75rem; background:#FFF; color:var(--tourist-forest); padding:0.35rem 0.85rem; border-radius:9999px; font-weight:800;">
+                        ${days} Curated Stop${days > 1 ? 's' : ''}
+                    </span>
+                </div>
+                ${planDays.map(d => `
+                    <div class="itinerary-day-card">
+                        <div class="itinerary-day-badge">
+                            <div class="itinerary-day-badge-num">Day ${d.day}</div>
+                            <div class="itinerary-day-badge-lbl">Custom Stop</div>
+                        </div>
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.35rem; flex-wrap:wrap; gap:0.5rem;">
+                                <h4 style="font-size:1.05rem; font-weight:800; color:var(--tourist-text-heading); margin:0;">
+                                    ${d.destName} <span style="font-size:0.78rem; color:var(--tourist-text-light); font-weight:500;">(${d.loc})</span>
+                                </h4>
+                                <a href="destination-detail.html?id=${d.destId}" class="tourist-link-arrow" style="font-size:0.82rem;">
+                                    View Destination Guide →
+                                </a>
+                            </div>
+                            <div style="font-size:0.78rem; color:var(--tourist-forest); font-weight:700; margin-bottom:0.45rem;">
+                                ⏱️ ${d.time} • ⭐ Category: ${d.category}
+                            </div>
+                            <p style="font-size:0.88rem; color:var(--tourist-text-muted); line-height:1.6; margin:0;">
+                                ${d.desc}
+                            </p>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        },
+
+        renderTravelStories() {
+            const grid = document.getElementById('tourist-stories-grid');
+            if (!grid) return;
+
+            grid.innerHTML = TRAVEL_STORIES.map(story => `
+                <div class="tourist-story-card">
+                    <div class="tourist-story-thumb" style="background-image: url('${story.img}');">
+                        <span class="tourist-story-badge">${story.category}</span>
+                    </div>
+                    <div class="tourist-story-body">
+                        <h4 class="tourist-story-title">${story.title}</h4>
+                        <p class="tourist-story-excerpt">${story.excerpt}</p>
+                        <div class="tourist-story-meta">
+                            <span>By ${story.author} • ${story.readTime}</span>
+                            <button type="button" class="tourist-link-arrow btn-read-story" data-story-id="${story.id}" style="background:none; border:none; cursor:pointer; font-weight:700; color:var(--tourist-forest); padding:0;">
+                                Read Story →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            grid.querySelectorAll('.btn-read-story').forEach(btn => {
+                btn.onclick = () => {
+                    const id = btn.getAttribute('data-story-id');
+                    const story = TRAVEL_STORIES.find(s => s.id === id);
+                    if (story) this.openStoryModal(story);
+                };
+            });
         },
 
         init() {
@@ -349,13 +1512,62 @@
 
             // Page-specific initialization
             const path = window.location.pathname;
-            if (path.includes('destinations.html')) {
-                this.initExploreDestinationsPage();
+            if (path.includes('destination-advisories.html')) {
+                this.initDestinationAdvisoriesPage();
             } else if (path.includes('destination-detail.html')) {
                 this.initDestinationDetailPage();
+            } else if (path.includes('destinations.html')) {
+                this.initExploreDestinationsPage();
+            } else if (path.includes('experiences.html')) {
+                this.initExperiencesPage();
+            } else if (path.includes('plan-trip.html')) {
+                this.initPlanTripPage();
+            } else if (path.includes('stories.html')) {
+                this.initStoriesPage();
+            } else if (path.includes('travel-guidance.html')) {
+                this.initTravelGuidancePage();
             } else if (path.includes('dashboard.html')) {
                 this.initTouristDashboard();
             }
+        },
+
+        /**
+         * Resolve Authentic Local Destination Images
+         */
+        resolveDestinationImage(dest) {
+            if (!dest) return '../assets/images/hero-india.jpg';
+            const id = (dest.id || '').toLowerCase();
+            const state = (dest.state_id || '').toLowerCase();
+            const name = (dest.name || '').toLowerCase();
+
+            if (id.includes('rajgad') || name.includes('rajgad')) return '../assets/images/thumb-rajgad.jpg';
+            if (id.includes('ajanta') || name.includes('ajanta') || id.includes('ellora') || name.includes('ellora')) return '../assets/images/thumb-ajanta.jpg';
+            if (id.includes('lonavala') || name.includes('lonavala') || id.includes('khandala')) return '../assets/images/thumb-lonavala.jpg';
+            if (id.includes('mumbai') || name.includes('mumbai')) return '../assets/images/thumb-mumbai.jpg';
+            if (id.includes('konkan') || id.includes('tarkarli') || id.includes('alibaug')) return '../assets/images/thumb-konkan.jpg';
+            if (id.includes('munnar') || name.includes('munnar')) return '../assets/images/dest-munnar.jpg';
+            if (id.includes('goa') || state === 'goa') return '../assets/images/dest-goa.jpg';
+            if (id.includes('jaipur') || id.includes('amer') || id.includes('jaisalmer') || id.includes('udaipur') || state === 'rajasthan') return '../assets/images/dest-jaipur.jpg';
+            if (id.includes('manali') || id.includes('gulmarg') || id.includes('pahalgam') || id.includes('sonamarg') || state === 'kashmir') return '../assets/images/dest-manali.jpg';
+            if (id.includes('varanasi') || id.includes('rishikesh') || id.includes('haridwar') || state === 'uttarakhand') return '../assets/images/dest-varanasi.jpg';
+            if (id.includes('hampi') || id.includes('madurai') || id.includes('thanjavur') || id.includes('mahabalipuram') || state === 'tamil-nadu') return '../assets/images/dest-hampi.jpg';
+            if (state === 'kerala' || id.includes('alappuzha') || id.includes('kochi') || id.includes('wayanad') || id.includes('varkala')) return '../assets/images/hero-kerala.jpg';
+            if (state === 'maharashtra') return '../assets/images/hero-maharashtra.jpg';
+
+            if (dest.img && dest.img.startsWith('../assets/')) return dest.img;
+            return '../assets/images/hero-india.jpg';
+        },
+
+        resolveAttractionImage(attr, dest) {
+            if (!attr) return this.resolveDestinationImage(dest);
+            const id = (attr.id || '').toLowerCase();
+            const name = (attr.name || '').toLowerCase();
+            if (id.includes('padmavati') || name.includes('padmavati') || id.includes('balekilla') || id.includes('suvela') || id.includes('sanjeevani')) {
+                return '../assets/images/thumb-rajgad.jpg';
+            }
+            if (id.includes('tiger') || name.includes('tiger')) return '../assets/images/thumb-lonavala.jpg';
+            if (attr.img && attr.img.startsWith('../assets/')) return attr.img;
+            return this.resolveDestinationImage(dest);
         },
 
         /**
@@ -415,7 +1627,7 @@
                     state_name: stateObj.name,
                     category: d.category,
                     rank: d.rank || 99,
-                    img: d.img,
+                    img: this.resolveDestinationImage(d),
                     location: editorial.location || `${d.name}, ${stateObj.name}`,
                     subtitle: editorial.subtitle || `${d.category} in ${stateObj.name}`,
                     description: editorial.description || `Discover ${d.name}, a prominent ${d.category} in ${stateObj.name}. Integrated into YatraSetu's destination network for visitor orientation and travel guidance.`,
@@ -425,6 +1637,11 @@
                         `Supported by active destination management coordination`,
                         `Authentic cultural, nature, and heritage experience`
                     ],
+                    history_background: editorial.history_background || `Originating in the regional chronicles of ${stateObj.name}, ${d.name} represents an essential monument in regional cultural geography. Historical records document continuous settlement, strategic fortification, and community heritage patronage.`,
+                    heritage_architecture: editorial.heritage_architecture || `Constructed in traditional regional architecture, ${d.name} demonstrates indigenous engineering adapted to the local topography and climate, featuring monumental entryways, stone ramparts, and specialized rainwater harvesting systems.`,
+                    cultural_significance: editorial.cultural_significance || `Deeply rooted in the living traditions of ${stateObj.name}, ${d.name} serves as a cultural landmark celebrated in regional folklore, seasonal festivities, and community heritage gatherings.`,
+                    geography_landmarks: editorial.geography_landmarks || `Occupying a prominent terrain vantage point overlooking regional valleys, ${d.name} is surrounded by natural buffer zones, panoramic lookouts, and regional nature corridors.`,
+                    traditions_culture: editorial.traditions_culture || `Local communities and village cooperatives surrounding ${d.name} uphold authentic handicraft, culinary hospitality, and seasonal ceremonies welcoming respectful travelers.`,
                     tags: tags,
                     suitable_for: suitable,
                     season: seasons,
@@ -472,14 +1689,32 @@
 
             // Sync all favorite heart buttons on the page with this ID
             document.querySelectorAll(`.dest-card-fav-btn[data-dest-id="${destId}"], .detail-fav-btn[data-dest-id="${destId}"]`).forEach(btn => {
+                const svg = btn.querySelector('svg');
                 if (isNowFav) {
                     btn.classList.add('favorited');
                     btn.setAttribute('aria-label', 'Remove from Saved Wishlist');
+                    btn.setAttribute('title', 'Remove from Saved');
+                    if (svg) svg.setAttribute('fill', '#EF4444');
                 } else {
                     btn.classList.remove('favorited');
                     btn.setAttribute('aria-label', 'Save to Wishlist');
+                    btn.setAttribute('title', 'Save to Favorites');
+                    if (svg) svg.setAttribute('fill', 'none');
                 }
             });
+
+            // Also sync quickSaveBtn if on destination-detail.html
+            const quickSaveBtn = document.getElementById('btn-quick-save-detail');
+            if (quickSaveBtn) {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('id') === destId) {
+                    quickSaveBtn.innerHTML = isNowFav 
+                        ? '<span>❤️</span> Saved in My Wishlist' 
+                        : '<span>🤍</span> Save to My Wishlist';
+                }
+            }
+
+            this.showToast(isNowFav ? 'Destination saved to your wishlist!' : 'Destination removed from your wishlist.');
 
             return isNowFav;
         },
@@ -674,6 +1909,15 @@
          * 5. Wishlist Slide-Over Drawer
          */
         initWishlistDrawer() {
+            let backdrop = document.getElementById('tourist-drawer-backdrop');
+            if (!backdrop) {
+                backdrop = document.createElement('div');
+                backdrop.id = 'tourist-drawer-backdrop';
+                backdrop.className = 'tourist-drawer-backdrop';
+                document.body.appendChild(backdrop);
+            }
+            backdrop.onclick = () => this.closeWishlistDrawer();
+
             let drawer = document.getElementById('tourist-wishlist-drawer');
             if (!drawer) {
                 drawer = document.createElement('div');
@@ -690,17 +1934,28 @@
                     <div class="tourist-drawer-body" id="wishlist-drawer-items"></div>
                 `;
                 document.body.appendChild(drawer);
-
-                const closeBtn = drawer.querySelector('#btn-close-wishlist-drawer');
-                if (closeBtn) closeBtn.onclick = () => drawer.classList.remove('show');
             }
+
+            const closeBtn = drawer.querySelector('#btn-close-wishlist-drawer');
+            if (closeBtn) closeBtn.onclick = () => this.closeWishlistDrawer();
         },
 
         openWishlistDrawer() {
             const drawer = document.getElementById('tourist-wishlist-drawer');
+            const backdrop = document.getElementById('tourist-drawer-backdrop');
             if (!drawer) return;
             this.renderWishlistDrawerItems();
-            drawer.classList.add('show');
+            drawer.classList.add('show', 'active', 'open');
+            if (backdrop) backdrop.classList.add('show', 'active', 'open');
+            document.body.style.overflow = 'hidden';
+        },
+
+        closeWishlistDrawer() {
+            const drawer = document.getElementById('tourist-wishlist-drawer');
+            const backdrop = document.getElementById('tourist-drawer-backdrop');
+            if (drawer) drawer.classList.remove('show', 'active', 'open');
+            if (backdrop) backdrop.classList.remove('show', 'active', 'open');
+            document.body.style.overflow = '';
         },
 
         renderWishlistDrawerItems() {
@@ -779,6 +2034,368 @@
                     window.location.href = `destinations.html?state=${encodeURIComponent(stateId)}`;
                 };
             });
+        },
+
+        /**
+         * Dedicated Experiences Page Controller
+         */
+        initExperiencesPage() {
+            const countAllEl = document.getElementById('count-exp-all');
+            if (countAllEl) countAllEl.textContent = EXPERIENCES_DATA.length;
+
+            let activeCategory = 'all';
+            let activeState = 'all';
+            let searchQuery = '';
+
+            const grid = document.getElementById('experiences-grid');
+            const renderExperiences = () => {
+                if (!grid) return;
+                const filtered = EXPERIENCES_DATA.filter(exp => {
+                    const matchCat = activeCategory === 'all' || exp.category === activeCategory;
+                    const matchState = activeState === 'all' || exp.state_id === activeState;
+                    const qLower = searchQuery.toLowerCase();
+                    const matchSearch = !searchQuery || 
+                        exp.title.toLowerCase().includes(qLower) || 
+                        exp.location.toLowerCase().includes(qLower) || 
+                        exp.desc.toLowerCase().includes(qLower);
+                    return matchCat && matchState && matchSearch;
+                });
+
+                if (filtered.length > 0) {
+                    grid.innerHTML = filtered.map(exp => `
+                        <div class="experience-full-card">
+                            <div class="exp-full-img" style="background-image: url('${exp.img}');">
+                                <span class="exp-full-badge">${exp.category_label || exp.category}</span>
+                            </div>
+                            <div class="exp-full-content">
+                                <h3 class="exp-full-title">${exp.title}</h3>
+                                <div class="exp-full-loc">📍 ${exp.location}</div>
+                                <p class="exp-full-desc">${exp.desc}</p>
+                                <div class="exp-full-meta-grid">
+                                    <div><strong>⏱️ Duration:</strong> ${exp.duration}</div>
+                                    <div><strong>💪 Difficulty:</strong> ${exp.difficulty}</div>
+                                    <div><strong>☀️ Best Season:</strong> ${exp.season}</div>
+                                    <div><strong>🧭 Guide:</strong> ${exp.guide}</div>
+                                </div>
+                                <button type="button" class="tourist-btn-primary btn-view-exp" data-exp-id="${exp.id}" style="width:100%; justify-content:center;">
+                                    View Experience Details <span>→</span>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    grid.querySelectorAll('.btn-view-exp').forEach(btn => {
+                        btn.onclick = () => {
+                            const expId = btn.getAttribute('data-exp-id');
+                            const exp = EXPERIENCES_DATA.find(e => e.id === expId);
+                            if (exp) this.openExperienceModal(exp);
+                        };
+                    });
+                } else {
+                    grid.innerHTML = `
+                        <div style="grid-column: 1 / -1; padding: 3rem; text-align: center; background: var(--tourist-bg-subtle); border-radius: 12px;">
+                            <span style="font-size: 2.5rem; display: block; margin-bottom: 0.75rem;">🔍</span>
+                            <h4 style="font-size: 1.15rem; color: var(--tourist-text-heading); margin: 0 0 0.5rem 0;">No Experiences Match Your Filter</h4>
+                            <p style="font-size: 0.88rem; color: var(--tourist-text-muted); max-width: 440px; margin: 0 auto 1.25rem auto;">
+                                Try resetting your search terms or selecting 'All Experiences' to view our complete regional catalog.
+                            </p>
+                        </div>
+                    `;
+                }
+            };
+
+            // Initial render
+            renderExperiences();
+
+            // Category Chips
+            document.querySelectorAll('#exp-category-chips button').forEach(btn => {
+                btn.onclick = () => {
+                    document.querySelectorAll('#exp-category-chips button').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeCategory = btn.getAttribute('data-exp-cat') || 'all';
+                    renderExperiences();
+                };
+            });
+
+            // Search Input
+            const searchInput = document.getElementById('exp-search-input');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    searchQuery = e.target.value.trim();
+                    renderExperiences();
+                });
+            }
+
+            // State Selector
+            const stateSelect = document.getElementById('exp-state-select');
+            if (stateSelect) {
+                stateSelect.addEventListener('change', (e) => {
+                    activeState = e.target.value;
+                    renderExperiences();
+                });
+            }
+
+            // Modal Closers
+            const btnCloseExp = document.getElementById('btn-close-exp-modal');
+            const btnCloseExpFooter = document.getElementById('btn-close-exp-modal-footer');
+            const expModal = document.getElementById('touristExperienceModal');
+            if (btnCloseExp) btnCloseExp.onclick = () => this.closeExperienceModal();
+            if (btnCloseExpFooter) btnCloseExpFooter.onclick = () => this.closeExperienceModal();
+            if (expModal) {
+                expModal.onclick = (e) => {
+                    if (e.target === expModal) this.closeExperienceModal();
+                };
+            }
+        },
+
+        /**
+         * Dedicated Plan Your Trip Page Controller
+         */
+        initPlanTripPage() {
+            // Tabs switching (Curated, Builder, Wishlist)
+            const tabs = document.querySelectorAll('.itinerary-nav-tab');
+            const paneCurated = document.getElementById('itinerary-pane-curated');
+            const paneBuilder = document.getElementById('itinerary-pane-builder');
+            const paneWishlist = document.getElementById('itinerary-pane-wishlist');
+
+            tabs.forEach(tab => {
+                tab.onclick = () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    const tabKey = tab.getAttribute('data-itinerary-tab');
+                    if (paneCurated) paneCurated.style.display = tabKey === 'curated' ? 'block' : 'none';
+                    if (paneBuilder) paneBuilder.style.display = tabKey === 'builder' ? 'block' : 'none';
+                    if (paneWishlist) {
+                        paneWishlist.style.display = tabKey === 'wishlist' ? 'block' : 'none';
+                        if (tabKey === 'wishlist') this.renderWishlistPlanner();
+                    }
+                };
+            });
+
+            // Curated Circuits Buttons
+            const btnMh = document.getElementById('btn-circuit-mh');
+            const btnKl = document.getElementById('btn-circuit-kl');
+            const btnRj = document.getElementById('btn-circuit-rj');
+            const btnGoa = document.getElementById('btn-circuit-goa');
+            const btnJk = document.getElementById('btn-circuit-jk');
+            const circuitBtns = [btnMh, btnKl, btnRj, btnGoa, btnJk].filter(Boolean);
+
+            const setCircuitActive = (btn, key) => {
+                circuitBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.renderCuratedItinerary(key);
+            };
+
+            if (btnMh) btnMh.onclick = () => setCircuitActive(btnMh, 'mh');
+            if (btnKl) btnKl.onclick = () => setCircuitActive(btnKl, 'kl');
+            if (btnRj) btnRj.onclick = () => setCircuitActive(btnRj, 'rj');
+            if (btnGoa) btnGoa.onclick = () => setCircuitActive(btnGoa, 'goa');
+            if (btnJk) btnJk.onclick = () => setCircuitActive(btnJk, 'jk');
+
+            // Render Default Curated Circuit
+            this.renderCuratedItinerary('mh');
+
+            // Custom Trip Builder Generator
+            const btnGenerate = document.getElementById('btn-generate-custom-itinerary');
+            if (btnGenerate) {
+                btnGenerate.onclick = () => {
+                    const state = (document.getElementById('builder-state-select') || {}).value || 'maharashtra';
+                    const days = parseInt((document.getElementById('builder-duration-select') || {}).value || '3', 10);
+                    const style = (document.getElementById('builder-style-select') || {}).value || 'heritage';
+                    this.generateCustomItinerary(state, days, style);
+                };
+                // Initial default render
+                this.generateCustomItinerary('maharashtra', 3, 'heritage');
+            }
+
+            // Update Wishlist Tab Counter
+            const countEl = document.getElementById('plan-wishlist-count');
+            if (countEl) countEl.textContent = this.favorites.size;
+        },
+
+        renderWishlistPlanner() {
+            const grid = document.getElementById('wishlist-planner-grid');
+            const countEl = document.getElementById('plan-wishlist-count');
+            if (countEl) countEl.textContent = this.favorites.size;
+            if (!grid) return;
+
+            const favDestinations = this.destinations.filter(d => this.favorites.has(d.id));
+            if (favDestinations.length > 0) {
+                grid.innerHTML = favDestinations.map(dest => `
+                    <div class="dest-card" style="box-shadow:var(--tourist-shadow-sm);">
+                        <div class="dest-card-img-wrap" style="background-image: url('${dest.img}'); height: 160px;">
+                            <span class="dest-card-badge">${dest.category}</span>
+                            <span style="position:absolute; bottom:8px; left:8px; background:rgba(0,0,0,0.65); color:#fff; font-size:0.75rem; padding:2px 8px; border-radius:4px; font-weight:700;">
+                                📍 ${dest.location}
+                            </span>
+                        </div>
+                        <div class="dest-card-content" style="padding: 1.25rem;">
+                            <h3 class="dest-card-name" style="font-size: 1.1rem; margin: 0 0 0.35rem 0;">${dest.name}</h3>
+                            <p style="font-size:0.84rem; color:var(--tourist-text-muted); line-height:1.5; margin:0 0 1rem 0;">${dest.description.slice(0, 110)}...</p>
+                            <a href="destination-detail.html?id=${dest.id}" class="tourist-btn-primary" style="width:100%; justify-content:center; box-sizing:border-box; font-size:0.85rem;">
+                                View Destination Circuit →
+                            </a>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; padding: 3rem; text-align: center; background: var(--tourist-bg-subtle); border-radius: 12px;">
+                        <span style="font-size: 2.5rem; display: block; margin-bottom: 0.75rem;">🤍</span>
+                        <h4 style="font-size: 1.15rem; color: var(--tourist-text-heading); margin: 0 0 0.5rem 0;">Your Travel Wishlist is Empty</h4>
+                        <p style="font-size: 0.88rem; color: var(--tourist-text-muted); max-width: 440px; margin: 0 auto 1.25rem auto;">
+                            Click the heart icon on any destination or experience to build your personalized multi-day trip plan.
+                        </p>
+                        <a href="destinations.html" class="tourist-btn-primary">Browse Destinations</a>
+                    </div>
+                `;
+            }
+        },
+
+        /**
+         * Dedicated Stories Page Controller
+         */
+        initStoriesPage() {
+            let activeFilter = 'all';
+            const grid = document.getElementById('tourist-stories-grid');
+
+            const renderFilteredStories = () => {
+                if (!grid) return;
+                const filtered = TRAVEL_STORIES.filter(s => {
+                    if (activeFilter === 'all') return true;
+                    if (activeFilter === 'forts') return s.category.toLowerCase().includes('fort') || s.category.toLowerCase().includes('heritage');
+                    if (activeFilter === 'treks') return s.category.toLowerCase().includes('trek') || s.category.toLowerCase().includes('mountain');
+                    if (activeFilter === 'backwaters') return s.category.toLowerCase().includes('backwater') || s.category.toLowerCase().includes('water');
+                    if (activeFilter === 'culture') return s.category.toLowerCase().includes('spiritual') || s.category.toLowerCase().includes('culture');
+                    return true;
+                });
+
+                grid.innerHTML = filtered.map(story => `
+                    <div class="tourist-story-card">
+                        <div class="tourist-story-thumb" style="background-image: url('${story.img}');">
+                            <span class="tourist-story-badge">${story.category}</span>
+                        </div>
+                        <div class="tourist-story-body">
+                            <h4 class="tourist-story-title">${story.title}</h4>
+                            <p class="tourist-story-excerpt">${story.excerpt}</p>
+                            <div class="tourist-story-meta">
+                                <span>By ${story.author} • ${story.readTime}</span>
+                                <button type="button" class="tourist-link-arrow btn-read-story" data-story-id="${story.id}" style="background:none; border:none; cursor:pointer; font-weight:700; color:var(--tourist-forest); padding:0;">
+                                    Read Story →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                grid.querySelectorAll('.btn-read-story').forEach(btn => {
+                    btn.onclick = () => {
+                        const id = btn.getAttribute('data-story-id');
+                        const story = TRAVEL_STORIES.find(s => s.id === id);
+                        if (story) this.openStoryModal(story);
+                    };
+                });
+            };
+
+            renderFilteredStories();
+
+            // Filter Chips
+            document.querySelectorAll('#story-filter-chips button').forEach(chip => {
+                chip.onclick = () => {
+                    document.querySelectorAll('#story-filter-chips button').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    activeFilter = chip.getAttribute('data-story-filter') || 'all';
+                    renderFilteredStories();
+                };
+            });
+
+            // Modal Closers
+            const btnCloseStory = document.getElementById('btn-close-story-modal');
+            const btnCloseStoryFooter = document.getElementById('btn-close-story-modal-footer');
+            const storyModal = document.getElementById('touristStoryModal');
+            if (btnCloseStory) btnCloseStory.onclick = () => this.closeStoryModal();
+            if (btnCloseStoryFooter) btnCloseStoryFooter.onclick = () => this.closeStoryModal();
+            if (storyModal) {
+                storyModal.onclick = (e) => {
+                    if (e.target === storyModal) this.closeStoryModal();
+                };
+            }
+        },
+
+        /**
+         * Dedicated Travel Guidance Page Controller
+         */
+        initTravelGuidancePage() {
+            // Static structured guidance page is ready upon load
+        },
+
+        /**
+         * Dedicated Destination Advisories Page Controller
+         */
+        initDestinationAdvisoriesPage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const destId = urlParams.get('id') || 'raigad-fort';
+            const dest = this.destinations.find(d => d.id === destId) || this.destinations[0];
+
+            if (!dest) return;
+
+            const nameEl = document.getElementById('adv-dest-name');
+            const locEl = document.getElementById('adv-dest-location');
+            const backLink = document.getElementById('adv-back-dest-link');
+            const sidebarDestBtn = document.getElementById('adv-sidebar-dest-btn');
+            const authorityEl = document.getElementById('adv-authority-name');
+            const basecampEl = document.getElementById('adv-basecamp-name');
+            const listEl = document.getElementById('adv-bulletins-list');
+
+            if (nameEl) nameEl.textContent = `${dest.name} — Official Advisories & Guidelines`;
+            if (locEl) locEl.textContent = `📍 ${dest.location} • ${dest.state_name || 'India'}`;
+            if (backLink) backLink.href = `destination-detail.html?id=${encodeURIComponent(dest.id)}`;
+            if (sidebarDestBtn) sidebarDestBtn.href = `destination-detail.html?id=${encodeURIComponent(dest.id)}`;
+            if (authorityEl) authorityEl.textContent = `${dest.state_name || 'State'} Tourism Development Corporation (STDC)`;
+            if (basecampEl) basecampEl.textContent = `${dest.name} Base Checkpoint Station`;
+
+            const bulletins = this.getDestinationAnnouncements(dest.id);
+            if (listEl) {
+                if (bulletins.length > 0) {
+                    listEl.innerHTML = bulletins.map(b => `
+                        <div class="tourist-advisory-card" style="margin-bottom:1.25rem;">
+                            <div class="advisory-header">
+                                <span class="advisory-icon">${b.icon || '🚨'}</span>
+                                <div>
+                                    <h4 class="advisory-title">${b.title}</h4>
+                                    <div class="advisory-date">Published: ${b.date} • ${b.category || 'Official Safety Directive'}</div>
+                                </div>
+                            </div>
+                            <p class="advisory-content">${b.content}</p>
+                            ${b.guidance ? `
+                                <div class="advisory-guidance-box">
+                                    <strong style="color:var(--tourist-text-heading); display:block; margin-bottom:0.25rem;">Mandatory Visitor Directive:</strong>
+                                    <span>${b.guidance}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('');
+                } else {
+                    listEl.innerHTML = `
+                        <div class="tourist-advisory-card">
+                            <div class="advisory-header">
+                                <span class="advisory-icon">🌿</span>
+                                <div>
+                                    <h4 class="advisory-title">Standard Trail Conditions & Safety Protocols Active</h4>
+                                    <div class="advisory-date">All routes open for verified visitor exploration</div>
+                                </div>
+                            </div>
+                            <p class="advisory-content">
+                                Trails, heritage bastions, and visitor approaches are reported clear by Destination Managers. Normal daylight visiting hours (06:00 AM – 06:00 PM) apply.
+                            </p>
+                            <div class="advisory-guidance-box">
+                                <strong style="color:var(--tourist-text-heading); display:block; margin-bottom:0.25rem;">Zero-Plastic Code:</strong>
+                                <span>Carry all personal waste back to base camp disposal points. Do not discard plastic wrappers or containers on heritage trails.</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
         },
 
         /**
@@ -870,6 +2487,25 @@
             if (closeSidebarBtn && sidebar) {
                 closeSidebarBtn.onclick = () => sidebar.classList.remove('mobile-open');
             }
+
+            // Intercept navigation links on destinations.html for smooth intra-page category switching
+            document.querySelectorAll('a[href*="destinations.html?category="]').forEach(link => {
+                link.onclick = (e) => {
+                    e.preventDefault();
+                    const href = link.getAttribute('href');
+                    const match = href.match(/category=([\w-]+)/);
+                    if (match && match[1]) {
+                        const cat = match[1];
+                        history.pushState(null, '', `destinations.html?category=${cat}`);
+                        this.currentFilters.categories = [cat];
+                        document.querySelectorAll('.category-filter-checkbox').forEach(cb => {
+                            cb.checked = (cb.value === cat);
+                        });
+                        this.renderFilteredDestinations();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                };
+            });
 
             // Initial Render
             this.renderFilteredDestinations();
@@ -973,7 +2609,7 @@
                     return `
                         <div class="dest-card" data-dest-id="${dest.id}">
                             <div class="dest-card-media">
-                                <img src="${dest.img}" alt="${dest.name}" class="dest-card-media-img" loading="lazy">
+                                <img src="${dest.img}" alt="${dest.name}" class="dest-card-media-img" loading="lazy" onerror="this.onerror=null; this.src='../assets/images/hero-india.jpg';">
                                 <button type="button" class="dest-card-fav-btn ${isFav ? 'favorited' : ''}" 
                                         data-dest-id="${dest.id}" 
                                         title="${isFav ? 'Remove from Saved' : 'Save to Favorites'}"
@@ -1185,17 +2821,66 @@
         getDestinationAttractions(destId) {
             const attractions = (window.YatraSetuManagerData && window.YatraSetuManagerData.attractions) || [];
             // Strict relationship: only attractions explicitly tagged with this destination_id
-            return attractions.filter(a => a.destination_id === destId);
+            const matched = attractions.filter(a => a.destination_id === destId);
+            const dest = (this.destinations || []).find(d => d.id === destId);
+            return matched.map(a => ({
+                ...a,
+                img: this.resolveAttractionImage(a, dest)
+            }));
         },
 
         getDestinationVideos(destId) {
-            const videos = (window.YatraSetuManagerData && window.YatraSetuManagerData.destinationVideos) || [];
+            let videos = (window.YatraSetuManagerData && window.YatraSetuManagerData.destinationVideos) ? [...window.YatraSetuManagerData.destinationVideos] : [];
+
+            // Restore manager-published videos from authoritative storage (localStorage / sessionStorage)
+            try {
+                const rawStored = localStorage.getItem('yatrasetu_destination_videos') || sessionStorage.getItem('yatrasetu_destination_videos');
+                if (rawStored) {
+                    const parsed = JSON.parse(rawStored);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        const map = new Map(videos.map(v => [v.id, v]));
+                        parsed.forEach(item => {
+                            if (map.has(item.id)) {
+                                Object.assign(map.get(item.id), item);
+                            } else {
+                                videos.push(item);
+                                map.set(item.id, item);
+                            }
+                        });
+                    }
+                }
+            } catch (e) {
+                console.warn('[tourist.js] Video storage read error:', e);
+            }
+
             // Official published videos explicitly tagged with this destination_id
             return videos.filter(v => v.destination_id === destId && v.status === 'Published');
         },
 
         getApprovedStakeholders(destId) {
-            const shList = (window.YatraSetuManagerData && window.YatraSetuManagerData.stakeholders) || [];
+            let shList = (window.YatraSetuManagerData && window.YatraSetuManagerData.stakeholders) ? [...window.YatraSetuManagerData.stakeholders] : [];
+
+            // Restore manager-approved stakeholders from authoritative storage (localStorage / sessionStorage)
+            try {
+                const rawStored = localStorage.getItem('yatrasetu_manager_stakeholders') || sessionStorage.getItem('yatrasetu_manager_stakeholders');
+                if (rawStored) {
+                    const parsed = JSON.parse(rawStored);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        const map = new Map(shList.map(s => [s.id, s]));
+                        parsed.forEach(item => {
+                            if (map.has(item.id)) {
+                                Object.assign(map.get(item.id), item);
+                            } else {
+                                shList.push(item);
+                                map.set(item.id, item);
+                            }
+                        });
+                    }
+                }
+            } catch (e) {
+                console.warn('[tourist.js] Stakeholder storage read error:', e);
+            }
+
             // Strict role privacy & publication boundary:
             // 1. Must match destination_id
             // 2. Must be Approved
@@ -1232,19 +2917,35 @@
         },
 
         getDestinationFeedback(destId) {
-            const defaultFeedback = (window.YatraSetuManagerData && window.YatraSetuManagerData.feedback) || [];
-            const matched = defaultFeedback.filter(f => f.destination_id === destId);
+            let deletedIds = new Set();
             try {
-                const stored = sessionStorage.getItem('yatrasetu_tourist_feedback');
-                if (stored) {
-                    const parsed = JSON.parse(stored);
-                    const userForDest = parsed.filter(f => f.destination_id === destId);
-                    return [...userForDest, ...matched];
+                const rawDeleted = localStorage.getItem('yatrasetu_deleted_feedback_ids');
+                if (rawDeleted) {
+                    const parsed = JSON.parse(rawDeleted);
+                    if (Array.isArray(parsed)) deletedIds = new Set(parsed);
+                }
+            } catch (e) {}
+
+            const defaultFeedback = ((window.YatraSetuManagerData && window.YatraSetuManagerData.feedback) || [])
+                .filter(f => f.destination_id === destId && !deletedIds.has(f.id));
+
+            try {
+                // Single authoritative storage across tabs is localStorage
+                const rawStored = localStorage.getItem('yatrasetu_tourist_feedback');
+                if (rawStored) {
+                    const parsed = JSON.parse(rawStored);
+                    if (Array.isArray(parsed)) {
+                        const validUserSubmissions = parsed.filter(f => !deletedIds.has(f.id));
+                        // Keep sessionStorage strictly synchronized to avoid stale resurrection
+                        sessionStorage.setItem('yatrasetu_tourist_feedback', JSON.stringify(validUserSubmissions));
+                        const userForDest = validUserSubmissions.filter(f => f.destination_id === destId);
+                        return [...userForDest, ...defaultFeedback];
+                    }
                 }
             } catch (err) {
                 console.warn('Could not read user feedback storage:', err);
             }
-            return matched;
+            return defaultFeedback;
         },
 
         getNearbyDestinations(dest) {
@@ -1311,6 +3012,7 @@
             // Wire Favorite Button in Detail Hero & Quick Save Card
             const favBtn = document.getElementById('detail-fav-btn');
             const quickSaveBtn = document.getElementById('btn-quick-save-detail');
+            if (favBtn) favBtn.setAttribute('data-dest-id', dest.id);
 
             const updateFavUI = (isFav) => {
                 if (favBtn) {
@@ -1365,8 +3067,45 @@
             // =================================================================
             // TAB 1: OVERVIEW PANE POPULATION
             // =================================================================
+            // Key Facts Sheet
+            const factClass = document.getElementById('fact-classification');
+            if (factClass) factClass.textContent = dest.category || 'Heritage Monument & Scenic Destination';
+
+            const factDist = document.getElementById('fact-district');
+            if (factDist) factDist.textContent = dest.location || (dest.state_name ? `${dest.state_name}, India` : 'India');
+
+            const factElev = document.getElementById('fact-elevation');
+            if (factElev) factElev.textContent = dest.elevation || (dest.id === 'raigad-fort' ? '1,376 m (4,514 ft) ASL' : (dest.id === 'lonavala' ? '624 m (2,047 ft) ASL' : (dest.id === 'munnar-hills' ? '1,532 m (5,026 ft) ASL' : 'Regional Plateau & Landscape')));
+
+            const factSeas = document.getElementById('fact-season');
+            if (factSeas) factSeas.textContent = dest.season || 'October to March (Winter / Post-Monsoon)';
+
+            const factDur = document.getElementById('fact-duration');
+            if (factDur) factDur.textContent = dest.ideal_duration || 'Full Day (5 – 7 Hours)';
+
+            const factDiff = document.getElementById('fact-difficulty');
+            if (factDiff) factDiff.textContent = dest.difficulty || (dest.category.includes('Fort') || dest.tags.includes('Trekking') ? 'Moderate to Strenuous Ridge Trek' : 'Accessible / Leisure Exploration');
+
             const descEl = document.getElementById('detail-dest-description');
             if (descEl) descEl.textContent = dest.description;
+
+            const historyBgEl = document.getElementById('detail-history-bg');
+            if (historyBgEl) historyBgEl.textContent = dest.history_background || `Originating in the regional chronicles of ${dest.state_name || 'India'}, ${dest.name} represents a foundational monument in local cultural geography. Historical records document continuous settlement, strategic fortification, and royal patronage over successive centuries.`;
+
+            const archEl = document.getElementById('detail-heritage-arch');
+            if (archEl) archEl.textContent = dest.heritage_architecture || `Constructed in traditional regional masonry, ${dest.name} demonstrates indigenous engineering adapted to the local topography and climate, featuring monumental entryways, stone ramparts, and specialized rainwater harvesting systems.`;
+
+            const cultureEl = document.getElementById('detail-culture-trad');
+            if (cultureEl) cultureEl.textContent = dest.cultural_significance || `Deeply rooted in the living traditions of ${dest.state_name || 'India'}, ${dest.name} serves as a cultural landmark celebrated in regional folklore, seasonal festivities, and community heritage gatherings.`;
+
+            const geoEl = document.getElementById('detail-geography-landmarks');
+            if (geoEl) geoEl.textContent = dest.geography_landmarks || `Occupying a prominent terrain vantage point overlooking arterial river valleys, ${dest.name} is surrounded by natural buffer zones, panoramic lookouts, and regional nature corridors.`;
+
+            // Wire Official Advisories Button in Overview
+            const advBtn = document.getElementById('btn-view-all-advisories');
+            if (advBtn) {
+                advBtn.href = `destination-advisories.html?id=${encodeURIComponent(dest.id)}`;
+            }
 
             const highlightsEl = document.getElementById('detail-highlights-list');
             if (highlightsEl) {
@@ -1379,19 +3118,28 @@
                 `).join('');
             }
 
-            // Overview Attractions Preview (Up to 4)
+            // Overview Attractions Preview (Up to 4) with Interactive Click Modal
             const attrPreviewGrid = document.getElementById('detail-attractions-grid');
             if (attrPreviewGrid) {
                 if (attractions.length > 0) {
                     attrPreviewGrid.innerHTML = attractions.slice(0, 4).map(attr => `
-                        <div class="detail-attr-item">
+                        <div class="detail-attr-item" data-attr-id="${attr.id}" style="cursor:pointer;" title="Click to view attraction details">
                             <div class="detail-attr-thumb" style="background-image: url('${attr.img}');"></div>
                             <div class="detail-attr-body">
                                 <h4 class="detail-attr-name">${attr.name}</h4>
                                 <div class="detail-attr-cat">${attr.category} • ⭐ ${attr.rating || '4.8'}</div>
+                                <div style="font-size:0.72rem; color:var(--tourist-forest); font-weight:700; margin-top:3px;">View Details ↗</div>
                             </div>
                         </div>
                     `).join('');
+
+                    attrPreviewGrid.querySelectorAll('.detail-attr-item').forEach(item => {
+                        item.onclick = () => {
+                            const id = item.getAttribute('data-attr-id');
+                            const attr = attractions.find(a => a.id === id);
+                            if (attr) this.openAttractionModal(attr);
+                        };
+                    });
                 } else {
                     attrPreviewGrid.innerHTML = `
                         <div style="grid-column: 1 / -1; padding: 1.25rem; background: var(--tourist-bg-subtle); border-radius: 8px; font-size: 0.85rem; color: var(--tourist-text-muted);">
@@ -1399,6 +3147,36 @@
                         </div>
                     `;
                 }
+            }
+
+            // Visual Gallery in Overview Tab & Hero Strip
+            const gallery = this.getDestinationGallery(dest);
+            const heroPhotoCount = document.getElementById('hero-photo-count');
+            if (heroPhotoCount) heroPhotoCount.textContent = gallery.length;
+
+            const btnHeroPhotos = document.getElementById('btn-hero-view-photos');
+            if (btnHeroPhotos) {
+                btnHeroPhotos.onclick = () => {
+                    this.openLightbox(0, gallery, dest.name);
+                };
+            }
+
+            const galleryGrid = document.getElementById('detail-gallery-grid');
+            if (galleryGrid) {
+                galleryGrid.innerHTML = gallery.map((item, idx) => `
+                    <div class="detail-gallery-item" data-photo-idx="${idx}" title="${item.title}">
+                        <img src="${item.url}" alt="${item.title}" loading="lazy" onerror="this.onerror=null; this.src='${dest.img}';">
+                        <span class="detail-gallery-tag">${item.tag}</span>
+                        <div class="detail-gallery-caption">${item.title}</div>
+                    </div>
+                `).join('');
+
+                galleryGrid.querySelectorAll('.detail-gallery-item').forEach(el => {
+                    el.onclick = () => {
+                        const idx = parseInt(el.getAttribute('data-photo-idx'), 10);
+                        this.openLightbox(idx, gallery, dest.name);
+                    };
+                });
             }
 
             // Quick switch to Attractions tab
@@ -1471,19 +3249,33 @@
             if (attractionsCardsContainer) {
                 if (attractions.length > 0) {
                     attractionsCardsContainer.innerHTML = attractions.map(attr => `
-                        <div class="tourist-video-card">
-                            <div class="video-thumb-wrap" style="background-image: url('${attr.img}');">
-                                <span class="video-duration-tag">⭐ ${attr.rating || '4.8'}</span>
+                        <div class="tourist-attraction-card" data-attr-id="${attr.id}" style="cursor:pointer;" title="Click to view attraction details">
+                            <div class="attr-card-media" style="background-image: url('${attr.img}');">
+                                <span class="attr-card-tag">${attr.category}</span>
+                                <span class="attr-card-rating">★ ${attr.rating || '4.8'}</span>
                             </div>
-                            <div class="video-card-body">
-                                <h4 class="video-card-title">${attr.name}</h4>
-                                <p class="video-card-desc">Category: ${attr.category} • Status: ${attr.status || 'Open to Visitors'}</p>
-                                <div class="video-card-meta">
-                                    <span style="font-size:0.75rem; color:var(--tourist-forest); font-weight:700;">✓ Verified Destination Attraction</span>
+                            <div class="attr-card-body">
+                                <h4 class="attr-card-title">${attr.name}</h4>
+                                <p class="attr-card-desc">${attr.description || 'Verified secondary attraction catalogued under destination jurisdiction.'}</p>
+                                <div class="attr-card-meta">
+                                    <span>🕒 ${attr.timings || '06:00 AM – 06:00 PM'}</span>
+                                    <span>⏱️ ${attr.duration || '1.5 – 2.5 Hours'}</span>
+                                </div>
+                                <div class="attr-card-action">
+                                    <span class="attr-verified-badge">✓ Verified Landmark</span>
+                                    <span class="tourist-link-arrow">View Details →</span>
                                 </div>
                             </div>
                         </div>
                     `).join('');
+
+                    attractionsCardsContainer.querySelectorAll('.tourist-attraction-card').forEach(card => {
+                        card.onclick = () => {
+                            const id = card.getAttribute('data-attr-id');
+                            const attr = attractions.find(a => a.id === id);
+                            if (attr) this.openAttractionModal(attr);
+                        };
+                    });
                 } else {
                     attractionsCardsContainer.innerHTML = `
                         <div style="grid-column: 1 / -1; padding: 2.5rem; text-align: center; background: var(--tourist-bg-subtle); border-radius: 12px;">
@@ -1555,11 +3347,14 @@
                             <h4 class="stakeholder-name">${sh.name}</h4>
                             <p class="stakeholder-desc">${sh.description}</p>
                             <div class="stakeholder-meta-grid">
-                                <div><strong>📍 Base:</strong> ${sh.address || 'Local Hub'}</div>
+                                <div><strong>📍 Base Hub:</strong> ${sh.address || 'Local Hub'}</div>
                                 <div><strong>🕒 Hours:</strong> ${sh.hours || 'Standard Hours'}</div>
-                                <div><strong>💰 Guide Rate:</strong> ${sh.price_range || 'Contact Partner'}</div>
+                                <div><strong>💰 Indicative Guide Rate:</strong> ${sh.price_range || 'Contact Partner'}</div>
                             </div>
                             <div class="stakeholder-card-actions">
+                                <a href="tel:${sh.contact_phone || '1800-233-7799'}" class="tourist-btn-outline" style="font-size:0.82rem; padding:0.5rem 0.85rem; text-decoration:none;">
+                                    📞 Contact
+                                </a>
                                 <button type="button" class="tourist-btn-primary btn-view-stakeholder" data-sh-id="${sh.id}" style="font-size:0.82rem; padding:0.5rem 1rem;">
                                     View Details & Enquire
                                 </button>
@@ -1588,26 +3383,100 @@
             }
 
             // =================================================================
+            // TAB 4: EXPERIENCES PANE
+            // =================================================================
+            const destExpGrid = document.getElementById('detail-experiences-grid');
+            const destExperiences = this.getDestinationExperiences(dest.id);
+            const tabExpCount = document.getElementById('tab-exp-count');
+            if (tabExpCount) tabExpCount.textContent = destExperiences.length;
+
+            if (destExpGrid) {
+                if (destExperiences.length > 0) {
+                    destExpGrid.innerHTML = destExperiences.map(exp => `
+                        <div class="experience-full-card">
+                            <div class="exp-full-img" style="background-image: url('${exp.img}');">
+                                <span class="exp-full-badge">${exp.category_label || exp.category}</span>
+                            </div>
+                            <div class="exp-full-content">
+                                <h3 class="exp-full-title">${exp.title}</h3>
+                                <div class="exp-full-loc">📍 ${exp.location}</div>
+                                <p class="exp-full-desc">${exp.desc}</p>
+                                <div class="exp-full-meta-grid">
+                                    <div><strong>⏱️ Duration:</strong> ${exp.duration}</div>
+                                    <div><strong>💪 Difficulty:</strong> ${exp.difficulty}</div>
+                                    <div><strong>☀️ Best Season:</strong> ${exp.season}</div>
+                                    <div><strong>🧭 Guide:</strong> ${exp.guide}</div>
+                                </div>
+                                <button type="button" class="tourist-btn-primary btn-view-dest-exp" data-exp-id="${exp.id}" style="width:100%; justify-content:center;">
+                                    View Experience Details <span>→</span>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    destExpGrid.querySelectorAll('.btn-view-dest-exp').forEach(btn => {
+                        btn.onclick = () => {
+                            const expId = btn.getAttribute('data-exp-id');
+                            const exp = destExperiences.find(e => e.id === expId) || EXPERIENCES_DATA.find(e => e.id === expId);
+                            if (exp) {
+                                this.openExperienceModal(exp);
+                            } else {
+                                console.warn('Experience record not found for id:', expId);
+                            }
+                        };
+                    });
+                } else {
+                    destExpGrid.innerHTML = `
+                        <div style="grid-column: 1 / -1; padding: 2.5rem; text-align: center; background: var(--tourist-bg-subtle); border-radius: 12px;">
+                            <span style="font-size: 2.5rem; display: block; margin-bottom: 0.75rem;">🧭</span>
+                            <h4 style="font-size: 1.1rem; color: var(--tourist-text-heading); margin: 0 0 0.5rem 0;">No Dedicated Experiences Listed</h4>
+                            <p style="font-size: 0.88rem; color: var(--tourist-text-muted); max-width: 480px; margin: 0 auto;">
+                                Experience trails for this destination are currently being verified with regional eco-guides.
+                            </p>
+                        </div>
+                    `;
+                }
+            }
+
+            // =================================================================
             // TAB 5: EVENTS & FESTIVALS
             // =================================================================
             const eventsGrid = document.getElementById('detail-events-grid');
             if (eventsGrid) {
                 if (events.length > 0) {
-                    eventsGrid.innerHTML = events.map(ev => `
+                    eventsGrid.innerHTML = events.map((ev, i) => `
                         <div class="tourist-event-card">
-                            <div class="event-date-box">
-                                <span class="event-date-num">${ev.dateNum || '15'}</span>
-                                <span class="event-date-month">${ev.dateMonth || 'OCT'}</span>
+                            <div class="event-thumb" style="background-image:url('${ev.img || dest.img}');">
+                                <div class="event-date-box">
+                                    <span class="event-date-num">${ev.dateNum || '28'}</span>
+                                    <span class="event-date-month">${ev.dateMonth || 'SEP'}</span>
+                                </div>
                             </div>
-                            <div class="event-details">
+                            <div class="event-body">
+                                <div class="event-header-row">
+                                    <span class="event-status-pill ${ev.statusClass || 'active'}">${ev.status || 'Active'}</span>
+                                    <span class="event-cat-tag">Regional Festival</span>
+                                </div>
                                 <h4 class="event-title">${ev.title}</h4>
-                                <div class="event-loc">📍 ${ev.location}</div>
-                            </div>
-                            <div>
-                                <span class="event-status-pill ${ev.statusClass || 'active'}">${ev.status || 'Active'}</span>
+                                <div class="event-loc">📍 ${ev.location || ev.loc || dest.name}</div>
+                                <p class="event-desc">${ev.description || 'Official scheduled regional festival organized under local tourism governance.'}</p>
+                                <div class="event-meta-row">
+                                    <span>🕒 ${ev.timings || 'Scheduled Program'}</span>
+                                    <button type="button" class="tourist-btn-primary btn-view-event-detail" data-event-idx="${i}" style="font-size:0.75rem; padding:0.35rem 0.85rem;">
+                                        View Details ↗
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     `).join('');
+
+                    eventsGrid.querySelectorAll('.btn-view-event-detail').forEach(btn => {
+                        btn.onclick = () => {
+                            const idx = parseInt(btn.getAttribute('data-event-idx'), 10);
+                            const ev = events[idx];
+                            if (ev) this.openEventModal(ev);
+                        };
+                    });
                 } else {
                     eventsGrid.innerHTML = `
                         <div style="grid-column: 1 / -1; padding: 2.5rem; text-align: center; background: var(--tourist-bg-subtle); border-radius: 12px;">
@@ -1621,50 +3490,16 @@
                 }
             }
 
-            // =================================================================
-            // TAB 6: GUIDELINES & ADVISORIES
-            // =================================================================
-            const advisoriesContainer = document.getElementById('detail-advisories-container');
-            if (advisoriesContainer) {
-                if (advisories.length > 0) {
-                    advisoriesContainer.innerHTML = advisories.map(adv => `
-                        <div class="tourist-advisory-card">
-                            <div class="advisory-header">
-                                <span class="advisory-icon">${adv.icon || '🚨'}</span>
-                                <div>
-                                    <h4 class="advisory-title">${adv.title}</h4>
-                                    <div class="advisory-date">Published: ${adv.date} • ${adv.category || 'Official Advisory'}</div>
-                                </div>
-                            </div>
-                            <p class="advisory-content">${adv.content}</p>
-                            ${adv.guidance ? `
-                                <div class="advisory-guidance-box">
-                                    <strong style="color:var(--tourist-text-heading); display:block; margin-bottom:0.25rem;">Authorized Guidance:</strong>
-                                    <span>${adv.guidance}</span>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `).join('');
-                } else {
-                    advisoriesContainer.innerHTML = `
-                        <div class="tourist-advisory-card">
-                            <div class="advisory-header">
-                                <span class="advisory-icon">🌿</span>
-                                <div>
-                                    <h4 class="advisory-title">General Visitor Code & Eco-Preservation</h4>
-                                    <div class="advisory-date">Standard Operating Protocol • YatraSetu Destination Network</div>
-                                </div>
-                            </div>
-                            <p class="advisory-content">
-                                Please respect local cultural customs, keep to designated trails, avoid littering, and refrain from using single-use plastic bottles.
-                            </p>
-                            <div class="advisory-guidance-box">
-                                <strong style="color:var(--tourist-text-heading); display:block; margin-bottom:0.25rem;">Responsible Travel:</strong>
-                                <span>Support certified local guides, pack out all personal waste, and observe high-altitude wildlife conservation rules.</span>
-                            </div>
-                        </div>
-                    `;
-                }
+            // Event Modal Closers
+            const btnCloseEvent = document.getElementById('btn-close-event-modal');
+            const btnCloseEventFooter = document.getElementById('btn-close-event-modal-footer');
+            const eventModal = document.getElementById('touristEventModal');
+            if (btnCloseEvent) btnCloseEvent.onclick = () => this.closeEventModal();
+            if (btnCloseEventFooter) btnCloseEventFooter.onclick = () => this.closeEventModal();
+            if (eventModal) {
+                eventModal.onclick = (e) => {
+                    if (e.target === eventModal) this.closeEventModal();
+                };
             }
 
             // =================================================================
@@ -1674,15 +3509,20 @@
             if (nearbyGrid) {
                 if (nearbyDestinations.length > 0) {
                     nearbyGrid.innerHTML = nearbyDestinations.map(d => `
-                        <a href="destination-detail.html?id=${d.id}" class="dest-state-card" style="text-decoration:none; display:block;">
-                            <div class="dest-state-thumb" style="background-image: url('${d.img}'); height:140px; border-radius:10px; position:relative; background-size:cover; background-position:center;">
-                                <span style="position:absolute; top:8px; left:8px; background:rgba(0,0,0,0.6); color:#fff; font-size:0.75rem; padding:2px 8px; border-radius:4px; font-weight:700;">#${d.rank || 1} in State</span>
+                        <div class="circuit-dest-card">
+                            <div class="circuit-dest-thumb" style="background-image: url('${d.img}');">
+                                <span class="circuit-rank-badge">#${d.rank || 1} in State</span>
+                                <span class="circuit-cat-badge">${d.category}</span>
                             </div>
-                            <div style="padding: 0.75rem 0.25rem;">
-                                <h4 style="font-size:0.95rem; font-weight:800; color:var(--tourist-text-heading); margin:0 0 0.25rem 0;">${d.name}</h4>
-                                <div style="font-size:0.8rem; color:var(--tourist-text-muted);">${d.category}</div>
+                            <div class="circuit-dest-body">
+                                <h4 class="circuit-dest-name">${d.name}</h4>
+                                <div class="circuit-dest-loc">📍 ${d.location}</div>
+                                <p class="circuit-dest-desc">${(d.description || '').slice(0, 95)}...</p>
+                                <a href="destination-detail.html?id=${d.id}" class="tourist-btn-primary" style="width:100%; justify-content:center; box-sizing:border-box; font-size:0.82rem; padding:0.5rem 0.85rem; text-decoration:none;">
+                                    Explore Destination <span>→</span>
+                                </a>
                             </div>
-                        </a>
+                        </div>
                     `).join('');
                 } else {
                     nearbyGrid.innerHTML = `
@@ -1798,7 +3638,7 @@
                 `;
             }
 
-            modal.classList.add('active');
+            modal.classList.add('active', 'show');
             document.body.style.overflow = 'hidden';
         },
 
@@ -1808,7 +3648,7 @@
             const frameContainer = document.getElementById('video-player-frame-container');
             // Clear iframe to immediately stop video & audio playback
             if (frameContainer) frameContainer.innerHTML = '';
-            modal.classList.remove('active');
+            modal.classList.remove('active', 'show');
             document.body.style.overflow = '';
         },
 
@@ -1835,21 +3675,21 @@
                 contactEl.href = sh.contact ? `tel:${sh.contact.replace(/\s+/g, '')}` : `mailto:${sh.email || ''}`;
             }
 
-            modal.classList.add('active');
+            modal.classList.add('active', 'show');
             document.body.style.overflow = 'hidden';
         },
 
         closeStakeholderModal() {
             const modal = document.getElementById('touristStakeholderModal');
             if (!modal) return;
-            modal.classList.remove('active');
+            modal.classList.remove('active', 'show');
             document.body.style.overflow = '';
         },
 
         openFeedbackModal() {
             const modal = document.getElementById('touristFeedbackModal');
             if (!modal) return;
-            modal.classList.add('active');
+            modal.classList.add('active', 'show');
             document.body.style.overflow = 'hidden';
             const nameInput = document.getElementById('fb-author-name');
             if (nameInput) nameInput.focus();
@@ -1858,7 +3698,7 @@
         closeFeedbackModal() {
             const modal = document.getElementById('touristFeedbackModal');
             if (!modal) return;
-            modal.classList.remove('active');
+            modal.classList.remove('active', 'show');
             document.body.style.overflow = '';
         },
 
@@ -1882,6 +3722,47 @@
             if (shModal) {
                 shModal.onclick = (e) => {
                     if (e.target === shModal) this.closeStakeholderModal();
+                };
+            }
+
+            // Attraction Modal Closers
+            const btnCloseAttr = document.getElementById('btn-close-attr-modal');
+            const btnCloseAttrFooter = document.getElementById('btn-close-attr-modal-footer');
+            const attrModal = document.getElementById('touristAttractionModal');
+            if (btnCloseAttr) btnCloseAttr.onclick = () => this.closeAttractionModal();
+            if (btnCloseAttrFooter) btnCloseAttrFooter.onclick = () => this.closeAttractionModal();
+            if (attrModal) {
+                attrModal.onclick = (e) => {
+                    if (e.target === attrModal) this.closeAttractionModal();
+                };
+            }
+
+            // Experience Modal Closers
+            const btnCloseExp = document.getElementById('btn-close-exp-modal');
+            const btnCloseExpFooter = document.getElementById('btn-close-exp-modal-footer');
+            const expModal = document.getElementById('touristExperienceModal');
+            if (btnCloseExp) btnCloseExp.onclick = () => this.closeExperienceModal();
+            if (btnCloseExpFooter) btnCloseExpFooter.onclick = () => this.closeExperienceModal();
+            if (expModal) {
+                expModal.onclick = (e) => {
+                    if (e.target === expModal) this.closeExperienceModal();
+                };
+            }
+
+            // Lightbox Closers & Navigation
+            const btnCloseLb = document.getElementById('btn-close-lightbox');
+            const btnPrevLb = document.getElementById('btn-lightbox-prev');
+            const btnNextLb = document.getElementById('btn-lightbox-next');
+            const lbModal = document.getElementById('touristLightboxModal');
+
+            if (btnCloseLb) btnCloseLb.onclick = () => this.closeLightbox();
+            if (btnPrevLb) btnPrevLb.onclick = () => this.prevLightbox();
+            if (btnNextLb) btnNextLb.onclick = () => this.nextLightbox();
+            if (lbModal) {
+                lbModal.onclick = (e) => {
+                    if (e.target === lbModal || e.target.classList.contains('lightbox-stage') || e.target.classList.contains('lightbox-main-img-wrap')) {
+                        this.closeLightbox();
+                    }
                 };
             }
 
@@ -1925,18 +3806,24 @@
                         date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
                         category: category,
                         text: comments.trim(),
+                        status: 'Pending Review',
                         is_user_submission: true
                     };
 
-                    // Persist to sessionStorage
+                    // Persist to authoritative localStorage and sync sessionStorage
                     try {
                         let existing = [];
-                        const stored = sessionStorage.getItem('yatrasetu_tourist_feedback');
-                        if (stored) existing = JSON.parse(stored);
-                        existing.unshift(newFeedbackItem);
-                        sessionStorage.setItem('yatrasetu_tourist_feedback', JSON.stringify(existing));
+                        const rawStored = localStorage.getItem('yatrasetu_tourist_feedback');
+                        if (rawStored) {
+                            try { existing = JSON.parse(rawStored); } catch (e) {}
+                        }
+                        if (Array.isArray(existing) && !existing.some(f => f.id === newFeedbackItem.id)) {
+                            existing.unshift(newFeedbackItem);
+                            localStorage.setItem('yatrasetu_tourist_feedback', JSON.stringify(existing));
+                            sessionStorage.setItem('yatrasetu_tourist_feedback', JSON.stringify(existing));
+                        }
                     } catch (err) {
-                        console.warn('Could not persist tourist feedback to sessionStorage:', err);
+                        console.warn('Could not persist tourist feedback to storage:', err);
                     }
 
                     fbForm.reset();
@@ -1946,14 +3833,45 @@
                 };
             }
 
-            // Global ESC key closes active modal
+            // Global Keydown Handler (ESC, ArrowLeft, ArrowRight)
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
+                    this.closeWishlistDrawer();
                     this.closeVideoModal();
                     this.closeStakeholderModal();
                     this.closeFeedbackModal();
+                    this.closeAttractionModal();
+                    this.closeLightbox();
+                    this.closeStoryModal();
+                    this.closeEventModal();
+                    this.closeExperienceModal();
+                } else if (e.key === 'ArrowRight') {
+                    if (lbModal && lbModal.classList.contains('active')) {
+                        this.nextLightbox();
+                    }
+                } else if (e.key === 'ArrowLeft') {
+                    if (lbModal && lbModal.classList.contains('active')) {
+                        this.prevLightbox();
+                    }
                 }
             });
+        },
+
+        showToast(msg) {
+            let toast = document.getElementById('tourist-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'tourist-toast';
+                toast.className = 'tourist-toast';
+                toast.style.cssText = 'position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:rgba(18,44,36,0.92); color:#FFF; padding:10px 20px; border-radius:8px; font-size:0.88rem; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,0.2); z-index:9999; transition:opacity 0.3s ease; opacity:0; pointer-events:none;';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = msg;
+            toast.style.opacity = '1';
+            clearTimeout(this._toastTimer);
+            this._toastTimer = setTimeout(() => {
+                if (toast) toast.style.opacity = '0';
+            }, 3000);
         }
     };
 

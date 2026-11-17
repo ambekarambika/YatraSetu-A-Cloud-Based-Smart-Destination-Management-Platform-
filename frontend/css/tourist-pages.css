@@ -1,0 +1,1049 @@
+/* ==========================================================================
+   YatraSetu — Smart Destination Management Platform
+   Tourist Workspace Page-Specific Components (tourist-pages.css)
+   Dedicated styles for Discover, Destinations, Plan Your Trip, Stories,
+   Experiences, Travel Guidance, and Destination Advisories.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Shared Page Elements & Prototype Notices
+   -------------------------------------------------------------------------- */
+.tourist-demo-banner {
+    background: #FFFBEB;
+    border-bottom: 1px solid #FDE68A;
+    color: #92400E;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.45rem 1.5rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.tourist-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.84rem;
+    color: var(--tourist-text-light);
+    margin: 1.25rem 0 0.75rem 0;
+    list-style: none;
+    padding: 0;
+}
+
+.tourist-breadcrumb a {
+    color: var(--tourist-text-muted);
+    text-decoration: none;
+    transition: var(--tourist-transition);
+}
+
+.tourist-breadcrumb a:hover {
+    color: var(--tourist-forest);
+}
+
+.tourist-breadcrumb .current {
+    color: var(--tourist-text-main);
+    font-weight: 600;
+}
+
+.tourist-content-wrapper {
+    min-height: calc(100vh - 400px);
+    padding-bottom: 3.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   2. Mobile Navigation Desktop Concealment & Standardization
+   -------------------------------------------------------------------------- */
+@media (min-width: 1081px) {
+    .tourist-mobile-nav,
+    #tourist-mobile-nav.tourist-mobile-nav {
+        display: none !important;
+    }
+}
+
+@media (max-width: 1080px) {
+    .tourist-mobile-nav {
+        display: none;
+        position: fixed;
+        top: 70px;
+        left: 0;
+        right: 0;
+        background: #FFFFFF;
+        border-bottom: 1px solid var(--tourist-border);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+        z-index: 999;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .tourist-mobile-nav.show,
+    .tourist-mobile-nav.active {
+        display: block;
+    }
+
+    .tourist-mobile-nav-inner {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .tourist-mobile-link {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--tourist-text-main);
+        text-decoration: none;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--tourist-border-subtle);
+    }
+
+    .tourist-mobile-link.active {
+        color: var(--tourist-forest);
+        font-weight: 700;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   3. Discover Page (dashboard.html) Components
+   -------------------------------------------------------------------------- */
+.tourist-hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #F8D38D;
+    margin-bottom: 0.65rem;
+}
+
+.tourist-hero-subtitle {
+    font-size: 1.15rem;
+    color: rgba(255, 255, 255, 0.92);
+    margin: 0 0 1.75rem 0;
+    max-width: 650px;
+    font-weight: 400;
+    line-height: 1.55;
+}
+
+.tourist-hero-search-wrapper {
+    position: relative;
+    max-width: 680px;
+    margin-bottom: 1.75rem;
+}
+
+.tourist-search-bar {
+    display: flex;
+    align-items: center;
+    background: #FFFFFF;
+    border-radius: var(--tourist-radius-full);
+    padding: 0.45rem 0.55rem 0.45rem 1.4rem;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    transition: var(--tourist-transition);
+}
+
+.tourist-search-bar:focus-within {
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.28), 0 0 0 3px rgba(224, 122, 34, 0.35);
+}
+
+.tourist-search-icon {
+    color: var(--tourist-text-light);
+    margin-right: 0.85rem;
+    flex-shrink: 0;
+}
+
+.tourist-search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: var(--tourist-text-main);
+    padding: 0.4rem 0;
+    width: 100%;
+}
+
+.tourist-search-input::placeholder {
+    color: var(--tourist-text-light);
+}
+
+.tourist-search-submit {
+    background: var(--tourist-saffron);
+    color: #FFFFFF;
+    border: none;
+    border-radius: var(--tourist-radius-full);
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--tourist-transition);
+    flex-shrink: 0;
+}
+
+.tourist-search-submit:hover {
+    background: var(--tourist-saffron-hover);
+    transform: scale(1.04);
+}
+
+.tourist-hero-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.tourist-chip,
+.hero-category-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.95rem;
+    background: rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: var(--tourist-radius-full);
+    color: #FFFFFF;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--tourist-transition);
+    cursor: pointer;
+}
+
+.tourist-chip:hover,
+.hero-category-chip:hover {
+    background: rgba(255, 255, 255, 0.28);
+    border-color: #FFFFFF;
+    transform: translateY(-2px);
+    color: #FFFFFF;
+}
+
+/* Light Surface Chips (Plan Your Trip, Stories, Filters) */
+.tourist-content-wrapper .tourist-chip,
+#itinerary-pane-curated .tourist-chip,
+#story-filter-chips .tourist-chip {
+    background: #FFFFFF;
+    border: 1px solid var(--tourist-border);
+    color: var(--tourist-text-main);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.tourist-content-wrapper .tourist-chip:hover,
+#itinerary-pane-curated .tourist-chip:hover,
+#story-filter-chips .tourist-chip:hover {
+    background: var(--tourist-bg-subtle);
+    border-color: var(--tourist-forest);
+    color: var(--tourist-forest);
+    transform: translateY(-1px);
+}
+
+.tourist-content-wrapper .tourist-chip.active,
+#itinerary-pane-curated .tourist-chip.active,
+#story-filter-chips .tourist-chip.active {
+    background: var(--tourist-forest);
+    border-color: var(--tourist-forest);
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(26, 61, 50, 0.22);
+}
+
+.tourist-hero-badge {
+    position: absolute;
+    bottom: 2rem;
+    right: 2.5rem;
+    z-index: 2;
+    background: rgba(18, 44, 36, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--tourist-radius-md);
+    padding: 0.65rem 1rem;
+    color: #FFFFFF;
+}
+
+/* Discover 8-States Grid */
+.tourist-states-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+    .tourist-states-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 540px) {
+    .tourist-states-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.tourist-state-card {
+    position: relative;
+    height: 190px;
+    border-radius: var(--tourist-radius-md);
+    overflow: hidden;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.25rem;
+    box-shadow: var(--tourist-shadow-sm);
+    transition: var(--tourist-transition);
+}
+
+.tourist-state-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--tourist-shadow-md);
+}
+
+.tourist-state-card-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.4s ease;
+    z-index: 1;
+}
+
+.tourist-state-card:hover .tourist-state-card-bg {
+    transform: scale(1.06);
+}
+
+.tourist-state-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.05) 0%, rgba(18, 44, 36, 0.85) 100%);
+    z-index: 2;
+}
+
+.tourist-state-card-content {
+    position: relative;
+    z-index: 3;
+    color: #FFFFFF;
+}
+
+.tourist-state-card-name {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    margin-bottom: 0.2rem;
+    font-family: 'Playfair Display', Georgia, serif;
+}
+
+.tourist-state-card-sub {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.88);
+    font-weight: 500;
+}
+
+/* Responsible Tourism Banner */
+.tourist-responsible-banner {
+    background: var(--tourist-forest);
+    border-radius: var(--tourist-radius-lg);
+    padding: 2.25rem 2.5rem;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 3.5rem 0 2rem 0;
+    box-shadow: var(--tourist-shadow-md);
+}
+
+.tourist-responsible-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    max-width: 750px;
+}
+
+.tourist-leaf-icon {
+    font-size: 2.2rem;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+}
+
+.tourist-responsible-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    margin: 0 0 0.4rem 0;
+    font-family: 'Playfair Display', Georgia, serif;
+}
+
+.tourist-responsible-desc {
+    font-size: 0.92rem;
+    color: rgba(255, 255, 255, 0.88);
+    line-height: 1.55;
+    margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   4. Destinations Catalog (destinations.html) Components
+   -------------------------------------------------------------------------- */
+.dest-page-hero {
+    text-align: center;
+    padding: 2.5rem 1rem 1.5rem 1rem;
+}
+
+.dest-page-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--tourist-text-heading);
+    margin: 0 0 0.65rem 0;
+    letter-spacing: -0.02em;
+}
+
+.dest-page-subtitle {
+    font-size: 1.05rem;
+    color: var(--tourist-text-muted);
+    max-width: 620px;
+    margin: 0 auto 2rem auto;
+    line-height: 1.55;
+}
+
+.dest-page-search-container {
+    max-width: 680px;
+    margin: 0 auto 1.75rem auto;
+}
+
+/* State Filter Pills Row */
+.dest-state-pills-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-bottom: 2rem;
+}
+
+.dest-state-pill,
+.circuit-filter-btn,
+.story-cat-btn {
+    padding: 0.45rem 1.15rem;
+    background: #FFFFFF;
+    border: 1px solid var(--tourist-border);
+    border-radius: var(--tourist-radius-full);
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: var(--tourist-text-main);
+    cursor: pointer;
+    transition: var(--tourist-transition);
+    outline: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.dest-state-pill:hover,
+.circuit-filter-btn:hover,
+.story-cat-btn:hover {
+    border-color: var(--tourist-forest);
+    background: var(--tourist-bg-subtle);
+    transform: translateY(-1px);
+}
+
+.dest-state-pill.active,
+.circuit-filter-btn.active,
+.story-cat-btn.active {
+    background: var(--tourist-forest);
+    color: #FFFFFF;
+    border-color: var(--tourist-forest);
+    box-shadow: 0 2px 8px rgba(26, 61, 50, 0.2);
+}
+
+/* Sidebar Filter Controls */
+.dest-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--tourist-border);
+}
+
+.dest-clear-btn {
+    background: transparent;
+    border: none;
+    color: var(--tourist-saffron);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    transition: var(--tourist-transition);
+}
+
+.dest-clear-btn:hover {
+    color: var(--tourist-saffron-hover);
+    text-decoration: underline;
+}
+
+.dest-filter-group {
+    margin-bottom: 1.5rem;
+}
+
+.dest-filter-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--tourist-text-heading);
+    margin-bottom: 0.75rem;
+}
+
+.dest-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 0.86rem;
+    color: var(--tourist-text-main);
+    margin-bottom: 0.55rem;
+    cursor: pointer;
+    user-select: none;
+    line-height: 1.35;
+}
+
+.dest-checkbox-item input[type="checkbox"],
+.category-filter-checkbox,
+.suitable-filter-checkbox,
+.season-filter-checkbox {
+    accent-color: var(--tourist-forest);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.dest-main-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+}
+
+.dest-count-label {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--tourist-text-heading);
+    margin: 0;
+}
+
+.dest-sort-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.86rem;
+    color: var(--tourist-text-muted);
+}
+
+.dest-sort-select {
+    padding: 0.4rem 0.85rem;
+    border: 1px solid var(--tourist-border);
+    border-radius: var(--tourist-radius-sm);
+    background: #FFFFFF;
+    font-size: 0.86rem;
+    color: var(--tourist-text-main);
+    cursor: pointer;
+    outline: none;
+}
+
+.dest-active-tags-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-bottom: 1.25rem;
+}
+
+/* Destination Cards Body & Tags */
+.dest-card-body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.dest-card-title-row {
+    margin-bottom: 0.35rem;
+}
+
+.dest-card-name {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--tourist-text-heading);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.dest-card-loc {
+    font-size: 0.82rem;
+    color: var(--tourist-text-light);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+.dest-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+.dest-card-tag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--tourist-radius-full);
+    background: var(--tourist-bg-subtle);
+    color: var(--tourist-forest);
+    display: inline-block;
+}
+
+.dest-card-reviews {
+    color: var(--tourist-text-light);
+    font-weight: 500;
+    margin-left: 0.25rem;
+}
+
+.dest-card-link {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--tourist-forest);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: var(--tourist-transition);
+}
+
+.dest-card-link:hover {
+    color: var(--tourist-saffron);
+    transform: translateX(2px);
+}
+
+/* Empty & Loading State Panel */
+.dest-state-panel {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3.5rem 1.5rem;
+    background: var(--tourist-bg-surface);
+    border: 1px solid var(--tourist-border);
+    border-radius: var(--tourist-radius-md);
+}
+
+.dest-state-icon {
+    font-size: 2.8rem;
+    display: block;
+    margin-bottom: 0.75rem;
+}
+
+.dest-state-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--tourist-text-heading);
+    margin: 0 0 0.5rem 0;
+}
+
+.dest-state-desc {
+    font-size: 0.9rem;
+    color: var(--tourist-text-muted);
+    max-width: 480px;
+    margin: 0 auto 1.5rem auto;
+}
+
+/* --------------------------------------------------------------------------
+   5. Plan Your Trip (plan-trip.html) Components
+   -------------------------------------------------------------------------- */
+.itinerary-planner-wrapper {
+    background: #FFFFFF;
+    border: 1px solid var(--tourist-border);
+    border-radius: var(--tourist-radius-lg);
+    box-shadow: var(--tourist-shadow-sm);
+    padding: 2rem;
+    margin-top: 1.5rem;
+}
+
+.itinerary-nav-tabs {
+    display: flex;
+    gap: 1.5rem;
+    border-bottom: 2px solid var(--tourist-border-subtle);
+    margin-bottom: 2rem;
+}
+
+.itinerary-nav-tab {
+    background: transparent;
+    border: none;
+    padding: 0.75rem 0.25rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--tourist-text-muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: var(--tourist-transition);
+}
+
+.itinerary-nav-tab:hover {
+    color: var(--tourist-text-heading);
+}
+
+.itinerary-nav-tab.active {
+    color: var(--tourist-forest);
+    border-bottom-color: var(--tourist-forest);
+}
+
+.circuit-timeline {
+    position: relative;
+    padding-left: 2rem;
+    margin-top: 2rem;
+}
+
+.circuit-timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    background: var(--tourist-border);
+}
+
+.circuit-day-card {
+    position: relative;
+    background: var(--tourist-bg-surface);
+    border: 1px solid var(--tourist-border);
+    border-radius: var(--tourist-radius-md);
+    padding: 1.5rem;
+    margin-bottom: 1.75rem;
+    box-shadow: var(--tourist-shadow-sm);
+}
+
+.circuit-day-badge {
+    position: absolute;
+    left: -2rem;
+    top: 1.5rem;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--tourist-forest);
+    color: #FFFFFF;
+    font-size: 0.85rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #FFFFFF;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.circuit-stop-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--tourist-border-subtle);
+}
+
+.circuit-stop-item:last-child {
+    border-bottom: none;
+}
+
+/* --------------------------------------------------------------------------
+   6. Stories (stories.html) Components
+   -------------------------------------------------------------------------- */
+.tourist-curated-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 1.75rem;
+    margin-top: 1.5rem;
+}
+
+@media (max-width: 640px) {
+    .tourist-curated-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.story-card {
+    background: #FFFFFF;
+    border: 1px solid var(--tourist-border);
+    border-radius: var(--tourist-radius-md);
+    overflow: hidden;
+    box-shadow: var(--tourist-shadow-sm);
+    display: flex;
+    flex-direction: column;
+    transition: var(--tourist-transition);
+}
+
+.story-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--tourist-shadow-md);
+    border-color: var(--tourist-forest);
+}
+
+.story-card-media {
+    position: relative;
+    height: 210px;
+    overflow: hidden;
+}
+
+.story-card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.story-card:hover .story-card-media img {
+    transform: scale(1.05);
+}
+
+.story-card-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.story-card-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--tourist-text-heading);
+    margin: 0 0 0.65rem 0;
+    line-height: 1.35;
+    font-family: 'Playfair Display', Georgia, serif;
+}
+
+.story-card-excerpt {
+    font-size: 0.88rem;
+    color: var(--tourist-text-muted);
+    line-height: 1.6;
+    margin: 0 0 1.25rem 0;
+    flex: 1;
+}
+
+.story-card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1rem;
+    border-top: 1px solid var(--tourist-border-subtle);
+    font-size: 0.82rem;
+    color: var(--tourist-text-light);
+}
+
+.btn-read-story {
+    font-weight: 700;
+    color: var(--tourist-forest);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: var(--tourist-transition);
+}
+
+.btn-read-story:hover {
+    color: var(--tourist-saffron);
+    transform: translateX(3px);
+}
+
+/* --------------------------------------------------------------------------
+   7. Travel Guidance (travel-guidance.html) Components
+   -------------------------------------------------------------------------- */
+.guidance-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+    .guidance-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .guidance-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.guidance-card {
+    background: #FFFFFF;
+    border: 1px solid var(--tourist-border);
+    border-radius: var(--tourist-radius-md);
+    padding: 1.75rem;
+    box-shadow: var(--tourist-shadow-sm);
+    display: flex;
+    flex-direction: column;
+}
+
+.guidance-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--tourist-radius-sm);
+    background: var(--tourist-bg-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.guidance-card-title {
+    font-size: 1.18rem;
+    font-weight: 800;
+    color: var(--tourist-text-heading);
+    margin: 0 0 0.85rem 0;
+    font-family: 'Playfair Display', Georgia, serif;
+}
+
+.guidance-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.88rem;
+    color: var(--tourist-text-muted);
+    line-height: 1.6;
+}
+
+.guidance-list li {
+    margin-bottom: 0.75rem;
+}
+
+.guidance-list strong {
+    color: var(--tourist-text-main);
+}
+
+/* --------------------------------------------------------------------------
+   8. Destination Advisories (destination-advisories.html) Components
+   -------------------------------------------------------------------------- */
+.advisories-header-banner {
+    background: var(--tourist-forest);
+    border-radius: var(--tourist-radius-lg);
+    padding: 2.5rem;
+    color: #FFFFFF;
+    margin-bottom: 2rem;
+    box-shadow: var(--tourist-shadow-md);
+}
+
+.advisories-header-banner h1,
+.advisories-header-banner h2,
+.advisories-header-banner h3 {
+    color: #FFFFFF !important;
+    margin: 0 0 0.5rem 0;
+}
+
+.advisories-header-banner p {
+    color: rgba(255, 255, 255, 0.9) !important;
+    margin: 0;
+}
+
+.advisories-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.75rem;
+    align-items: flex-start;
+}
+
+@media (max-width: 900px) {
+    .advisories-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.tourist-advisory-card {
+    background: #FFFFFF;
+    border: 1px solid var(--tourist-border);
+    border-left: 5px solid #10B981;
+    border-radius: var(--tourist-radius-md);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+    box-shadow: var(--tourist-shadow-sm);
+}
+
+.tourist-advisory-card.warning {
+    border-left-color: #F59E0B;
+}
+
+.tourist-advisory-card.danger {
+    border-left-color: #EF4444;
+}
+
+.advisory-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.advisory-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--tourist-text-heading);
+    margin: 0;
+}
+
+.advisory-date {
+    font-size: 0.8rem;
+    color: var(--tourist-text-light);
+}
+
+.advisory-content {
+    font-size: 0.88rem;
+    color: var(--tourist-text-muted);
+    line-height: 1.55;
+    margin-bottom: 0.75rem;
+}
+
+.advisory-guidance-box {
+    background: var(--tourist-bg-subtle);
+    border-radius: var(--tourist-radius-sm);
+    padding: 0.75rem 1rem;
+    font-size: 0.82rem;
+    color: var(--tourist-forest-dark);
+}
+
+/* --------------------------------------------------------------------------
+   9. Destination Detail Tabs Bar Responsive Enhancement
+   -------------------------------------------------------------------------- */
+.detail-tabs-bar {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.detail-tabs-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.detail-tabs-list {
+    display: flex;
+    gap: 0.5rem;
+    white-space: nowrap;
+    min-width: max-content;
+}
+
+/* Map Location Box Placeholder Protection */
+.tourist-map-container {
+    width: 100%;
+    height: 220px;
+    background-color: var(--tourist-bg-subtle);
+    border-radius: var(--tourist-radius-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--tourist-text-muted);
+    border: 1px solid var(--tourist-border);
+    margin-top: 1rem;
+}

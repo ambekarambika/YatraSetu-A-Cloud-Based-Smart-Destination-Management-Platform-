@@ -6,7 +6,25 @@
  * Dependencies: manager-data.js, stakeholder-data.js
  */
 
+/**
+ * Frontend Route Protection: verify active user is logged in with stakeholder role.
+ * Prevents logged-out or unauthorized users from viewing or manipulating stakeholder controls.
+ */
+function checkStakeholderAuth() {
+    if (typeof window === 'undefined' || !window.location) return true;
+    const isStakeholderPage = window.location.pathname.includes('/stakeholder/') || window.location.href.includes('/stakeholder/');
+    if (!isStakeholderPage) return true;
+
+    const role = (typeof sessionStorage !== 'undefined') ? sessionStorage.getItem('yatrasetu_role') : null;
+    if (!role || (role !== 'stakeholder' && role !== 'admin')) {
+        window.location.replace('../login.html');
+        return false;
+    }
+    return true;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    if (!checkStakeholderAuth()) return;
     initStakeholderContext();
     initStakeholderSidebar();
     initStakeholderOverview();
@@ -29,7 +47,7 @@ function initStakeholderContext() {
     const sessionName = sessionStorage.getItem('yatrasetu_name');
     const sessionOrg = sessionStorage.getItem('yatrasetu_org') || sessionStorage.getItem('yatrasetu_organization');
     const sessionRole = sessionStorage.getItem('yatrasetu_role');
-    const sessionDestId = sessionStorage.getItem('yatrasetu_destination_id');
+    let sessionDestId = sessionStorage.getItem('yatrasetu_destination_id');
 
     if (sessionName) {
         profile.userName = sessionName;
@@ -190,6 +208,98 @@ function initStakeholderContext() {
             heroBanner.style.backgroundImage = 'linear-gradient(135deg, #0F172A, #1E293B)';
         }
     }
+
+    // Restore persisted stakeholder listings, media and posts (BUG-05)
+    try {
+        const rawListings = localStorage.getItem('yatrasetu_stakeholder_listings') || sessionStorage.getItem('yatrasetu_stakeholder_listings');
+        if (rawListings) {
+            const parsed = JSON.parse(rawListings);
+            if (Array.isArray(parsed)) {
+                const map = new Map((dataStore.listings || []).map(l => [l.id, l]));
+                parsed.forEach(item => map.set(item.id, item));
+                dataStore.listings = Array.from(map.values());
+            }
+        }
+    } catch (e) {
+        console.warn('[stakeholder.js] Error restoring listings:', e);
+    }
+
+    try {
+        const rawMedia = localStorage.getItem('yatrasetu_stakeholder_media') || sessionStorage.getItem('yatrasetu_stakeholder_media');
+        if (rawMedia) {
+            const parsed = JSON.parse(rawMedia);
+            if (Array.isArray(parsed)) {
+                const map = new Map((dataStore.media || []).map(m => [m.id, m]));
+                parsed.forEach(item => map.set(item.id, item));
+                dataStore.media = Array.from(map.values());
+            }
+        }
+    } catch (e) {
+        console.warn('[stakeholder.js] Error restoring media:', e);
+    }
+
+    try {
+        const rawPosts = localStorage.getItem('yatrasetu_stakeholder_posts') || sessionStorage.getItem('yatrasetu_stakeholder_posts');
+        if (rawPosts) {
+            const parsed = JSON.parse(rawPosts);
+            if (Array.isArray(parsed)) {
+                const map = new Map((dataStore.posts || []).map(p => [p.id, p]));
+                parsed.forEach(item => map.set(item.id, item));
+                dataStore.posts = Array.from(map.values());
+            }
+        }
+    } catch (e) {
+        console.warn('[stakeholder.js] Error restoring posts:', e);
+    }
+}
+
+/**
+ * Persistence Helper Functions (BUG-05)
+ */
+function saveStakeholderListings(listings) {
+    const dataStore = window.YatraSetuStakeholderData || {};
+    dataStore.listings = listings;
+    try {
+        localStorage.setItem('yatrasetu_stakeholder_listings', JSON.stringify(listings));
+        sessionStorage.setItem('yatrasetu_stakeholder_listings', JSON.stringify(listings));
+    } catch (e) {}
+
+    // Sync to manager stakeholders repository if applicable
+    try {
+        const rawMgr = localStorage.getItem('yatrasetu_manager_stakeholders') || sessionStorage.getItem('yatrasetu_manager_stakeholders');
+        if (rawMgr) {
+            const mgrList = JSON.parse(rawMgr);
+            listings.forEach(l => {
+                const match = mgrList.find(s => s.id === l.id);
+                if (match) {
+                    match.name = l.name;
+                    match.category = l.category;
+                    match.type = l.type;
+                    match.status = l.status;
+                }
+            });
+            localStorage.setItem('yatrasetu_manager_stakeholders', JSON.stringify(mgrList));
+            sessionStorage.setItem('yatrasetu_manager_stakeholders', JSON.stringify(mgrList));
+        }
+    } catch (e) {}
+}
+
+function saveStakeholderMedia(mediaList) {
+    const dataStore = window.YatraSetuStakeholderData || {};
+    dataStore.media = mediaList;
+    try {
+        localStorage.setItem('yatrasetu_stakeholder_media', JSON.stringify(mediaList));
+        sessionStorage.setItem('yatrasetu_stakeholder_media', JSON.stringify(mediaList));
+    } catch (e) {}
+}
+
+function saveStakeholderPosts(postsList) {
+    const dataStore = window.YatraSetuStakeholderData || {};
+    dataStore.posts = postsList;
+    try {
+        localStorage.setItem('yatrasetu_stakeholder_posts', JSON.stringify(postsList));
+        sessionStorage.setItem('yatrasetu_stakeholder_posts', JSON.stringify(postsList));
+    } catch (e) {}
 }
 
 /**
@@ -627,6 +737,11 @@ function initStakeholderProfilePage() {
 
             if (window.YatraSetuManagerStore && typeof window.YatraSetuManagerStore.saveStakeholders === 'function') {
                 window.YatraSetuManagerStore.saveStakeholders(managerData.stakeholders);
+            } else {
+                try {
+                    localStorage.setItem('yatrasetu_manager_stakeholders', JSON.stringify(managerData.stakeholders));
+                    sessionStorage.setItem('yatrasetu_manager_stakeholders', JSON.stringify(managerData.stakeholders));
+                } catch (e) {}
             }
         }
 
@@ -1927,6 +2042,10 @@ function initStakeholderMediaListings() {
                     clearInterval(timer);
 
                     // Add new media item in Pending Approval state
+                    const persistentMediaUrl = (currentPreviewUrl && !currentPreviewUrl.startsWith('blob:'))
+                        ? currentPreviewUrl
+                        : 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&auto=format&fit=crop&q=80';
+
                     const newMediaItem = {
                         id: `med-${Date.now()}`,
                         stakeholder_id: currentUserId,
@@ -1934,7 +2053,7 @@ function initStakeholderMediaListings() {
                         type: mediaType,
                         title: caption,
                         description: description || 'Stakeholder media submission awaiting official verification.',
-                        url: currentPreviewUrl,
+                        url: persistentMediaUrl,
                         duration: mediaType === 'video' ? 'Clip' : '',
                         fileSize: fileSizeStr,
                         fileType: currentSelectedFile.type || 'image/jpeg',
@@ -1944,6 +2063,7 @@ function initStakeholderMediaListings() {
                     };
 
                     (dataStore.media = dataStore.media || []).unshift(newMediaItem);
+                    saveStakeholderMedia(dataStore.media);
                     alert(`Media "${caption}" added to local session as a temporary preview (Status: Pending Approval). Note: Prototype mode does not perform permanent server storage. Only the authorized Destination Manager can verify and grant public approval.`);
 
                     // Reset selected file reference but preserve preview in collection
@@ -2095,6 +2215,7 @@ function initStakeholderMediaListings() {
                         URL.revokeObjectURL(item.url);
                     }
                     dataStore.media = (dataStore.media || []).filter(m => m.id !== id);
+                    saveStakeholderMedia(dataStore.media);
                     alert(`Media item "${item.title}" successfully removed.`);
                     renderMediaGallery();
                 }
@@ -2156,6 +2277,7 @@ function initStakeholderMediaListings() {
 
                 openDeleteConfirmation(`Are you sure you want to delete post "${targetPost.title}"?`, () => {
                     dataStore.posts = (dataStore.posts || []).filter(p => p.id !== postId);
+                    saveStakeholderPosts(dataStore.posts);
                     alert('Post removed successfully.');
                     renderPostsFeed();
                 });
@@ -2186,6 +2308,7 @@ function initStakeholderMediaListings() {
             };
 
             (dataStore.posts = dataStore.posts || []).unshift(newPost);
+            saveStakeholderPosts(dataStore.posts);
             alert('Service update submitted! Status is "Pending Approval" awaiting Destination Manager verification. (Saved in prototype store)');
             createPostForm.reset();
             renderPostsFeed();
@@ -2316,6 +2439,7 @@ function initStakeholderMediaListings() {
 
                 openDeleteConfirmation(`Are you sure you want to remove listing "${lst.name}"?`, () => {
                     dataStore.listings = (dataStore.listings || []).filter(l => l.id !== id);
+                    saveStakeholderListings(dataStore.listings);
                     alert(`Listing "${lst.name}" successfully removed.`);
                     renderListingsGrid();
                 });
@@ -2411,6 +2535,7 @@ function initStakeholderMediaListings() {
                     lst.status = statusVal;
                     lst.statusClass = statusClass;
 
+                    saveStakeholderListings(dataStore.listings);
                     alert(`Listing "${name}" updated! Status set to "${statusVal}". Note: Only the authorized Destination Manager can grant public approval for this destination.`);
                 }
             } else {
@@ -2436,6 +2561,7 @@ function initStakeholderMediaListings() {
                 };
 
                 (dataStore.listings = dataStore.listings || []).unshift(newListing);
+                saveStakeholderListings(dataStore.listings);
                 alert(`New listing "${name}" submitted with status "${statusVal}". Note: Only the authorized Destination Manager can grant public approval for this destination. (Saved in prototype store)`);
             }
 

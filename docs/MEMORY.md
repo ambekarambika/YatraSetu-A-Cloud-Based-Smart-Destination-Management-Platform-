@@ -353,4 +353,193 @@ This file records decisions that should not be silently reversed.
 6. **Feedback Loop & Session Persistence:**
    - Displayed authentic manager-reviewed feedback from `window.YatraSetuManagerData.feedback` and provided an interactive modal (`#touristFeedbackModal`) allowing travelers to submit reviews with ratings and categories, persisted via `sessionStorage` (`yatrasetu_tourist_feedback`).
 
+---
+
+## 2026-11-17 — Stabilization Stage B: Batch 2 Implementation (BUG-05, BUG-06, BUG-07)
+
+**Context:** Bug fixes and stabilization for Stakeholder persistence, script dependencies, and workspace frontend route guards.
+
+**Key Decisions & Architectural Enforcements:**
+1. **Stakeholder Listings, Media, and Posts Persistence (BUG-05):**
+   - Reused existing storage conventions in `frontend/js/stakeholder.js`: restored stored listings (`yatrasetu_stakeholder_listings`), media (`yatrasetu_stakeholder_media`), and posts (`yatrasetu_stakeholder_posts`) upon `initStakeholderContext()` with `Map` deduplication by `id`.
+   - Implemented persistence helpers (`saveStakeholderListings`, `saveStakeholderMedia`, `saveStakeholderPosts`) and wired them into listing creation/edit/deletion, media upload/deletion, and post creation/deletion so data survives browser refresh and cross-page navigation.
+   - Media previews with ephemeral blob URLs fallback to persistent sample image assets upon upload so image thumbnails survive page reload.
+2. **Script Dependency Alignment (BUG-06):**
+   - Preserved existing clean script dependency chain (`manager-data.js` -> `stakeholder-data.js` -> `stakeholder.js` -> `dashboard.js`) in `stakeholder/*.html`.
+   - Avoided loading `manager-core.js` into unrelated stakeholder pages; instead implemented direct local storage synchronization fallback in `stakeholder.js` to eliminate manager DOM side-effects.
+3. **Manager & Stakeholder Frontend Route Guards (BUG-07):**
+   - Implemented `checkManagerAuth()` in `manager-core.js` and `checkStakeholderAuth()` in `stakeholder.js`.
+   - Guards inspect `sessionStorage.getItem('yatrasetu_role')`. Users attempting to access `/manager/` without `manager` or `admin` role, or `/stakeholder/` without `stakeholder` or `admin` role, are safely redirected to `../login.html` via `window.location.replace()`.
+   - Guards run exclusively on their respective workspace paths, completely avoiding public landing, login, and registration pages to prevent redirect loops.
+   - Explicitly documented that frontend route guards protect user navigation flow only, with true authorization enforced at API/JWT boundaries in Phase 11.
+
+---
+
+## 2026-11-17 — Stabilization Stage B: Batch 3 Implementation (BUG-08, BUG-09, SUSP-01, SUSP-02)
+
+**Context:** Bug fixes and stabilization for topbar null-safety, video player namespace resolution, demo credential harmonization, and performance deferral.
+
+**Key Decisions & Architectural Enforcements:**
+1. **Dashboard Topbar Null-Safety (BUG-08):**
+   - In `frontend/js/dashboard.js`, added null checks before inspecting `.classList` on `userBadge.parentElement` and `notifBtn.parentElement`.
+   - Added fallback DOM appending (`if (badgeWrapper) badgeWrapper.appendChild(...) else if (rightArea) rightArea.appendChild(...)`) ensuring topbar initialization never throws when badges or notifications are detached or initialized off-DOM.
+2. **Manager Video Preview Namespace Alignment (BUG-09):**
+   - In `frontend/js/manager-views.js` (`openVideoPlayerModal`), replaced non-existent `window.YatraSetuManagerCore.syncActiveManagerProfile` with standard global `syncActiveManagerProfile()` and store fallback `window.YatraSetuManagerStore.syncActiveManagerProfile`.
+   - Ensures video player modals correctly evaluate real-time authority scope across reassigned or state-level managers without relying on stale static fallback seeds.
+3. **Demo Credentials Alignment (SUSP-01):**
+   - Confirmed genuine mismatch: `auth.js` demo helper filled `stakeholder.local@yatrasetu.in`, whereas `admin.js`, `manager-data.js`, and `stakeholder-data.js` seed Suresh Deshmukh (`sh-101`) with `sahyadri.guides@gmail.com`.
+   - Aligned `demoAccounts.stakeholder.email` to `sahyadri.guides@gmail.com` in `auth.js`.
+   - Preserved backward-compatible alias in `initLoginForm` so `stakeholder.local@yatrasetu.in` maps to `sh-101`.
+   - Verified that clicking "⚡ Fill Demo Credentials" on `login.html` logs in as Suresh Deshmukh (`sh-101`), properly synchronizing name, user ID, and destination context.
+4. **Tourist Filter Concurrency Debouncing Deferral (SUSP-02):**
+   - Deferred per explicit instruction: 40 static destination cards filter synchronously in <4ms without measurable UI frame drops.
+
+---
+
+## 2026-11-17 — Tourist Workspace Functional Repair, Destination Details & UI Improvement
+
+**Context:** Complete functional repair and polish of the Tourist Workspace (`frontend/tourist/`), restoring interactive destination details, photo galleries, verified attractions modal, video player visibility, local services integration, curated multi-day trip itineraries, authentic travel chronicles with a modal reader, and dedicated travel guidance pillars.
+
+**Key Decisions & Architectural Enforcements:**
+1. **Modal Visibility Mismatch Resolution (Video Playback & Stakeholder Modal Fix):**
+   - Root cause identified: `frontend/css/tourist.css` strictly defined `.tourist-modal-overlay.show { display: flex; }`, while `frontend/js/tourist.js` toggled `modal.classList.add('active')`. This kept `.tourist-modal-overlay` hidden (`display: none`), causing video audio to play from the embedded iframe while visual picture remained completely invisible, and causing stakeholder buttons to appear non-responsive.
+   - Updated `tourist.css` to `.tourist-modal-overlay.show, .tourist-modal-overlay.active { display: flex; z-index: 2000; }`.
+   - Updated modal openers and closers in `tourist.js` to toggle both `.active` and `.show`.
+   - On video modal close, the iframe is immediately cleared (`frameContainer.innerHTML = ''`), guaranteeing instant audio and video teardown.
+2. **Multi-Image Destination Gallery & Fullscreen Lightbox:**
+   - Implemented `DESTINATION_GALLERIES` mapping destination IDs to 5–8 high-resolution authentic photographs with titles, perspectives, and descriptive captions. Added dynamic fallback generator ensuring all 40 destinations have visual galleries.
+   - Added `[📷 View Photos]` button pill in the hero banner and a dedicated "Visual Gallery & Scenic Perspectives" section in the Overview tab of `destination-detail.html`.
+   - Implemented `#touristLightboxModal` with fullscreen dark backdrop, main image, caption bar, image counter (`Photo X of Y`), direct jump thumbnail strip, and bidirectional keyboard navigation (`ArrowLeft`, `ArrowRight`, `Escape`).
+3. **Interactive Attraction Detail Modal & Clickable Attraction Cards:**
+   - Enriched attraction records via `ATTRACTION_EDITORIAL` with operational hours/timings, recommended visiting duration, best time/photography guidelines, and visitor safety instructions.
+   - Added `#touristAttractionModal` in `destination-detail.html`.
+   - Made both Overview preview attraction cards (`.detail-attr-item`) and Tab 2 full attraction cards (`.tourist-attraction-card`) interactive, opening `#touristAttractionModal` with detailed context when clicked.
+4. **Interactive Itinerary Planner on Dashboard (`#plan-trip`):**
+   - Replaced static promo placeholder on `dashboard.html` with an interactive multi-day planner featuring two modes:
+     - **Curated Circuits:** 3 verified multi-day routes (Maharashtra Fort Trail 3-Day, Kerala Backwaters Circuit 4-Day, Rajasthan Royal Fortresses 5-Day) with day-by-day stops, timing, highlights, and direct links to destination detail pages.
+     - **Custom Trip Builder:** Interactive generator allowing tourists to select state, duration (2–5 days), and theme (Heritage, Nature, Culture) to synthesize custom itineraries from verified destination records.
+5. **Travel Stories & Interactive Story Reader Modal (`#curated-section`):**
+   - Populated `#curated-section` with 4 authentic chronicles (Rajgad Fort sunrise climb, Munnar cloud trails, Jaisalmer living fort, and Rishikesh Ganga Aarti) complete with author credits, reading times, and excerpts.
+   - Added `#touristStoryModal` and wired "Read Story →" buttons to open a modal chronicle with full narrative and direct link to the related destination guide.
+6. **Dedicated Travel Guidance & Visitor Directory (`#travel-guide`):**
+   - Created a comprehensive 6-pillar travel guidance directory covering Best Time & Climate Patterns, Transit & How to Reach, Heritage Etiquette & Respect, Trekking Safety & Guides, Sustainable & Responsible Travel, and Packing Essentials.
+7. **Experiences Navigation & Filter Continuity (`destinations.html`):**
+   - Handled `category=adventure-outdoor` query parameters, ensuring category checkboxes, active filter tags, and filtered destination cards update seamlessly.
+   - Added intra-page category navigation interceptors for smooth filtering without unwanted page refreshes.
+
+---
+
+## 2026-11-17 — Tourist Workspace: Dedicated Independent Pages & Navigation Architecture
+
+**Context:** Restructuring the Tourist Workspace from an embedded multi-section dashboard into modular, dedicated independent pages with standardized 6-link navigation and enriched destination information architecture.
+
+**Key Decisions & Architectural Enforcements:**
+1. **Modular Page Architecture:**
+   - Separated embedded sub-features out of `dashboard.html` into independent pages:
+     - `dashboard.html` (Discover): Retains top destination highlights, state exploration, curated spotlights, and recent stories teasers.
+     - `destinations.html` (Destinations): Complete destination catalog with state filters and search.
+     - `experiences.html` (Experiences): 18 outdoor and cultural experiences across 6 categories (Trekking & Hiking, Water & Coastal, Heritage & Architecture, Wildlife & Nature, Cultural & Spiritual, Culinary & Local Traditions) with interactive `#touristExperienceModal`.
+     - `plan-trip.html` (Plan Your Trip): Curated multi-day circuits across 5 states, dynamic custom builder, and personal wishlist planner.
+     - `stories.html` (Stories): Dedicated travel chronicles with category filtering and `#touristStoryModal`.
+     - `travel-guidance.html` (Travel Guidance): 6 guidance pillars, regional transit directory, high-altitude trekking safety checklist, and emergency directory.
+     - `destination-advisories.html?id=...` (Destination Advisories): Dedicated official bulletin and guideline viewer linked directly from destination detail pages.
+2. **Navigation Standardisation:**
+   - Unified desktop navigation bar and mobile drawer with exact 6 links (`Discover`, `Destinations`, `Experiences`, `Plan Your Trip`, `Stories`, `Travel Guidance`).
+   - Dynamic `active` state tracking based on current URL path.
+   - Preserved browser history navigation (back/forward) and direct URL bookmarking.
+3. **Destination Information Architecture & Official Advisories Separation:**
+   - Enriched destination overviews with deep historical background, heritage architecture, cultural significance, geography, and notable landmarks.
+   - Standardized 8 tabs on `destination-detail.html`: Overview, Attractions, Videos, Experiences, Events, Authorized Local Services & Guides, Regional Circuit, Reviews & Feedback.
+   - In the Overview tab, replaced repetitive full advisory text with an official preview banner containing a direct link to `destination-advisories.html?id=${dest.id}`.
+4. **Events and Experiences Interactivity:**
+   - Wired destination-specific experiences in Tab 4 to open `#touristExperienceModal`.
+   - Wired destination event cards in Tab 5 to `#touristEventModal` displaying dates, locations, schedules, entry fees, and organizer contacts.
+
+---
+
+## 2026-11-17 — Tourist Workspace: UI Stabilization, CSS Consolidation & Section Redesign
+
+**Context:** Full visual and architectural stabilization of the Tourist Workspace, resolving layout anomalies, eliminated redundant CSS rules, and redesigning Destination Detail sections into a cohesive travel editorial design system.
+
+**Key Decisions & Architectural Enforcements:**
+1. **Consolidated Design System & Dead Code Removal:**
+   - Audited `frontend/css/tourist.css` and purged over 50 dead/unreferenced class selectors (e.g. obsolete promo cards, old guide pills, duplicate experience rules, unreferenced history box selectors).
+   - Unified conflicting experience card classes into standard `.experiences-full-grid` and `.experience-full-card`.
+   - Enforced consistent typography (`Playfair Display` serif for titles, `Plus Jakarta Sans` for body text), warm `#FAF8F5` surface background, `#1A3D32` primary forest green, and restrained saffron accents.
+2. **Mobile Viewport (390px) Overflow Fix:**
+   - Root cause identified: Inactive off-screen drawers (Wishlist and Mobile Nav) had positive translateX transforms and off-screen positions without `display: none`, causing modern WebKit/Blink layout viewports to expand to 465px.
+   - Fixed by toggling `display: none;` on `.tourist-drawer` when inactive and `display: flex;` when active, clamping document `scrollWidth` strictly to `390px` with 0px horizontal overflow across all 8 tourist pages.
+   - Added compact mobile header rules (hiding user name/role text, keeping avatar circle) and smooth horizontal swipe on the 8 destination detail tabs (`scrollbar-width: none`).
+3. **Destination Detail Section Redesign:**
+   - *Overview*: Replaced 5 repetitive, detached text cards with a high-level 6-point Key Facts Grid (Classification, District, Elevation, Season, Duration, Trail Grade) and an integrated Comprehensive Editorial Narrative Card with clear chapter headings and typography.
+   - *Attractions*: Replaced mismatched video grid classes with dedicated `.tourist-attractions-grid` and `.tourist-attraction-card` (180px uniform media, category tags, rating pills, operating hours, and detail modal).
+   - *Videos*: Standardized 16:9 thumbnail ratio, duration badges, and play button overlay.
+   - *Experiences*: Enforced uniform card dimensions, 2x2 meta grid, and `#touristExperienceModal`.
+   - *Events*: Replaced inline styled elements with a modern `.tourist-event-card` with saffron date badge (day number + month), location, timings, and `#touristEventModal`.
+   - *Authorized Local Services & Guides*: Enhanced cards with verified partner badge, category tag, base hub, hours, guide rate, and dual actions (direct `tel:` link + "View Details & Enquire").
+   - *Regional Circuit*: Replaced generic state cards with dedicated `.circuit-dest-card` grid displaying state rank badge, category, thumbnail, and direct destination link.
+   - *Reviews & Feedback*: Cleaned up review presentation with author initials avatar, star rating, verified submission pill, and feedback form modal.
+4. **Multi-Device Responsive Verification:**
+   - Automated CDP measurements across Desktop (1440px), Laptop (1366px), Tablet (768px), and Mobile (390px) confirmed `noHorizontalOverflow: true` (0 horizontal scroll) on all 8 pages.
+   - Automated CDP navigation and interaction test suite passed 100% with zero console errors.
+
+---
+
+## 2026-11-17 — Tourist Workspace: Controlled Repair & Visual Stabilization (Stage 1)
+
+**Decision:** Perform a strictly scoped repair limited to `tourist.css`, `destination-detail.html`, and `tourist.js` without modifying any other workspaces, without global framework/CSS redesign, and without Git rollbacks.
+
+**Resolved Issues & Concrete Fixes:**
+1. **Header Responsive Alignment (1180px–1080px):**
+   - Added `@media (max-width: 1180px)` rules in `tourist.css` compacting link gaps to `1.15rem`, font-size to `0.88rem`, and hiding `.tourist-brand-tagline` and `.tourist-user-role` to prevent menu collisions. Mobile drawer breakpoint adjusted to 1080px. Zero horizontal overflow verified across 1440px, 1180px, 1024px, 768px, and 390px.
+2. **Destination Detail Card Grids Standardization:**
+   - Standardized all 8 tab card grids (`.tourist-attractions-grid`, `.tourist-video-grid`, `.experiences-full-grid`, `.tourist-stakeholders-grid`, `.regional-circuit-grid`) to uniform `repeat(auto-fill, minmax(280px, 1fr))` with `1.5rem` gaps.
+3. **Purged Malformed HTML & Safe Inline Style Replacement:**
+   - Removed unclosed duplicate block of Destination Advisories at lines 292-306 in `destination-detail.html` that caused grid deformation.
+   - Created reusable semantic classes in `tourist.css` (`.detail-tab-header`, `.modal-card-lg`, `.detail-pill-forest`, etc.) and safely replaced inline styles from 110 down to 44. Preserved all 31 duplicate responsive selector groups inside media queries.
+4. **Resilient Local Destination Images:**
+   - Implemented `resolveDestinationImage` and `resolveAttractionImage` routing destinations to authentic local images in `../assets/images/`, with fallbacks and CSS min-height to prevent card collapse; zero broken external URLs remain.
+5. **Browser Verification:**
+   - All 8 tabs, video player modal, and feedback submission modal confirmed working in visible Chrome with zero console errors.
+
+---
+
+## 2026-11-17 — Tourist CSS Architecture: Three-Tier Stylesheet Split (`tourist-pages.css`)
+
+**Decision:** Separate page-specific Tourist component styles into a dedicated stylesheet `frontend/css/tourist-pages.css`, establishing a clear three-tier CSS architecture:
+1. `style.css`: Shared application foundation and dynamic state-theme engine.
+2. `tourist.css`: Shared Tourist workspace shell (tokens, header, nav drawer, common modals, footer).
+3. `tourist-pages.css`: Dedicated page-level component styling (Discover 8-states grid, Destinations filter sidebar and card tags, Plan Trip circuit timeline, Stories cards, Travel Guidance pillars, and Advisories bulletins).
+
+**Reason:** Prevents cascading regressions where automated cleanups on one page delete selectors required by other pages, protects the shared header/navigation, and eliminates unstyled browser-default controls.
+
+**Consequence:** All eight Tourist HTML pages load `style.css` -> `tourist.css` -> `tourist-pages.css`. Off-canvas mobile navigation standardized cleanly across all pages.
+
+---
+
+## 2026-11-17 — Tourist Workspace: Favorites & Wishlist Drawer System Repair
+
+**Decision:**
+1. Fix Wishlist Drawer opening: Added `.show` selector to `.tourist-drawer` and `.tourist-drawer-backdrop` in `tourist.css` so `openWishlistDrawer()` (which adds `.show`) renders the drawer with `display: flex;`.
+2. Created and wired dimming backdrop overlay (`#tourist-drawer-backdrop`) so clicking outside the drawer smoothly dismisses it; wired Escape key to dismiss drawer.
+3. Synchronized SVG heart fills (`fill="#EF4444"` vs `fill="none"`) on card buttons (`.dest-card-fav-btn`) and detail buttons (`.detail-fav-btn`) upon toggling favorites, added instant topbar badge updating (`.tourist-fav-badge`), and added toast confirmation notifications.
+4. Set `data-dest-id` dynamically on `detail-fav-btn` on `destination-detail.html` to keep hero heart in sync when toggled from drawer or page.
+
+**Verification:**
+- Verified in Chrome via automated CDP tests: Header heart icon opens Wishlist drawer showing saved cards and items; clicking heart on destination cards immediately fills red, increments topbar badge, and displays toast; clicking "Remove" in drawer removes the item and updates the card heart in real time; closing via `×`, backdrop click, and Escape key verified.
+
+
+**Decision:**
+1. Connect "View Experience Details" button on `destination-detail.html` (under Experiences tab) to `#touristExperienceModal` by adding the modal markup to `destination-detail.html` and binding modal closers in `initModals()`.
+2. Add graceful fallbacks in `openExperienceModal()` for missing experience metadata (duration, difficulty, season, guide, gear) and handle destination link navigation intelligently.
+3. Remove the two prototype disclaimer banners from `destinations.html` and `dashboard.html`.
+
+**Reason:**
+- Root Cause: `#touristExperienceModal` existed only in `experiences.html`. When clicked on `destination-detail.html`, `document.getElementById('touristExperienceModal')` returned null, silently aborting modal opening.
+- Prototype notices are no longer needed and their removal restores clean header alignment without awkward spacing.
+
+**Verification:**
+- Verified in Chrome via automated CDP tests: Modal opens with specific experience details for "Monsoon Rajgad Fort Citadel Trek" and "Padmavati Machi Heritage Bastion Exploration", closes on X, footer button, and Escape key, and functions on `experiences.html`. Both notice banners confirmed absent from DOM and screenshots.
+
+
 

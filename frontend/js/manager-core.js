@@ -125,13 +125,21 @@ window.YatraSetuManagerStore = {
     async getStakeholders(stateId, destinationId = 'all') {
         if (!window.YatraSetuManagerData) return [];
 
-        // Restore from session storage if present (in-memory prototype persistence)
+        // Restore from storage if present (sessionStorage / localStorage)
         try {
-            const saved = sessionStorage.getItem('yatrasetu_manager_stakeholders');
+            const saved = sessionStorage.getItem('yatrasetu_manager_stakeholders') || localStorage.getItem('yatrasetu_manager_stakeholders');
             if (saved) {
                 const parsed = JSON.parse(saved);
                 if (Array.isArray(parsed) && parsed.length > 0) {
-                    window.YatraSetuManagerData.stakeholders = parsed;
+                    const baseMap = new Map((window.YatraSetuManagerData.stakeholders || []).map(s => [s.id, s]));
+                    parsed.forEach(storedItem => {
+                        if (baseMap.has(storedItem.id)) {
+                            Object.assign(baseMap.get(storedItem.id), storedItem);
+                        } else {
+                            baseMap.set(storedItem.id, storedItem);
+                        }
+                    });
+                    window.YatraSetuManagerData.stakeholders = Array.from(baseMap.values());
                 }
             }
         } catch (e) {
@@ -181,7 +189,7 @@ window.YatraSetuManagerStore = {
             list = list.filter(s => s.state_id === stateId);
         }
         if (destinationId && destinationId !== 'all') {
-            list = list.filter(s => s.destination_id === destinationId || s.destination_id.includes(destinationId));
+            list = list.filter(s => s.destination_id === destinationId || (typeof s.destination_id === 'string' && s.destination_id.includes(destinationId)) || (!s.destination_id && s.status === 'Pending Approval'));
         }
         return list;
     },
@@ -237,15 +245,100 @@ window.YatraSetuManagerStore = {
     },
 
     async getFeedback(stateId, destinationId = 'all') {
-        if (!window.YatraSetuManagerData || !window.YatraSetuManagerData.feedback) return [];
-        let list = window.YatraSetuManagerData.feedback;
+        if (!window.YatraSetuManagerData) return [];
+        if (!window.YatraSetuManagerData.feedback) window.YatraSetuManagerData.feedback = [];
+
+        // Authoritative deleted feedback blacklist across tabs
+        let deletedIds = new Set();
+        try {
+            const rawDeleted = localStorage.getItem('yatrasetu_deleted_feedback_ids');
+            if (rawDeleted) {
+                const parsed = JSON.parse(rawDeleted);
+                if (Array.isArray(parsed)) deletedIds = new Set(parsed);
+            }
+        } catch (e) {}
+
+        // Base prototype feedback records filtered against deleted blacklist
+        let list = window.YatraSetuManagerData.feedback.filter(f => !deletedIds.has(f.id));
+
+        // Restore tourist-submitted feedback from single authoritative store (localStorage)
+        try {
+            const rawStored = localStorage.getItem('yatrasetu_tourist_feedback');
+            if (rawStored) {
+                const parsed = JSON.parse(rawStored);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    const validSubmissions = parsed.filter(f => !deletedIds.has(f.id));
+                    // Keep sessionStorage strictly synchronized to avoid resurrection
+                    sessionStorage.setItem('yatrasetu_tourist_feedback', JSON.stringify(validSubmissions));
+
+                    const existingMap = new Map(list.map(f => [f.id, f]));
+                    validSubmissions.forEach(storedItem => {
+                        if (!existingMap.has(storedItem.id)) {
+                            const item = {
+                                ...storedItem,
+                                status: storedItem.status || 'Pending Review',
+                                is_user_submission: true
+                            };
+                            list.unshift(item);
+                            existingMap.set(item.id, item);
+                        } else {
+                            const current = existingMap.get(storedItem.id);
+                            if (storedItem.status) current.status = storedItem.status;
+                            if (storedItem.manager_note) current.manager_note = storedItem.manager_note;
+                        }
+                    });
+                }
+            }
+        } catch (e) {
+            console.warn('[manager-core.js] Tourist feedback restore error:', e);
+        }
+
+        let filtered = [...list];
         if (stateId && stateId !== 'all') {
-            list = list.filter(f => f.state_id === stateId);
+            filtered = filtered.filter(f => f.state_id === stateId);
         }
         if (destinationId && destinationId !== 'all') {
-            list = list.filter(f => f.destination_id === destinationId || f.destination_id.includes(destinationId));
+            filtered = filtered.filter(f => f.destination_id === destinationId || (typeof f.destination_id === 'string' && f.destination_id.includes(destinationId)));
         }
-        return list;
+        return filtered;
+    },
+
+    deleteFeedback(fbId) {
+        if (!fbId) return;
+
+        // 1. Blacklist ID in authoritative localStorage so item never resurrects on refresh
+        try {
+            let deletedList = [];
+            const rawDeleted = localStorage.getItem('yatrasetu_deleted_feedback_ids');
+            if (rawDeleted) {
+                try { deletedList = JSON.parse(rawDeleted); } catch (e) {}
+            }
+            if (Array.isArray(deletedList) && !deletedList.includes(fbId)) {
+                deletedList.push(fbId);
+                localStorage.setItem('yatrasetu_deleted_feedback_ids', JSON.stringify(deletedList));
+            }
+        } catch (e) {}
+
+        // 2. Remove from single authoritative storage (localStorage) and mirror to sessionStorage
+        try {
+            const rawStored = localStorage.getItem('yatrasetu_tourist_feedback');
+            if (rawStored) {
+                const parsed = JSON.parse(rawStored);
+                if (Array.isArray(parsed)) {
+                    const updated = parsed.filter(f => f.id !== fbId);
+                    localStorage.setItem('yatrasetu_tourist_feedback', JSON.stringify(updated));
+                    sessionStorage.setItem('yatrasetu_tourist_feedback', JSON.stringify(updated));
+                }
+            }
+        } catch (e) {}
+
+        // 3. Remove from in-memory prototype state
+        if (window.YatraSetuManagerData && window.YatraSetuManagerData.feedback) {
+            const idx = window.YatraSetuManagerData.feedback.findIndex(f => f.id === fbId);
+            if (idx !== -1) {
+                window.YatraSetuManagerData.feedback.splice(idx, 1);
+            }
+        }
     },
 
     async getStakeholderMessages(stateId, destinationId = 'all') {
@@ -1163,7 +1256,25 @@ function initManagerModals() {
     });
 }
 
+/**
+ * Frontend Route Protection: verify active user is logged in with manager or admin role.
+ * Prevents logged-out or unauthorized users from viewing or manipulating manager controls.
+ */
+function checkManagerAuth() {
+    if (typeof window === 'undefined' || !window.location) return true;
+    const isManagerPage = window.location.pathname.includes('/manager/') || window.location.href.includes('/manager/');
+    if (!isManagerPage) return true;
+
+    const role = (typeof sessionStorage !== 'undefined') ? sessionStorage.getItem('yatrasetu_role') : null;
+    if (!role || (role !== 'manager' && role !== 'admin')) {
+        window.location.replace('../login.html');
+        return false;
+    }
+    return true;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    if (!checkManagerAuth()) return;
     initDestinationStateContext();
     initManagerModals();
     initTopbarSharedFeatures();

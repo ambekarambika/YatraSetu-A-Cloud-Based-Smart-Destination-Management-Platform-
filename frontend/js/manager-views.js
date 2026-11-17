@@ -572,7 +572,7 @@ async function renderConnectedViews(context) {
                         </div>
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <span style="color: #F59E0B; font-size: 0.85rem;">${'★'.repeat(fb.rating || 5)}</span>
-                            <span class="badge badge-success">Positive</span>
+                            ${fb.is_user_submission ? `<span class="badge" style="background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px;">${fb.status || 'Pending Review'}</span>` : `<span class="badge badge-success">Reviewed</span>`}
                             <button type="button" class="btn-secondary btn-fb-view" data-fb-id="${fb.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600;">View</button>
                             <button type="button" class="btn-secondary btn-fb-delete" data-fb-id="${fb.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; color: #DC2626; border-color: #FECACA;">Delete</button>
                         </div>
@@ -594,8 +594,12 @@ async function renderConnectedViews(context) {
                     e.stopPropagation();
                     const fbId = btn.getAttribute('data-fb-id');
                     if (confirm('Are you sure you want to delete this feedback record?')) {
-                        const idx = window.YatraSetuManagerData.feedback.findIndex(f => f.id === fbId);
-                        if (idx !== -1) window.YatraSetuManagerData.feedback.splice(idx, 1);
+                        if (window.YatraSetuManagerStore && typeof window.YatraSetuManagerStore.deleteFeedback === 'function') {
+                            window.YatraSetuManagerStore.deleteFeedback(fbId);
+                        } else {
+                            const idx = window.YatraSetuManagerData.feedback.findIndex(f => f.id === fbId);
+                            if (idx !== -1) window.YatraSetuManagerData.feedback.splice(idx, 1);
+                        }
                         await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
                     }
                 };
@@ -1524,12 +1528,17 @@ function openStakeholderDetailModal(shId) {
             const allowedDests = (profile.destination_ids && profile.destination_ids.length > 0)
                 ? profile.destination_ids
                 : (profile.destination_id ? [profile.destination_id] : ['raigad-fort']);
-            if (allowedDests.includes(sh.destination_id)) {
+            if (sh.destination_id && allowedDests.includes(sh.destination_id)) {
                 isAuthorized = true;
-                authMessage = `Authorized: You are the designated Destination Manager for ${sh.destination}.`;
+                authMessage = `Authorized: You are the designated Destination Manager for ${sh.destination || sh.destination_name}.`;
+            } else if (!sh.destination_id || sh.destination_id === 'unassigned') {
+                isAuthorized = isStateScope;
+                authMessage = isStateScope
+                    ? `Authorized: State Manager jurisdiction for unassigned registrations in ${profile.state_name || 'Maharashtra'}.`
+                    : `Pending Destination Assignment: Registration awaits administrative destination assignment. Jurisdiction currently restricted to ${profile.destination || allowedDests.join(', ')}.`;
             } else {
                 isAuthorized = false;
-                authMessage = `Unauthorized: Your management jurisdiction is limited to: ${profile.destination || allowedDests.join(', ')}. You cannot approve registrations for ${sh.destination}.`;
+                authMessage = `Unauthorized: Your management jurisdiction is limited to: ${profile.destination || allowedDests.join(', ')}. You cannot approve registrations for ${sh.destination || 'other destinations'}.`;
             }
         }
     }
@@ -1578,7 +1587,7 @@ function openStakeholderDetailModal(shId) {
             </div>
             <div>
                 <span style="color: var(--text-muted); font-size: 0.75rem; display: block;">Assigned Destination Context</span>
-                <span style="font-weight: 700; color: #1E293B;">🔒 ${sh.destination || 'Rajgad Fort'}</span>
+                <span style="font-weight: 700; color: #1E293B;">${sh.destination_id ? `🔒 ${sh.destination || sh.destination_name}` : '⏳ Pending Destination Assignment'}</span>
                 <span style="font-size: 0.68rem; color: #64748B; display: block; margin-top: 0.1rem;">(Protected: Stakeholders cannot change approved destination assignment)</span>
             </div>
             <div>
@@ -1830,8 +1839,12 @@ function openFeedbackDetailModal(fbId) {
     if (deleteBtn) {
         deleteBtn.onclick = async () => {
             if (confirm('Are you sure you want to delete this feedback record?')) {
-                const idx = window.YatraSetuManagerData.feedback.findIndex(f => f.id === fbId);
-                if (idx !== -1) window.YatraSetuManagerData.feedback.splice(idx, 1);
+                if (window.YatraSetuManagerStore && typeof window.YatraSetuManagerStore.deleteFeedback === 'function') {
+                    window.YatraSetuManagerStore.deleteFeedback(fbId);
+                } else {
+                    const idx = window.YatraSetuManagerData.feedback.findIndex(f => f.id === fbId);
+                    if (idx !== -1) window.YatraSetuManagerData.feedback.splice(idx, 1);
+                }
                 modal.classList.remove('active');
                 document.body.style.overflow = '';
                 await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
@@ -2353,9 +2366,10 @@ async function openVideoPlayerModal(videoId) {
     const authStatus = document.getElementById('player-modal-auth-status');
     const editBtn = document.getElementById('btn-player-edit-action');
 
-    const activeProfile = (window.YatraSetuManagerCore && window.YatraSetuManagerCore.syncActiveManagerProfile)
-        ? window.YatraSetuManagerCore.syncActiveManagerProfile()
-        : (window.YatraSetuManagerData ? window.YatraSetuManagerData.profile : null);
+    const activeProfile = (typeof syncActiveManagerProfile === 'function' ? syncActiveManagerProfile() : null)
+        || ((window.YatraSetuManagerStore && typeof window.YatraSetuManagerStore.syncActiveManagerProfile === 'function')
+            ? window.YatraSetuManagerStore.syncActiveManagerProfile()
+            : (window.YatraSetuManagerData ? window.YatraSetuManagerData.profile : null));
 
     const isSuspended = activeProfile && (activeProfile.status === 'Suspended' || activeProfile.account_status === 'Suspended' || activeProfile.status === 'Inactive' || activeProfile.account_status === 'Inactive');
 

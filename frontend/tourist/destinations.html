@@ -14,14 +14,9 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/tourist.css">
+    <link rel="stylesheet" href="../css/tourist-pages.css">
 </head>
 <body class="tourist-body">
-
-    <!-- Prototype Demo Disclaimer Banner -->
-    <div class="tourist-demo-banner">
-        <span>⚠️</span>
-        <strong>Prototype Demonstration Data:</strong> Destination records, ratings, and reviews reflect curated single-source-of-truth data. PostgreSQL database persistence will be integrated in Phase 10.
-    </div>
 
     <!-- ====================================================================
          1. TOPBAR NAVIGATION (Clean Tourist Travel Companion Nav)
@@ -53,16 +48,16 @@
                     <a href="destinations.html">Destinations</a>
                 </li>
                 <li class="tourist-nav-item">
-                    <a href="destinations.html?category=adventure-outdoor">Experiences</a>
+                    <a href="experiences.html">Experiences</a>
                 </li>
                 <li class="tourist-nav-item">
-                    <a href="dashboard.html#plan-trip">Plan Your Trip</a>
+                    <a href="plan-trip.html">Plan Your Trip</a>
                 </li>
                 <li class="tourist-nav-item">
-                    <a href="dashboard.html#curated-section">Stories</a>
+                    <a href="stories.html">Stories</a>
                 </li>
                 <li class="tourist-nav-item">
-                    <a href="dashboard.html#travel-guide">Travel Guidance</a>
+                    <a href="travel-guidance.html">Travel Guidance</a>
                 </li>
             </ul>
 
@@ -117,11 +112,12 @@
             <button type="button" class="tourist-modal-close" onclick="document.getElementById('tourist-mobile-nav').classList.remove('show');" style="position:static;">×</button>
         </div>
         <div class="tourist-drawer-body">
-            <a href="dashboard.html" class="tourist-dropdown-item">🧭 Discover Home</a>
-            <a href="destinations.html" class="tourist-dropdown-item active" style="color:var(--tourist-forest); font-weight:700;">🗺️ Explore Destinations</a>
-            <a href="destinations.html?category=adventure-outdoor" class="tourist-dropdown-item">🧗 Experiences & Activities</a>
-            <a href="dashboard.html#plan-trip" class="tourist-dropdown-item">🎒 Plan Your Trip</a>
-            <a href="dashboard.html#travel-guide" class="tourist-dropdown-item">🌿 Travel Responsibly</a>
+            <a href="dashboard.html" class="tourist-dropdown-item">🧭 Discover</a>
+            <a href="destinations.html" class="tourist-dropdown-item active" style="color:var(--tourist-forest); font-weight:700;">🗺️ Destinations</a>
+            <a href="experiences.html" class="tourist-dropdown-item">🧗 Experiences</a>
+            <a href="plan-trip.html" class="tourist-dropdown-item">🎒 Plan Your Trip</a>
+            <a href="stories.html" class="tourist-dropdown-item">📖 Stories</a>
+            <a href="travel-guidance.html" class="tourist-dropdown-item">🌿 Travel Guidance</a>
             <div style="border-top:1px solid var(--tourist-border); margin:1rem 0;"></div>
             <a href="../login.html" class="tourist-btn-primary" style="justify-content:center;">Sign In</a>
         </div>

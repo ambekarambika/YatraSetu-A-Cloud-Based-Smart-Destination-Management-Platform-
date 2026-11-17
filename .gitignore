@@ -28,3 +28,6 @@ logs/
 # Root image uploads
 *.png
 
+# Temporary Scratch & Diagnostic Helpers
+scratch/
+

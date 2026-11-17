@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Destination Advisories & Guidelines — YatraSetu</title>
+    <meta name="description" content="Official visitor safety advisories, conservation rules, and trail guidelines published by Destination Managers on YatraSetu.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/tourist.css">
+    <link rel="stylesheet" href="../css/tourist-pages.css">
+</head>
+<body class="tourist-body">
+
+    <!-- Prototype Demo Disclaimer Banner -->
+    <div class="tourist-demo-banner">
+        <span>⚠️</span>
+        <strong>Tourist Workspace Phase 1 Prototype:</strong> Official destination advisories, weather warnings, and heritage protection guidelines verified by Destination Managers.
+    </div>
+
+    <!-- ====================================================================
+         1. TOPBAR NAVIGATION (Standardized 6-link Shared Nav)
+         ==================================================================== -->
+    <header class="tourist-header">
+        <div class="tourist-container tourist-header-inner">
+            
+            <!-- Brand Logo -->
+            <a href="dashboard.html" class="tourist-brand" id="tourist-brand-logo">
+                <div class="tourist-brand-crest">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                </div>
+                <div class="tourist-brand-text">
+                    <span class="tourist-brand-name">Yatra<span>Setu</span></span>
+                    <span class="tourist-brand-tagline">Explore • Experience • Preserve</span>
+                </div>
+            </a>
+
+            <!-- Center Navigation Links -->
+            <ul class="tourist-nav-links">
+                <li class="tourist-nav-item">
+                    <a href="dashboard.html">Discover</a>
+                </li>
+                <li class="tourist-nav-item active">
+                    <a href="destinations.html">Destinations</a>
+                </li>
+                <li class="tourist-nav-item">
+                    <a href="experiences.html">Experiences</a>
+                </li>
+                <li class="tourist-nav-item">
+                    <a href="plan-trip.html">Plan Your Trip</a>
+                </li>
+                <li class="tourist-nav-item">
+                    <a href="stories.html">Stories</a>
+                </li>
+                <li class="tourist-nav-item">
+                    <a href="travel-guidance.html">Travel Guidance</a>
+                </li>
+            </ul>
+
+            <!-- Right Utilities -->
+            <div class="tourist-nav-actions">
+                <a href="destinations.html" class="tourist-icon-btn" title="Quick Destination Search" aria-label="Search destinations">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </a>
+
+                <!-- Favorites Wishlist Heart Button -->
+                <button type="button" class="tourist-icon-btn" id="tourist-nav-fav-btn" title="Saved Destinations" aria-label="View saved wishlist">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                    <span class="tourist-badge-count tourist-fav-badge" style="display: none;">0</span>
+                </button>
+
+                <!-- User Profile Badge & Dropdown -->
+                <div class="tourist-user-badge" id="tourist-user-badge">
+                    <div class="tourist-avatar">GE</div>
+                    <div class="tourist-user-info">
+                        <span class="tourist-user-name">Hi, Guest</span>
+                        <span class="tourist-user-role">Plan My Journey</span>
+                    </div>
+                    <span class="tourist-user-caret">▾</span>
+                    <div class="tourist-user-dropdown" id="tourist-user-dropdown"></div>
+                </div>
+
+                <!-- Mobile Hamburger Toggle -->
+                <button type="button" class="tourist-mobile-toggle" id="tourist-mobile-toggle" aria-label="Open mobile menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="tourist-mobile-nav" class="tourist-drawer" style="left: -320px; right: auto; width: 300px;">
+        <div class="tourist-drawer-header">
+            <span class="tourist-brand-name">Yatra<span>Setu</span></span>
+            <button type="button" class="tourist-modal-close" onclick="document.getElementById('tourist-mobile-nav').classList.remove('show');" style="position:static;">×</button>
+        </div>
+        <div class="tourist-drawer-body">
+            <a href="dashboard.html" class="tourist-dropdown-item">🧭 Discover</a>
+            <a href="destinations.html" class="tourist-dropdown-item active" style="color:var(--tourist-forest); font-weight:700;">🗺️ Destinations</a>
+            <a href="experiences.html" class="tourist-dropdown-item">🧗 Experiences</a>
+            <a href="plan-trip.html" class="tourist-dropdown-item">🎒 Plan Your Trip</a>
+            <a href="stories.html" class="tourist-dropdown-item">📖 Stories</a>
+            <a href="travel-guidance.html" class="tourist-dropdown-item">🌿 Travel Guidance</a>
+            <div style="border-top:1px solid var(--tourist-border); margin:1rem 0;"></div>
+            <a href="../login.html" class="tourist-btn-primary" style="justify-content:center;">Sign In</a>
+        </div>
+    </div>
+
+    <!-- Wishlist Off-Canvas Drawer -->
+    <aside class="tourist-drawer" id="touristWishlistDrawer" role="dialog" aria-modal="true" aria-labelledby="wishlist-title">
+        <div class="tourist-drawer-header">
+            <div>
+                <h3 class="tourist-drawer-title" id="wishlist-title">My Saved Destinations</h3>
+                <span class="tourist-drawer-subtitle"><span id="drawer-fav-count">0</span> items saved</span>
+            </div>
+            <button type="button" class="tourist-drawer-close" id="btn-close-wishlist" aria-label="Close Wishlist">×</button>
+        </div>
+        <div class="tourist-drawer-body" id="wishlist-drawer-items">
+            <!-- Dynamic items rendered by tourist.js -->
+        </div>
+        <div class="tourist-drawer-footer">
+            <button type="button" class="tourist-btn-outline" id="btn-clear-wishlist" style="width:100%; justify-content:center;">Clear Wishlist</button>
+        </div>
+    </aside>
+    <div class="tourist-drawer-overlay" id="touristDrawerOverlay"></div>
+
+    <!-- ====================================================================
+         2. DESTINATION ADVISORIES PAGE CONTENT
+         ==================================================================== -->
+    <main class="tourist-container tourist-content-wrapper">
+
+        <!-- Back to Destination Link -->
+        <div style="margin-bottom: 1.5rem;">
+            <a href="destination-detail.html" id="adv-back-dest-link" class="tourist-link-arrow" style="font-size:0.92rem; font-weight:700;">
+                ← Back to Destination Details
+            </a>
+        </div>
+
+        <!-- Banner Header -->
+        <section class="advisories-header-banner">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+                <div>
+                    <span style="display:inline-block; font-size:0.8rem; background:rgba(255,255,255,0.15); padding:0.3rem 0.75rem; border-radius:9999px; font-weight:700; margin-bottom:0.75rem;">
+                        Official Destination Bulletin
+                    </span>
+                    <h1 id="adv-dest-name" style="font-family:'Playfair Display', serif; font-size:2.2rem; font-weight:800; margin:0 0 0.5rem 0;">
+                        Destination Advisories & Guidelines
+                    </h1>
+                    <p id="adv-dest-location" style="font-size:0.95rem; color:rgba(255,255,255,0.85); margin:0;">
+                        Loading destination context...
+                    </p>
+                </div>
+                <div style="text-align:right;">
+                    <div style="display:inline-flex; align-items:center; gap:0.4rem; background:#D1FAE5; color:#065F46; padding:0.4rem 0.85rem; border-radius:8px; font-size:0.82rem; font-weight:700;">
+                        <span>✓</span> Verified Active
+                    </div>
+                    <div style="font-size:0.75rem; color:rgba(255,255,255,0.7); margin-top:0.35rem;">Updated: Current Season 2026</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Two-Column Advisories Grid -->
+        <div class="advisories-grid">
+            
+            <!-- Left Main Column -->
+            <div>
+                <!-- Active Safety Bulletins -->
+                <div class="detail-card">
+                    <h2 class="detail-card-title">Active Safety & Operational Bulletins</h2>
+                    <p style="font-size:0.88rem; color:var(--tourist-text-muted); margin-bottom:1.25rem;">
+                        Real-time visitor advisories, trail condition notices, and weather alerts issued for this destination.
+                    </p>
+                    <div id="adv-bulletins-list">
+                        <!-- Populated dynamically by tourist.js -->
+                    </div>
+                </div>
+
+                <!-- Heritage Conservation & ASI Regulations -->
+                <div class="detail-card">
+                    <h2 class="detail-card-title">Heritage Protection & Legal Regulations</h2>
+                    <p style="font-size:0.88rem; color:var(--tourist-text-muted); margin-bottom:1rem;">
+                        This destination is a nationally protected monument and eco-sensitive heritage zone. Visitors must comply with statutory preservation laws:
+                    </p>
+                    <ul class="guidance-list" style="margin-bottom:1.25rem;">
+                        <li><strong>Monument Integrity:</strong> Scratching, defacing, carving, or removing masonry stones from fort walls or rock-cut caves is a non-bailable offence under the Ancient Monuments and Archaeological Sites and Remains Act.</li>
+                        <li><strong>Zero-Plastic Policy:</strong> Single-use plastic bottles, snack packets, and polythene carry bags are strictly barred at base camp security gates. Visitors must carry reusable water canteens.</li>
+                        <li><strong>Camping & Open Fires:</strong> Lighting bonfires, cooking with open flames, or overnight wilderness camping outside registered base camp campsites is strictly prohibited.</li>
+                        <li><strong>Drone Flights:</strong> Operating unmanned aerial vehicles (drones) requires prior written clearance from the District Administration and ASI circle offices.</li>
+                    </ul>
+                </div>
+
+                <!-- Seasonal Weather Guidance -->
+                <div class="detail-card">
+                    <h2 class="detail-card-title">Seasonal Climate & Visiting Conditions</h2>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1.25rem; margin-top:1rem;">
+                        <div style="border:1px solid var(--tourist-border); border-radius:10px; padding:1.25rem; background:var(--tourist-bg-surface);">
+                            <span style="font-size:0.75rem; font-weight:800; color:var(--tourist-forest); text-transform:uppercase;">Peak Season Window</span>
+                            <h4 style="margin:0.25rem 0 0.5rem 0;">October – February</h4>
+                            <p style="font-size:0.82rem; color:var(--tourist-text-muted); margin:0;">Clear skies, crisp mountain air, and safe dry rock faces. Daylight exploration recommended between 06:30 AM and 05:30 PM.</p>
+                        </div>
+                        <div style="border:1px solid var(--tourist-border); border-radius:10px; padding:1.25rem; background:var(--tourist-bg-surface);">
+                            <span style="font-size:0.75rem; font-weight:800; color:var(--tourist-saffron); text-transform:uppercase;">Monsoon Window</span>
+                            <h4 style="margin:0.25rem 0 0.5rem 0;">July – September</h4>
+                            <p style="font-size:0.82rem; color:var(--tourist-text-muted); margin:0;">Lush greenery and cascading waterfalls. Slippery rock patches require ankle-support hiking boots and accompaniment by registered local guides.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar Column -->
+            <div>
+                <!-- Official Management Verification -->
+                <div class="detail-card">
+                    <h3 style="font-size:1.15rem; font-weight:800; color:var(--tourist-text-heading); margin:0 0 0.5rem 0;">Destination Management</h3>
+                    <p style="font-size:0.85rem; color:var(--tourist-text-muted); margin:0 0 1rem 0;">
+                        Supervised under state tourism authority and registered village cooperative committees.
+                    </p>
+                    <div style="background:var(--tourist-bg-subtle); border-radius:8px; padding:1rem; font-size:0.82rem; margin-bottom:1rem; display:flex; flex-direction:column; gap:0.5rem;">
+                        <div><strong>Authority:</strong> <span id="adv-authority-name">State Tourism Board</span></div>
+                        <div><strong>Base Camp Station:</strong> <span id="adv-basecamp-name">Base Checkpoint</span></div>
+                        <div><strong>Visitor Checkpoint:</strong> Open Daily (06:00 AM – 06:00 PM)</div>
+                    </div>
+                    <a href="destination-detail.html" id="adv-sidebar-dest-btn" class="tourist-btn-primary" style="width:100%; justify-content:center; box-sizing:border-box;">
+                        <span>📍</span> View Full Destination Details <span>→</span>
+                    </a>
+                </div>
+
+                <!-- Emergency Helpline Quick Box -->
+                <div class="detail-card">
+                    <h3 style="font-size:1.15rem; font-weight:800; color:var(--tourist-text-heading); margin:0 0 0.75rem 0;">Base Camp Helplines</h3>
+                    <div style="display:flex; flex-direction:column; gap:0.75rem; font-size:0.85rem; color:var(--tourist-text-muted);">
+                        <div>
+                            <strong style="color:var(--tourist-text-heading); display:block;">🚑 Medical & Rescue:</strong>
+                            <span style="font-weight:700; color:var(--tourist-forest);">108 (National Emergency)</span>
+                        </div>
+                        <div>
+                            <strong style="color:var(--tourist-text-heading); display:block;">👮 Tourist Police:</strong>
+                            <span style="font-weight:700; color:var(--tourist-forest);">1363 (24x7 Multi-lingual)</span>
+                        </div>
+                        <div>
+                            <strong style="color:var(--tourist-text-heading); display:block;">🌲 Forest Ranger Office:</strong>
+                            <span style="font-weight:700; color:var(--tourist-forest);">1926</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Travel Responsibly Card -->
+                <div class="detail-card" style="background:linear-gradient(135deg, #EBF3F0 0%, #FAF8F5 100%); border-color:#D2E4DC;">
+                    <h3 style="font-size:1.15rem; font-weight:800; color:var(--tourist-forest); margin:0 0 0.5rem 0;">Visitor Pledge</h3>
+                    <p style="font-size:0.82rem; color:var(--tourist-text-muted); margin:0 0 1rem 0;">
+                        Support local homestays, hire registered local guides, and preserve pristine nature by carrying all waste back to municipal collection bins.
+                    </p>
+                    <a href="travel-guidance.html" class="tourist-btn-outline" style="width:100%; justify-content:center; box-sizing:border-box;">
+                        Read Full Guidance <span>→</span>
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- ====================================================================
+         3. FOOTER
+         ==================================================================== -->
+    <footer class="tourist-footer">
+        <div class="tourist-container">
+            <div class="tourist-footer-grid">
+                <div class="tourist-footer-brand">
+                    <div class="tourist-brand-text" style="margin-bottom:0.75rem;">
+                        <span class="tourist-brand-name" style="font-size:1.35rem;">Yatra<span>Setu</span></span>
+                    </div>
+                    <p style="font-size:0.85rem; color:var(--tourist-text-light); line-height:1.6; margin:0 0 1rem 0;">
+                        National Smart Destination Management Platform facilitating sustainable tourism stewardship, visitor guidance, and cultural heritage preservation across India.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="tourist-footer-title">Workspace Navigation</h4>
+                    <ul class="tourist-footer-links">
+                        <li><a href="dashboard.html">Discover India</a></li>
+                        <li><a href="destinations.html">All Destinations</a></li>
+                        <li><a href="experiences.html">Experiences & Trails</a></li>
+                        <li><a href="plan-trip.html">Plan Your Trip</a></li>
+                        <li><a href="stories.html">Travel Stories</a></li>
+                        <li><a href="travel-guidance.html">Official Travel Guidance</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="tourist-footer-title">Platform Workspaces</h4>
+                    <ul class="tourist-footer-links">
+                        <li><a href="../manager/dashboard.html">Destination Manager</a></li>
+                        <li><a href="../stakeholder/dashboard.html">Local Tourism Stakeholder</a></li>
+                        <li><a href="../admin/dashboard.html">Platform Administration</a></li>
+                        <li><a href="../login.html">Role Switcher & Sign In</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tourist-footer-bottom">
+                <div>© 2026 YatraSetu Smart Destination Management Platform. All rights reserved.</div>
+                <div style="font-size:0.75rem; color:var(--tourist-text-light);">
+                    Phase 1 Verified Prototype • Educational & Research Demonstration
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification Container -->
+    <div class="tourist-toast-container" id="touristToastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="../js/manager-data.js"></script>
+    <script src="../js/tourist.js"></script>
+</body>
+</html>

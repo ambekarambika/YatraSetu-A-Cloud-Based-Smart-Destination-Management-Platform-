@@ -151,6 +151,20 @@
                         </div>
                     </div>
 
+                    <!-- Operating Destination Selection (Visible for Stakeholder / Manager) -->
+                    <div class="glass-form-group" id="destination-select-group" style="display: none;">
+                        <label for="registration-destination" class="glass-label">Operating Destination (Optional)</label>
+                        <div class="glass-input-wrapper">
+                            <svg class="glass-input-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            <select id="registration-destination" class="glass-input" style="color: #FFFFFF; background: rgba(255, 255, 255, 0.07); cursor: pointer;">
+                                <option value="" style="color: #1E293B; background: #FFFFFF;">-- No Destination Assigned (Pending Review) --</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <!-- Full Name -->
                     <div class="glass-form-group">
                         <label for="fullname" class="glass-label">Full Name</label>
@@ -237,6 +251,7 @@
     </main>
 
     <!-- JavaScript -->
+    <script src="js/manager-data.js"></script>
     <script src="js/auth.js"></script>
 </body>
 </html>

@@ -14,6 +14,7 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/tourist.css">
+    <link rel="stylesheet" href="../css/tourist-pages.css">
 </head>
 <body class="tourist-body">
 
@@ -53,16 +54,16 @@
                     <a href="destinations.html">Destinations</a>
                 </li>
                 <li class="tourist-nav-item">
-                    <a href="destinations.html?category=adventure-outdoor">Experiences</a>
+                    <a href="experiences.html">Experiences</a>
                 </li>
                 <li class="tourist-nav-item">
-                    <a href="dashboard.html#plan-trip">Plan Your Trip</a>
+                    <a href="plan-trip.html">Plan Your Trip</a>
                 </li>
                 <li class="tourist-nav-item">
-                    <a href="dashboard.html#curated-section">Stories</a>
+                    <a href="stories.html">Stories</a>
                 </li>
                 <li class="tourist-nav-item">
-                    <a href="dashboard.html#travel-guide">Travel Guidance</a>
+                    <a href="travel-guidance.html">Travel Guidance</a>
                 </li>
             </ul>
 
@@ -107,6 +108,24 @@
         </div>
     </header>
 
+    <!-- Mobile Navigation Drawer -->
+    <div id="tourist-mobile-nav" class="tourist-drawer" style="left: -320px; right: auto; width: 300px;">
+        <div class="tourist-drawer-header">
+            <span class="tourist-brand-name">Yatra<span>Setu</span></span>
+            <button type="button" class="tourist-modal-close" onclick="document.getElementById('tourist-mobile-nav').classList.remove('show');" style="position:static;">×</button>
+        </div>
+        <div class="tourist-drawer-body">
+            <a href="dashboard.html" class="tourist-dropdown-item">🧭 Discover</a>
+            <a href="destinations.html" class="tourist-dropdown-item active" style="color:var(--tourist-forest); font-weight:700;">🗺️ Destinations</a>
+            <a href="experiences.html" class="tourist-dropdown-item">🧗 Experiences</a>
+            <a href="plan-trip.html" class="tourist-dropdown-item">🎒 Plan Your Trip</a>
+            <a href="stories.html" class="tourist-dropdown-item">📖 Stories</a>
+            <a href="travel-guidance.html" class="tourist-dropdown-item">🌿 Travel Guidance</a>
+            <div style="border-top:1px solid var(--tourist-border); margin:1rem 0;"></div>
+            <a href="../login.html" class="tourist-btn-primary" style="justify-content:center;">Sign In</a>
+        </div>
+    </div>
+
     <!-- ====================================================================
          2. DESTINATION DETAIL MAIN CONTAINER
          ==================================================================== -->
@@ -129,7 +148,7 @@
             <div class="detail-hero-overlay"></div>
 
             <!-- Favorite Heart Button in Hero -->
-            <button type="button" class="dest-card-fav-btn detail-fav-btn" id="detail-fav-btn" title="Save to Favorites" aria-label="Save to Favorites" style="top: 24px; right: 24px; width: 44px; height: 44px;">
+            <button type="button" class="dest-card-fav-btn detail-fav-btn" id="detail-fav-btn" title="Save to Favorites" aria-label="Save to Favorites">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                 </svg>
@@ -138,11 +157,11 @@
             <div class="detail-hero-content">
                 <h1 class="detail-hero-title" id="detail-dest-name">Rajgad Fort</h1>
                 <div class="detail-hero-loc" id="detail-dest-location">📍 Pune, Maharashtra</div>
-                <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem;">
-                    <span style="color:#FBBF24; font-weight:800; font-size:1.05rem;" id="detail-dest-rating">★ 4.8</span>
-                    <span style="font-size:0.75rem; background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:4px; color:#FFF;">Prototype Demo Rating</span>
+                <div class="detail-rating-row">
+                    <span class="detail-rating-star" id="detail-dest-rating">★ 4.8</span>
+                    <span class="detail-demo-tag">Prototype Demo Rating</span>
                 </div>
-                <p style="font-size:1.1rem; max-width:720px; margin:0 0 0.75rem 0; opacity:0.95;" id="detail-dest-subtitle">
+                <p class="detail-hero-subtitle" id="detail-dest-subtitle">
                     A historic fort with breathtaking views, rich Maratha history, and scenic trekking trails.
                 </p>
                 <div class="detail-hero-tags" id="detail-dest-tags">
@@ -151,6 +170,11 @@
                     <span class="detail-hero-tag">Nature</span>
                 </div>
             </div>
+
+            <!-- View Photos Button in Hero -->
+            <button type="button" class="hero-view-photos-btn" id="btn-hero-view-photos" aria-label="View Destination Photo Gallery">
+                <span>📷</span> View Photos (<span id="hero-photo-count">0</span>)
+            </button>
         </section>
 
         <!-- Navigation Tabs Bar -->
@@ -158,11 +182,11 @@
             <button type="button" class="detail-tab-btn active" data-tab="overview">Overview</button>
             <button type="button" class="detail-tab-btn" data-tab="attractions">Attractions (<span id="tab-attr-count">0</span>)</button>
             <button type="button" class="detail-tab-btn" data-tab="videos">Videos (<span id="tab-video-count">0</span>)</button>
-            <button type="button" class="detail-tab-btn" data-tab="stakeholders">Local Services (<span id="tab-sh-count">0</span>)</button>
+            <button type="button" class="detail-tab-btn" data-tab="experiences">Experiences (<span id="tab-exp-count">0</span>)</button>
             <button type="button" class="detail-tab-btn" data-tab="events">Events (<span id="tab-event-count">0</span>)</button>
-            <button type="button" class="detail-tab-btn" data-tab="guidelines">Advisories & Guidelines</button>
+            <button type="button" class="detail-tab-btn" data-tab="stakeholders">Authorized Local Services & Guides (<span id="tab-sh-count">0</span>)</button>
             <button type="button" class="detail-tab-btn" data-tab="nearby-places">Regional Circuit</button>
-            <button type="button" class="detail-tab-btn" data-tab="reviews">Reviews (<span id="tab-review-count">0</span>)</button>
+            <button type="button" class="detail-tab-btn" data-tab="reviews">Reviews & Feedback (<span id="tab-review-count">0</span>)</button>
         </nav>
 
         <!-- ====================================================================
@@ -173,12 +197,70 @@
                 
                 <!-- Left Main Content Column -->
                 <div>
-                    <!-- About Card -->
+                    <!-- Key Destination Facts Card -->
                     <div class="detail-card">
-                        <h2 class="detail-card-title">About this Destination</h2>
-                        <p id="detail-dest-description" style="font-size:0.95rem; color:var(--tourist-text-muted); line-height:1.7; margin:0;">
+                        <div class="detail-facts-grid" id="detail-facts-grid">
+                            <div class="detail-fact-item">
+                                <span class="detail-fact-label">🏛️ Heritage Classification</span>
+                                <span class="detail-fact-val" id="fact-classification">Monument & Heritage Landmark</span>
+                            </div>
+                            <div class="detail-fact-item">
+                                <span class="detail-fact-label">📍 Administrative Territory</span>
+                                <span class="detail-fact-val" id="fact-district">Regional Jurisdiction</span>
+                            </div>
+                            <div class="detail-fact-item">
+                                <span class="detail-fact-label">⛰️ Elevation & Terrain</span>
+                                <span class="detail-fact-val" id="fact-elevation">Sahyadri High Basalt Ridge</span>
+                            </div>
+                            <div class="detail-fact-item">
+                                <span class="detail-fact-label">🌤️ Ideal Season Window</span>
+                                <span class="detail-fact-val" id="fact-season">October to March</span>
+                            </div>
+                            <div class="detail-fact-item">
+                                <span class="detail-fact-label">⏱️ Recommended Duration</span>
+                                <span class="detail-fact-val" id="fact-duration">Full Day Exploration</span>
+                            </div>
+                            <div class="detail-fact-item">
+                                <span class="detail-fact-label">🧭 Trail / Access Grade</span>
+                                <span class="detail-fact-val" id="fact-difficulty">Moderate Scenic Trail</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comprehensive Editorial Heritage Chronicles Card -->
+                    <div class="detail-editorial-card">
+                        <h2 class="detail-card-title">Destination Overview & Heritage Chronicles</h2>
+                        <p class="editorial-lead" id="detail-dest-description">
                             Loading destination overview...
                         </p>
+
+                        <div class="editorial-chapter">
+                            <h3 class="editorial-chapter-title">📜 Historical Background & Origin</h3>
+                            <p class="editorial-chapter-text" id="detail-history-bg">
+                                Loading historical chronicles...
+                            </p>
+                        </div>
+
+                        <div class="editorial-chapter">
+                            <h3 class="editorial-chapter-title">🏰 Heritage Architecture & Defensive Engineering</h3>
+                            <p class="editorial-chapter-text" id="detail-heritage-arch">
+                                Loading architectural analysis...
+                            </p>
+                        </div>
+
+                        <div class="editorial-chapter">
+                            <h3 class="editorial-chapter-title">🎭 Cultural Significance & Living Lore</h3>
+                            <p class="editorial-chapter-text" id="detail-culture-trad">
+                                Loading cultural heritage...
+                            </p>
+                        </div>
+
+                        <div class="editorial-chapter">
+                            <h3 class="editorial-chapter-title">🗺️ Geography, Topography & Scenic Landmarks</h3>
+                            <p class="editorial-chapter-text" id="detail-geography-landmarks">
+                                Loading geographical terrain context...
+                            </p>
+                        </div>
                     </div>
 
                     <!-- Key Highlights Card -->
@@ -189,11 +271,41 @@
 
                     <!-- Featured Attractions Preview -->
                     <div class="detail-card">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                            <h2 class="detail-card-title" style="margin:0;">Verified Attractions in Scope</h2>
-                            <button type="button" class="tourist-link-arrow" id="btn-quick-view-all-attr" style="background:none; border:none; cursor:pointer;">View All Attractions →</button>
+                        <div class="detail-section-header">
+                            <h2 class="detail-card-title">Verified Attractions in Scope</h2>
+                            <button type="button" class="tourist-link-arrow" id="btn-quick-view-all-attr">View All Attractions →</button>
                         </div>
                         <div class="detail-attr-grid" id="detail-attractions-grid"></div>
+                    </div>
+
+                    <!-- Visual Gallery Preview -->
+                    <div class="detail-card">
+                        <div class="detail-section-header">
+                            <div>
+                                <h2 class="detail-card-title">Visual Gallery & Scenic Perspectives</h2>
+                                <p class="detail-tab-header-desc">Verified landscape, architecture, and panoramic captures.</p>
+                            </div>
+                            <span style="font-size:0.78rem; color:var(--tourist-forest); font-weight:700;">Click photo to open Lightbox ↗</span>
+                        </div>
+                        <div class="detail-gallery-grid" id="detail-gallery-grid"></div>
+                    </div>
+
+                    <!-- Official Destination Advisories Preview Card (Mandatory Requirement) -->
+                    <div class="detail-card detail-advisory-banner">
+                        <div class="detail-section-header">
+                            <div style="display:flex; align-items:center; gap:0.75rem; flex:1; min-width:260px;">
+                                <span style="font-size:1.75rem;">🚨</span>
+                                <div>
+                                    <h3 style="font-size:1.05rem; font-weight:800; color:var(--tourist-text-heading); margin:0 0 0.2rem 0;">Official Destination Advisories & Guidelines</h3>
+                                    <p style="font-size:0.84rem; color:var(--tourist-text-muted); margin:0;" id="overview-advisories-preview-text">
+                                        View official trail advisories, weather warnings, seasonal restrictions, and visitor guidelines published by Destination Managers.
+                                    </p>
+                                </div>
+                            </div>
+                            <a href="destination-advisories.html" id="btn-view-all-advisories" class="tourist-btn-primary" style="font-size:0.85rem; padding:0.55rem 1.15rem; white-space:nowrap;">
+                                View All Advisories & Guidelines <span>→</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
@@ -244,12 +356,12 @@
                     </div>
 
                     <!-- Plan Your Trip Card -->
-                    <div class="detail-card" style="background:linear-gradient(135deg, #EBF3F0 0%, #FAF8F5 100%); border-color:#D2E4DC;">
+                    <div class="detail-card detail-plan-banner">
                         <h3 style="font-size:1.15rem; font-weight:800; color:var(--tourist-forest); margin:0 0 0.5rem 0;">Plan a Visit</h3>
                         <p style="font-size:0.85rem; color:var(--tourist-text-muted); margin:0 0 1rem 0;">
                             Save this destination to your personal wishlist or view authorized local service partners.
                         </p>
-                        <button type="button" class="tourist-btn-primary" id="btn-quick-save-detail" style="width:100%; justify-content:center; box-sizing:border-box;">
+                        <button type="button" class="tourist-btn-primary detail-btn-block" id="btn-quick-save-detail">
                             <span>❤️</span> Save to My Wishlist
                         </button>
                     </div>
@@ -261,37 +373,37 @@
         <!-- ====================================================================
              TAB 2: ATTRACTIONS PANE
              ==================================================================== -->
-        <div class="detail-tab-pane" data-pane="attractions" style="display:none;">
+        <div class="detail-tab-pane" data-pane="attractions">
             <div class="detail-card">
-                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:1.5rem;">
+                <div class="detail-tab-header">
                     <div>
-                        <h2 class="detail-card-title" style="margin:0 0 0.25rem 0;">Associated Attractions</h2>
-                        <p style="font-size:0.88rem; color:var(--tourist-text-muted); margin:0;">
+                        <h2 class="detail-card-title detail-tab-header-title">Associated Attractions</h2>
+                        <p class="detail-tab-header-desc">
                             Verified monuments, viewpoints, and cultural landmarks explicitly associated with this destination.
                         </p>
                     </div>
-                    <span style="font-size:0.75rem; background:var(--tourist-bg-subtle); padding:0.3rem 0.75rem; border-radius:6px; font-weight:700; color:var(--tourist-forest);">
+                    <span class="detail-pill-forest">
                         Verified Destination Manager Catalog
                     </span>
                 </div>
-                <div class="tourist-video-grid" id="tab-attractions-cards"></div>
+                <div class="tourist-attractions-grid" id="tab-attractions-cards"></div>
             </div>
         </div>
 
         <!-- ====================================================================
              TAB 3: DESTINATION VIDEOS (FR-15 MANDATORY INTEGRATION)
              ==================================================================== -->
-        <div class="detail-tab-pane" data-pane="videos" style="display:none;">
+        <div class="detail-tab-pane" data-pane="videos">
             <div class="detail-card">
-                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+                <div class="detail-tab-header">
                     <div>
-                        <h2 class="detail-card-title" style="margin:0 0 0.25rem 0;">Official Destination Information Videos</h2>
-                        <p style="font-size:0.88rem; color:var(--tourist-text-muted); margin:0;">
+                        <h2 class="detail-card-title detail-tab-header-title">Official Destination Information Videos</h2>
+                        <p class="detail-tab-header-desc">
                             Short ~30-second audiovisual orientation guides curated by Destination Managers for visitor preparation.
                         </p>
                     </div>
                     <div style="display:flex; gap:0.5rem; align-items:center;">
-                        <span style="font-size:0.75rem; background:#D1FAE5; color:#065F46; padding:0.25rem 0.65rem; border-radius:9999px; font-weight:700;">
+                        <span class="detail-pill-success">
                             ● Official Published Media
                         </span>
                     </div>
@@ -304,17 +416,17 @@
         <!-- ====================================================================
              TAB 4: STAKEHOLDER EXPERIENCES & SERVICES (MANDATORY INTEGRATION)
              ==================================================================== -->
-        <div class="detail-tab-pane" data-pane="stakeholders" style="display:none;">
+        <div class="detail-tab-pane" data-pane="stakeholders">
             <div class="detail-card">
-                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+                <div class="detail-tab-header">
                     <div>
-                        <h2 class="detail-card-title" style="margin:0 0 0.25rem 0;">Authorized Local Services & Guides</h2>
-                        <p style="font-size:0.88rem; color:var(--tourist-text-muted); margin:0;">
+                        <h2 class="detail-card-title detail-tab-header-title">Authorized Local Services & Guides</h2>
+                        <p class="detail-tab-header-desc">
                             Registered, active tourism stakeholders approved by the regional Destination Manager.
                         </p>
                     </div>
                     <div style="display:flex; gap:0.5rem; align-items:center;">
-                        <span style="font-size:0.75rem; background:var(--tourist-forest-light); color:var(--tourist-forest); padding:0.25rem 0.65rem; border-radius:9999px; font-weight:700;">
+                        <span class="detail-pill-forest">
                             ✓ Verified Destination Partners
                         </span>
                     </div>
@@ -327,12 +439,12 @@
         <!-- ====================================================================
              TAB 5: EVENTS & FESTIVALS
              ==================================================================== -->
-        <div class="detail-tab-pane" data-pane="events" style="display:none;">
+        <div class="detail-tab-pane" data-pane="events">
             <div class="detail-card">
-                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:1.5rem;">
+                <div class="detail-tab-header">
                     <div>
-                        <h2 class="detail-card-title" style="margin:0 0 0.25rem 0;">Scheduled Tourism Events</h2>
-                        <p style="font-size:0.88rem; color:var(--tourist-text-muted); margin:0;">
+                        <h2 class="detail-card-title detail-tab-header-title">Scheduled Tourism Events</h2>
+                        <p class="detail-tab-header-desc">
                             Official cultural festivities, trekking festivals, and ceremonies in this destination.
                         </p>
                     </div>
@@ -342,57 +454,45 @@
         </div>
 
         <!-- ====================================================================
-             TAB 6: VISITOR GUIDELINES & ADVISORIES
+             TAB 4: EXPERIENCES PANE
              ==================================================================== -->
-        <div class="detail-tab-pane" data-pane="guidelines" style="display:none;">
+        <div class="detail-tab-pane" data-pane="experiences">
             <div class="detail-card">
-                <h2 class="detail-card-title">Official Destination Advisories & Guidelines</h2>
-                <p style="font-size:0.88rem; color:var(--tourist-text-muted); margin-bottom:1.5rem;">
-                    Active trail updates, conservation notices, and safety guidelines published by Destination Managers and partner authorities.
-                </p>
-                <div id="detail-advisories-container"></div>
-            </div>
-
-            <!-- Best Time & Seasonal Guidance -->
-            <div class="detail-card">
-                <h3 class="detail-card-title" style="font-size:1.15rem;">Seasonal Climate & Recommended Window</h3>
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:1.25rem; margin-top:1rem;">
-                    <div style="border:1px solid var(--tourist-border); border-radius:12px; padding:1.25rem; background:var(--tourist-bg-surface);">
-                        <span style="font-size:0.75rem; font-weight:800; color:var(--tourist-forest); text-transform:uppercase;">Peak Season</span>
-                        <h4 style="margin:0.25rem 0 0.5rem 0;">October – February</h4>
-                        <p style="font-size:0.82rem; color:var(--tourist-text-muted); margin:0;">Optimal weather, clear mountain skies, and pleasant temperatures for outdoor heritage exploration.</p>
+                <div class="detail-tab-header">
+                    <div>
+                        <h2 class="detail-card-title detail-tab-header-title">Destination Experiences & Outdoor Trails</h2>
+                        <p class="detail-tab-header-desc">
+                            Authenticated trekking ridges, cultural ceremonies, and guided nature trails for this destination.
+                        </p>
                     </div>
-                    <div style="border:1px solid var(--tourist-border); border-radius:12px; padding:1.25rem; background:var(--tourist-bg-surface);">
-                        <span style="font-size:0.75rem; font-weight:800; color:var(--tourist-saffron); text-transform:uppercase;">Monsoon Trails</span>
-                        <h4 style="margin:0.25rem 0 0.5rem 0;">July – September</h4>
-                        <p style="font-size:0.82rem; color:var(--tourist-text-muted); margin:0;">Lush greenery, mist-shrouded ramparts, and seasonal waterfalls. Trekking requires non-slip shoes and certified guide accompaniment.</p>
-                    </div>
+                    <a href="experiences.html" class="tourist-link-arrow">Browse All Experiences →</a>
                 </div>
+                <div class="experiences-full-grid" id="detail-experiences-grid"></div>
             </div>
         </div>
 
         <!-- ====================================================================
              TAB 7: REGIONAL CIRCUIT (NEARBY DESTINATIONS)
              ==================================================================== -->
-        <div class="detail-tab-pane" data-pane="nearby-places" style="display:none;">
+        <div class="detail-tab-pane" data-pane="nearby-places">
             <div class="detail-card">
-                <h2 class="detail-card-title">Other Curated Destinations in Region</h2>
-                <p style="font-size:0.88rem; color:var(--tourist-text-muted); margin-bottom:1.5rem;">
+                <h2 class="detail-card-title detail-tab-header-title">Regional Circuit & Nearby Destinations</h2>
+                <p class="detail-tab-header-desc" style="margin-bottom:1.5rem;">
                     Verified partner destinations within the same administrative state territory for regional circuit planning.
                 </p>
-                <div class="tourist-states-grid" id="detail-nearby-grid" style="grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));"></div>
+                <div class="regional-circuit-grid" id="detail-nearby-grid"></div>
             </div>
         </div>
 
         <!-- ====================================================================
              TAB 8: REVIEWS & FEEDBACK
              ==================================================================== -->
-        <div class="detail-tab-pane" data-pane="reviews" style="display:none;">
+        <div class="detail-tab-pane" data-pane="reviews">
             <div class="detail-card">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+                <div class="detail-tab-header">
                     <div>
-                        <h2 class="detail-card-title" style="margin:0 0 0.25rem 0;">Tourist Feedback & Reviews</h2>
-                        <p style="font-size:0.85rem; color:var(--tourist-text-muted); margin:0;">
+                        <h2 class="detail-card-title detail-tab-header-title">Tourist Feedback & Reviews</h2>
+                        <p class="detail-tab-header-desc">
                             Authentic visitor impressions and feedback reviewed by local Destination Managers.
                         </p>
                     </div>
@@ -401,7 +501,7 @@
                     </button>
                 </div>
 
-                <div id="detail-reviews-container"></div>
+                <div class="tourist-reviews-list" id="detail-reviews-container"></div>
             </div>
         </div>
 
@@ -413,17 +513,17 @@
     
     <!-- 3A. Video Playback Modal (FR-15) -->
     <div class="tourist-modal-overlay" id="touristVideoModal" role="dialog" aria-modal="true" aria-labelledby="video-modal-title">
-        <div class="tourist-modal-card" style="max-width: 760px; padding: 1.5rem;">
+        <div class="tourist-modal-card modal-card-lg">
             <button type="button" class="tourist-modal-close" id="btn-close-video-modal" aria-label="Close Video Player">×</button>
             <div style="margin-bottom: 1rem; padding-right: 2rem;">
-                <h3 id="video-modal-title" style="font-size: 1.25rem; font-weight: 800; color: var(--tourist-text-heading); margin: 0 0 0.25rem 0;">Destination Video</h3>
+                <h3 id="video-modal-title" class="modal-title-lg">Destination Video</h3>
                 <div style="font-size: 0.8rem; color: var(--tourist-text-light);" id="video-modal-publisher">Publisher: Maharashtra Tourism</div>
             </div>
 
             <!-- Responsive 16:9 Player Frame -->
             <div class="tourist-video-player-container" id="video-player-frame-container"></div>
 
-            <p id="video-modal-desc" style="font-size: 0.88rem; color: var(--tourist-text-muted); line-height: 1.6; margin: 0 0 1rem 0;"></p>
+            <p id="video-modal-desc" class="modal-desc-subtle"></p>
             
             <div style="display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--tourist-border); padding-top: 0.75rem; font-size: 0.78rem; color: var(--tourist-text-light);">
                 <span id="video-modal-duration">Duration: ~1:25</span>
@@ -434,19 +534,19 @@
 
     <!-- 3B. Stakeholder Enquiry & Visitor Info Modal -->
     <div class="tourist-modal-overlay" id="touristStakeholderModal" role="dialog" aria-modal="true" aria-labelledby="sh-modal-title">
-        <div class="tourist-modal-card" style="max-width: 540px;">
+        <div class="tourist-modal-card modal-card-sm">
             <button type="button" class="tourist-modal-close" id="btn-close-sh-modal" aria-label="Close Partner Details">×</button>
             <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
                 <span style="font-size:1.5rem;">🤝</span>
-                <span style="font-size:0.75rem; background:#D1FAE5; color:#065F46; padding:0.2rem 0.65rem; border-radius:9999px; font-weight:700;">
+                <span class="detail-pill-success">
                     Destination Manager Approved
                 </span>
             </div>
             
-            <h3 id="sh-modal-title" style="font-size:1.35rem; font-weight:800; color:var(--tourist-text-heading); margin:0 0 0.35rem 0;">Partner Name</h3>
+            <h3 id="sh-modal-title" class="modal-title-lg">Partner Name</h3>
             <div id="sh-modal-category" style="font-size:0.82rem; color:var(--tourist-forest); font-weight:700; margin-bottom:1rem;">Category</div>
             
-            <p id="sh-modal-desc" style="font-size:0.88rem; color:var(--tourist-text-muted); line-height:1.6; margin:0 0 1.25rem 0;"></p>
+            <p id="sh-modal-desc" class="modal-desc-subtle"></p>
 
             <div style="background:var(--tourist-bg-subtle); border-radius:10px; padding:1.25rem; display:flex; flex-direction:column; gap:0.65rem; font-size:0.85rem; margin-bottom:1.5rem;">
                 <div><strong>📍 Base Office / Hub:</strong> <span id="sh-modal-address">—</span></div>
@@ -459,16 +559,16 @@
                 ℹ️ <strong>Scope Notice:</strong> YatraSetu is an official destination management platform. Commercial arrangements and bookings are handled directly with authorized partners.
             </div>
 
-            <button type="button" class="tourist-btn-primary" id="btn-close-sh-modal-footer" style="width:100%; justify-content:center;">Close Partner Overview</button>
+            <button type="button" class="tourist-btn-primary detail-btn-block" id="btn-close-sh-modal-footer">Close Partner Overview</button>
         </div>
     </div>
 
     <!-- 3C. Tourist Feedback Submission Modal -->
     <div class="tourist-modal-overlay" id="touristFeedbackModal" role="dialog" aria-modal="true" aria-labelledby="fb-modal-title">
-        <div class="tourist-modal-card" style="max-width: 520px;">
+        <div class="tourist-modal-card modal-card-xs">
             <button type="button" class="tourist-modal-close" id="btn-close-fb-modal" aria-label="Close Feedback Dialog">×</button>
-            <h3 id="fb-modal-title" style="font-size:1.35rem; font-weight:800; color:var(--tourist-text-heading); margin:0 0 0.35rem 0;">Submit Destination Feedback</h3>
-            <p style="font-size:0.85rem; color:var(--tourist-text-muted); margin:0 0 1.25rem 0;">
+            <h3 id="fb-modal-title" class="modal-title-lg">Submit Destination Feedback</h3>
+            <p class="modal-desc-subtle">
                 Share your experience to help Destination Managers improve trail safety, facilities, and cultural interpretation.
             </p>
 
@@ -503,11 +603,172 @@
                     <textarea id="fb-comments" class="tourist-form-textarea" rows="4" placeholder="Share specific details about trail conditions, guides, cleanliness, signage, or viewpoints (min 10 characters)..." required></textarea>
                 </div>
 
-                <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1rem;">
+                <div class="modal-actions-right">
                     <button type="button" class="tourist-btn-outline" id="btn-cancel-fb-modal">Cancel</button>
                     <button type="submit" class="tourist-btn-primary">Submit to Destination Manager</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- 3D. Fullscreen Visual Lightbox Modal -->
+    <div class="tourist-lightbox-overlay" id="touristLightboxModal" role="dialog" aria-modal="true" aria-label="Photo Lightbox">
+        <div class="lightbox-topbar">
+            <div class="lightbox-title-wrap">
+                <span class="lightbox-title" id="lightbox-dest-title">Destination</span>
+                <span class="lightbox-counter" id="lightbox-counter">Photo 1 of 6</span>
+            </div>
+            <button type="button" class="lightbox-close-btn" id="btn-close-lightbox" aria-label="Close Lightbox">✕</button>
+        </div>
+
+        <div class="lightbox-stage">
+            <button type="button" class="lightbox-nav-btn lightbox-nav-prev" id="btn-lightbox-prev" aria-label="Previous Photo">‹</button>
+            <div class="lightbox-main-img-wrap">
+                <img src="" alt="High-Resolution Photograph" class="lightbox-main-img" id="lightbox-main-img">
+            </div>
+            <button type="button" class="lightbox-nav-btn lightbox-nav-next" id="btn-lightbox-next" aria-label="Next Photo">›</button>
+        </div>
+
+        <div class="lightbox-bottom">
+            <div class="lightbox-caption-box">
+                <div class="lightbox-caption-text" id="lightbox-caption">Photograph View</div>
+                <div class="lightbox-subcaption" id="lightbox-subcaption">View Angle: Scenic • Verified High-Resolution Imagery</div>
+            </div>
+            <div class="lightbox-thumbs-strip" id="lightbox-thumbs-strip"></div>
+        </div>
+    </div>
+
+    <!-- 3E. Verified Attraction Detail Modal -->
+    <div class="tourist-modal-overlay" id="touristAttractionModal" role="dialog" aria-modal="true" aria-labelledby="attr-modal-title">
+        <div class="tourist-modal-card modal-card-md">
+            <button type="button" class="tourist-modal-close" id="btn-close-attr-modal" aria-label="Close Attraction Details">×</button>
+            
+            <img src="" alt="Attraction" id="attr-modal-img" class="attr-modal-header-img">
+
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem; flex-wrap:wrap;">
+                <span class="detail-pill-forest" id="attr-modal-category">
+                    Category
+                </span>
+                <span class="detail-pill-success" id="attr-modal-status">
+                    ✓ Verified Attraction
+                </span>
+                <span style="color:#D97706; font-weight:800; font-size:0.85rem;" id="attr-modal-rating">★ 4.8</span>
+            </div>
+
+            <h3 id="attr-modal-title" class="modal-title-lg">Attraction Name</h3>
+            <p id="attr-modal-desc" class="modal-desc-subtle"></p>
+
+            <div class="attr-modal-meta-grid">
+                <div>
+                    <strong>🕒 Operating Hours & Days:</strong>
+                    <span id="attr-modal-timings">06:00 – 18:00 (Open All Days)</span>
+                </div>
+                <div>
+                    <strong>⏱️ Recommended Duration:</strong>
+                    <span id="attr-modal-duration">1.5 – 2.5 Hours</span>
+                </div>
+                <div>
+                    <strong>📸 Best Time for Visit:</strong>
+                    <span id="attr-modal-best-time">Early Morning / Sunset</span>
+                </div>
+                <div>
+                    <strong>🧭 Visitor & Entry Guidelines:</strong>
+                    <span id="attr-modal-guidelines">Non-slip footwear, local guide recommended for steep stairs</span>
+                </div>
+            </div>
+
+            <button type="button" class="tourist-btn-primary detail-btn-block" id="btn-close-attr-modal-footer">Close Attraction Details</button>
+        </div>
+    </div>
+
+    <!-- 3F. Scheduled Tourism Event Detail Modal -->
+    <div class="tourist-modal-overlay" id="touristEventModal" role="dialog" aria-modal="true" aria-labelledby="event-modal-title">
+        <div class="tourist-modal-card modal-card-md">
+            <button type="button" class="tourist-modal-close" id="btn-close-event-modal" aria-label="Close Event Details">×</button>
+            
+            <img src="" alt="Scheduled Event" id="event-modal-img" class="event-modal-header-img">
+
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem; flex-wrap:wrap;">
+                <span class="detail-pill-saffron" id="event-modal-date">
+                    📅 Date
+                </span>
+                <span class="event-status-pill active" id="event-modal-status">
+                    Open
+                </span>
+            </div>
+
+            <h3 id="event-modal-title" class="modal-title-lg">Event Title</h3>
+            <div id="event-modal-loc" style="font-size:0.85rem; color:var(--tourist-text-light); margin-bottom:1rem;">📍 Location</div>
+            
+            <p id="event-modal-desc" class="modal-desc-subtle"></p>
+
+            <div class="exp-full-meta-grid" style="margin-bottom:1.25rem;">
+                <div>
+                    <strong>🕒 Timings & Schedule:</strong>
+                    <span id="event-modal-timing">Full Day Program</span>
+                </div>
+                <div>
+                    <strong>🏛️ Organizing Body:</strong>
+                    <span id="event-modal-organizer">Tourism Department & Local Council</span>
+                </div>
+                <div>
+                    <strong>🎟️ Entry / Participation:</strong>
+                    <span id="event-modal-entry">Open to All Verified Visitors</span>
+                </div>
+                <div>
+                    <strong>📋 Visitor Advisory:</strong>
+                    <span id="event-modal-guidelines">Standard heritage etiquette applies</span>
+                </div>
+            </div>
+
+            <button type="button" class="tourist-btn-primary detail-btn-block" id="btn-close-event-modal-footer">Close Event Overview</button>
+        </div>
+    </div>
+
+    <!-- 3G. Verified Experience Detail Modal -->
+    <div class="tourist-modal-overlay" id="touristExperienceModal" role="dialog" aria-modal="true" aria-labelledby="exp-modal-title">
+        <div class="tourist-modal-card" style="max-width: 680px;">
+            <button type="button" class="tourist-modal-close" id="btn-close-exp-modal" aria-label="Close Experience Details">×</button>
+            <img id="exp-modal-img" src="" alt="Experience Photo" class="event-modal-header-img">
+            <div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:0.5rem;">
+                <span class="exp-full-badge" id="exp-modal-category">Trekking</span>
+                <span style="font-size:0.78rem; color:var(--tourist-text-light); font-weight:700;" id="exp-modal-state">Maharashtra</span>
+            </div>
+            <h3 id="exp-modal-title" style="font-size:1.4rem; font-weight:800; color:var(--tourist-text-heading); margin:0 0 0.5rem 0;">Experience Title</h3>
+            <div id="exp-modal-loc" style="font-size:0.85rem; color:var(--tourist-text-light); margin-bottom:1rem;">📍 Location</div>
+            
+            <p id="exp-modal-desc" style="font-size:0.9rem; color:var(--tourist-text-muted); line-height:1.65; margin:0 0 1.25rem 0;"></p>
+
+            <div class="exp-full-meta-grid" id="exp-modal-meta-grid">
+                <div>
+                    <strong>⏱️ Duration:</strong>
+                    <span id="exp-modal-duration">4 - 5 Hours</span>
+                </div>
+                <div>
+                    <strong>💪 Difficulty Level:</strong>
+                    <span id="exp-modal-difficulty">Moderate</span>
+                </div>
+                <div>
+                    <strong>☀️ Best Season:</strong>
+                    <span id="exp-modal-season">Oct – Mar</span>
+                </div>
+                <div>
+                    <strong>🧭 Guide Requirement:</strong>
+                    <span id="exp-modal-guide">Certified Guide Recommended</span>
+                </div>
+            </div>
+
+            <div style="background:var(--tourist-bg-subtle); border-radius:8px; padding:1rem; font-size:0.85rem; color:var(--tourist-text-muted); margin-bottom:1.5rem;">
+                <strong style="color:var(--tourist-text-heading); display:block; margin-bottom:0.35rem;">🎒 Essential Gear & Advice:</strong>
+                <span id="exp-modal-gear">Sturdy trekking boots, 2L drinking water, windcheater in monsoon, and rain cover for electronics.</span>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+                <a href="#" id="exp-modal-dest-link" class="tourist-btn-primary" style="flex:1; justify-content:center;">
+                    <span>📍</span> View Full Destination Details <span>→</span>
+                </a>
+                <button type="button" class="tourist-btn-outline" id="btn-close-exp-modal-footer">Close</button>
+            </div>
         </div>
     </div>
 
