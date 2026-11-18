@@ -543,3 +543,91 @@ This file records decisions that should not be silently reversed.
 
 
 
+
+---
+
+## 2026-11-18 — Backend Foundation: FastAPI, SQLAlchemy 2.0 & PostgreSQL Schema (Phase 1)
+
+**Context:** Implementation of the initial backend foundation and PostgreSQL database architecture for YatraSetu, preserving frozen frontend interfaces, verified schemas, and security specifications.
+
+**Key Decisions & Architectural Enforcements:**
+1. **Technology Stack Alignment:**
+   - Framework: FastAPI with REST APIs and CORS support.
+   - ORM: SQLAlchemy 2.0 with type-safe `Uuid(as_uuid=True)` and cross-dialect `JSON().with_variant(JSONB, 'postgresql')`.
+   - Database: PostgreSQL (Neon target) with connection pooling (`pool_pre_ping=True`, `pool_recycle=1800`), falling back to in-memory SQLite for offline automated unit testing.
+   - Migrations: Alembic with offline static SQL generation and live Neon execution support.
+   - Seeding: Dedicated reference data seeder (`app.seeds`) populating ONLY official reference roles (4) and states (8) without inserting synthetic users, fake reviews, or dummy tourism records.
+2. **Schema & Model Implementation (27 Relational Tables):**
+   - Identity: `roles`, `users`, `user_refresh_tokens`, `manager_assignments`.
+   - Destination Ecosystem: `states`, `destinations`, `attractions`, `experiences`, `events`, `curated_circuits`, `curated_circuit_items`, `destination_videos`, `destination_advisories`, `travel_stories`.
+   - Stakeholder Ecosystem: `stakeholder_services`, `stakeholder_media`, `stakeholder_posts`, `stakeholder_messages`, `stakeholder_reviews`.
+   - Tourist Functionality: `trip_plans`, `trip_plan_items`, `user_favorites`, `destination_reviews`.
+   - Governance & Analytics: `visitor_statistics`, `audit_logs`, `storage_object_registry`, `media_deletion_outbox`.
+3. **Security Invariants Enforced:**
+   - Strict UUID primary keys across entities.
+   - Hierarchical composite foreign keys (`[destination_id, state_id] -> destinations[id, state_id]`, `[user_id, role_id] -> users[id, role_id]`).
+   - Manager jurisdiction modeling (State scope when `destination_id IS NULL`; Destination scope when assigned).
+   - Storage coordinate triads (nullable provider/bucket/key for legacy records; full triad required for verified objects).
+   - Dedicated health and database connectivity diagnostics (`/health`, `/api/v1/health`, `/api/v1/health/db`).
+4. **Verification & Testing:**
+   - 12 automated unit and integration tests executed via pytest, verifying model relationships, constraints, cascade deletions, unique indexes, and API startup with 100% pass rate in 0.19s.
+   - Alembic offline SQL generation verified (`alembic upgrade head --sql`), generating complete transactional DDL.
+
+
+---
+
+## 2026-11-18 — Phase 1: Authentication Integration (Frontend-Backend)
+
+**Context:** Connecting existing frontend login and registration interfaces to the completed FastAPI authentication endpoints.
+
+**Key Decisions & Architectural Enforcements:**
+1. **Shared Vanilla JavaScript API Client (`frontend/js/api.js`):**
+   - Created a dependency-free, native JavaScript singleton `window.YatraSetuApi`.
+   - Transparent 401 handling: on HTTP 401, attempts single refresh token rotation via `POST /api/v1/auth/refresh`. If successful, retries original request once with new Bearer token; if failed, terminates session cleanly without looping.
+   - Centralized session storage key mapping (`yatrasetu_access_token`, `yatrasetu_refresh_token`, `yatrasetu_role`, `yatrasetu_manager_scope`, etc.).
+2. **Login Integration (`frontend/js/auth.js`):**
+   - `initLoginForm` sends `{ email, password }` only. The client-selected role is never trusted; the role is authoritatively determined from the database `user.role` returned by the backend.
+   - Role-based navigation to `${role}/dashboard.html` is strictly preserved.
+3. **Registration Integration (`frontend/js/auth.js`):**
+   - Public registration is strictly limited to `tourist` and `stakeholder`. Public registration attempts as `manager` or `admin` are rejected with descriptive governance notices.
+   - Frontend password complexity validation strictly mirrors backend `PasswordSecurity` rules (min 8 chars, uppercase, lowercase, digit, special character).
+   - Removed client-side mock writes to `yatrasetu_admin_users` and `yatrasetu_audit_trail`.
+4. **Logout Synchronization:**
+   - Topbar and sidebar logout buttons in `dashboard.js`, `manager-core.js`, and `tourist.js` call `window.YatraSetuApi.logout()`, revoking the refresh token in the backend database before clearing local session storage.
+5. **Verification & Testing:**
+   - 42 pytest tests passing (32 passed, 10 skipped PostgreSQL integration tests).
+   - Node.js API client suite (8 tests) and password validation suite (7 tests) passing.
+   - 9 live HTTP server integration tests executed against running FastAPI instance on `localhost:8001` passing with 100% success.
+
+---
+
+## 2026-11-18 — Phase 2: Public Catalogue API Integration (Frontend-Backend)
+
+**Context:** Implementation of strictly read-only public catalogue backend APIs and connecting them to the existing Vanilla JavaScript frontend.
+
+**Key Decisions & Architectural Enforcements:**
+1. **Public Catalogue Architecture & Endpoints:**
+   - Implemented 10 strictly read-only REST endpoints under `backend/app/api/v1/endpoints/catalogue.py`:
+     - `GET /api/v1/states`: Fetch supported states (ordered by name).
+     - `GET /api/v1/states/{state_id}`: Fetch state detail by ID.
+     - `GET /api/v1/destinations`: Paginated destination list with `state_id`, `category`, and `search` filters.
+     - `GET /api/v1/destinations/{destination_id}`: Destination detail by ID.
+     - `GET /api/v1/attractions`: Paginated attractions list with `destination_id` and `category` filters.
+     - `GET /api/v1/experiences`: Paginated experiences list with `destination_id`, `category`, and `difficulty` filters.
+     - `GET /api/v1/experiences/{experience_id}`: Experience detail by ID.
+     - `GET /api/v1/events`: Paginated events list with `destination_id` and `status` filters.
+     - `GET /api/v1/circuits`: Paginated curated multi-day regional circuits with `state_id` filter and embedded stops.
+     - `GET /api/v1/circuits/{circuit_id}`: Curated circuit detail by ID.
+   - Mutation guard: Zero POST, PUT, PATCH, or DELETE methods exposed on catalogue routes; mutations return HTTP 405 Method Not Allowed.
+   - Pagination: Generic `PaginatedResponse[T]` envelope containing `items`, `total`, `limit`, and `offset`.
+2. **Frontend API Client Integration (`frontend/js/api.js`):**
+   - Added 10 public catalogue client methods (`getStates`, `getState`, `getDestinations`, `getDestination`, `getAttractions`, `getExperiences`, `getExperience`, `getEvents`, `getCircuits`, `getCircuit`) with query parameter serialization.
+   - Script inclusion: `<script src="../js/api.js"></script>` added to all 8 tourist workspace pages before data and controller scripts.
+3. **Resilient Data Resolution & Graceful Fallback (`frontend/js/tourist.js`):**
+   - Asynchronous `loadCatalogueFromApi()` loads live records from REST endpoints.
+   - When API returns records (`items.length > 0`), the frontend updates with live database data.
+   - When the database returns an empty set (`items: []`, as Neon DB currently has 0 destinations) or is temporarily offline, the frontend falls back gracefully to `window.YatraSetuManagerData` and local catalogs. Zero broken layouts, zero missing cards, and zero JavaScript exceptions.
+4. **Verification & Testing:**
+   - 51 backend tests: 41 passed, 10 skipped in 1.30s (9 dedicated catalogue tests in `backend/tests/test_catalogue.py`).
+   - Live Neon PostgreSQL verification: confirmed 8 states returned from live Neon; empty envelopes returned for empty tables; POST returns 405 Method Not Allowed.
+   - Headless Chrome CDP browser tests across 4 tourist pages (`destinations.html`, `experiences.html`, `destination-detail.html`, `dashboard.html`): 100% passed with 0 console errors.

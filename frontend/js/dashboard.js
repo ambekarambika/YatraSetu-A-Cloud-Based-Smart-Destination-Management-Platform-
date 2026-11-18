@@ -89,10 +89,14 @@ function initAppSidebar() {
     // Clear session when clicking sidebar footer logout button
     const sidebarLogoutBtns = document.querySelectorAll('.btn-sidebar-logout');
     sidebarLogoutBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            sessionStorage.removeItem('yatrasetu_role');
-            sessionStorage.removeItem('yatrasetu_email');
-            sessionStorage.removeItem('yatrasetu_name');
+        btn.addEventListener('click', async () => {
+            if (window.YatraSetuApi && typeof window.YatraSetuApi.logout === 'function') {
+                await window.YatraSetuApi.logout();
+            } else {
+                sessionStorage.removeItem('yatrasetu_role');
+                sessionStorage.removeItem('yatrasetu_email');
+                sessionStorage.removeItem('yatrasetu_name');
+            }
         });
     });
 }
@@ -273,11 +277,15 @@ function initTopbarUserDropdown(topbar, userName, initials, roleLabel) {
 
         const logoutBtn = userMenuPanel.querySelector('#topbar-btn-logout');
         if (logoutBtn) {
-            logoutBtn.onclick = (e) => {
+            logoutBtn.onclick = async (e) => {
                 e.stopPropagation();
-                sessionStorage.removeItem('yatrasetu_role');
-                sessionStorage.removeItem('yatrasetu_email');
-                sessionStorage.removeItem('yatrasetu_name');
+                if (window.YatraSetuApi && typeof window.YatraSetuApi.logout === 'function') {
+                    await window.YatraSetuApi.logout();
+                } else {
+                    sessionStorage.removeItem('yatrasetu_role');
+                    sessionStorage.removeItem('yatrasetu_email');
+                    sessionStorage.removeItem('yatrasetu_name');
+                }
                 window.location.href = loginPath;
             };
         }

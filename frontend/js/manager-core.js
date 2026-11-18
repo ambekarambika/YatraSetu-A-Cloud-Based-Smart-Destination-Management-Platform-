@@ -1136,9 +1136,13 @@ function initTopbarSharedFeatures() {
 
             const logoutBtn = userMenuPanel.querySelector('#topbar-btn-logout');
             if (logoutBtn) {
-                logoutBtn.onclick = (e) => {
+                logoutBtn.onclick = async (e) => {
                     e.stopPropagation();
-                    sessionStorage.clear();
+                    if (window.YatraSetuApi && typeof window.YatraSetuApi.logout === 'function') {
+                        await window.YatraSetuApi.logout();
+                    } else {
+                        sessionStorage.clear();
+                    }
                     window.location.href = '../login.html';
                 };
             }

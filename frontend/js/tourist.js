@@ -540,7 +540,7 @@
             difficulty: 'Easy - Moderate',
             season: 'Oct – Mar',
             guide: 'Archaeological Guide Available',
-            img: '../assets/images/dest-lonavala.jpg',
+            img: '../assets/images/thumb-lonavala.jpg',
             desc: 'Discover 2,200-year-old Buddhist Chaitya halls, monolithic stone stupas, and ancient Ashokan inscriptions carved into the Western Ghats cliffs.',
             gear: 'Comfortable footwear for stone stairs, sun protection, and camera.'
         },
@@ -572,7 +572,7 @@
             difficulty: 'Leisure / Easy',
             season: 'Sep – Mar',
             guide: 'Licensed Captain & Crew',
-            img: '../assets/images/dest-alleppey.jpg',
+            img: '../assets/images/hero-kerala.jpg',
             desc: 'Cruise along the tranquil palm-shaded canals of Vembanad Lake on a traditional coir-tied Kettuvallam, accompanied by authentic freshly cooked Kuttanad meals.',
             gear: 'Sun hat, sunglasses, cotton attire, and mosquito repellent.'
         },
@@ -1248,14 +1248,31 @@
         },
 
         getDestinationExperiences(destId) {
-            const matches = EXPERIENCES_DATA.filter(e => e.destination_id === destId);
+            const expPool = (this.apiExperiences && this.apiExperiences.length > 0)
+                ? this.apiExperiences.map(e => ({
+                    id: e.id,
+                    title: e.title,
+                    state_id: e.state_id || 'maharashtra',
+                    destination_id: e.destination_id,
+                    category: e.category,
+                    category_label: e.category,
+                    difficulty: e.difficulty,
+                    duration: e.duration,
+                    season: e.season,
+                    guide: e.guide_requirement || 'Local Guide Recommended',
+                    location: e.location || (e.destination_name ? `${e.destination_name}, India` : 'India'),
+                    desc: e.description,
+                    img: e.img || '../assets/images/thumb-rajgad.jpg'
+                }))
+                : EXPERIENCES_DATA;
+            const matches = expPool.filter(e => e.destination_id === destId);
             if (matches.length > 0) return matches;
             const dest = this.destinations.find(d => d.id === destId);
             if (dest) {
-                const stateMatches = EXPERIENCES_DATA.filter(e => e.state_id === dest.state_id);
+                const stateMatches = expPool.filter(e => e.state_id === dest.state_id);
                 if (stateMatches.length > 0) return stateMatches;
             }
-            return EXPERIENCES_DATA.slice(0, 3);
+            return expPool.slice(0, 3);
         },
 
         openEventModal(ev) {
@@ -1366,7 +1383,31 @@
         renderCuratedItinerary(circuitKey) {
             const container = document.getElementById('itinerary-days-display');
             if (!container) return;
-            const circuit = CURATED_ITINERARIES[circuitKey] || CURATED_ITINERARIES.mh;
+
+            let circuit = null;
+            if (this.apiCircuits && this.apiCircuits.length > 0) {
+                const matchedApiCircuit = this.apiCircuits.find(c => c.id === circuitKey || c.state_id === circuitKey);
+                if (matchedApiCircuit && matchedApiCircuit.stops && matchedApiCircuit.stops.length > 0) {
+                    circuit = {
+                        title: matchedApiCircuit.title,
+                        duration: matchedApiCircuit.duration || 'Curated Circuit',
+                        theme: matchedApiCircuit.theme || 'Heritage & Nature',
+                        days: matchedApiCircuit.stops.map((s, idx) => ({
+                            day: s.day_number || (idx + 1),
+                            dest: s.destination_name || s.destination_id,
+                            destId: s.destination_id,
+                            loc: s.destination_name || 'India',
+                            time: s.time_schedule || '08:00 AM – 05:00 PM',
+                            highlight: s.highlight || 'Featured Stop',
+                            desc: s.description || 'Guided circuit exploration stop.'
+                        }))
+                    };
+                }
+            }
+
+            if (!circuit) {
+                circuit = CURATED_ITINERARIES[circuitKey] || CURATED_ITINERARIES.mh;
+            }
 
             container.innerHTML = `
                 <div style="background:var(--tourist-bg-surface); border:1px solid var(--tourist-border); border-radius:10px; padding:1.25rem 1.5rem; margin-bottom:1.25rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
@@ -1529,6 +1570,9 @@
             } else if (path.includes('dashboard.html')) {
                 this.initTouristDashboard();
             }
+
+            // Asynchronously synchronize live catalogue data from REST API
+            this.loadCatalogueFromApi();
         },
 
         /**
@@ -1571,16 +1615,122 @@
         },
 
         /**
+         * Asynchronously synchronize live catalogue data from REST API
+         */
+        async loadCatalogueFromApi() {
+            if (typeof window === 'undefined' || !window.YatraSetuApi) return;
+            try {
+                // 1. Fetch live states
+                const statesData = await window.YatraSetuApi.getStates().catch(() => null);
+                if (statesData && Array.isArray(statesData)) {
+                    this.apiStates = statesData;
+                }
+
+                // 2. Fetch live destinations
+                const destData = await window.YatraSetuApi.getDestinations({ limit: 100 }).catch(() => null);
+                if (destData && Array.isArray(destData.items) && destData.items.length > 0) {
+                    this.isUsingLiveDestinations = true;
+                    this.enrichDestinations(destData.items, this.apiStates);
+
+                    // Re-render current page with live database data
+                    const path = window.location.pathname;
+                    if (path.includes('destinations.html')) {
+                        this.renderFilteredDestinations();
+                    } else if (path.includes('destination-detail.html')) {
+                        this.initDestinationDetailPage();
+                    }
+                }
+
+                // 3. Fetch live attractions
+                const attrData = await window.YatraSetuApi.getAttractions({ limit: 100 }).catch(() => null);
+                if (attrData && Array.isArray(attrData.items) && attrData.items.length > 0) {
+                    this.apiAttractions = attrData.items;
+                    if (window.location.pathname.includes('destination-detail.html')) {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const destId = urlParams.get('id') || 'raigad-fort';
+                        const attrContainer = document.getElementById('detail-attractions-grid');
+                        if (attrContainer) {
+                            const attractions = this.getDestinationAttractions(destId);
+                            if (attractions.length > 0) {
+                                attrContainer.innerHTML = attractions.map(attr => `
+                                    <div class="tourist-attraction-card">
+                                        <div class="attraction-img" style="background-image: url('${attr.img || '../assets/images/thumb-rajgad.jpg'}');">
+                                            <span class="attraction-badge">${attr.category || 'Point of Interest'}</span>
+                                        </div>
+                                        <div class="attraction-content">
+                                            <h4 class="attraction-name">${attr.name}</h4>
+                                            <p class="attraction-desc">${attr.description || ''}</p>
+                                            <div class="attraction-meta-row">
+                                                <span>⏱️ ${attr.timings || 'Sunrise – Sunset'}</span>
+                                                <span>🎟️ ${attr.entry_fee || 'Free Entry'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('');
+                            }
+                        }
+                    }
+                }
+
+                // 4. Fetch live experiences
+                const expData = await window.YatraSetuApi.getExperiences({ limit: 100 }).catch(() => null);
+                if (expData && Array.isArray(expData.items) && expData.items.length > 0) {
+                    this.apiExperiences = expData.items;
+                    if (window.location.pathname.includes('experiences.html')) {
+                        this.initExperiencesPage();
+                    }
+                }
+
+                // 5. Fetch live events
+                const evtData = await window.YatraSetuApi.getEvents({ limit: 100 }).catch(() => null);
+                if (evtData && Array.isArray(evtData.items) && evtData.items.length > 0) {
+                    this.apiEvents = evtData.items;
+                    if (window.location.pathname.includes('destination-detail.html')) {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const destId = urlParams.get('id') || 'raigad-fort';
+                        const eventsContainer = document.getElementById('detail-events-grid');
+                        if (eventsContainer) {
+                            const events = this.getDestinationEvents(destId);
+                            if (events.length > 0) {
+                                eventsContainer.innerHTML = events.map(ev => `
+                                    <div class="tourist-event-card">
+                                        <div class="event-card-date-badge">
+                                            <div class="event-date-month">${new Date(ev.start_date).toLocaleString('default', { month: 'short' }).toUpperCase()}</div>
+                                            <div class="event-date-day">${new Date(ev.start_date).getDate()}</div>
+                                        </div>
+                                        <div class="event-card-body">
+                                            <h4 class="event-card-title">${ev.title}</h4>
+                                            <p class="event-card-desc">${ev.description || ''}</p>
+                                            <div class="event-card-status">Status: <strong>${ev.status}</strong></div>
+                                        </div>
+                                    </div>
+                                `).join('');
+                            }
+                        }
+                    }
+                }
+
+                // 6. Fetch live circuits
+                const circuitData = await window.YatraSetuApi.getCircuits({ limit: 100 }).catch(() => null);
+                if (circuitData && Array.isArray(circuitData.items) && circuitData.items.length > 0) {
+                    this.apiCircuits = circuitData.items;
+                }
+            } catch (err) {
+                console.warn('[YatraSetu Tourist] Live catalogue API sync note:', err);
+            }
+        },
+
+        /**
          * 1. Enrich Destinations Single Source of Truth
          */
-        enrichDestinations() {
-            const rawDestinations = (window.YatraSetuManagerData && window.YatraSetuManagerData.destinations) || [];
-            const states = (window.YatraSetuManagerData && window.YatraSetuManagerData.states) || [];
+        enrichDestinations(customRawDestinations = null, customStates = null) {
+            const rawDestinations = customRawDestinations || (window.YatraSetuManagerData && window.YatraSetuManagerData.destinations) || [];
+            const states = customStates || (this.apiStates && this.apiStates.length > 0 ? this.apiStates : (window.YatraSetuManagerData && window.YatraSetuManagerData.states)) || [];
 
             this.destinations = rawDestinations.map(d => {
                 const editorial = DESTINATION_EDITORIAL[d.id] || {};
-                const coords = DESTINATION_COORDINATES[d.id] || null;
-                const stateObj = states.find(s => s.id === d.state_id) || { name: d.state_id || 'India' };
+                const coords = DESTINATION_COORDINATES[d.id] || (d.latitude && d.longitude ? { lat: d.latitude, lng: d.longitude } : null);
+                const stateObj = states.find(s => s.id === d.state_id) || { name: d.state_name || d.state_id || 'India' };
                 const catLower = (d.category || '').toLowerCase();
 
                 // Compute tags
@@ -1630,7 +1780,7 @@
                     img: this.resolveDestinationImage(d),
                     location: editorial.location || `${d.name}, ${stateObj.name}`,
                     subtitle: editorial.subtitle || `${d.category} in ${stateObj.name}`,
-                    description: editorial.description || `Discover ${d.name}, a prominent ${d.category} in ${stateObj.name}. Integrated into YatraSetu's destination network for visitor orientation and travel guidance.`,
+                    description: d.description || editorial.description || `Discover ${d.name}, a prominent ${d.category} in ${stateObj.name}. Integrated into YatraSetu's destination network for visitor orientation and travel guidance.`,
                     highlights: editorial.highlights || [
                         `Prominent ${d.category} in ${stateObj.name}`,
                         `Curated travel route with verified local attractions`,
@@ -1831,10 +1981,14 @@
 
                 const logoutBtn = userDropdownEl.querySelector('#tourist-logout-btn');
                 if (logoutBtn) {
-                    logoutBtn.onclick = () => {
-                        sessionStorage.removeItem('yatrasetu_role');
-                        sessionStorage.removeItem('yatrasetu_email');
-                        sessionStorage.removeItem('yatrasetu_name');
+                    logoutBtn.onclick = async () => {
+                        if (window.YatraSetuApi && typeof window.YatraSetuApi.logout === 'function') {
+                            await window.YatraSetuApi.logout();
+                        } else {
+                            sessionStorage.removeItem('yatrasetu_role');
+                            sessionStorage.removeItem('yatrasetu_email');
+                            sessionStorage.removeItem('yatrasetu_name');
+                        }
                         window.location.href = '../login.html';
                     };
                 }
@@ -2040,8 +2194,26 @@
          * Dedicated Experiences Page Controller
          */
         initExperiencesPage() {
+            const expList = (this.apiExperiences && this.apiExperiences.length > 0)
+                ? this.apiExperiences.map(e => ({
+                    id: e.id,
+                    title: e.title,
+                    state_id: e.state_id || 'maharashtra',
+                    destination_id: e.destination_id,
+                    category: e.category,
+                    category_label: e.category,
+                    difficulty: e.difficulty,
+                    duration: e.duration,
+                    season: e.season,
+                    guide: e.guide_requirement || 'Local Guide Required',
+                    location: e.location || (e.destination_name ? `${e.destination_name}, India` : 'India'),
+                    desc: e.description,
+                    img: e.img || '../assets/images/thumb-rajgad.jpg'
+                }))
+                : EXPERIENCES_DATA;
+
             const countAllEl = document.getElementById('count-exp-all');
-            if (countAllEl) countAllEl.textContent = EXPERIENCES_DATA.length;
+            if (countAllEl) countAllEl.textContent = expList.length;
 
             let activeCategory = 'all';
             let activeState = 'all';
@@ -2050,7 +2222,7 @@
             const grid = document.getElementById('experiences-grid');
             const renderExperiences = () => {
                 if (!grid) return;
-                const filtered = EXPERIENCES_DATA.filter(exp => {
+                const filtered = expList.filter(exp => {
                     const matchCat = activeCategory === 'all' || exp.category === activeCategory;
                     const matchState = activeState === 'all' || exp.state_id === activeState;
                     const qLower = searchQuery.toLowerCase();
@@ -2087,7 +2259,7 @@
                     grid.querySelectorAll('.btn-view-exp').forEach(btn => {
                         btn.onclick = () => {
                             const expId = btn.getAttribute('data-exp-id');
-                            const exp = EXPERIENCES_DATA.find(e => e.id === expId);
+                            const exp = expList.find(e => e.id === expId);
                             if (exp) this.openExperienceModal(exp);
                         };
                     });
@@ -2819,7 +2991,9 @@
         },
 
         getDestinationAttractions(destId) {
-            const attractions = (window.YatraSetuManagerData && window.YatraSetuManagerData.attractions) || [];
+            let attractions = (this.apiAttractions && this.apiAttractions.length > 0)
+                ? this.apiAttractions
+                : ((window.YatraSetuManagerData && window.YatraSetuManagerData.attractions) || []);
             // Strict relationship: only attractions explicitly tagged with this destination_id
             const matched = attractions.filter(a => a.destination_id === destId);
             const dest = (this.destinations || []).find(d => d.id === destId);
@@ -2907,7 +3081,9 @@
         },
 
         getDestinationEvents(destId) {
-            const events = (window.YatraSetuManagerData && window.YatraSetuManagerData.events) || [];
+            const events = (this.apiEvents && this.apiEvents.length > 0)
+                ? this.apiEvents
+                : ((window.YatraSetuManagerData && window.YatraSetuManagerData.events) || []);
             return events.filter(e => e.destination_id === destId);
         },
 

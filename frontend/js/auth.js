@@ -128,16 +128,11 @@ function initLoginForm() {
     const form = document.getElementById('login-form');
     if (!form) return;
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value.trim();
-        let role = document.getElementById('selected-role') ? document.getElementById('selected-role').value : 'tourist';
-
-        // Auto-detect Admin role if admin governance email is entered
-        if (email.toLowerCase() === 'admin.governance@yatrasetu.in') {
-            role = 'admin';
-        }
+        const password = document.getElementById('password').value;
+        const submitBtn = document.getElementById('login-submit-btn');
 
         if (!email || !password) {
             showGlassAlert('error', 'Please enter both email address and password.');
@@ -149,68 +144,40 @@ function initLoginForm() {
             return;
         }
 
-        // Account status enforcement: check if account was deactivated by Platform Administrator
-        try {
-            const rawUsers = localStorage.getItem('yatrasetu_admin_users') || sessionStorage.getItem('yatrasetu_admin_users');
-            if (rawUsers) {
-                const adminUsers = JSON.parse(rawUsers);
-                const normEmail = email.toLowerCase();
-                const matched = adminUsers.find(u => u.email && (u.email.toLowerCase() === normEmail || (normEmail === 'stakeholder.local@yatrasetu.in' && u.id === 'sh-101')));
-                if (matched && matched.account_status === 'Deactivated') {
-                    showGlassAlert('error', 'ACCOUNT SUSPENDED: This account has been deactivated by the Platform Administrator. Access is blocked.');
-                    return;
-                }
-                if (matched) {
-                    sessionStorage.setItem('yatrasetu_name', matched.name);
-                    sessionStorage.setItem('yatrasetu_user_id', matched.id);
-                    if (matched.state_id) sessionStorage.setItem('yatrasetu_active_state_id', matched.state_id);
-                    if (matched.destination_id) sessionStorage.setItem('yatrasetu_active_dest_id', matched.destination_id);
-                    if (matched.access_level) sessionStorage.setItem('yatrasetu_access_level', matched.access_level);
-                    if (matched.role === 'manager') {
-                        sessionStorage.setItem('yatrasetu_manager_scope', matched.access_level === 'State Manager' ? 'state' : 'destination');
-                        sessionStorage.setItem('yatrasetu_manager_access_level', matched.access_level);
-                        
-                        const isState = matched.access_level === 'State Manager';
-                        const mgrProfile = {
-                            id: matched.id,
-                            name: matched.name,
-                            email: matched.email,
-                            phone: matched.phone || '+91 98230 41092',
-                            organization: matched.organization || 'Tourism Authority',
-                            manager_type: matched.access_level,
-                            access_level: matched.access_level,
-                            scope: isState ? 'STATE' : 'DESTINATION',
-                            state_id: matched.state_id || 'maharashtra',
-                            state_name: matched.state_id === 'kerala' ? 'Kerala' : 'Maharashtra',
-                            destination_id: isState ? 'all' : matched.destination_id,
-                            destination: matched.destination_name,
-                            destination_name: matched.destination_name,
-                            destination_ids: isState ? ['raigad-fort', 'ajanta-caves', 'ellora-caves', 'lonavala', 'shirdi'] : [matched.destination_id],
-                            assigned_date: matched.created_at || '15 Jan 2026',
-                            status: matched.account_status || 'Active',
-                            account_status: matched.account_status || 'Active',
-                            avatar_initials: matched.name.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2)
-                        };
-                        sessionStorage.setItem('yatrasetu_manager_profile', JSON.stringify(mgrProfile));
-                    }
-                }
-            }
-        } catch (err) {}
-
-        // Store active user session context
-        sessionStorage.setItem('yatrasetu_role', role);
-        sessionStorage.setItem('yatrasetu_email', email);
-        if (!sessionStorage.getItem('yatrasetu_user_id')) {
-            sessionStorage.setItem('yatrasetu_user_id', role === 'tourist' ? 'usr-tourist-01' : (role === 'manager' ? 'usr-mgr-01' : (role === 'stakeholder' ? 'sh-101' : 'usr-adm-01')));
+        // Show loading state on button
+        const originalBtnHtml = submitBtn ? submitBtn.innerHTML : 'Sign In';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
+                    <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
+                    <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path>
+                </svg>
+                <span>Signing In...</span>`;
         }
-        sessionStorage.setItem('yatrasetu_name', (typeof matched !== 'undefined' && matched) ? matched.name : (role === 'tourist' ? 'Ananya Sharma' : (role === 'manager' ? 'Rajesh Patil' : (role === 'stakeholder' ? 'Suresh Deshmukh' : 'Rajesh Verma'))));
 
-        showGlassAlert('success', `✨ Authenticated as <strong>${role.toUpperCase()}</strong>. Redirecting to workspace...`);
+        try {
+            if (!window.YatraSetuApi) {
+                throw new Error('API client is not loaded. Please refresh the page.');
+            }
 
-        // Perform role-based redirection to ${role}/dashboard.html
-        setTimeout(() => {
-            window.location.href = `${role}/dashboard.html`;
-        }, 800);
+            // Authenticate against FastAPI backend (role derived authoritatively by backend)
+            const data = await window.YatraSetuApi.login(email, password);
+            const userRole = (data.user && (data.user.role || data.user.role_id)) || 'tourist';
+
+            showGlassAlert('success', `✨ Authenticated as <strong>${userRole.toUpperCase()}</strong>. Redirecting to workspace...`);
+
+            // Perform role-based redirection to ${userRole}/dashboard.html
+            setTimeout(() => {
+                window.location.href = `${userRole}/dashboard.html`;
+            }, 800);
+        } catch (err) {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHtml;
+            }
+            showGlassAlert('error', err.message || 'Authentication failed. Please verify your credentials.');
+        }
     });
 }
 
@@ -234,17 +201,25 @@ function initRegisterForm() {
         });
     }
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const fullname = document.getElementById('fullname') ? document.getElementById('fullname').value.trim() : '';
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirm-password') ? document.getElementById('confirm-password').value : '';
-        const role = document.getElementById('selected-role') ? document.getElementById('selected-role').value : 'tourist';
+        const selectedRoleInput = document.getElementById('selected-role');
+        const role = selectedRoleInput ? selectedRoleInput.value.trim().toLowerCase() : 'tourist';
         const terms = document.getElementById('terms-agree') ? document.getElementById('terms-agree').checked : true;
+        const submitBtn = document.getElementById('register-submit-btn');
 
-        if (!fullname) {
-            showGlassAlert('error', 'Please enter your full name.');
+        // Rule: Only tourist and stakeholder can self-register
+        if (role === 'manager' || role === 'admin') {
+            showGlassAlert('error', 'Public registration is only permitted for Tourist or Tourism Stakeholder accounts. Destination Manager and Administrative accounts must be provisioned by Platform Governance.');
+            return;
+        }
+
+        if (!fullname || fullname.length < 2) {
+            showGlassAlert('error', 'Please enter your full name (minimum 2 characters).');
             return;
         }
 
@@ -253,8 +228,10 @@ function initRegisterForm() {
             return;
         }
 
-        if (!password || password.length < 6) {
-            showGlassAlert('error', 'Password must be at least 6 characters long.');
+        // Validate password complexity matching backend PasswordSecurity policy
+        const complexityError = validatePasswordComplexity(password);
+        if (complexityError) {
+            showGlassAlert('error', complexityError);
             return;
         }
 
@@ -264,139 +241,67 @@ function initRegisterForm() {
         }
 
         if (!terms) {
-            showGlassAlert('error', 'Please agree to the Terms of Service to continue.');
+            showGlassAlert('error', 'Please agree to the Platform Terms & Privacy Policy to continue.');
             return;
         }
 
-        // Determine destination selection from user choice (no invented destinations or hardcoded Rajgad Fort)
-        const selectedDestId = (destSelect ? destSelect.value.trim() : '');
-        let assignedDestId = '';
-        let assignedDestName = 'Pending Assignment';
-        let assignedStateId = 'maharashtra';
+        // Determine destination selection for stakeholder
+        const selectedDestId = (destSelect && role === 'stakeholder') ? destSelect.value.trim() : null;
 
-        if (selectedDestId && window.YatraSetuManagerData && Array.isArray(window.YatraSetuManagerData.destinations)) {
-            const matchedDest = window.YatraSetuManagerData.destinations.find(d => d.id === selectedDestId);
-            if (matchedDest) {
-                assignedDestId = matchedDest.id;
-                assignedDestName = matchedDest.name;
-                assignedStateId = matchedDest.state_id || 'maharashtra';
+        const originalBtnHtml = submitBtn ? submitBtn.innerHTML : 'Create Account';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
+                    <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
+                    <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path>
+                </svg>
+                <span>Creating Account...</span>`;
+        }
+
+        try {
+            if (!window.YatraSetuApi) {
+                throw new Error('API client is not loaded. Please refresh the page.');
             }
-        }
 
-        sessionStorage.setItem('yatrasetu_role', role);
-        sessionStorage.setItem('yatrasetu_email', email);
-        sessionStorage.setItem('yatrasetu_name', fullname);
-        if (assignedDestId) {
-            sessionStorage.setItem('yatrasetu_destination_id', assignedDestId);
-            sessionStorage.setItem('yatrasetu_active_dest_id', assignedDestId);
-        } else {
-            sessionStorage.removeItem('yatrasetu_destination_id');
-            sessionStorage.removeItem('yatrasetu_active_dest_id');
-        }
+            const payload = {
+                full_name: fullname,
+                email: email.toLowerCase(),
+                password: password,
+                role: role,
+                destination_id: selectedDestId || null
+            };
 
-        // Auto-register stakeholder into AdminStore and Manager Review Workflow
-        if (role === 'stakeholder') {
-            try {
-                const userKey = 'yatrasetu_admin_users';
-                const auditKey = 'yatrasetu_audit_trail';
-                const rawUsers = localStorage.getItem(userKey) || sessionStorage.getItem(userKey);
-                let users = [];
-                if (rawUsers) {
-                    try { users = JSON.parse(rawUsers); } catch (e) {}
-                }
-                const existing = users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
-                if (!existing) {
-                    const stableId = `sh-${Date.now().toString(36)}`;
-                    const newSh = {
-                        id: stableId,
-                        name: fullname,
-                        email: email,
-                        role: 'stakeholder',
-                        access_level: 'Registered Business',
-                        state_id: assignedStateId,
-                        destination_id: assignedDestId,
-                        destination_name: assignedDestName,
-                        organization: `${fullname} Enterprise`,
-                        category: 'Tourism Partner',
-                        account_status: 'Active',
-                        registration_status: 'Pending Approval',
-                        created_at: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-                        last_active: 'Just now'
-                    };
-                    users.unshift(newSh);
-                    localStorage.setItem(userKey, JSON.stringify(users));
-                    sessionStorage.setItem(userKey, JSON.stringify(users));
+            await window.YatraSetuApi.register(payload);
 
-                    // Connect to Destination Manager review workflow (BUG-04)
-                    const mgrShKey = 'yatrasetu_manager_stakeholders';
-                    const rawMgrSh = localStorage.getItem(mgrShKey) || sessionStorage.getItem(mgrShKey);
-                    let mgrStakeholders = [];
-                    if (rawMgrSh) {
-                        try { mgrStakeholders = JSON.parse(rawMgrSh); } catch (e) {}
-                    }
-                    if (!Array.isArray(mgrStakeholders) || mgrStakeholders.length === 0) {
-                        mgrStakeholders = (window.YatraSetuManagerData && window.YatraSetuManagerData.stakeholders) ? [...window.YatraSetuManagerData.stakeholders] : [];
-                    }
-                    const existingMgrSh = mgrStakeholders.find(s => (s.id && s.id === stableId) || (s.email && s.email.toLowerCase() === email.toLowerCase()));
-                    if (!existingMgrSh) {
-                        const mgrRecord = {
-                            id: stableId,
-                            state_id: newSh.state_id,
-                            destination_id: newSh.destination_id,
-                            destination: newSh.destination_name,
-                            name: newSh.organization,
-                            category: 'Guides',
-                            type: 'visitor-facing',
-                            contact: '+91 98220 00000',
-                            email: email,
-                            contact_person: fullname,
-                            address: assignedDestId ? `${newSh.destination_name} Base, ${assignedStateId.charAt(0).toUpperCase() + assignedStateId.slice(1)}` : 'Pending Destination Assignment',
-                            hours: '08:00 - 18:00',
-                            price_range: '₹500 - ₹1,500',
-                            description: `Registered local tourism service for ${fullname}.`,
-                            status: 'Pending Approval',
-                            account_status: 'Active',
-                            registered_date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-                            reviewed_by: '',
-                            reviewed_date: '',
-                            manager_note: ''
-                        };
-                        mgrStakeholders.unshift(mgrRecord);
-                        localStorage.setItem(mgrShKey, JSON.stringify(mgrStakeholders));
-                        sessionStorage.setItem(mgrShKey, JSON.stringify(mgrStakeholders));
-                    }
+            showGlassAlert('success', `✨ Account created successfully for <strong>${fullname}</strong>! Redirecting to sign in...`);
 
-                    const rawAudit = localStorage.getItem(auditKey) || sessionStorage.getItem(auditKey);
-                    let audit = [];
-                    if (rawAudit) {
-                        try { audit = JSON.parse(rawAudit); } catch (e) {}
-                    }
-                    audit.unshift({
-                        id: `aud-${Date.now().toString(36)}`,
-                        timestamp: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-                        action: 'USER_ACCOUNT_REGISTERED',
-                        stakeholder_id: newSh.id,
-                        stakeholder_name: newSh.organization,
-                        actor_name: fullname,
-                        actor_role: 'Tourism Stakeholder',
-                        details: `New tourism stakeholder self-registered account. Business registration is Pending Approval.`,
-                        previous_value: 'Unregistered',
-                        new_value: 'Pending Approval'
-                    });
-                    localStorage.setItem(auditKey, JSON.stringify(audit));
-                    sessionStorage.setItem(auditKey, JSON.stringify(audit));
-                }
-            } catch (err) {
-                console.warn('[auth.js] Error creating stakeholder record:', err);
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1200);
+        } catch (err) {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHtml;
             }
+            showGlassAlert('error', err.message || 'Registration failed. Please verify your details.');
         }
-
-        showGlassAlert('success', `✨ Account created for <strong>${fullname}</strong> as <strong>${role.toUpperCase()}</strong>! Redirecting...`);
-
-        setTimeout(() => {
-            window.location.href = `${role}/dashboard.html`;
-        }, 800);
     });
+}
+
+/**
+ * Utility: Password Complexity Validation
+ * Matches backend PasswordSecurity policy (min 8 chars, uppercase, lowercase, digit, special char)
+ */
+function validatePasswordComplexity(password) {
+    if (!password) return 'Password cannot be empty.';
+    if (password.length < 8) return 'Password must be at least 8 characters long.';
+    if (password.length > 128) return 'Password must not exceed 128 characters.';
+    if (!/[A-Z]/.test(password)) return 'Password must contain at least one uppercase letter (A-Z).';
+    if (!/[a-z]/.test(password)) return 'Password must contain at least one lowercase letter (a-z).';
+    if (!/[0-9]/.test(password)) return 'Password must contain at least one digit (0-9).';
+    if (!/[\W_]/.test(password)) return 'Password must contain at least one special character (!@#$%^&*...).';
+    return null;
 }
 
 /**

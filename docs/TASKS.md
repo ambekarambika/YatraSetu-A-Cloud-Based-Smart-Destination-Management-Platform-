@@ -82,18 +82,55 @@
     - *Reviews & Feedback*: Cleaned up review presentation with author initials avatar, star rating, verified submission pill, and feedback form modal.
   - **Multi-Device Responsive Verification**: Automated layout verification across Desktop (1440px), Laptop (1366px), Tablet (768px), and Mobile (390px) confirmed `noHorizontalOverflow: true` (0 horizontal scroll) on all 8 pages. All 8 automated CDP navigation and functional test suites passed 100%.
 
+### Completed Backend & Database Foundation
+- **Phase 1: Backend Foundation & Data Modeling (Completed & Verified)**:
+  - Created modular `backend/` application structure with FastAPI, SQLAlchemy 2.0, Alembic, and Pydantic.
+  - Implemented all 27 approved database models across 5 logical domains (`identity`, `destination`, `stakeholder`, `tourist`, `governance`) with strict UUID identifiers, composite foreign keys, constraints, and timestamps.
+  - Configured Alembic with `001_initial_schema.py` supporting offline static SQL generation and live Neon migrations.
+  - Idempotent verified lookup seeder (`app.seeds`) for official roles and states.
+- **Phase 1.1: Database Security Hardening & RLS Architecture (Completed & Verified)**:
+  - Row-Level Security Alembic migrations `002_enable_rls.py`, `003_harden_rls_policies.py`, and `004_gov_storage_rls.py`.
+  - Applied `FORCE ROW LEVEL SECURITY` across 17 tenant, governance, and system tables (`users`, `user_refresh_tokens`, `trip_plans`, `trip_plan_items`, `user_favorites`, `stakeholder_services`, `stakeholder_media`, `stakeholder_posts`, `stakeholder_messages`, `destination_advisories`, `destination_reviews`, `stakeholder_reviews`, `visitor_statistics`, `audit_logs`, `media_deletion_outbox`, `manager_assignments`, `storage_object_registry`).
+  - Corrected `stakeholder_messages` policy in `003` to match actual schema columns (`sender_id`, `recipient_id`, `destination_id`).
+  - Governance protection: `manager_assignments` secured with RLS in `004_gov_storage_rls.py` (admin full CRUD, managers self-read, state managers regional read, tourists/stakeholders blocked).
+  - Cloud infrastructure protection: `storage_object_registry` secured with RLS in `004_gov_storage_rls.py` (admin-only access).
+  - Least-privilege PostgreSQL role provisioning script `backend/scripts/setup_roles.sql` (`yatrasetu_app` with NOBYPASSRLS, DML only, no TRUNCATE on audit/registry, no CREATE privilege on schema public).
+  - Manager jurisdiction authorization guards (`JurisdictionAuthorizer`) & soft-delete filter scoping (`SoftDeleteManager`).
+- **Phase 2: Authentication & Role-Based Authorization (Completed & Verified)**:
+  - **Argon2id Password Hashing (`app.core.hashing`)**: RFC 9106 parameters (64 MiB memory, 3 iterations, 4 parallelism, 16-byte salt). Complexity validator enforcing uppercase, lowercase, digit, and symbol.
+  - **Token Management (`app.core.tokens`)**: Short-lived signed JWT access tokens (PyJWT, HS256) and cryptographically secure 64-byte refresh tokens stored as SHA-256 hashes in `user_refresh_tokens`.
+  - **Token Family Rotation & Replay Attack Detection**: Detects token reuse; revokes the entire token family immediately on reuse attempt.
+  - **Authentication Endpoints (`app.api.v1.endpoints.auth`)**:
+    - `POST /api/v1/auth/register`: Public registration strictly restricted to `tourist` and `stakeholder` (admin and manager registration rejected).
+    - `POST /api/v1/auth/login`: Email and password authentication with neutral error messaging (prevents email enumeration).
+    - `POST /api/v1/auth/refresh`: Atomic refresh token rotation.
+    - `POST /api/v1/auth/logout`: Refresh token revocation.
+    - `GET /api/v1/auth/me`: Authenticated profile endpoint returning verified `SecurityContext` identity and manager jurisdiction.
+  - **FastAPI RBAC Dependencies (`app.core.auth`)**: Authoritative database user loading, active account checks, and role guards (`require_tourist`, `require_stakeholder`, `require_manager`, `require_admin`, `require_destination_manager`, `require_state_manager`).
+  - **Transaction-Local Identity Assertion**: Parameterized `SELECT set_config('app.current_user_id', :uid, true)` and `SELECT set_config('app.current_role', :role, true)` establishing caller identity inside the same transaction block prior to manager assignment lookup.
+  - **Automated Test Suite**: 32 unit tests passing in 1.15s (13 auth tests, 7 security tests, 8 model tests, 4 health tests). 10 PostgreSQL integration tests prepared for Docker/CI.
+
+- **Phase 1 (Integration): Authentication Integration (Completed & Verified)**:
+  - Centralized Vanilla JS API client `frontend/js/api.js` (`window.YatraSetuApi`) with transparent refresh token rotation, replay prevention, and 401 handling.
+  - Connected `login.html` and `register.html` to live FastAPI auth endpoints (`/auth/login`, `/auth/register`, `/auth/logout`, `/auth/refresh`, `/auth/me`).
+  - Database role authoritative resolution (client-selected role untrusted; role derived from database).
+  - Verified against live Neon PostgreSQL database with official roles and states.
+- **Phase 2 (Integration): Public Catalogue API Integration (Completed & Verified)**:
+  - Implemented 10 strictly read-only catalogue endpoints in `backend/app/api/v1/endpoints/catalogue.py` (`/states`, `/destinations`, `/attractions`, `/experiences`, `/events`, `/circuits`).
+  - Added Pydantic schemas in `backend/app/schemas/catalogue.py` with generic `PaginatedResponse[T]`.
+  - Added 10 public catalogue methods to `frontend/js/api.js` (`getStates`, `getDestinations`, etc.).
+  - Integrated `frontend/js/tourist.js` to asynchronously load live catalogue records from REST endpoints.
+  - Implemented resilient fallback to existing catalogue data when database returns empty sets (0 destinations in Neon).
+  - Included `api.js` across all 8 tourist workspace pages.
+  - 41 backend tests passed (9 catalogue tests in `backend/tests/test_catalogue.py`).
+  - Verified live Neon PostgreSQL responses: 8 states returned; empty paginated envelopes for unpopulated tables; HTTP 405 Method Not Allowed on mutation attempts.
+  - Headless Chrome browser integration test passed across all 4 tourist pages with zero console errors.
+
 ### Not yet implemented
-- FastAPI backend
-- PostgreSQL schema
-- Real authentication
-- JWT
-- server-side RBAC
-- real API integration
-- persistent application data
-- real analytics calculations
-- real report generation
-- Tourist workspace video discovery and playback view (Phase 8)
-- production backend/database integration
+- Role-specific mutation & CRUD APIs (Destination Manager workspace APIs, Stakeholder service APIs, Tourist trip planning / favorites / review APIs)
+- Real analytics aggregation queries
+- Report PDF/CSV generation
+- Production deployment on cloud host
 
 
 ## 2. Phase Roadmap
@@ -236,32 +273,69 @@ Implemented & Verified:
 
 
 ## 6. Phase 10 — Database Schema
-**Status: PLANNED**
+**Status: FOUNDATION IMPLEMENTED (SQLAlchemy 2.0 Models & Alembic 001 Schema)**
 
-Expected:
-- PostgreSQL ER model,
-- users/roles,
-- destinations,
-- attractions,
-- events,
-- stakeholders,
-- feedback,
-- trip plans,
-- visitor statistics,
-- supporting relationships as required.
+Implemented:
+- 27 frozen relational tables defined in `backend/app/models/` (`identity`, `destination`, `stakeholder`, `tourist`, `governance`).
+- Alembic initial revision `001_initial_schema.py` generated and tested with offline SQL generation (`alembic upgrade head --sql`).
+- Idempotent verified lookup seeder (`app.seeds`) for official roles and states.
+- Live Neon execution ready pending user connection configuration.
 
-## 7. Phase 11 — FastAPI Backend
-**Status: PLANNED**
+## 7. Phase 11 — FastAPI Backend & Authentication (Phase 2 Completed)
+**Status: AUTHENTICATION & RBAC IMPLEMENTED (Phase 2 Complete)**
 
-Expected:
-- REST APIs,
-- authentication,
-- JWT,
-- password hashing,
-- RBAC,
-- validation,
-- database integration,
-- role-specific authorization.
+Implemented & Verified:
+- FastAPI application entrypoint with CORS middleware for local frontend ports.
+- Configuration loader via `.env` with fallback support for SQLite offline testing.
+- Database session dependency injection (`get_db`) with automatic connection pooling.
+- Health check endpoints (`/health`, `/api/v1/health`, `/api/v1/health/db`).
+- Alembic initial revision `001_initial_schema.py` generated with 27 models and verified via static SQL generation (`alembic upgrade head --sql`).
+- Idempotent verified lookup seeder (`app.seeds`) for official roles and states.
+- **Phase 1.1 Database Security Hardening (Completed & Verified)**:
+  - Identity Propagation Architecture (`SET LOCAL app.current_user_id` / `SET LOCAL app.current_role`).
+  - Row-Level Security Alembic migrations `002_enable_rls.py`, `003_harden_rls_policies.py`, and `004_gov_storage_rls.py`.
+  - Least-privilege PostgreSQL role provisioning script `backend/scripts/setup_roles.sql`.
+  - Governance protection: `manager_assignments` secured with RLS (admin full CRUD, managers self-read, state managers regional read, tourists/stakeholders blocked).
+  - Cloud infrastructure protection: `storage_object_registry` secured with RLS (admin-only access).
+  - Manager jurisdiction authorization guards & soft-delete filter scoping.
+- **Phase 2 Authentication & Authorization (Completed & Verified)**:
+  - **Argon2id Password Hashing (`app.core.hashing`)**: RFC 9106 parameters (64 MiB memory, 3 iterations, 4 parallelism, 16-byte salt). Complexity validator enforcing uppercase, lowercase, digit, and symbol.
+  - **Token Management (`app.core.tokens`)**: Short-lived signed JWT access tokens (PyJWT, HS256) and cryptographically secure 64-byte refresh tokens stored as SHA-256 hashes in `user_refresh_tokens`.
+  - **Token Family Rotation & Replay Attack Detection**: Detects token reuse; revokes the entire token family immediately on reuse attempt.
+  - **Authentication Endpoints (`app.api.v1.endpoints.auth`)**:
+    - `POST /api/v1/auth/register`: Public registration strictly restricted to `tourist` and `stakeholder` (admin and manager registration rejected).
+    - `POST /api/v1/auth/login`: Email and password authentication with neutral error messaging (prevents email enumeration).
+    - `POST /api/v1/auth/refresh`: Atomic refresh token rotation.
+    - `POST /api/v1/auth/logout`: Refresh token revocation.
+    - `GET /api/v1/auth/me`: Authenticated profile endpoint returning verified `SecurityContext` identity and manager jurisdiction.
+  - **FastAPI RBAC Dependencies (`app.core.auth`)**: Authoritative database user loading, active account checks, and role guards (`require_tourist`, `require_stakeholder`, `require_manager`, `require_admin`, `require_destination_manager`, `require_state_manager`).
+  - **Test Suite**: 32 unit tests passing in 1.23s (13 auth tests, 7 security tests, 8 model tests, 4 health tests). 5 PostgreSQL integration tests prepared for Docker/CI.
+
+### 7.2 Phase 1: Authentication Integration (Completed & Verified)
+- **Centralized Vanilla JavaScript API Client (`frontend/js/api.js`)**:
+  - Implemented configurable API base URL (`window.YATRASETU_API_BASE` or `http://127.0.0.1:8000/api/v1`).
+  - Built-in Bearer authorization header injection with `sessionStorage` token management.
+  - Transparent 401 handling with single-attempt refresh token rotation (`POST /api/v1/auth/refresh`), retry, infinite loop guards, and session cleanup on failure.
+  - Full support for `login`, `register`, `getProfile`, `logout`, `refreshToken`, and session persistence.
+- **Login Integration (`frontend/login.html` & `frontend/js/auth.js`)**:
+  - Connected `initLoginForm()` to `POST /api/v1/auth/login`.
+  - Sends email and password only; role is authoritatively determined by backend and verified in database.
+  - Full loading state handling, error alerts for invalid credentials (401) and deactivated accounts (403).
+  - Preserves role-based redirection to `${role}/dashboard.html`.
+- **Registration Integration (`frontend/register.html` & `frontend/js/auth.js`)**:
+  - Connected `initRegisterForm()` to `POST /api/v1/auth/register`.
+  - Frontend password complexity validation harmonized with backend `PasswordSecurity` (min 8 chars, uppercase, lowercase, digit, special character).
+  - Public registration restricted strictly to `tourist` and `stakeholder`; manager/admin public registration blocked upfront.
+  - Removed client-side mock writes to `yatrasetu_admin_users` and `yatrasetu_audit_trail`.
+- **Session Profile & Logout Integration**:
+  - Synchronized topbar & sidebar logout buttons in `dashboard.js`, `manager-core.js`, and `tourist.js` to call `window.YatraSetuApi.logout()`.
+  - Refresh tokens are revoked in the database before local session keys are cleared.
+- **Script Order Verification**:
+  - Loaded `js/api.js` before consumer scripts in `login.html`, `register.html`, `manager/dashboard.html`, `tourist/dashboard.html`, `stakeholder/dashboard.html`, and `admin/dashboard.html`.
+- **Automated Verification**:
+  - All 32 backend tests passed.
+  - Node.js API client unit test suite (8 tests) and password complexity validation suite (7 tests) passed.
+  - 9 live HTTP server integration tests against running FastAPI backend passed.
 
 ## 8. Recommended Immediate Task
 
@@ -314,8 +388,8 @@ Later:
 
 ## 10. Technical Debt / Risks
 
-- Frontend currently relies on simulated/sample data.
-- Backend/database are not yet implemented.
+- Frontend currently relies on simulated/sample data in browser storage (`auth.js` ready to be wired to `/api/v1/auth/*`).
+- Role-specific business CRUD endpoints (Manager attractions/events/videos, Stakeholder profiles/media, Tourist bookings/plans) pending Phase 3+.
 - Report export is currently a UI trigger/simulation until backend generation is implemented.
 - Real analytics will require defined database fields and aggregation logic.
 - Exact GCP service/API selection remains a future implementation decision.
