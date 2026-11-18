@@ -126,6 +126,47 @@
   - Verified live Neon PostgreSQL responses: 8 states returned; empty paginated envelopes for unpopulated tables; HTTP 405 Method Not Allowed on mutation attempts.
   - Headless Chrome browser integration test passed across all 4 tourist pages with zero console errors.
 
+- **Phase 3 (Step 2): Destination Manager API Foundation (Completed & Verified)**:
+  - Implemented Destination Manager foundation endpoints in `backend/app/api/v1/endpoints/manager.py`:
+    - `GET /api/v1/manager/context`: Returns authenticated manager's verified identity, role, scope (`state` or `destination`), assigned state, assigned destination, and assignment timestamp.
+    - `GET /api/v1/manager/destinations`: Returns list of destinations restricted strictly to caller's jurisdictional boundary (Destination Managers see only their assigned destination; State Managers see all destinations in their assigned state).
+    - `GET /api/v1/manager/destinations/{id}`: Returns detailed destination record with strict cross-jurisdiction authorization guards (403 Forbidden for cross-jurisdiction access, 404 for non-existent destinations).
+  - Created Pydantic schema `ManagerContextResponse` in `backend/app/schemas/manager.py` and exported via `backend/app/schemas/__init__.py`.
+  - Registered manager router in `backend/app/api/v1/api.py` with prefix `/manager`.
+  - Enforced RBAC and jurisdiction guards: unauthenticated calls rejected with 401; tourist/stakeholder roles rejected with 403; managers without DB assignments rejected with 403; cross-jurisdiction requests rejected with 403.
+  - 8 new focused unit and security tests in `backend/tests/test_manager_api.py`.
+  - Entire test suite: 49 passed, 10 skipped (PostgreSQL RLS integration tests requiring live test instance).
+
+- **Phase 3 (Step 3): Attractions and Events Manager APIs (Completed & Verified)**:
+  - Implemented Attraction management endpoints in `backend/app/api/v1/endpoints/manager.py`:
+    - `GET /api/v1/manager/attractions`: Scoped listing with optional `destination_id` and `category` filters.
+    - `POST /api/v1/manager/attractions`: Creation with destination verification and jurisdiction enforcement.
+    - `GET /api/v1/manager/attractions/{attraction_id}`: Detail retrieval with jurisdiction check.
+    - `PUT /api/v1/manager/attractions/{attraction_id}`: Partial update with optional destination reassignment validation.
+    - `DELETE /api/v1/manager/attractions/{attraction_id}`: Scoped deletion returning `MessageResponse`.
+  - Implemented Tourism Event management endpoints in `backend/app/api/v1/endpoints/manager.py`:
+    - `GET /api/v1/manager/events`: Scoped listing with optional `destination_id` and `status` filters.
+    - `POST /api/v1/manager/events`: Creation using actual `Event` columns (`date_num`, `date_month`, `location_label`, `status`, `status_class`).
+    - `GET /api/v1/manager/events/{event_id}`: Detail retrieval with jurisdiction check.
+    - `PUT /api/v1/manager/events/{event_id}`: Partial update with destination reassignment validation.
+    - `DELETE /api/v1/manager/events/{event_id}`: Scoped deletion returning `MessageResponse`.
+  - Added Pydantic schemas in `backend/app/schemas/manager.py`: `AttractionCreate`, `AttractionUpdate`, `EventCreate`, `EventUpdate`.
+  - Enforced RBAC and strict jurisdiction scoping: 401 for unauthenticated; 403 for tourists/stakeholders/unassigned managers; 403 for cross-destination/cross-state actions; 404 for invalid destination references; 422 for constraint/validation failures.
+  - Expanded `backend/tests/test_manager_api.py` to 17 tests (9 new dedicated attraction and event tests).
+  - Full test suite: 58 passed, 10 skipped in 9.06s.
+
+- **Phase 3 (Step 3.5): Migration 005 Implementation & Catalogue RLS Hardening (Completed & Verified)**:
+  - Created Alembic revision `005_catalogue_rls.py` chained from `004_gov_storage_rls`.
+  - Applied `ENABLE & FORCE ROW LEVEL SECURITY` on `destinations`, `attractions`, and `events`.
+  - Added public read policies (`p_*_select`) with `USING (true)` preserving unauthenticated catalogue browsing.
+  - Restricted `destinations` mutations (`INSERT`, `UPDATE`, `DELETE`) strictly to `admin` (zero manager mutation permission on destinations).
+  - Implemented granular command-specific policies on `attractions` and `events` enforcing destination/state jurisdiction (`WITH CHECK` on `INSERT`, `USING` and `WITH CHECK` on `UPDATE`, `USING` on `DELETE`).
+  - Corrected Migration 002 advisory vulnerability: explicitly dropped obsolete `p_destination_advisories_modify` and created granular `INSERT`, `UPDATE`, `DELETE` policies eliminating the OR-combination loophole.
+  - Added full reversible `downgrade()` restoring 002 policies and disabling RLS on newly secured tables.
+  - Added 8 new PostgreSQL integration tests in `backend/tests/test_postgres_rls.py` (total: 18 tests, explicitly skipped when `POSTGRES_TEST_URL` is unset).
+  - Verified migration chain integrity: `005_catalogue_rls` is the clean single head.
+  - Backend test suite: 58 passed, 18 skipped in 7.54s.
+
 ### Not yet implemented
 - Role-specific mutation & CRUD APIs (Destination Manager workspace APIs, Stakeholder service APIs, Tourist trip planning / favorites / review APIs)
 - Real analytics aggregation queries

@@ -11,6 +11,13 @@ from app.schemas.auth import (
     UserProfileResponse,
     MessageResponse,
 )
+from app.schemas.manager import (
+    ManagerContextResponse,
+    AttractionCreate,
+    AttractionUpdate,
+    EventCreate,
+    EventUpdate,
+)
 
 __all__ = [
     "HealthResponse",
@@ -21,4 +28,9 @@ __all__ = [
     "TokenResponse",
     "UserProfileResponse",
     "MessageResponse",
+    "ManagerContextResponse",
+    "AttractionCreate",
+    "AttractionUpdate",
+    "EventCreate",
+    "EventUpdate",
 ]

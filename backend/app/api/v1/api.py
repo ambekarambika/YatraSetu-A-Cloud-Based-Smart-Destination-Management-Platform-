@@ -4,7 +4,7 @@ Combines all v1 endpoint routers into a central APIRouter.
 """
 
 from fastapi import APIRouter
-from app.api.v1.endpoints import health, auth, catalogue
+from app.api.v1.endpoints import health, auth, catalogue, manager
 
 api_router = APIRouter()
 
@@ -16,3 +16,6 @@ api_router.include_router(auth.router, prefix="/auth", tags=["Authentication & A
 
 # Public Tourism Catalogue (Read-Only)
 api_router.include_router(catalogue.router, tags=["Public Catalogue"])
+
+# Destination Manager Workspace (Scoped Authority)
+api_router.include_router(manager.router, prefix="/manager", tags=["Destination Manager"])

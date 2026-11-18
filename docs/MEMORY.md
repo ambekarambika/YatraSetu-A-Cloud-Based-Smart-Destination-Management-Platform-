@@ -631,3 +631,90 @@ This file records decisions that should not be silently reversed.
    - 51 backend tests: 41 passed, 10 skipped in 1.30s (9 dedicated catalogue tests in `backend/tests/test_catalogue.py`).
    - Live Neon PostgreSQL verification: confirmed 8 states returned from live Neon; empty envelopes returned for empty tables; POST returns 405 Method Not Allowed.
    - Headless Chrome CDP browser tests across 4 tourist pages (`destinations.html`, `experiences.html`, `destination-detail.html`, `dashboard.html`): 100% passed with 0 console errors.
+
+---
+
+## 2026-11-18 — Phase 3 (Step 2): Destination Manager API Foundation
+
+**Context:** Implementation of Destination Manager API foundation (`/api/v1/manager/context`, `/api/v1/manager/destinations`, `/api/v1/manager/destinations/{id}`) with strict database-derived jurisdiction guards.
+
+**Key Decisions & Architectural Enforcements:**
+1. **Manager Endpoints & Scoping (`backend/app/api/v1/endpoints/manager.py`):**
+   - `GET /api/v1/manager/context`: Resolves manager identity, role (`manager`), scope (`state` or `destination`), state ID/name, destination ID/name, and assignment timestamp from DB `ManagerAssignment`.
+   - `GET /api/v1/manager/destinations`: Strictly filtered by jurisdiction:
+     - Destination Managers receive only their assigned destination (`Destination.id == context.destination_id`).
+     - State Managers receive all destinations belonging to their assigned state (`Destination.state_id == context.state_id`).
+   - `GET /api/v1/manager/destinations/{id}`:
+     - Destination Managers requesting an ID outside their assigned destination receive `403 Forbidden` (`Access denied: Destination is outside your assigned jurisdiction`).
+     - State Managers requesting a destination outside their state jurisdiction receive `403 Forbidden`.
+     - Non-existent destinations within scope receive `404 Not Found`.
+2. **Pydantic Schemas (`backend/app/schemas/manager.py`):**
+   - `ManagerContextResponse`: Encapsulates verified manager attributes without leaking sensitive data or cross-manager records.
+   - Reuses `DestinationSummaryResponse` and `DestinationDetailResponse` from catalogue schemas.
+3. **Authorization & Security Guards:**
+   - Unauthenticated requests: `401 Unauthorized` via `require_manager` -> `get_current_active_user` -> `get_current_user_and_context`.
+   - Tourist / Stakeholder roles: `403 Forbidden` (`Access denied: Requires one of roles: manager`).
+   - Manager without active assignment: `403 Forbidden` (`CONFIGURATION ERROR: Manager account exists without active jurisdiction assignment`).
+   - Cross-jurisdiction access: `403 Forbidden` via `JurisdictionAuthorizer.can_manage_destination`.
+4. **Verification & Testing:**
+   - 8 new focused unit and security tests in `backend/tests/test_manager_api.py`.
+   - Test suite status: 49 passed, 10 skipped in 6.18s.
+
+---
+
+## 2026-11-18 — Phase 3 (Step 3): Attractions and Events Manager APIs
+
+**Context:** Implementation of Attraction and Tourism Event management endpoints for the Destination Manager workspace (`/api/v1/manager/attractions`, `/api/v1/manager/events`) with complete CRUD and jurisdiction validation.
+
+**Key Decisions & Architectural Enforcements:**
+1. **Model Alignment & Zero Field Fabrication:**
+   - Used actual SQLAlchemy model columns in `backend/app/models/destination.py`:
+     - `Attraction`: `id`, `destination_id`, `name`, `category`, `description`, `image_url`, `rating`, `status`, `operating_hours`, `entry_fee_label`.
+     - `Event`: `id`, `destination_id`, `title`, `date_num`, `date_month`, `location_label`, `status`, `status_class`, `image_url`, `description`.
+   - Explicitly discarded proposed audit fields not backed by the database schema (e.g. `start_date`, `end_date`, `expected_footfall`, `permit_status`).
+2. **Endpoints Implemented (`backend/app/api/v1/endpoints/manager.py`):**
+   - Attractions:
+     - `GET /api/v1/manager/attractions`: Scoped listing with optional `destination_id` and `category` filters.
+     - `POST /api/v1/manager/attractions`: Creation validating destination existence and manager jurisdiction.
+     - `GET /api/v1/manager/attractions/{attraction_id}`: Detail retrieval checking jurisdiction over attraction's destination.
+     - `PUT /api/v1/manager/attractions/{attraction_id}`: Partial updates, plus authority verification on destination if reassigned.
+     - `DELETE /api/v1/manager/attractions/{attraction_id}`: Scoped deletion.
+   - Events:
+     - `GET /api/v1/manager/events`: Scoped listing with optional `destination_id` and `status` filters.
+     - `POST /api/v1/manager/events`: Creation with destination jurisdiction checks.
+     - `GET /api/v1/manager/events/{event_id}`: Detail retrieval.
+     - `PUT /api/v1/manager/events/{event_id}`: Partial updates with reassignment checks.
+     - `DELETE /api/v1/manager/events/{event_id}`: Scoped deletion.
+3. **Jurisdiction Enforcement Matrix:**
+   - Destination Manager: restricted to `context.destination_id`. Attempting to list with a different `destination_id`, create for another destination, or modify an attraction/event outside their destination returns `403 Forbidden`.
+   - State Manager: restricted to destinations where `state_id == context.state_id`. Attempting to create or modify attractions/events in another state returns `403 Forbidden`.
+   - Non-existent destination references return `404 Not Found` (when caller has state jurisdiction) or `403 Forbidden` (when destination manager attempts an ID outside their assignment).
+4. **Verification & Testing:**
+   - 9 new unit and security tests in `backend/tests/test_manager_api.py` (total 17 tests in module).
+   - Entire test suite: 58 passed, 10 skipped in 9.06s.
+
+---
+
+## 2026-11-18 — Phase 3 (Step 3.5): Migration 005 — Catalogue RLS & Jurisdiction Hardening
+
+**Context:** Implementation of Alembic migration `005_catalogue_rls.py` providing database-level Row-Level Security defense-in-depth on `destinations`, `attractions`, and `events`, while correcting the Migration 002 advisory policy loophole.
+
+**Key Decisions & Architectural Enforcements:**
+1. **Granular Command Policies & Least Privilege Scope:**
+   - Discarded generic `FOR ALL` policies in favor of separate `SELECT`, `INSERT`, `UPDATE`, and `DELETE` policies.
+   - `destinations`: Public `SELECT USING (true)` preserves public browsing. `INSERT`, `UPDATE`, and `DELETE` restricted strictly to `admin`. Managers hold zero mutation authority on destinations (matching approved Phase 3 scope).
+   - `attractions` & `events`: Public `SELECT USING (true)`. `INSERT`, `UPDATE`, and `DELETE` enforced with database-level jurisdiction checks:
+     - Destination Managers: strictly `destination_id = app.current_destination_id`.
+     - State Managers: `NULLIF(app.current_destination_id, '') IS NULL` and destination verified in `app.current_state_id`.
+     - `UPDATE` evaluates both `USING` (pre-update row authority) and `WITH CHECK` (post-update row authority), preventing cross-destination or cross-state reassignment attacks.
+2. **Migration 002 Advisory Flaw Resolution:**
+   - Migration 002's `p_destination_advisories_modify` checked `state_id = app.current_state_id` without verifying `app.current_destination_id IS NULL`, which allowed a Destination Manager to edit advisories for any destination in their state via OR-combination.
+   - Migration 005 explicitly dropped `p_destination_advisories_modify` and replaced it with granular `INSERT`, `UPDATE`, and `DELETE` policies.
+3. **Zero Policy Recursion:**
+   - Subqueries against `destinations` inside `attractions`/`events` policies evaluate `p_destinations_select` (`USING (true)`), which carries no subqueries.
+4. **Integration Test Suite Hardening (`backend/tests/test_postgres_rls.py`):**
+   - Added 8 integration tests covering unauthenticated catalogue browsing, DM and SM mutations, cross-jurisdiction reassignment denial, manager destination mutation denial, advisory loophole resolution, and tourist/stakeholder mutation denial.
+   - Tests explicitly skipped when `POSTGRES_TEST_URL` is unavailable.
+5. **Verification & Testing:**
+   - Alembic chain verified: single head `005_catalogue_rls`.
+   - Test suite status: 58 passed, 18 skipped in 7.54s.
