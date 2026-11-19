@@ -34,9 +34,18 @@
 
     class YatraSetuApiClient {
         constructor() {
+            const isLocalhost = typeof window !== 'undefined' && window.location && (
+                window.location.hostname === 'localhost' ||
+                window.location.hostname === '127.0.0.1' ||
+                window.location.hostname === '::1' ||
+                window.location.hostname === ''
+            );
+
             this.baseUrl = (typeof window !== 'undefined' && window.YATRASETU_API_BASE)
                 ? window.YATRASETU_API_BASE.replace(/\/+$/, '')
-                : 'http://127.0.0.1:8000/api/v1';
+                : isLocalhost
+                    ? 'http://127.0.0.1:8000/api/v1'
+                    : 'https://yatrasetu-a-cloud-based-smart.onrender.com/api/v1';
 
             this._isRefreshing = false;
             this._refreshPromise = null;
