@@ -31,7 +31,7 @@
             state_id: 'all',
             destination_id: 'all',
             destination_name: 'All Jurisdictions (Global)',
-            organization: 'Ministry of Tourism / YatraSetu Gov',
+            organization: 'YatraSetu Project Administration',
             account_status: 'Active',
             registration_status: 'Verified Platform Admin',
             created_at: '01 Jan 2026',
@@ -1221,7 +1221,7 @@
                         state_id: u.state_id,
                         destination_id: u.destination_id,
                         destination_name: u.jurisdiction || u.destination_id || 'All Jurisdictions',
-                        organization: u.business_name || (u.role === 'admin' ? 'Ministry of Tourism / YatraSetu Gov' : (u.role === 'manager' ? 'State Tourism Authority' : u.full_name)),
+                        organization: u.business_name || (u.role === 'admin' ? 'YatraSetu Project Administration' : (u.role === 'manager' ? 'State Tourism Authority' : u.full_name)),
                         account_status: u.is_active ? 'Active' : 'Deactivated',
                         registration_status: u.verification_status || (u.is_active ? 'Verified' : 'Pending'),
                         created_at: formatDisplayDate(u.created_at),
@@ -3017,7 +3017,7 @@
 
         if (nameEl) nameEl.textContent = currentName;
         if (emailEl) emailEl.textContent = currentEmail;
-        if (orgEl) orgEl.textContent = 'Ministry of Tourism / YatraSetu Gov';
+        if (orgEl) orgEl.textContent = 'YatraSetu Project Administration';
         if (idEl) idEl.textContent = currentId;
         if (statusEl) statusEl.textContent = 'Active (Authoritative RBAC)';
         if (createdEl) createdEl.textContent = 'Active Session';
