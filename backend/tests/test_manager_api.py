@@ -783,3 +783,115 @@ def test_validation_errors_on_model_constraints(
     })
     assert res_missing_event.status_code == 422
 
+
+def test_manager_destination_creation_and_update(
+    client: TestClient, db_session: Session, manager_test_data
+):
+    """
+    Verifies that state managers can create and update destinations within their state,
+    and cross-jurisdiction attempts are rejected with 403.
+    """
+    sm = create_test_user(db_session, "sm.dest@example.com", "manager", "MH State Manager")
+    db_session.add(ManagerAssignment(
+        user_id=sm.id, role_id="manager", state_id="maharashtra", destination_id=None
+    ))
+    db_session.commit()
+    headers = get_auth_headers(sm)
+
+    # 1. State manager creates destination in assigned state
+    res_create = client.post("/api/v1/manager/destinations", headers=headers, json={
+        "id": "torna-fort",
+        "state_id": "maharashtra",
+        "name": "Torna Fort",
+        "category": "Hill Fort",
+        "subtitle": "Historic highest hill fort in Pune",
+        "description": "Prachandagad or Torna Fort is a large fort in Pune district.",
+        "max_daily_capacity": 2500,
+    })
+    assert res_create.status_code == 201
+    assert res_create.json()["id"] == "torna-fort"
+    assert res_create.json()["name"] == "Torna Fort"
+
+    # 2. State manager updates destination
+    res_update = client.put("/api/v1/manager/destinations/torna-fort", headers=headers, json={
+        "subtitle": "Updated Subtitle for Torna",
+        "max_daily_capacity": 3000,
+    })
+    assert res_update.status_code == 200
+    assert res_update.json()["subtitle"] == "Updated Subtitle for Torna"
+    assert res_update.json()["max_daily_capacity"] == 3000
+
+    # 3. State manager cannot create destination in another state (kerala)
+    res_cross = client.post("/api/v1/manager/destinations", headers=headers, json={
+        "id": "cross-dest",
+        "state_id": "kerala",
+        "name": "Cross State Dest",
+        "category": "Heritage",
+        "description": "Illegal creation test",
+    })
+    assert res_cross.status_code == 403
+
+
+def test_manager_video_lifecycle_and_public_sync(
+    client: TestClient, db_session: Session, manager_test_data
+):
+    """
+    Verifies full lifecycle of destination videos:
+    - Manager creates video for assigned destination (201).
+    - Public catalogue video endpoint retrieves the video (200).
+    - Manager updates video (200).
+    - Manager deletes video (200).
+    - Cross-jurisdiction manager access is denied (403).
+    """
+    dm = create_test_user(db_session, "dm.video@example.com", "manager", "Rajgad Video DM")
+    db_session.add(ManagerAssignment(
+        user_id=dm.id, role_id="manager", state_id="maharashtra", destination_id="rajgad-fort"
+    ))
+    db_session.commit()
+    headers = get_auth_headers(dm)
+
+    # 1. Create video
+    res_create = client.post("/api/v1/manager/videos", headers=headers, json={
+        "destination_id": "rajgad-fort",
+        "title": "Rajgad Fort Aerial Showcase",
+        "category": "Orientation",
+        "description": "Stunning drone flyover showing the ramparts and cliffs.",
+        "duration": "0:30",
+        "video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "status": "Published"
+    })
+    assert res_create.status_code == 201
+    video_id = res_create.json()["id"]
+    assert res_create.json()["youtube_id"] == "dQw4w9WgXcQ"
+
+    # 2. Public catalogue endpoint can retrieve destination videos
+    res_pub = client.get("/api/v1/destinations/rajgad-fort/videos")
+    assert res_pub.status_code == 200
+    videos = res_pub.json()
+    assert any(v["id"] == video_id for v in videos)
+
+    # 3. Manager updates video
+    res_update = client.put(f"/api/v1/manager/videos/{video_id}", headers=headers, json={
+        "title": "Rajgad Fort Master Aerial Showcase",
+        "duration": "0:45",
+    })
+    assert res_update.status_code == 200
+    assert res_update.json()["title"] == "Rajgad Fort Master Aerial Showcase"
+
+    # 4. Cross-jurisdiction manager denied
+    dm_kerala = create_test_user(db_session, "dm.kl.video@example.com", "manager", "Kerala Video DM")
+    db_session.add(ManagerAssignment(
+        user_id=dm_kerala.id, role_id="manager", state_id="kerala", destination_id="munnar-hills"
+    ))
+    db_session.commit()
+    headers_kl = get_auth_headers(dm_kerala)
+
+    res_cross_delete = client.delete(f"/api/v1/manager/videos/{video_id}", headers=headers_kl)
+    assert res_cross_delete.status_code == 403
+
+    # 5. Manager deletes video
+    res_delete = client.delete(f"/api/v1/manager/videos/{video_id}", headers=headers)
+    assert res_delete.status_code == 200
+    assert "deleted successfully" in res_delete.json()["message"]
+
+

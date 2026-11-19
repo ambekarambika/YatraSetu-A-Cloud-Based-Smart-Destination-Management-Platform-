@@ -6,6 +6,7 @@ States, Destinations, Attractions, Experiences, Events, and Circuits.
 
 import uuid
 from typing import Optional, List, Dict, Any, Generic, TypeVar
+from datetime import datetime
 from pydantic import BaseModel, Field
 
 T = TypeVar("T")
@@ -53,6 +54,7 @@ class DestinationSummaryResponse(BaseModel):
     ideal_duration: Optional[str] = None
     best_time: Optional[str] = None
     max_daily_capacity: Optional[int] = None
+    description: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
 
@@ -158,3 +160,25 @@ class CuratedCircuitResponse(BaseModel):
     items: List[CuratedCircuitItemResponse] = []
 
     model_config = {"from_attributes": True}
+
+
+# -----------------------------------------------------------------------------
+# 7. Destination Video Schemas
+# -----------------------------------------------------------------------------
+
+class DestinationVideoResponse(BaseModel):
+    """Public representation of a curated destination video."""
+    id: uuid.UUID
+    destination_id: str
+    title: str
+    category: Optional[str] = "Orientation"
+    description: Optional[str] = None
+    duration: str = "0:30"
+    youtube_id: Optional[str] = None
+    video_url: Optional[str] = None
+    thumbnail_url: Optional[str] = None
+    status: Optional[str] = "Published"
+    created_at: Optional[datetime] = None
+
+    model_config = {"from_attributes": True}
+

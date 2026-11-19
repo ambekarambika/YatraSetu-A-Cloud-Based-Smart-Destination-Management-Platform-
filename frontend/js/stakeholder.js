@@ -15,79 +15,140 @@ function checkStakeholderAuth() {
     const isStakeholderPage = window.location.pathname.includes('/stakeholder/') || window.location.href.includes('/stakeholder/');
     if (!isStakeholderPage) return true;
 
+    const token = (typeof sessionStorage !== 'undefined')
+        ? (sessionStorage.getItem('yatrasetu_access_token') || (window.YatraSetuApi && window.YatraSetuApi.getAccessToken()))
+        : null;
     const role = (typeof sessionStorage !== 'undefined') ? sessionStorage.getItem('yatrasetu_role') : null;
-    if (!role || (role !== 'stakeholder' && role !== 'admin')) {
+    if (!token || !role || (role !== 'stakeholder' && role !== 'admin')) {
         window.location.replace('../login.html');
         return false;
     }
     return true;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     if (!checkStakeholderAuth()) return;
-    initStakeholderContext();
+    await initStakeholderContext();
     initStakeholderSidebar();
-    initStakeholderOverview();
+    await initStakeholderOverview();
     initStakeholderProfilePage();
-    initStakeholderDestinationUpdates();
-    initStakeholderConnectionsReviews();
-    initStakeholderMediaListings();
+    await initStakeholderDestinationUpdates();
+    await initStakeholderConnectionsReviews();
+    await initStakeholderMediaListings();
 });
 
 /**
  * 1. Active User Identity & Destination Context Initialization
  */
-function initStakeholderContext() {
+async function initStakeholderContext() {
     const dataStore = window.YatraSetuStakeholderData || {};
     const profile = dataStore.profile || {};
     const managerData = window.YatraSetuManagerData || {};
 
-    // Session Overrides from auth.js if available
-    const sessionEmail = sessionStorage.getItem('yatrasetu_email');
-    const sessionName = sessionStorage.getItem('yatrasetu_name');
-    const sessionOrg = sessionStorage.getItem('yatrasetu_org') || sessionStorage.getItem('yatrasetu_organization');
-    const sessionRole = sessionStorage.getItem('yatrasetu_role');
-    let sessionDestId = sessionStorage.getItem('yatrasetu_destination_id');
+    // Live Backend Profile Integration
+    if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+        try {
+            const apiRes = await window.YatraSetuApi.getStakeholderProfile();
+            if (apiRes) {
+                profile.id = apiRes.user_id;
+                profile.userName = apiRes.full_name;
+                profile.contactPerson = apiRes.full_name;
+                profile.email = apiRes.email;
+                profile.phone = apiRes.phone_number || '';
+                profile.account_status = apiRes.is_active ? 'Active' : 'Deactivated';
 
-    if (sessionName) {
-        profile.userName = sessionName;
-        profile.contactPerson = sessionName;
-    }
-    if (sessionEmail) {
-        profile.email = sessionEmail;
-    }
-    if (sessionOrg) {
-        profile.organizationName = sessionOrg;
-    }
+                if (apiRes.service_id || apiRes.business_name) {
+                    profile.serviceId = apiRes.service_id;
+                    profile.organizationName = apiRes.business_name || '';
+                    profile.destinationId = apiRes.destination_id;
+                    profile.destinationName = apiRes.destination_name || apiRes.destination_id || 'Rajgad Fort';
+                    profile.stateId = apiRes.state_id || 'maharashtra';
+                    profile.stateName = apiRes.state_name || 'Maharashtra';
+                    profile.category = apiRes.category || 'Tour & Trekking Guides';
+                    const isVerified = (apiRes.verification_status === 'verified');
+                    profile.registration_status = isVerified ? 'Approved' : (apiRes.verification_status === 'rejected' ? 'Rejected' : 'Pending Approval');
+                    profile.status = profile.registration_status;
+                    profile.isBusinessApproved = isVerified;
 
-    // Cross-sync with central Admin users and Manager stakeholders repositories
-    try {
-        const rawUsers = localStorage.getItem('yatrasetu_admin_users') || sessionStorage.getItem('yatrasetu_admin_users');
-        if (rawUsers) {
-            const adminUsers = JSON.parse(rawUsers);
-            const lookupEmail = sessionEmail || profile.email;
-            const matchedUser = adminUsers.find(u => (u.id && u.id === profile.id) || (u.email && u.email.toLowerCase() === (lookupEmail || '').toLowerCase()));
-            if (matchedUser) {
-                profile.id = matchedUser.id;
-                profile.userName = matchedUser.name;
-                profile.contactPerson = matchedUser.name;
-                profile.email = matchedUser.email;
-                if (matchedUser.organization) profile.organizationName = matchedUser.organization;
-                if (matchedUser.category) profile.category = matchedUser.category;
-                profile.account_status = matchedUser.account_status || 'Active';
-                profile.registration_status = matchedUser.registration_status || 'Pending Approval';
-                profile.status = matchedUser.registration_status || 'Pending Approval';
-                profile.isBusinessApproved = (profile.registration_status === 'Approved');
+                    const cInfo = apiRes.contact_info || {};
+                    profile.phone = apiRes.phone || cInfo.phone || apiRes.phone_number || '';
+                    profile.address = apiRes.address || cInfo.address || '';
+                    profile.hours = apiRes.operating_hours || cInfo.operating_hours || '';
+                    profile.priceRange = apiRes.price_range || cInfo.price_range || '';
+                    profile.description = cInfo.description || '';
+                    if (apiRes.destination_id) {
+                        sessionStorage.setItem('yatrasetu_destination_id', apiRes.destination_id);
+                    }
+                } else {
+                    profile.serviceId = null;
+                    profile.organizationName = '';
+                    profile.destinationId = null;
+                    profile.destinationName = 'No Destination Assigned';
+                    profile.registration_status = 'Unregistered';
+                    profile.status = 'Unregistered';
+                    profile.isBusinessApproved = false;
+                }
 
-                // If destination is assigned in Admin repository and no manual session override exists
-                if (matchedUser.destination_id && matchedUser.destination_id !== 'all' && (!sessionDestId || sessionDestId === '')) {
-                    sessionDestId = matchedUser.destination_id;
-                    sessionStorage.setItem('yatrasetu_destination_id', matchedUser.destination_id);
+                sessionStorage.setItem('yatrasetu_name', profile.userName);
+                if (profile.organizationName) {
+                    sessionStorage.setItem('yatrasetu_org', profile.organizationName);
+                    sessionStorage.setItem('yatrasetu_organization', profile.organizationName);
                 }
             }
+        } catch (err) {
+            console.error('[stakeholder.js] Profile fetch error:', err);
+            if (err && err.status === 401) {
+                if (window.YatraSetuApi) window.YatraSetuApi.clearSession();
+                window.location.replace('../login.html');
+                return;
+            }
         }
-    } catch (e) {
-        console.warn('[stakeholder.js] Cross-sync error:', e);
+    } else {
+        // Session Overrides from auth.js if available in prototype mode
+        const sessionEmail = sessionStorage.getItem('yatrasetu_email');
+        const sessionName = sessionStorage.getItem('yatrasetu_name');
+        const sessionOrg = sessionStorage.getItem('yatrasetu_org') || sessionStorage.getItem('yatrasetu_organization');
+        let sessionDestId = sessionStorage.getItem('yatrasetu_destination_id');
+
+        if (sessionName) {
+            profile.userName = sessionName;
+            profile.contactPerson = sessionName;
+        }
+        if (sessionEmail) {
+            profile.email = sessionEmail;
+        }
+        if (sessionOrg) {
+            profile.organizationName = sessionOrg;
+        }
+
+        // Cross-sync with central Admin users and Manager stakeholders repositories
+        try {
+            const rawUsers = localStorage.getItem('yatrasetu_admin_users') || sessionStorage.getItem('yatrasetu_admin_users');
+            if (rawUsers) {
+                const adminUsers = JSON.parse(rawUsers);
+                const lookupEmail = sessionEmail || profile.email;
+                const matchedUser = adminUsers.find(u => (u.id && u.id === profile.id) || (u.email && u.email.toLowerCase() === (lookupEmail || '').toLowerCase()));
+                if (matchedUser) {
+                    profile.id = matchedUser.id;
+                    profile.userName = matchedUser.name;
+                    profile.contactPerson = matchedUser.name;
+                    profile.email = matchedUser.email;
+                    if (matchedUser.organization) profile.organizationName = matchedUser.organization;
+                    if (matchedUser.category) profile.category = matchedUser.category;
+                    profile.account_status = matchedUser.account_status || 'Active';
+                    profile.registration_status = matchedUser.registration_status || 'Pending Approval';
+                    profile.status = matchedUser.registration_status || 'Pending Approval';
+                    profile.isBusinessApproved = (profile.registration_status === 'Approved');
+
+                    if (matchedUser.destination_id && matchedUser.destination_id !== 'all' && (!sessionDestId || sessionDestId === '')) {
+                        sessionDestId = matchedUser.destination_id;
+                        sessionStorage.setItem('yatrasetu_destination_id', matchedUser.destination_id);
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('[stakeholder.js] Cross-sync error:', e);
+        }
     }
 
     // Display Account Deactivation Alert if account was deactivated by Platform Administrator
@@ -114,10 +175,7 @@ function initStakeholderContext() {
     }
 
     // Destination Resolution
-    // Priority:
-    // 1) sessionStorage 'yatrasetu_destination_id' if explicitly set
-    // 2) profile.destinationId from stakeholder-data.js
-    let targetDestId = sessionDestId !== null ? sessionDestId : profile.destinationId;
+    let targetDestId = profile.destinationId || sessionStorage.getItem('yatrasetu_destination_id');
 
     if (targetDestId && targetDestId !== 'unassigned' && targetDestId !== '') {
         const foundDest = (managerData.destinations || []).find(d => d.id === targetDestId);
@@ -128,10 +186,10 @@ function initStakeholderContext() {
             const foundState = (managerData.states || []).find(s => s.id === foundDest.state_id);
             profile.stateName = foundState ? foundState.name : foundDest.state_id;
         } else {
-            profile.destinationId = null;
-            profile.destinationName = 'No Destination Assigned';
-            profile.stateName = 'Unassigned Destination';
-            profile.destinationImg = '';
+            profile.destinationId = targetDestId;
+            profile.destinationName = profile.destinationName || targetDestId;
+            profile.stateName = profile.stateId || 'Maharashtra';
+            profile.destinationImg = 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?w=600&auto=format&fit=crop&q=80';
         }
     } else {
         // Missing or unassigned
@@ -262,7 +320,7 @@ function saveStakeholderListings(listings) {
     try {
         localStorage.setItem('yatrasetu_stakeholder_listings', JSON.stringify(listings));
         sessionStorage.setItem('yatrasetu_stakeholder_listings', JSON.stringify(listings));
-    } catch (e) {}
+    } catch (e) { }
 
     // Sync to manager stakeholders repository if applicable
     try {
@@ -281,7 +339,7 @@ function saveStakeholderListings(listings) {
             localStorage.setItem('yatrasetu_manager_stakeholders', JSON.stringify(mgrList));
             sessionStorage.setItem('yatrasetu_manager_stakeholders', JSON.stringify(mgrList));
         }
-    } catch (e) {}
+    } catch (e) { }
 }
 
 function saveStakeholderMedia(mediaList) {
@@ -290,7 +348,7 @@ function saveStakeholderMedia(mediaList) {
     try {
         localStorage.setItem('yatrasetu_stakeholder_media', JSON.stringify(mediaList));
         sessionStorage.setItem('yatrasetu_stakeholder_media', JSON.stringify(mediaList));
-    } catch (e) {}
+    } catch (e) { }
 }
 
 function saveStakeholderPosts(postsList) {
@@ -299,7 +357,7 @@ function saveStakeholderPosts(postsList) {
     try {
         localStorage.setItem('yatrasetu_stakeholder_posts', JSON.stringify(postsList));
         sessionStorage.setItem('yatrasetu_stakeholder_posts', JSON.stringify(postsList));
-    } catch (e) {}
+    } catch (e) { }
 }
 
 /**
@@ -327,7 +385,7 @@ function initStakeholderSidebar() {
 /**
  * 3. Overview Page Controller (dashboard.html)
  */
-function initStakeholderOverview() {
+async function initStakeholderOverview() {
     const noticeFeed = document.getElementById('overview-announcements-feed');
     const eventsFeed = document.getElementById('overview-events-feed');
     if (!noticeFeed && !eventsFeed) return;
@@ -361,10 +419,39 @@ function initStakeholderOverview() {
         return;
     }
 
-    // Destination-Scoped Announcements & Events
-    const announcements = (dataStore.announcements || []).filter(a => a.destination_id === destId);
-    const events = (managerCatalog.events || []).filter(e => e.destination_id === destId);
-    const suggestions = (dataStore.suggestions || []).filter(s => s.destination_id === destId && s.status === 'Pending');
+    let announcements = [];
+    let events = [];
+    let suggestions = [];
+
+    if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+        try {
+            const updates = await window.YatraSetuApi.getStakeholderDestinationUpdates();
+            const advisoriesList = Array.isArray(updates) ? updates : (updates?.advisories || []);
+            announcements = advisoriesList.map(adv => ({
+                id: adv.id,
+                title: adv.title,
+                content: adv.description || adv.message,
+                category: adv.severity ? (adv.severity.charAt(0).toUpperCase() + adv.severity.slice(1)) : 'Advisory',
+                date: adv.created_at ? new Date(adv.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Official Notice',
+                icon: adv.severity === 'critical' ? '🚨' : (adv.severity === 'warning' ? '⚠️' : '📣')
+            }));
+
+            // Events from catalog scoped to destination
+            events = (managerCatalog.events || []).filter(e => e.destination_id === destId);
+
+            const rawSug = await window.YatraSetuApi.getStakeholderSuggestions();
+            if (Array.isArray(rawSug)) {
+                suggestions = rawSug.filter(s => s.status === 'pending');
+            }
+        } catch (err) {
+            console.error('[stakeholder.js] Error loading overview data:', err);
+        }
+    } else {
+        // Prototype fallback
+        announcements = (dataStore.announcements || []).filter(a => a.destination_id === destId);
+        events = (managerCatalog.events || []).filter(e => e.destination_id === destId);
+        suggestions = (dataStore.suggestions || []).filter(s => s.destination_id === destId && s.status === 'Pending');
+    }
 
     // Update Summary Metric Cards
     const valAnc = document.getElementById('metric-announcements-count');
@@ -482,18 +569,19 @@ function initStakeholderProfilePage() {
         // Set current assigned destination value
         selectDest.value = profile.destinationId || '';
 
-        // Rule 3: Once approved, the stakeholder cannot change the registered destination through ordinary editing.
+        // Rule 3: Once approved or registered, the stakeholder cannot change the registered destination through ordinary editing.
+        const isRegistered = Boolean(profile.serviceId || profile.destinationId);
         const isApproved = profile.status === 'Approved' || profile.registration_status === 'Approved' || profile.isBusinessApproved === true;
         const isPending = profile.status === 'Pending Approval' || profile.registration_status === 'Pending Approval';
         const destLockNotice = document.getElementById('sh-dest-lock-notice');
         const destPendingNotice = document.getElementById('sh-dest-pending-notice');
         const destLockNameDisplay = document.getElementById('locked-dest-name-display');
 
-        if (isApproved) {
+        if (isRegistered) {
             selectDest.disabled = true;
             selectDest.style.backgroundColor = '#F1F5F9';
             selectDest.style.cursor = 'not-allowed';
-            selectDest.title = 'Destination locked: Reassignment requires an authorized administrative process with audit trail.';
+            selectDest.title = 'Destination locked: Once registered, reassignment requires an authorized administrative process.';
             if (destLockNotice) destLockNotice.style.display = 'block';
             if (destPendingNotice) destPendingNotice.style.display = 'none';
             if (destLockNameDisplay) destLockNameDisplay.textContent = profile.destinationName || 'Rajgad Fort';
@@ -616,7 +704,7 @@ function initStakeholderProfilePage() {
     const saveBtn = document.getElementById('btn-save-profile');
     const profileForm = document.getElementById('profile-form');
 
-    const handleProfileSave = (e) => {
+    const handleProfileSave = async (e) => {
         if (e) e.preventDefault();
 
         if (profile.account_status === 'Deactivated') {
@@ -653,6 +741,55 @@ function initStakeholderProfilePage() {
         profile.priceRange = inputPrice ? inputPrice.value.trim() : '';
         profile.address = inputAddress ? inputAddress.value.trim() : '';
         profile.description = inputDesc ? inputDesc.value.trim() : '';
+
+        // Live Backend Profile Integration
+        if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+            try {
+                const contactInfo = {
+                    phone: profile.phone,
+                    address: profile.address,
+                    operating_hours: profile.hours,
+                    price_range: profile.priceRange,
+                    description: profile.description
+                };
+
+                if (!profile.serviceId) {
+                    if (!chosenDestId) {
+                        alert('Please select an operating destination for your business.');
+                        if (selectDest) selectDest.focus();
+                        return;
+                    }
+                    const destObj = (managerData.destinations || []).find(d => d.id === chosenDestId);
+                    const stateId = destObj ? destObj.state_id : 'maharashtra';
+
+                    await window.YatraSetuApi.registerStakeholderService({
+                        business_name: nameVal,
+                        destination_id: chosenDestId,
+                        state_id: stateId,
+                        category: profile.category,
+                        contact_info: contactInfo
+                    });
+                    alert('Business registration submitted for review! Your destination selection is now pending approval by the Destination Manager.');
+                } else {
+                    await window.YatraSetuApi.updateStakeholderProfile({
+                        full_name: profile.contactPerson,
+                        phone_number: profile.phone,
+                        business_name: nameVal,
+                        category: profile.category,
+                        contact_info: contactInfo
+                    });
+                    alert('Profile updated successfully!');
+                }
+
+                await initStakeholderContext();
+                renderLivePreview(radioVisitor ? radioVisitor.checked : true);
+                return;
+            } catch (err) {
+                console.error('[stakeholder.js] Profile save error:', err);
+                alert(err.message || 'Failed to save profile changes.');
+                return;
+            }
+        }
 
         const isApproved = profile.status === 'Approved' || profile.registration_status === 'Approved' || profile.isBusinessApproved === true;
         let isInitialSubmission = false;
@@ -741,7 +878,7 @@ function initStakeholderProfilePage() {
                 try {
                     localStorage.setItem('yatrasetu_manager_stakeholders', JSON.stringify(managerData.stakeholders));
                     sessionStorage.setItem('yatrasetu_manager_stakeholders', JSON.stringify(managerData.stakeholders));
-                } catch (e) {}
+                } catch (e) { }
             }
         }
 
@@ -763,7 +900,7 @@ function initStakeholderProfilePage() {
                     sessionStorage.setItem('yatrasetu_admin_users', JSON.stringify(adminUsers));
                 }
             }
-        } catch (e) {}
+        } catch (e) { }
 
         // Log audit event if new destination was registered by pending stakeholder
         if (isInitialSubmission && profile.destinationId) {
@@ -772,7 +909,7 @@ function initStakeholderProfilePage() {
                 const rawAudit = localStorage.getItem(auditKey) || sessionStorage.getItem(auditKey);
                 let audit = [];
                 if (rawAudit) {
-                    try { audit = JSON.parse(rawAudit); } catch (e) {}
+                    try { audit = JSON.parse(rawAudit); } catch (e) { }
                 }
                 audit.unshift({
                     id: `aud-${Date.now().toString(36)}`,
@@ -788,7 +925,7 @@ function initStakeholderProfilePage() {
                 });
                 localStorage.setItem(auditKey, JSON.stringify(audit));
                 sessionStorage.setItem(auditKey, JSON.stringify(audit));
-            } catch (e) {}
+            } catch (e) { }
         }
 
         // Re-initialize context to update sidebar and badges
@@ -807,7 +944,7 @@ function initStakeholderProfilePage() {
 /**
  * 5. Destination Updates Controller (destination-updates.html)
  */
-function initStakeholderDestinationUpdates() {
+async function initStakeholderDestinationUpdates() {
     const isUpdatesPage = window.location.pathname.includes('destination-updates.html');
     if (!isUpdatesPage) return;
 
@@ -888,9 +1025,36 @@ function initStakeholderDestinationUpdates() {
     if (quickTabsBar) quickTabsBar.style.display = 'flex';
 
     // 2. Base Records strictly filtered by Destination ID
-    const rawAnnouncements = (dataStore.announcements || []).filter(a => a.destination_id === destId);
-    const rawAttractions = (managerCatalog.attractions || []).filter(a => a.destination_id === destId);
-    const rawEvents = (managerCatalog.events || []).filter(e => e.destination_id === destId);
+    let rawAnnouncements = [];
+    let rawAttractions = [];
+    let rawEvents = [];
+
+    if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+        try {
+            const updates = await window.YatraSetuApi.getStakeholderDestinationUpdates();
+            const advisoriesList = Array.isArray(updates) ? updates : (updates?.advisories || []);
+            rawAnnouncements = advisoriesList.map(adv => ({
+                id: adv.id,
+                title: adv.title,
+                content: adv.description || adv.message,
+                category: adv.severity ? (adv.severity.charAt(0).toUpperCase() + adv.severity.slice(1)) : 'Advisory',
+                severity: adv.severity,
+                date: adv.created_at ? new Date(adv.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Official Notice',
+                guidance: `Official advisory issued by Destination Management. Severity: ${adv.severity}.`,
+                icon: adv.severity === 'critical' ? '🚨' : (adv.severity === 'warning' ? '⚠️' : '📣')
+            }));
+
+            // Scoped attractions and events
+            rawAttractions = (managerCatalog.attractions || []).filter(a => a.destination_id === destId);
+            rawEvents = (managerCatalog.events || []).filter(e => e.destination_id === destId);
+        } catch (err) {
+            console.error('[stakeholder.js] Error fetching destination updates:', err);
+        }
+    } else {
+        rawAnnouncements = (dataStore.announcements || []).filter(a => a.destination_id === destId);
+        rawAttractions = (managerCatalog.attractions || []).filter(a => a.destination_id === destId);
+        rawEvents = (managerCatalog.events || []).filter(e => e.destination_id === destId);
+    }
 
     // Timing Helper: compares event date against current reference date (October 2026)
     function isEventUpcoming(e) {
@@ -1237,7 +1401,7 @@ function initStakeholderDestinationUpdates() {
 
             if (modalImgContainer && modalImg) {
                 modalImgContainer.style.display = 'block';
-                modalImg.onerror = function() {
+                modalImg.onerror = function () {
                     this.onerror = null;
                     this.src = 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?w=600&auto=format&fit=crop&q=80';
                 };
@@ -1276,7 +1440,7 @@ function initStakeholderDestinationUpdates() {
 
             if (modalImgContainer && modalImg) {
                 modalImgContainer.style.display = 'block';
-                modalImg.onerror = function() {
+                modalImg.onerror = function () {
                     this.onerror = null;
                     this.src = 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&auto=format&fit=crop&q=80';
                 };
@@ -1346,7 +1510,7 @@ function initStakeholderDestinationUpdates() {
 /**
  * 6. Connections & Reviews Controller (connections-reviews.html)
  */
-function initStakeholderConnectionsReviews() {
+async function initStakeholderConnectionsReviews() {
     const isConnPage = window.location.pathname.includes('connections-reviews.html');
     if (!isConnPage) return;
 
@@ -1381,7 +1545,7 @@ function initStakeholderConnectionsReviews() {
     }
 
     // Render Suggestions Table
-    function renderSuggestionsTable() {
+    async function renderSuggestionsTable() {
         if (!suggestionsTable) return;
 
         if (!destId) {
@@ -1389,46 +1553,59 @@ function initStakeholderConnectionsReviews() {
             return;
         }
 
-        // Read from shared prototype storage
-        let allMessages = [];
-        try {
-            const rawStored = sessionStorage.getItem('yatrasetu_stakeholder_messages') || localStorage.getItem('yatrasetu_stakeholder_messages');
-            if (rawStored) {
-                allMessages = JSON.parse(rawStored);
-            }
-        } catch (e) {}
+        let suggestions = [];
 
-        if (!allMessages || allMessages.length === 0) {
-            if (window.YatraSetuManagerData && window.YatraSetuManagerData.stakeholderMessages) {
-                allMessages = window.YatraSetuManagerData.stakeholderMessages;
-            } else if (dataStore.suggestions) {
-                allMessages = dataStore.suggestions;
+        if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+            try {
+                const res = await window.YatraSetuApi.getStakeholderSuggestions();
+                if (Array.isArray(res)) suggestions = res;
+            } catch (err) {
+                console.error('[stakeholder.js] Error fetching suggestions:', err);
             }
+        } else {
+            // Read from shared prototype storage
+            let allMessages = [];
+            try {
+                const rawStored = sessionStorage.getItem('yatrasetu_stakeholder_messages') || localStorage.getItem('yatrasetu_stakeholder_messages');
+                if (rawStored) allMessages = JSON.parse(rawStored);
+            } catch (e) { }
+
+            if (!allMessages || allMessages.length === 0) {
+                if (window.YatraSetuManagerData && window.YatraSetuManagerData.stakeholderMessages) {
+                    allMessages = window.YatraSetuManagerData.stakeholderMessages;
+                } else if (dataStore.suggestions) {
+                    allMessages = dataStore.suggestions;
+                }
+            }
+
+            const currentStakeholderId = profile.id || 'sh-1';
+            suggestions = allMessages.filter(s => {
+                const matchesOwner = (s.stakeholder_id === currentStakeholderId || (!s.stakeholder_id && s.destination_id === destId));
+                const matchesDest = !destId || s.destination_id === destId;
+                return matchesOwner && matchesDest;
+            });
         }
 
-        // Strict Access Control: Stakeholders must ONLY see their own messages and replies
-        const currentStakeholderId = profile.id || 'sh-1';
-        const suggestions = allMessages.filter(s => {
-            const matchesOwner = (s.stakeholder_id === currentStakeholderId || (!s.stakeholder_id && s.destination_id === destId));
-            const matchesDest = !destId || s.destination_id === destId;
-            return matchesOwner && matchesDest;
-        });
-
         if (suggestions.length === 0) {
-            suggestionsTable.innerHTML = `<tr><td colspan="5" style="padding: 1.75rem; text-align: center; color: var(--sh-text-muted);">No suggestions submitted for ${profile.destinationName} yet. Use the "+ Suggest Update" button above.</td></tr>`;
+            suggestionsTable.innerHTML = `<tr><td colspan="5" style="padding: 1.75rem; text-align: center; color: var(--sh-text-muted);">No suggestions submitted for ${profile.destinationName} yet. Use the "+ Suggest Information Update" button above.</td></tr>`;
         } else {
             suggestionsTable.innerHTML = suggestions.map(s => {
                 let badgeClass = 'pending';
-                if (s.status === 'In Review') badgeClass = 'review';
-                else if (s.status === 'Responded') badgeClass = 'accepted';
+                const st = (s.status || '').toLowerCase();
+                if (st === 'in_review' || st === 'in review') badgeClass = 'review';
+                else if (st === 'responded') badgeClass = 'accepted';
+                else if (st === 'dismissed') badgeClass = 'pending';
+
+                const displayStatus = s.status ? (s.status.charAt(0).toUpperCase() + s.status.slice(1).replace('_', ' ')) : 'Pending';
+                const submittedAt = s.created_at ? new Date(s.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : (s.submitted_at || s.submittedAt || 'Recently');
 
                 const responseHtml = s.manager_response ? `
                     <div style="background: #F0FDF4; border-left: 3px solid #16A34A; padding: 0.45rem 0.75rem; border-radius: 4px; font-size: 0.8rem; color: #166534;">
-                        <strong style="color: #14532D; display: block; font-size: 0.76rem;">${s.responded_by || 'Destination Manager'}:</strong>
+                        <strong style="color: #14532D; display: block; font-size: 0.76rem;">Destination Manager:</strong>
                         "${s.manager_response}"
-                        <div style="font-size: 0.7rem; color: #64748B; margin-top: 0.25rem;">${s.responded_at || ''}</div>
+                        <div style="font-size: 0.7rem; color: #64748B; margin-top: 0.25rem;">${s.responded_at ? new Date(s.responded_at).toLocaleDateString('en-IN') : ''}</div>
                     </div>
-                ` : (s.status === 'In Review' ? `
+                ` : (st === 'in_review' || st === 'in review' ? `
                     <span style="color: #2563EB; font-style: italic; font-size: 0.8rem;">Under active review by Destination Manager</span>
                 ` : `
                     <span style="color: var(--sh-text-muted); font-style: italic; font-size: 0.8rem;">Awaiting Manager Review</span>
@@ -1438,9 +1615,9 @@ function initStakeholderConnectionsReviews() {
                     <tr style="border-bottom: 1px solid var(--sh-card-border); font-size: 0.85rem;">
                         <td style="padding: 0.85rem 1rem; font-weight: 700; color: var(--sh-text-primary);">${s.topic}</td>
                         <td style="padding: 0.85rem 1rem; color: var(--sh-text-secondary);">${s.message || s.suggestionText}</td>
-                        <td style="padding: 0.85rem 1rem; color: var(--sh-text-muted);">${s.submitted_at || s.submittedAt || 'Recently'}</td>
+                        <td style="padding: 0.85rem 1rem; color: var(--sh-text-muted);">${submittedAt}</td>
                         <td style="padding: 0.85rem 1rem;">
-                            <span class="sh-status-badge ${badgeClass}">${s.status}</span>
+                            <span class="sh-status-badge ${badgeClass}">${displayStatus}</span>
                         </td>
                         <td style="padding: 0.85rem 1rem;">
                             ${responseHtml}
@@ -1483,6 +1660,17 @@ function initStakeholderConnectionsReviews() {
     // Render Tourist Reviews
     function renderReviewsFeed() {
         if (!touristReviewsFeed) return;
+
+        if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+            touristReviewsFeed.innerHTML = `
+                <div style="padding: 2.5rem 1.5rem; text-align: center; color: var(--sh-text-muted); background: var(--sh-card-bg); border: 1px solid var(--sh-card-border); border-radius: 12px;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">ℹ️</div>
+                    <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--sh-text-primary); margin: 0 0 0.35rem 0;">Tourist Reviews & Inquiries</h4>
+                    <p style="font-size: 0.85rem; color: var(--sh-text-secondary); margin: 0;">Direct tourist messaging and review moderation are currently deferred and will be activated in the upcoming Tourist workspace phase.</p>
+                </div>
+            `;
+            return;
+        }
 
         if (!destId) {
             touristReviewsFeed.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--sh-text-muted);">No destination assigned. Please configure your profile to view tourist reviews.</div>';
@@ -1542,7 +1730,7 @@ function initStakeholderConnectionsReviews() {
         }
     }
 
-    renderSuggestionsTable();
+    await renderSuggestionsTable();
     renderManagerUpdates();
     renderReviewsFeed();
 
@@ -1569,7 +1757,7 @@ function initStakeholderConnectionsReviews() {
     }
 
     if (sugForm) {
-        sugForm.onsubmit = (e) => {
+        sugForm.onsubmit = async (e) => {
             e.preventDefault();
             const topicInput = document.getElementById('sug-topic-input');
             const textInput = document.getElementById('sug-text-input');
@@ -1579,71 +1767,26 @@ function initStakeholderConnectionsReviews() {
                 return;
             }
 
-            const nowFormatted = new Date().toLocaleString('en-IN', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-            });
-
-            const currentStakeholderId = profile.id || 'sh-1';
-            const newSug = {
-                id: `sh-msg-${Date.now()}`,
-                stakeholder_id: currentStakeholderId,
-                stakeholder_name: profile.userName || profile.contactPerson || 'Suresh Deshmukh',
-                business_name: profile.organizationName || 'Sahyadri Trekking Guides Co-op',
-                state_id: profile.stateId || 'maharashtra',
-                destination_id: destId,
-                destination_name: profile.destinationName || 'Rajgad Fort',
-                topic: topicInput.value.trim(),
-                message: textInput.value.trim(),
-                submitted_at: nowFormatted,
-                status: 'Pending',
-                manager_response: null,
-                responded_by: null,
-                responded_at: null,
-                // Backward-compatibility aliases
-                suggestionText: textInput.value.trim(),
-                submittedAt: nowFormatted,
-                statusClass: 'pending',
-                managerNote: 'Awaiting Manager Review'
-            };
-
-            // Load all current messages from prototype store
-            let allMessages = [];
-            try {
-                const rawStored = sessionStorage.getItem('yatrasetu_stakeholder_messages') || localStorage.getItem('yatrasetu_stakeholder_messages');
-                if (rawStored) allMessages = JSON.parse(rawStored);
-            } catch (e) {}
-
-            if (!allMessages || allMessages.length === 0) {
-                if (window.YatraSetuManagerData && window.YatraSetuManagerData.stakeholderMessages) {
-                    allMessages = window.YatraSetuManagerData.stakeholderMessages;
-                } else {
-                    allMessages = dataStore.suggestions || [];
+            if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+                try {
+                    await window.YatraSetuApi.createStakeholderSuggestion({
+                        topic: topicInput.value.trim(),
+                        message: textInput.value.trim()
+                    });
+                    alert('Suggestion submitted to Destination Manager!');
+                    if (sugModal) sugModal.style.display = 'none';
+                    sugForm.reset();
+                    await renderSuggestionsTable();
+                    await initStakeholderOverview();
+                    return;
+                } catch (err) {
+                    console.error('[stakeholder.js] Suggestion submission error:', err);
+                    alert(err.message || 'Failed to submit suggestion.');
+                    return;
                 }
+            } else {
+                alert('Suggestion submission requires an active authenticated session.');
             }
-
-            allMessages.unshift(newSug);
-
-            // Persist to storage
-            try {
-                sessionStorage.setItem('yatrasetu_stakeholder_messages', JSON.stringify(allMessages));
-                localStorage.setItem('yatrasetu_stakeholder_messages', JSON.stringify(allMessages));
-            } catch (e) {}
-
-            if (window.YatraSetuManagerData) {
-                window.YatraSetuManagerData.stakeholderMessages = allMessages;
-            }
-            dataStore.suggestions = allMessages;
-
-            alert('Suggestion submitted to Destination Manager! (Saved in prototype store)');
-            if (sugModal) sugModal.style.display = 'none';
-            sugForm.reset();
-            renderSuggestionsTable();
-            initStakeholderOverview();
         };
     }
 
@@ -1687,7 +1830,7 @@ function initStakeholderConnectionsReviews() {
  * media previews, destructive confirmation modals, post updates,
  * and service listing CRUD with strict stakeholder ownership protection.
  */
-function initStakeholderMediaListings() {
+async function initStakeholderMediaListings() {
     const isMediaPage = window.location.pathname.includes('media-listings.html');
     if (!isMediaPage) return;
 
@@ -1754,11 +1897,36 @@ function initStakeholderMediaListings() {
     const mediaSortSelect = document.getElementById('sh-media-sort');
     const mediaFilterPills = document.querySelectorAll('.sh-media-type-pill-group .sh-tab-pill');
 
-    function renderMediaGallery() {
+    async function renderMediaGallery() {
         if (!mediaGrid) return;
 
-        // Show only records genuinely uploaded by the current stakeholder
-        const allMedia = (dataStore.media || []).filter(m => m.destination_id === destId && m.stakeholder_id === currentUserId);
+        let allMedia = [];
+        if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+            try {
+                const res = await window.YatraSetuApi.getStakeholderMedia();
+                if (Array.isArray(res)) {
+                    allMedia = res.map(m => ({
+                        id: m.id,
+                        stakeholder_id: profile.id,
+                        destination_id: m.destination_id,
+                        type: m.media_type,
+                        title: m.title,
+                        description: m.description,
+                        url: m.media_url,
+                        status: m.verification_status === 'approved' ? 'Approved' : (m.verification_status === 'rejected' ? 'Rejected' : 'Pending Approval'),
+                        statusClass: m.verification_status === 'approved' ? 'accepted' : (m.verification_status === 'rejected' ? 'review' : 'pending'),
+                        uploadedAt: m.created_at ? new Date(m.created_at).toLocaleDateString('en-IN') : 'Today',
+                        fileSize: 'Standard'
+                    }));
+                }
+            } catch (err) {
+                console.error('[stakeholder.js] Error fetching media:', err);
+            }
+        } else {
+            // Show only records genuinely uploaded by the current stakeholder in prototype store
+            allMedia = (dataStore.media || []).filter(m => m.destination_id === destId && m.stakeholder_id === currentUserId);
+        }
+
         const photoCount = allMedia.filter(m => m.type === 'photo').length;
         const videoCount = allMedia.filter(m => m.type === 'video').length;
 
@@ -2013,7 +2181,7 @@ function initStakeholderMediaListings() {
     }
 
     if (btnSubmitUpload) {
-        btnSubmitUpload.addEventListener('click', () => {
+        btnSubmitUpload.addEventListener('click', async () => {
             if (!currentSelectedFile) {
                 alert('Please select a photo or video file to upload.');
                 return;
@@ -2030,7 +2198,30 @@ function initStakeholderMediaListings() {
             const description = uploadDescInput ? uploadDescInput.value.trim() : '';
             const fileSizeStr = `${(currentSelectedFile.size / (1024 * 1024)).toFixed(1)} MB`;
 
-            // Simulate upload progress
+            // Live Backend Media Integration
+            if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+                const persistentMediaUrl = (currentPreviewUrl && !currentPreviewUrl.startsWith('blob:'))
+                    ? currentPreviewUrl
+                    : 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&auto=format&fit=crop&q=80';
+                try {
+                    await window.YatraSetuApi.createStakeholderMedia({
+                        media_type: mediaType,
+                        title: caption,
+                        description: description || 'Stakeholder media submission awaiting official verification.',
+                        media_url: persistentMediaUrl
+                    });
+                    alert(`Media "${caption}" added to catalog (Status: Pending Approval). Only the authorized Destination Manager can verify and grant public approval.`);
+                    resetUploadForm();
+                    await renderMediaGallery();
+                    return;
+                } catch (err) {
+                    console.error('[stakeholder.js] Media upload error:', err);
+                    alert(err.message || 'Failed to upload media.');
+                    return;
+                }
+            }
+
+            // Simulate upload progress in prototype mode
             if (progressContainer) progressContainer.style.display = 'block';
             let progress = 0;
             const timer = setInterval(() => {
@@ -2041,7 +2232,6 @@ function initStakeholderMediaListings() {
                 if (progress >= 100) {
                     clearInterval(timer);
 
-                    // Add new media item in Pending Approval state
                     const persistentMediaUrl = (currentPreviewUrl && !currentPreviewUrl.startsWith('blob:'))
                         ? currentPreviewUrl
                         : 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&auto=format&fit=crop&q=80';
@@ -2064,17 +2254,9 @@ function initStakeholderMediaListings() {
 
                     (dataStore.media = dataStore.media || []).unshift(newMediaItem);
                     saveStakeholderMedia(dataStore.media);
-                    alert(`Media "${caption}" added to local session as a temporary preview (Status: Pending Approval). Note: Prototype mode does not perform permanent server storage. Only the authorized Destination Manager can verify and grant public approval.`);
+                    alert(`Media "${caption}" added to local session as a temporary preview (Status: Pending Approval).`);
 
-                    // Reset selected file reference but preserve preview in collection
-                    currentSelectedFile = null;
-                    currentPreviewUrl = '';
-                    if (fileInput) fileInput.value = '';
-                    if (uploadCaptionInput) uploadCaptionInput.value = '';
-                    if (uploadDescInput) uploadDescInput.value = '';
-                    if (progressContainer) progressContainer.style.display = 'none';
-                    if (uploadDetailsForm) uploadDetailsForm.style.display = 'none';
-
+                    resetUploadForm();
                     renderMediaGallery();
                 }
             }, 80);
@@ -2199,6 +2381,25 @@ function initStakeholderMediaListings() {
         if (deleteMediaBtn) {
             e.preventDefault();
             const id = deleteMediaBtn.getAttribute('data-id');
+
+            // Live Backend Delete
+            if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+                openDeleteConfirmation(
+                    `Are you sure you want to remove this media item? This action will permanently remove it from your media catalog.`,
+                    async () => {
+                        try {
+                            await window.YatraSetuApi.deleteStakeholderMedia(id);
+                            alert(`Media item successfully removed.`);
+                            await renderMediaGallery();
+                        } catch (err) {
+                            console.error('[stakeholder.js] Media delete error:', err);
+                            alert(err.message || 'Failed to remove media.');
+                        }
+                    }
+                );
+                return;
+            }
+
             const item = (dataStore.media || []).find(m => m.id === id);
             if (!item) return;
 
@@ -2338,11 +2539,37 @@ function initStakeholderMediaListings() {
     const listingFormStatus = document.getElementById('listing-form-status');
     const listingModalTitle = document.getElementById('listing-modal-title');
 
-    function renderListingsGrid() {
+    async function renderListingsGrid() {
         if (!listingsGrid) return;
 
-        // Show only records genuinely registered by the current stakeholder
-        const listings = (dataStore.listings || []).filter(l => l.destination_id === destId && l.stakeholder_id === currentUserId);
+        let listings = [];
+        if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+            try {
+                const res = await window.YatraSetuApi.getStakeholderOfferings();
+                if (Array.isArray(res)) {
+                    listings = res.map(off => ({
+                        id: off.id,
+                        stakeholder_id: profile.id,
+                        destination_id: destId,
+                        name: off.title,
+                        description: off.description || 'Verified service offering.',
+                        priceRange: off.price != null ? `${off.price} ${off.pricing_unit || 'per group'}` : 'On Request',
+                        category: profile.category || 'Tour & Trekking Guides',
+                        type: 'visitor-facing',
+                        status: off.is_active ? 'Active' : 'Inactive',
+                        statusClass: off.is_active ? 'accepted' : 'pending',
+                        address: profile.address || 'Gunjavane Village',
+                        hours: profile.hours || '06:00 - 18:00',
+                        img: ''
+                    }));
+                }
+            } catch (err) {
+                console.error('[stakeholder.js] Error fetching offerings:', err);
+            }
+        } else {
+            // Show only records genuinely registered by the current stakeholder
+            listings = (dataStore.listings || []).filter(l => l.destination_id === destId && l.stakeholder_id === currentUserId);
+        }
 
         if (listings.length === 0) {
             listingsGrid.innerHTML = `
@@ -2412,14 +2639,8 @@ function initStakeholderMediaListings() {
         document.querySelectorAll('.btn-edit-listing').forEach(btn => {
             btn.onclick = () => {
                 const id = btn.getAttribute('data-id');
-                const lst = (dataStore.listings || []).find(l => l.id === id);
+                const lst = (listings || []).find(l => l.id === id);
                 if (!lst) return;
-
-                // Strict Ownership Verification
-                if (lst.stakeholder_id !== currentUserId) {
-                    alert(`Unauthorized: You cannot edit a listing owned by another stakeholder.`);
-                    return;
-                }
 
                 openListingModal(lst);
             };
@@ -2428,10 +2649,24 @@ function initStakeholderMediaListings() {
         document.querySelectorAll('.btn-delete-listing').forEach(btn => {
             btn.onclick = () => {
                 const id = btn.getAttribute('data-id');
-                const lst = (dataStore.listings || []).find(l => l.id === id);
+                const lst = (listings || []).find(l => l.id === id);
                 if (!lst) return;
 
-                // Strict Ownership Verification
+                if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+                    openDeleteConfirmation(`Are you sure you want to remove listing "${lst.name}"?`, async () => {
+                        try {
+                            await window.YatraSetuApi.deleteStakeholderOffering(id);
+                            alert(`Listing "${lst.name}" successfully removed.`);
+                            await renderListingsGrid();
+                        } catch (err) {
+                            console.error('[stakeholder.js] Offering delete error:', err);
+                            alert(err.message || 'Failed to remove listing.');
+                        }
+                    });
+                    return;
+                }
+
+                // Strict Ownership Verification in prototype store
                 if (lst.stakeholder_id !== currentUserId) {
                     alert(`Unauthorized: You cannot delete a listing owned by another stakeholder.`);
                     return;
@@ -2491,7 +2726,7 @@ function initStakeholderMediaListings() {
     }
 
     if (btnSaveListingSubmit) {
-        btnSaveListingSubmit.addEventListener('click', () => {
+        btnSaveListingSubmit.addEventListener('click', async () => {
             const name = listingFormName ? listingFormName.value.trim() : '';
             const address = listingFormAddress ? listingFormAddress.value.trim() : '';
             const desc = listingFormDesc ? listingFormDesc.value.trim() : '';
@@ -2510,6 +2745,28 @@ function initStakeholderMediaListings() {
                 alert('Please describe your service offering.');
                 if (listingFormDesc) listingFormDesc.focus();
                 return;
+            }
+
+            // Live Backend Offering Creation
+            if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+                try {
+                    const priceRaw = listingFormPrice ? listingFormPrice.value.replace(/[^0-9.]/g, '') : '';
+                    const numericPrice = parseFloat(priceRaw);
+                    await window.YatraSetuApi.createStakeholderOffering({
+                        title: name,
+                        description: desc,
+                        price: isNaN(numericPrice) ? null : numericPrice,
+                        pricing_unit: 'per group'
+                    });
+                    alert(`New service listing "${name}" registered successfully!`);
+                    closeListingModal();
+                    await renderListingsGrid();
+                    return;
+                } catch (err) {
+                    console.error('[stakeholder.js] Offering save error:', err);
+                    alert(err.message || 'Failed to create service listing.');
+                    return;
+                }
             }
 
             const existingId = listingFormId ? listingFormId.value : '';
@@ -2580,5 +2837,5 @@ function initStakeholderMediaListings() {
     });
 
     // Initial Gallery Render
-    renderMediaGallery();
+    await renderMediaGallery();
 }

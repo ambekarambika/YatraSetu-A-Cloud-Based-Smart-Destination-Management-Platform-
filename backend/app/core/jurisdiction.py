@@ -70,7 +70,14 @@ class JurisdictionAuthorizer:
 
         # Destination Manager scope
         if assignment.destination_id is not None:
-            return assignment.destination_id == target_destination_id
+            aliases = {
+                "raigad-fort": ["raigad-fort", "rajgad-fort"],
+                "rajgad-fort": ["rajgad-fort", "raigad-fort"],
+                "amber-fort": ["amber-fort", "amer-fort"],
+                "amer-fort": ["amer-fort", "amber-fort"],
+            }
+            assigned_variants = aliases.get(assignment.destination_id, [assignment.destination_id])
+            return target_destination_id in assigned_variants
 
         # State Manager scope (destination_id is NULL)
         if target_state_id is not None:
@@ -78,7 +85,13 @@ class JurisdictionAuthorizer:
 
         # If target_state_id is not provided, look up destination's state
         from app.models.destination import Destination
-        dest = session.query(Destination).filter(Destination.id == target_destination_id).first()
+        aliases = {
+            "raigad-fort": ["raigad-fort", "rajgad-fort"],
+            "rajgad-fort": ["rajgad-fort", "raigad-fort"],
+            "amber-fort": ["amber-fort", "amer-fort"],
+            "amer-fort": ["amer-fort", "amber-fort"],
+        }
+        dest = session.query(Destination).filter(Destination.id.in_(aliases.get(target_destination_id, [target_destination_id]))).first()
         if not dest:
             return False
 

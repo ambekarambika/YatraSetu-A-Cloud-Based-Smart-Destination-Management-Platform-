@@ -230,10 +230,15 @@ class DestinationVideo(Base):
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     destination_id = Column(String(64), ForeignKey("destinations.id", ondelete="CASCADE"), nullable=False, index=True)
     title = Column(String(180), nullable=False)
-    duration = Column(String(32), nullable=False)
-    youtube_id = Column(String(64), nullable=False)
+    category = Column(String(64), nullable=True, default="Orientation")
+    description = Column(Text, nullable=True)
+    duration = Column(String(32), nullable=False, default="0:30")
+    youtube_id = Column(String(64), nullable=True)
+    video_url = Column(String(500), nullable=True)
     thumbnail_url = Column(String(500), nullable=True)
+    status = Column(String(32), nullable=False, default="Published")
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     # Relationships
     destination = relationship("Destination", back_populates="videos")

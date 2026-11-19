@@ -1,6 +1,12 @@
 # Environment variables & secrets
 .env
 *.env.local
+*.test_manager_credentials.json
+*.test_stakeholder_credentials.json
+*.test_tourist_credentials.json
+*.test_admin_credentials.json
+*.production_app_credentials.json
+*credentials*.json
 
 # Python / FastAPI
 __pycache__/

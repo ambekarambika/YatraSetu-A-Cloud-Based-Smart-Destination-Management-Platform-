@@ -7,6 +7,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -70,8 +71,16 @@ def register_user(
     password_hash = PasswordSecurity.hash_password(payload.password)
 
     # Construct user
+    new_user_id = uuid.uuid4()
+
+    # Establish transaction-scoped registration identity context for PostgreSQL RLS
+    bind = db.get_bind()
+    if hasattr(bind, "dialect") and bind.dialect.name == "postgresql":
+        db.execute(text("SELECT set_config('app.current_user_id', :uid, true)"), {"uid": str(new_user_id)})
+        db.execute(text("SELECT set_config('app.current_role', :role, true)"), {"role": payload.role})
+
     new_user = User(
-        id=uuid.uuid4(),
+        id=new_user_id,
         role_id=payload.role,
         email=norm_email,
         password_hash=password_hash,
@@ -134,38 +143,66 @@ def login_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    user = db.query(User).filter(User.email == norm_email).first()
-    if not user:
-        raise generic_error
+    bind = db.get_bind()
+    is_postgres = hasattr(bind, "dialect") and bind.dialect.name == "postgresql"
+
+    if is_postgres:
+        # Use narrow SECURITY DEFINER lookup function to resolve user under RLS
+        row = db.execute(
+            text(
+                "SELECT id, role_id, email, password_hash, full_name, is_active, is_verified "
+                "FROM public.lookup_user_for_authentication(:email)"
+            ),
+            {"email": norm_email},
+        ).first()
+        if not row:
+            raise generic_error
+
+        user_id = row.id
+        user_role = row.role_id
+        user_email = row.email
+        password_hash = row.password_hash
+        full_name = row.full_name
+        is_active = row.is_active
+        is_verified = row.is_verified
+    else:
+        user = db.query(User).filter(User.email == norm_email).first()
+        if not user:
+            raise generic_error
+        user_id = user.id
+        user_role = user.role_id
+        user_email = user.email
+        password_hash = user.password_hash
+        full_name = user.full_name
+        is_active = user.is_active
+        is_verified = user.is_verified
 
     # Verify password against Argon2id hash
-    if not PasswordSecurity.verify_password(payload.password, user.password_hash):
+    if not PasswordSecurity.verify_password(payload.password, password_hash):
         raise generic_error
 
     # Check account active status
-    if not user.is_active:
+    if not is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="ACCOUNT SUSPENDED: Your account has been deactivated by administration.",
         )
 
+    # Establish transaction-scoped caller identity prior to subsequent queries
+    if is_postgres:
+        db.execute(text("SELECT set_config('app.current_user_id', :uid, true)"), {"uid": str(user_id)})
+        db.execute(text("SELECT set_config('app.current_role', :role, true)"), {"role": user_role})
+
     # Issue JWT access token
     access_token, expires_at = TokenService.create_access_token(
-        user_id=user.id,
-        role=user.role_id,
+        user_id=user_id,
+        role=user_role,
     )
 
     # Resolve manager jurisdiction details if applicable BEFORE persisting refresh token
     manager_scope = None
-    if user.role_id == "manager":
-        # Establish verified transaction-scoped caller identity prior to querying protected assignment
-        from sqlalchemy import text
-        bind = db.get_bind()
-        if hasattr(bind, "dialect") and bind.dialect.name == "postgresql":
-            db.execute(text("SELECT set_config('app.current_user_id', :uid, true)"), {"uid": str(user.id)})
-            db.execute(text("SELECT set_config('app.current_role', :role, true)"), {"role": user.role_id})
-
-        assignment = JurisdictionAuthorizer.get_manager_assignment(db, user.id)
+    if user_role == "manager":
+        assignment = JurisdictionAuthorizer.get_manager_assignment(db, user_id)
         if not assignment:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -183,7 +220,7 @@ def login_user(
 
     db_refresh_token = UserRefreshToken(
         id=uuid.uuid4(),
-        user_id=user.id,
+        user_id=user_id,
         token_hash=token_hash,
         family_id=family_id,
         is_revoked=False,
@@ -200,12 +237,12 @@ def login_user(
         expires_in=expires_in_seconds,
         refresh_token=raw_refresh_token,
         user={
-            "id": str(user.id),
-            "email": user.email,
-            "full_name": user.full_name,
-            "role": user.role_id,
-            "is_active": user.is_active,
-            "is_verified": user.is_verified,
+            "id": str(user_id),
+            "email": user_email,
+            "full_name": full_name,
+            "role": user_role,
+            "is_active": is_active,
+            "is_verified": is_verified,
             "manager_scope": manager_scope,
         },
     )
@@ -230,9 +267,35 @@ def refresh_token(
     - Atomically revokes old token and issues fresh token pair in the same family.
     """
     token_hash = TokenService.hash_refresh_token(payload.refresh_token)
-    token_record = db.query(UserRefreshToken).filter(
-        UserRefreshToken.token_hash == token_hash
-    ).first()
+    bind = db.get_bind()
+    is_postgres = hasattr(bind, "dialect") and bind.dialect.name == "postgresql"
+
+    if is_postgres:
+        # Retrieve token securely via narrow SECURITY DEFINER function under RLS
+        token_row = db.execute(
+            text(
+                "SELECT id, user_id, family_id, is_revoked, expires_at "
+                "FROM public.lookup_refresh_token_for_rotation(:thash)"
+            ),
+            {"thash": token_hash},
+        ).first()
+
+        if not token_row:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # Establish owner identity context immediately
+        db.execute(text("SELECT set_config('app.current_user_id', :uid, true)"), {"uid": str(token_row.user_id)})
+
+        # Query actual token record under verified owner context
+        token_record = db.query(UserRefreshToken).filter(UserRefreshToken.id == token_row.id).first()
+    else:
+        token_record = db.query(UserRefreshToken).filter(
+            UserRefreshToken.token_hash == token_hash
+        ).first()
 
     if not token_record:
         raise HTTPException(
@@ -266,7 +329,7 @@ def refresh_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Load associated user
+    # Load associated user (satisfies p_users_select under established current_user_id)
     user = db.query(User).filter(User.id == token_record.user_id).first()
     if not user or not user.is_active:
         raise HTTPException(
@@ -275,21 +338,44 @@ def refresh_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+    # Set authoritative role in PostgreSQL context
+    if is_postgres:
+        db.execute(text("SELECT set_config('app.current_role', :role, true)"), {"role": user.role_id})
+
+    # Extract all user fields before commit to prevent post-commit lazy load under expired session
+    user_id = user.id
+    user_email = user.email
+    user_full_name = user.full_name
+    user_role = user.role_id
+    user_is_active = user.is_active
+    user_is_verified = user.is_verified
+
+    # Resolve manager jurisdiction details BEFORE commit while transaction context is active
+    manager_scope = None
+    if user_role == "manager":
+        assignment = JurisdictionAuthorizer.get_manager_assignment(db, user_id)
+        if assignment:
+            manager_scope = {
+                "state_id": assignment.state_id,
+                "destination_id": assignment.destination_id,
+                "scope": "STATE" if assignment.destination_id is None else "DESTINATION",
+            }
+
     # Revoke current token
     token_record.is_revoked = True
     token_record.revoked_at = now
 
     # Issue new access token
     access_token, access_expires_at = TokenService.create_access_token(
-        user_id=user.id,
-        role=user.role_id,
+        user_id=user_id,
+        role=user_role,
     )
 
     # Issue new refresh token within the SAME family
     new_raw_token, new_token_hash, new_refresh_expires = TokenService.generate_refresh_token()
     new_record = UserRefreshToken(
         id=uuid.uuid4(),
-        user_id=user.id,
+        user_id=user_id,
         token_hash=new_token_hash,
         family_id=token_record.family_id,
         is_revoked=False,
@@ -297,16 +383,6 @@ def refresh_token(
     )
     db.add(new_record)
     db.commit()
-
-    manager_scope = None
-    if user.role_id == "manager":
-        assignment = JurisdictionAuthorizer.get_manager_assignment(db, user.id)
-        if assignment:
-            manager_scope = {
-                "state_id": assignment.state_id,
-                "destination_id": assignment.destination_id,
-                "scope": "STATE" if assignment.destination_id is None else "DESTINATION",
-            }
 
     expires_in_seconds = int((access_expires_at - now).total_seconds())
 
@@ -316,12 +392,12 @@ def refresh_token(
         expires_in=expires_in_seconds,
         refresh_token=new_raw_token,
         user={
-            "id": str(user.id),
-            "email": user.email,
-            "full_name": user.full_name,
-            "role": user.role_id,
-            "is_active": user.is_active,
-            "is_verified": user.is_verified,
+            "id": str(user_id),
+            "email": user_email,
+            "full_name": user_full_name,
+            "role": user_role,
+            "is_active": user_is_active,
+            "is_verified": user_is_verified,
             "manager_scope": manager_scope,
         },
     )
@@ -342,14 +418,33 @@ def logout_user(
     Revokes the provided refresh token.
     """
     token_hash = TokenService.hash_refresh_token(payload.refresh_token)
-    token_record = db.query(UserRefreshToken).filter(
-        UserRefreshToken.token_hash == token_hash
-    ).first()
+    bind = db.get_bind()
+    is_postgres = hasattr(bind, "dialect") and bind.dialect.name == "postgresql"
 
-    if token_record and not token_record.is_revoked:
-        token_record.is_revoked = True
-        token_record.revoked_at = datetime.now(timezone.utc)
-        db.commit()
+    if is_postgres:
+        token_row = db.execute(
+            text(
+                "SELECT id, user_id, family_id, is_revoked, expires_at "
+                "FROM public.lookup_refresh_token_for_rotation(:thash)"
+            ),
+            {"thash": token_hash},
+        ).first()
+        if token_row:
+            db.execute(text("SELECT set_config('app.current_user_id', :uid, true)"), {"uid": str(token_row.user_id)})
+            token_record = db.query(UserRefreshToken).filter(UserRefreshToken.id == token_row.id).first()
+            if token_record and not token_record.is_revoked:
+                token_record.is_revoked = True
+                token_record.revoked_at = datetime.now(timezone.utc)
+                db.commit()
+    else:
+        token_record = db.query(UserRefreshToken).filter(
+            UserRefreshToken.token_hash == token_hash
+        ).first()
+
+        if token_record and not token_record.is_revoked:
+            token_record.is_revoked = True
+            token_record.revoked_at = datetime.now(timezone.utc)
+            db.commit()
 
     return MessageResponse(
         message="Session logged out successfully.",

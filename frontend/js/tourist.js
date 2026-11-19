@@ -280,6 +280,8 @@
             best_time: 'April to October'
         }
     };
+    DESTINATION_EDITORIAL['rajgad-fort'] = DESTINATION_EDITORIAL['raigad-fort'];
+    DESTINATION_EDITORIAL['amer-fort'] = DESTINATION_EDITORIAL['amber-fort'];
 
     /**
      * Authoritative Geographic Coordinates Dictionary
@@ -344,6 +346,8 @@
         'jorhat-tea-estates': { lat: 26.7509, lng: 94.2037 },
         'haflong-hill-station': { lat: 25.1764, lng: 93.0205 }
     };
+    DESTINATION_COORDINATES['rajgad-fort'] = DESTINATION_COORDINATES['raigad-fort'];
+    DESTINATION_COORDINATES['amer-fort'] = DESTINATION_COORDINATES['amber-fort'];
 
     /**
      * Curated Multi-Image Visual Galleries
@@ -399,6 +403,25 @@
             { url: '../assets/images/dest-jaipur.jpg', title: 'Evening Illumination & Sound Show', tag: 'Night Heritage', caption: 'Vibrant amber and crimson lighting highlighting fort ramparts against the night sky.' }
         ]
     };
+    DESTINATION_GALLERIES['rajgad-fort'] = DESTINATION_GALLERIES['raigad-fort'];
+    DESTINATION_GALLERIES['amer-fort'] = DESTINATION_GALLERIES['amber-fort'];
+
+    const DESTINATION_ID_ALIASES = {
+        'raigad-fort': ['raigad-fort', 'rajgad-fort'],
+        'rajgad-fort': ['rajgad-fort', 'raigad-fort'],
+        'amber-fort': ['amber-fort', 'amer-fort'],
+        'amer-fort': ['amer-fort', 'amber-fort']
+    };
+
+    function matchesDestId(id1, id2) {
+        if (!id1 || !id2) return false;
+        if (id1 === id2) return true;
+        const a1 = DESTINATION_ID_ALIASES[id1];
+        if (a1 && a1.includes(id2)) return true;
+        const a2 = DESTINATION_ID_ALIASES[id2];
+        if (a2 && a2.includes(id1)) return true;
+        return false;
+    }
 
     /**
      * Curated Editorial Details for Verified Attractions
@@ -1067,17 +1090,72 @@
         },
 
         getDestinationGallery(dest) {
-            if (DESTINATION_GALLERIES[dest.id]) {
-                return DESTINATION_GALLERIES[dest.id];
+            const gallery = [];
+            const seenUrls = new Set();
+
+            const addImg = (url, title, tag, caption) => {
+                if (!url || typeof url !== 'string' || !url.trim() || seenUrls.has(url.trim())) return;
+                seenUrls.add(url.trim());
+                gallery.push({
+                    url: url.trim(),
+                    title: title || `${dest.name} Perspective`,
+                    tag: tag || 'Curated Perspective',
+                    caption: caption || `Visual vista of ${dest.name}.`
+                });
+            };
+
+            // 1. Authoritative Hero & Banner Images
+            if (dest.hero_image_url) {
+                addImg(dest.hero_image_url, `${dest.name} Panoramic Landscape`, 'Primary Vista', `Official curated perspective highlighting the geography and monument of ${dest.name}.`);
             }
-            return [
-                { url: dest.img, title: `${dest.name} Panoramic Landscape`, tag: 'Landscape Panorama', caption: `Sweeping perspective highlighting the distinct topography and regional setting of ${dest.name}.` },
-                { url: dest.img, title: `${dest.name} Cultural Monument`, tag: 'Heritage Architecture', caption: `Architectural craftsmanship and historical masonry preserved at ${dest.name}.` },
-                { url: dest.img, title: `Scenic Trail Lookout`, tag: 'Scenic Viewpoint', caption: `Natural viewpoints and panoramic ridge vistas accessible to visiting travelers.` },
-                { url: dest.img, title: `Visitor Approach Trail`, tag: 'Visitor Trail', caption: `Approved access pathway maintained under Destination Manager coordination.` },
-                { url: dest.img, title: `Twilight Atmosphere`, tag: 'Golden Hour', caption: `Evening light settling across the landscape and monuments of ${dest.name}.` },
-                { url: dest.img, title: `Regional Conservation Zone`, tag: 'Regional Ecology', caption: `Protected natural habitat and community surrounds in the vicinity of ${dest.name}.` }
-            ];
+            if (dest.banner_image && dest.banner_image !== dest.hero_image_url) {
+                addImg(dest.banner_image, `${dest.name} Topographical View`, 'Landscape Panorama', `Topographical perspective highlighting the regional landscape of ${dest.name}.`);
+            }
+
+            // 2. Custom Metadata Gallery Images saved by Manager
+            const meta = dest.metadata || dest.metadata_json;
+            if (meta && Array.isArray(meta.gallery_images)) {
+                meta.gallery_images.forEach((imgItem, idx) => {
+                    const url = typeof imgItem === 'string' ? imgItem : (imgItem && imgItem.url);
+                    const title = (typeof imgItem === 'object' && imgItem.title) || `${dest.name} Perspective ${idx + 1}`;
+                    const tag = (typeof imgItem === 'object' && imgItem.tag) || 'Curated Perspective';
+                    const caption = (typeof imgItem === 'object' && imgItem.caption) || `Architectural and cultural vista of ${dest.name}.`;
+                    addImg(url, title, tag, caption);
+                });
+            }
+
+            // 3. Associated Local Attractions Images
+            if (typeof this.getDestinationAttractions === 'function') {
+                const attractions = this.getDestinationAttractions(dest.id);
+                if (Array.isArray(attractions)) {
+                    attractions.forEach(attr => {
+                        const attrImg = attr.img || attr.image_url;
+                        addImg(attrImg, attr.name, attr.category || 'Local Attraction', attr.description || `Key landmark at ${dest.name}.`);
+                    });
+                }
+            }
+
+            // 4. Curated Heritage Gallery Perspectives
+            if (DESTINATION_GALLERIES[dest.id]) {
+                DESTINATION_GALLERIES[dest.id].forEach(g => {
+                    addImg(g.url, g.title, g.tag, g.caption);
+                });
+            }
+
+            // 5. Fallback if still empty
+            if (gallery.length === 0) {
+                const fallbackImg = dest.img || this.resolveDestinationImage(dest);
+                return [
+                    { url: fallbackImg, title: `${dest.name} Panoramic Landscape`, tag: 'Landscape Panorama', caption: `Sweeping perspective highlighting the distinct topography and regional setting of ${dest.name}.` },
+                    { url: fallbackImg, title: `${dest.name} Cultural Monument`, tag: 'Heritage Architecture', caption: `Architectural craftsmanship and historical masonry preserved at ${dest.name}.` },
+                    { url: fallbackImg, title: `Scenic Trail Lookout`, tag: 'Scenic Viewpoint', caption: `Natural viewpoints and panoramic ridge vistas accessible to visiting travelers.` },
+                    { url: fallbackImg, title: `Visitor Approach Trail`, tag: 'Visitor Trail', caption: `Approved access pathway maintained under Destination Manager coordination.` },
+                    { url: fallbackImg, title: `Twilight Atmosphere`, tag: 'Golden Hour', caption: `Evening light settling across the landscape and monuments of ${dest.name}.` },
+                    { url: fallbackImg, title: `Regional Conservation Zone`, tag: 'Regional Ecology', caption: `Protected natural habitat and community surrounds in the vicinity of ${dest.name}.` }
+                ];
+            }
+
+            return gallery;
         },
 
         openLightbox(index, gallery, destTitle) {
@@ -1265,7 +1343,7 @@
                     img: e.img || '../assets/images/thumb-rajgad.jpg'
                 }))
                 : EXPERIENCES_DATA;
-            const matches = expPool.filter(e => e.destination_id === destId);
+            const matches = expPool.filter(e => matchesDestId(e.destination_id, destId));
             if (matches.length > 0) return matches;
             const dest = this.destinations.find(d => d.id === destId);
             if (dest) {
@@ -1482,9 +1560,14 @@
                         </h4>
                         <div style="font-size:0.8rem; color:var(--tourist-text-muted);">Theme: ${style.toUpperCase()} • Generated with authentic destination records</div>
                     </div>
-                    <span style="font-size:0.75rem; background:#FFF; color:var(--tourist-forest); padding:0.35rem 0.85rem; border-radius:9999px; font-weight:800;">
-                        ${days} Curated Stop${days > 1 ? 's' : ''}
-                    </span>
+                    <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                        <span style="font-size:0.75rem; background:#FFF; color:var(--tourist-forest); padding:0.35rem 0.85rem; border-radius:9999px; font-weight:800;">
+                            ${days} Curated Stop${days > 1 ? 's' : ''}
+                        </span>
+                        <button type="button" class="tourist-btn-primary" id="btn-save-custom-itinerary-to-db" style="font-size:0.78rem; padding:0.35rem 0.85rem;">
+                            💾 Save to My Trips
+                        </button>
+                    </div>
                 </div>
                 ${planDays.map(d => `
                     <div class="itinerary-day-card">
@@ -1511,6 +1594,34 @@
                     </div>
                 `).join('')}
             `;
+
+            const saveBtn = container.querySelector('#btn-save-custom-itinerary-to-db');
+            if (saveBtn) {
+                saveBtn.onclick = async () => {
+                    if (typeof window !== 'undefined' && window.YatraSetuApi && typeof window.YatraSetuApi.hasToken === 'function' && window.YatraSetuApi.hasToken()) {
+                        try {
+                            const items = planDays.map((d, idx) => ({
+                                destination_id: d.destId,
+                                day_number: d.day,
+                                order_index: idx + 1,
+                                time_slot: d.time,
+                                notes: d.highlight
+                            }));
+                            await window.YatraSetuApi.createTouristItinerary({
+                                title: `Custom ${days}-Day ${stateObj.name} Journey Plan`,
+                                notes: `Theme: ${style.toUpperCase()}. Generated via YatraSetu itinerary builder.`,
+                                items: items
+                            });
+                            this.showToast('Itinerary saved to your account successfully!');
+                        } catch (err) {
+                            console.warn('Could not save custom itinerary to backend:', err);
+                            this.showToast('Could not save itinerary. Please check connection.');
+                        }
+                    } else {
+                        this.showToast('Sign in with a Tourist account to save itineraries to your cloud profile.');
+                    }
+                };
+            }
         },
 
         renderTravelStories() {
@@ -1545,6 +1656,7 @@
         },
 
         init() {
+            console.log('[DEBUG INIT] TouristApp.init called, path:', window.location.pathname);
             this.loadFavorites();
             this.enrichDestinations();
             this.initUserSession();
@@ -1556,6 +1668,7 @@
             if (path.includes('destination-advisories.html')) {
                 this.initDestinationAdvisoriesPage();
             } else if (path.includes('destination-detail.html')) {
+                console.log('[DEBUG DETAIL] Calling initDestinationDetailPage from init()');
                 this.initDestinationDetailPage();
             } else if (path.includes('destinations.html')) {
                 this.initExploreDestinationsPage();
@@ -1580,6 +1693,18 @@
          */
         resolveDestinationImage(dest) {
             if (!dest) return '../assets/images/hero-india.jpg';
+            // 1. Authoritative: configured database hero or banner image URL
+            if (dest.hero_image_url && typeof dest.hero_image_url === 'string' && dest.hero_image_url.trim()) {
+                return dest.hero_image_url.trim();
+            }
+            if (dest.banner_image && typeof dest.banner_image === 'string' && dest.banner_image.trim()) {
+                return dest.banner_image.trim();
+            }
+            if (dest.img && typeof dest.img === 'string' && dest.img.trim()) {
+                return dest.img.trim();
+            }
+
+            // 2. Contextual fallback based on destination identifier and region
             const id = (dest.id || '').toLowerCase();
             const state = (dest.state_id || '').toLowerCase();
             const name = (dest.name || '').toLowerCase();
@@ -1598,7 +1723,6 @@
             if (state === 'kerala' || id.includes('alappuzha') || id.includes('kochi') || id.includes('wayanad') || id.includes('varkala')) return '../assets/images/hero-kerala.jpg';
             if (state === 'maharashtra') return '../assets/images/hero-maharashtra.jpg';
 
-            if (dest.img && dest.img.startsWith('../assets/')) return dest.img;
             return '../assets/images/hero-india.jpg';
         },
 
@@ -1615,22 +1739,79 @@
         },
 
         /**
-         * Asynchronously synchronize live catalogue data from REST API
+         * Asynchronously synchronize live catalogue data from REST API using Promise.all parallelization
+         * and sessionStorage caching with automatic cross-tab invalidation detection.
          */
-        async loadCatalogueFromApi() {
+        async loadCatalogueFromApi(forceRefresh = false) {
             if (typeof window === 'undefined' || !window.YatraSetuApi) return;
             try {
-                // 1. Fetch live states
-                const statesData = await window.YatraSetuApi.getStates().catch(() => null);
+                // 1. Check if catalogue was invalidated by Manager operations in another tab/session
+                let isInvalidated = false;
+                try {
+                    const lastInvalidated = localStorage.getItem('yatrasetu_catalogue_invalidated_at');
+                    const cacheTs = sessionStorage.getItem('yatrasetu_tourist_catalogue_ts');
+                    if (lastInvalidated && cacheTs && parseInt(lastInvalidated, 10) > parseInt(cacheTs, 10)) {
+                        isInvalidated = true;
+                    }
+                } catch (e) {}
+
+                // 2. Check sessionStorage cache unless forceRefresh or invalidated
+                if (!forceRefresh && !isInvalidated) {
+                    try {
+                        const cachedRaw = sessionStorage.getItem('yatrasetu_tourist_catalogue');
+                        if (cachedRaw) {
+                            const cached = JSON.parse(cachedRaw);
+                            if (cached && Array.isArray(cached.destinations) && cached.destinations.length > 0) {
+                                this.apiStates = cached.states || [];
+                                this.apiAttractions = cached.attractions || [];
+                                this.apiExperiences = cached.experiences || [];
+                                this.apiEvents = cached.events || [];
+                                this.apiCircuits = cached.circuits || [];
+                                this.apiVideos = cached.videos || [];
+                                this.isUsingLiveDestinations = true;
+                                this.enrichDestinations(cached.destinations, this.apiStates);
+
+                                // Re-render current page immediately from session cache
+                                const path = window.location.pathname;
+                                if (path.includes('destinations.html')) {
+                                    this.renderFilteredDestinations();
+                                } else if (path.includes('destination-detail.html')) {
+                                    this.initDestinationDetailPage();
+                                } else if (path.includes('experiences.html')) {
+                                    this.initExperiencesPage();
+                                }
+                                return;
+                            }
+                        }
+                    } catch (cacheErr) {
+                        console.warn('[YatraSetu Tourist] Session cache parse note:', cacheErr);
+                    }
+                }
+
+                // 3. Concurrent parallel fetch of all 7 catalogue entities via Promise.all
+                const [statesData, destData, attrData, expData, evtData, circuitData, videoData] = await Promise.all([
+                    window.YatraSetuApi.getStates().catch(() => null),
+                    window.YatraSetuApi.getDestinations({ limit: 100 }).catch(() => null),
+                    window.YatraSetuApi.getAttractions({ limit: 100 }).catch(() => null),
+                    window.YatraSetuApi.getExperiences({ limit: 100 }).catch(() => null),
+                    window.YatraSetuApi.getEvents({ limit: 100 }).catch(() => null),
+                    window.YatraSetuApi.getCircuits({ limit: 100 }).catch(() => null),
+                    window.YatraSetuApi.getVideos({ limit: 100 }).catch(() => null)
+                ]);
+
+                // 3.1 Process live states
                 if (statesData && Array.isArray(statesData)) {
                     this.apiStates = statesData;
                 }
 
-                // 2. Fetch live destinations
-                const destData = await window.YatraSetuApi.getDestinations({ limit: 100 }).catch(() => null);
+                // 3.2 Process live destinations
+                let hasLiveDestinations = false;
+                let rawDestList = [];
                 if (destData && Array.isArray(destData.items) && destData.items.length > 0) {
+                    hasLiveDestinations = true;
+                    rawDestList = destData.items;
                     this.isUsingLiveDestinations = true;
-                    this.enrichDestinations(destData.items, this.apiStates);
+                    this.enrichDestinations(rawDestList, this.apiStates);
 
                     // Re-render current page with live database data
                     const path = window.location.pathname;
@@ -1641,8 +1822,7 @@
                     }
                 }
 
-                // 3. Fetch live attractions
-                const attrData = await window.YatraSetuApi.getAttractions({ limit: 100 }).catch(() => null);
+                // 3.3 Process live attractions
                 if (attrData && Array.isArray(attrData.items) && attrData.items.length > 0) {
                     this.apiAttractions = attrData.items;
                     if (window.location.pathname.includes('destination-detail.html')) {
@@ -1672,8 +1852,7 @@
                     }
                 }
 
-                // 4. Fetch live experiences
-                const expData = await window.YatraSetuApi.getExperiences({ limit: 100 }).catch(() => null);
+                // 3.4 Process live experiences
                 if (expData && Array.isArray(expData.items) && expData.items.length > 0) {
                     this.apiExperiences = expData.items;
                     if (window.location.pathname.includes('experiences.html')) {
@@ -1681,8 +1860,7 @@
                     }
                 }
 
-                // 5. Fetch live events
-                const evtData = await window.YatraSetuApi.getEvents({ limit: 100 }).catch(() => null);
+                // 3.5 Process live events
                 if (evtData && Array.isArray(evtData.items) && evtData.items.length > 0) {
                     this.apiEvents = evtData.items;
                     if (window.location.pathname.includes('destination-detail.html')) {
@@ -1710,10 +1888,44 @@
                     }
                 }
 
-                // 6. Fetch live circuits
-                const circuitData = await window.YatraSetuApi.getCircuits({ limit: 100 }).catch(() => null);
+                // 3.6 Process live circuits
                 if (circuitData && Array.isArray(circuitData.items) && circuitData.items.length > 0) {
                     this.apiCircuits = circuitData.items;
+                }
+
+                // 3.7 Process live orientation videos
+                try {
+                    if (videoData && Array.isArray(videoData.items) && videoData.items.length > 0) {
+                        this.apiVideos = videoData.items;
+                    } else if (Array.isArray(videoData)) {
+                        this.apiVideos = videoData;
+                    }
+                    if (window.location.pathname.includes('destination-detail.html')) {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const currentDestId = urlParams.get('id') || 'raigad-fort';
+                        this.renderDestinationVideosTab(currentDestId);
+                    }
+                } catch (vErr) {
+                    console.warn('[YatraSetu Tourist] Live video sync note:', vErr);
+                }
+
+                // 4. Save clean snapshot to sessionStorage ONLY when live data was successfully fetched
+                if (hasLiveDestinations) {
+                    try {
+                        const cacheSnapshot = {
+                            states: this.apiStates || [],
+                            destinations: rawDestList,
+                            attractions: this.apiAttractions || [],
+                            experiences: this.apiExperiences || [],
+                            events: this.apiEvents || [],
+                            circuits: this.apiCircuits || [],
+                            videos: this.apiVideos || []
+                        };
+                        sessionStorage.setItem('yatrasetu_tourist_catalogue', JSON.stringify(cacheSnapshot));
+                        sessionStorage.setItem('yatrasetu_tourist_catalogue_ts', Date.now().toString());
+                    } catch (sErr) {
+                        console.warn('[YatraSetu Tourist] Session cache store note:', sErr);
+                    }
                 }
             } catch (err) {
                 console.warn('[YatraSetu Tourist] Live catalogue API sync note:', err);
@@ -1732,6 +1944,7 @@
                 const coords = DESTINATION_COORDINATES[d.id] || (d.latitude && d.longitude ? { lat: d.latitude, lng: d.longitude } : null);
                 const stateObj = states.find(s => s.id === d.state_id) || { name: d.state_name || d.state_id || 'India' };
                 const catLower = (d.category || '').toLowerCase();
+                const meta = d.metadata || d.metadata_json || {};
 
                 // Compute tags
                 let tags = editorial.tags || [];
@@ -1766,9 +1979,9 @@
                 }
 
                 // Formatted rating and reviews count
-                const baseRating = 4.5 + ((d.rank % 5) * 0.1);
-                const rating = editorial.rating || baseRating.toFixed(1);
-                const reviewsCount = editorial.reviews_count || `${(1.2 - (d.rank * 0.1)).toFixed(1)}k`;
+                const baseRating = d.rank ? (4.5 + ((d.rank % 5) * 0.1)).toFixed(1) : '4.8';
+                const rating = d.rating || editorial.rating || baseRating;
+                const reviewsCount = editorial.reviews_count || (d.rank ? `${(1.2 - (d.rank * 0.1)).toFixed(1)}k` : '1.2k');
 
                 return {
                     id: d.id,
@@ -1778,24 +1991,32 @@
                     category: d.category,
                     rank: d.rank || 99,
                     img: this.resolveDestinationImage(d),
-                    location: editorial.location || `${d.name}, ${stateObj.name}`,
-                    subtitle: editorial.subtitle || `${d.category} in ${stateObj.name}`,
+                    hero_image_url: d.hero_image_url,
+                    banner_image: d.banner_image,
+                    metadata: meta,
+                    metadata_json: meta,
+                    ideal_duration: d.ideal_duration || editorial.ideal_duration,
+                    max_daily_capacity: d.max_daily_capacity,
+                    elevation: meta.elevation || editorial.elevation,
+                    difficulty: meta.difficulty || editorial.difficulty,
+                    location: d.location_label || editorial.location || `${d.name}, ${stateObj.name}`,
+                    subtitle: d.subtitle || editorial.subtitle || `${d.category} in ${stateObj.name}`,
                     description: d.description || editorial.description || `Discover ${d.name}, a prominent ${d.category} in ${stateObj.name}. Integrated into YatraSetu's destination network for visitor orientation and travel guidance.`,
-                    highlights: editorial.highlights || [
+                    highlights: (meta && Array.isArray(meta.highlights) && meta.highlights.length) ? meta.highlights : (editorial.highlights || [
                         `Prominent ${d.category} in ${stateObj.name}`,
                         `Curated travel route with verified local attractions`,
                         `Supported by active destination management coordination`,
                         `Authentic cultural, nature, and heritage experience`
-                    ],
-                    history_background: editorial.history_background || `Originating in the regional chronicles of ${stateObj.name}, ${d.name} represents an essential monument in regional cultural geography. Historical records document continuous settlement, strategic fortification, and community heritage patronage.`,
-                    heritage_architecture: editorial.heritage_architecture || `Constructed in traditional regional architecture, ${d.name} demonstrates indigenous engineering adapted to the local topography and climate, featuring monumental entryways, stone ramparts, and specialized rainwater harvesting systems.`,
-                    cultural_significance: editorial.cultural_significance || `Deeply rooted in the living traditions of ${stateObj.name}, ${d.name} serves as a cultural landmark celebrated in regional folklore, seasonal festivities, and community heritage gatherings.`,
-                    geography_landmarks: editorial.geography_landmarks || `Occupying a prominent terrain vantage point overlooking regional valleys, ${d.name} is surrounded by natural buffer zones, panoramic lookouts, and regional nature corridors.`,
-                    traditions_culture: editorial.traditions_culture || `Local communities and village cooperatives surrounding ${d.name} uphold authentic handicraft, culinary hospitality, and seasonal ceremonies welcoming respectful travelers.`,
+                    ]),
+                    history_background: meta.history_background || editorial.history_background || `Originating in the regional chronicles of ${stateObj.name}, ${d.name} represents an essential monument in regional cultural geography. Historical records document continuous settlement, strategic fortification, and community heritage patronage.`,
+                    heritage_architecture: meta.heritage_architecture || editorial.heritage_architecture || `Constructed in traditional regional architecture, ${d.name} demonstrates indigenous engineering adapted to the local topography and climate, featuring monumental entryways, stone ramparts, and specialized rainwater harvesting systems.`,
+                    cultural_significance: meta.cultural_significance || editorial.cultural_significance || `Deeply rooted in the living traditions of ${stateObj.name}, ${d.name} serves as a cultural landmark celebrated in regional folklore, seasonal festivities, and community heritage gatherings.`,
+                    geography_landmarks: meta.geography_landmarks || editorial.geography_landmarks || `Occupying a prominent terrain vantage point overlooking regional valleys, ${d.name} is surrounded by natural buffer zones, panoramic lookouts, and regional nature corridors.`,
+                    traditions_culture: meta.traditions_culture || editorial.traditions_culture || `Local communities and village cooperatives surrounding ${d.name} uphold authentic handicraft, culinary hospitality, and seasonal ceremonies welcoming respectful travelers.`,
                     tags: tags,
                     suitable_for: suitable,
                     season: seasons,
-                    best_time: editorial.best_time || 'October to March',
+                    best_time: d.best_time || editorial.best_time || 'October to March',
                     rating: rating,
                     reviewsCount: reviewsCount,
                     coordinates: coords
@@ -1812,11 +2033,34 @@
                 if (stored) {
                     const parsed = JSON.parse(stored);
                     this.favorites = new Set(Array.isArray(parsed) ? parsed : []);
+                } else {
+                    this.favorites = new Set();
                 }
             } catch (e) {
                 this.favorites = new Set();
             }
             this.updateFavoritesBadge();
+
+            // Synchronize with backend if authenticated
+            if (typeof window !== 'undefined' && window.YatraSetuApi && typeof window.YatraSetuApi.hasToken === 'function' && window.YatraSetuApi.hasToken()) {
+                window.YatraSetuApi.getTouristFavorites().then(favs => {
+                    if (Array.isArray(favs)) {
+                        favs.forEach(f => this.favorites.add(f.destination_id));
+                        try {
+                            localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify([...this.favorites]));
+                        } catch (e) {}
+                        this.updateFavoritesBadge();
+                        this.renderWishlistDrawerItems();
+                        this.favorites.forEach(id => {
+                            document.querySelectorAll(`.dest-card-fav-btn[data-dest-id="${id}"], .detail-fav-btn[data-dest-id="${id}"]`).forEach(btn => {
+                                btn.classList.add('favorited');
+                                const svg = btn.querySelector('svg');
+                                if (svg) svg.setAttribute('fill', '#EF4444');
+                            });
+                        });
+                    }
+                }).catch(err => console.warn('Could not sync favorites from backend:', err));
+            }
         },
 
         toggleFavorite(destId) {
@@ -1825,9 +2069,15 @@
             if (this.favorites.has(destId)) {
                 this.favorites.delete(destId);
                 isNowFav = false;
+                if (typeof window !== 'undefined' && window.YatraSetuApi && typeof window.YatraSetuApi.hasToken === 'function' && window.YatraSetuApi.hasToken()) {
+                    window.YatraSetuApi.removeTouristFavorite(destId).catch(err => console.warn('Backend remove favorite error:', err));
+                }
             } else {
                 this.favorites.add(destId);
                 isNowFav = true;
+                if (typeof window !== 'undefined' && window.YatraSetuApi && typeof window.YatraSetuApi.hasToken === 'function' && window.YatraSetuApi.hasToken()) {
+                    window.YatraSetuApi.addTouristFavorite(destId).catch(err => console.warn('Backend add favorite error:', err));
+                }
             }
 
             try {
@@ -1921,6 +2171,22 @@
             if (roleEl) roleEl.textContent = userRoleLabel;
             if (avatarEl) avatarEl.textContent = initials;
 
+            // Fetch live verified profile from backend if tourist token exists
+            if (role === 'tourist' && typeof window !== 'undefined' && window.YatraSetuApi && typeof window.YatraSetuApi.hasToken === 'function' && window.YatraSetuApi.hasToken()) {
+                window.YatraSetuApi.getTouristProfile().then(profile => {
+                    if (profile && profile.full_name) {
+                        userName = profile.full_name;
+                        const dynInitials = userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'TM';
+                        if (nameEl) nameEl.textContent = `Hi, ${userName.split(' ')[0]}`;
+                        if (avatarEl) avatarEl.textContent = dynInitials;
+                        const ddName = userDropdownEl.querySelector('.tourist-dropdown-name');
+                        const ddEmail = userDropdownEl.querySelector('.tourist-dropdown-email');
+                        if (ddName) ddName.textContent = userName;
+                        if (ddEmail) ddEmail.textContent = profile.email || email;
+                    }
+                }).catch(err => console.warn('Could not fetch tourist profile:', err));
+            }
+
             // Render Dropdown Content
             if (isGuest) {
                 userDropdownEl.innerHTML = `
@@ -1983,12 +2249,13 @@
                 if (logoutBtn) {
                     logoutBtn.onclick = async () => {
                         if (window.YatraSetuApi && typeof window.YatraSetuApi.logout === 'function') {
-                            await window.YatraSetuApi.logout();
-                        } else {
-                            sessionStorage.removeItem('yatrasetu_role');
-                            sessionStorage.removeItem('yatrasetu_email');
-                            sessionStorage.removeItem('yatrasetu_name');
+                            await window.YatraSetuApi.logout().catch(() => {});
                         }
+                        sessionStorage.removeItem('yatrasetu_role');
+                        sessionStorage.removeItem('yatrasetu_email');
+                        sessionStorage.removeItem('yatrasetu_name');
+                        localStorage.removeItem('yatrasetu_access_token');
+                        localStorage.removeItem('yatrasetu_refresh_token');
                         window.location.href = '../login.html';
                     };
                 }
@@ -2422,6 +2689,66 @@
                     </div>
                 `;
             }
+
+            // Asynchronously load saved custom itineraries from backend
+            if (typeof window !== 'undefined' && window.YatraSetuApi && typeof window.YatraSetuApi.hasToken === 'function' && window.YatraSetuApi.hasToken()) {
+                window.YatraSetuApi.getTouristItineraries().then(plans => {
+                    let itinContainer = document.getElementById('saved-itineraries-container');
+                    let itinHeader = document.getElementById('saved-itineraries-header');
+                    if (Array.isArray(plans) && plans.length > 0) {
+                        if (!itinContainer) {
+                            itinHeader = document.createElement('div');
+                            itinHeader.id = 'saved-itineraries-header';
+                            itinHeader.style.cssText = 'grid-column: 1 / -1; margin-top: 2rem; margin-bottom: 0.75rem;';
+                            itinHeader.innerHTML = `
+                                <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--tourist-forest); margin: 0 0 0.25rem 0;">
+                                    🎒 Saved Cloud Itineraries (${plans.length})
+                                </h3>
+                                <p style="font-size: 0.85rem; color: var(--tourist-text-muted); margin: 0;">
+                                    Custom trip plans saved to your verified tourist account.
+                                </p>
+                            `;
+                            itinContainer = document.createElement('div');
+                            itinContainer.id = 'saved-itineraries-container';
+                            itinContainer.style.cssText = 'grid-column: 1 / -1; display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem;';
+                            grid.parentNode.insertBefore(itinHeader, grid);
+                            grid.parentNode.insertBefore(itinContainer, grid);
+                        }
+                        itinContainer.innerHTML = plans.map(p => `
+                            <div style="background: #FFF; border: 1px solid var(--tourist-border); border-radius: 10px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; box-shadow: var(--tourist-shadow-sm);">
+                                <div>
+                                    <h4 style="font-size: 1.05rem; font-weight: 800; color: var(--tourist-text-heading); margin: 0 0 0.25rem 0;">${p.title}</h4>
+                                    <div style="font-size: 0.8rem; color: var(--tourist-text-muted);">
+                                        Created: ${new Date(p.created_at).toLocaleDateString('en-GB')} • ${p.items ? p.items.length : 0} Stop(s) • ${p.notes ? p.notes.slice(0, 80) : ''}
+                                    </div>
+                                </div>
+                                <button type="button" class="tourist-btn-outline btn-delete-saved-itinerary" data-plan-id="${p.id}" style="color: #DC2626; border-color: #FCA5A5; font-size: 0.78rem; padding: 0.35rem 0.85rem;">
+                                    🗑️ Delete Itinerary
+                                </button>
+                            </div>
+                        `).join('');
+
+                        itinContainer.querySelectorAll('.btn-delete-saved-itinerary').forEach(btn => {
+                            btn.onclick = async () => {
+                                const pid = btn.getAttribute('data-plan-id');
+                                if (confirm('Are you sure you want to delete this saved itinerary?')) {
+                                    try {
+                                        await window.YatraSetuApi.deleteTouristItinerary(pid);
+                                        this.showToast('Itinerary deleted.');
+                                        this.renderWishlistPlanner();
+                                    } catch (e) {
+                                        console.warn('Error deleting itinerary:', e);
+                                    }
+                                }
+                            };
+                        });
+                    } else if (itinContainer) {
+                        itinContainer.innerHTML = '';
+                        if (itinHeader) itinHeader.remove();
+                        itinContainer.remove();
+                    }
+                }).catch(e => console.warn('Could not load saved itineraries:', e));
+            }
         },
 
         /**
@@ -2526,10 +2853,10 @@
             if (authorityEl) authorityEl.textContent = `${dest.state_name || 'State'} Tourism Development Corporation (STDC)`;
             if (basecampEl) basecampEl.textContent = `${dest.name} Base Checkpoint Station`;
 
-            const bulletins = this.getDestinationAnnouncements(dest.id);
-            if (listEl) {
-                if (bulletins.length > 0) {
-                    listEl.innerHTML = bulletins.map(b => `
+            const renderAdvisoriesList = (bulletinsList) => {
+                if (!listEl) return;
+                if (bulletinsList.length > 0) {
+                    listEl.innerHTML = bulletinsList.map(b => `
                         <div class="tourist-advisory-card" style="margin-bottom:1.25rem;">
                             <div class="advisory-header">
                                 <span class="advisory-icon">${b.icon || '🚨'}</span>
@@ -2567,6 +2894,28 @@
                         </div>
                     `;
                 }
+            };
+
+            const defaultBulletins = this.getDestinationAnnouncements(dest.id);
+            renderAdvisoriesList(defaultBulletins);
+
+            // Fetch live advisories from backend if available
+            if (typeof window !== 'undefined' && window.YatraSetuApi && typeof window.YatraSetuApi.getTouristAdvisories === 'function') {
+                window.YatraSetuApi.getTouristAdvisories(dest.id).then(liveAdvs => {
+                    if (Array.isArray(liveAdvs) && liveAdvs.length > 0) {
+                        const mapped = liveAdvs.map(a => ({
+                            id: a.id,
+                            destination_id: a.destination_id,
+                            icon: a.severity === 'critical' ? '🛑' : (a.severity === 'warning' ? '⚠️' : 'ℹ️'),
+                            title: a.title,
+                            date: new Date(a.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+                            category: `${a.severity.toUpperCase()} Directive`,
+                            content: a.description,
+                            guidance: a.valid_until ? `Valid until: ${new Date(a.valid_until).toLocaleDateString('en-GB')}` : 'Active advisory published by Destination Manager'
+                        }));
+                        renderAdvisoriesList(mapped);
+                    }
+                }).catch(err => console.warn('Could not fetch live destination advisories:', err));
             }
         },
 
@@ -2994,9 +3343,9 @@
             let attractions = (this.apiAttractions && this.apiAttractions.length > 0)
                 ? this.apiAttractions
                 : ((window.YatraSetuManagerData && window.YatraSetuManagerData.attractions) || []);
-            // Strict relationship: only attractions explicitly tagged with this destination_id
-            const matched = attractions.filter(a => a.destination_id === destId);
-            const dest = (this.destinations || []).find(d => d.id === destId);
+            // Strict relationship: only attractions explicitly tagged with this destination_id (or alias)
+            const matched = attractions.filter(a => matchesDestId(a.destination_id, destId));
+            const dest = (this.destinations || []).find(d => matchesDestId(d.id, destId));
             return matched.map(a => ({
                 ...a,
                 img: this.resolveAttractionImage(a, dest)
@@ -3004,21 +3353,34 @@
         },
 
         getDestinationVideos(destId) {
-            let videos = (window.YatraSetuManagerData && window.YatraSetuManagerData.destinationVideos) ? [...window.YatraSetuManagerData.destinationVideos] : [];
+            let videos = [];
+            // 1. Live API videos if fetched
+            if (this.apiVideos && Array.isArray(this.apiVideos)) {
+                videos.push(...this.apiVideos);
+            }
+            // 2. Manager shared in-memory data
+            if (window.YatraSetuManagerData && Array.isArray(window.YatraSetuManagerData.destinationVideos)) {
+                window.YatraSetuManagerData.destinationVideos.forEach(v => {
+                    if (!videos.some(ev => String(ev.id) === String(v.id))) {
+                        videos.push(v);
+                    }
+                });
+            }
 
-            // Restore manager-published videos from authoritative storage (localStorage / sessionStorage)
+            // 3. Restore manager-published videos from authoritative storage (localStorage / sessionStorage)
             try {
                 const rawStored = localStorage.getItem('yatrasetu_destination_videos') || sessionStorage.getItem('yatrasetu_destination_videos');
                 if (rawStored) {
                     const parsed = JSON.parse(rawStored);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        const map = new Map(videos.map(v => [v.id, v]));
+                        const map = new Map(videos.map(v => [String(v.id), v]));
                         parsed.forEach(item => {
-                            if (map.has(item.id)) {
-                                Object.assign(map.get(item.id), item);
+                            const key = String(item.id);
+                            if (map.has(key)) {
+                                Object.assign(map.get(key), item);
                             } else {
                                 videos.push(item);
-                                map.set(item.id, item);
+                                map.set(key, item);
                             }
                         });
                     }
@@ -3027,8 +3389,54 @@
                 console.warn('[tourist.js] Video storage read error:', e);
             }
 
-            // Official published videos explicitly tagged with this destination_id
-            return videos.filter(v => v.destination_id === destId && v.status === 'Published');
+            // Official published videos explicitly tagged with this destination_id (or alias)
+            return videos.filter(v => matchesDestId(v.destination_id, destId) && (v.status === 'Published' || !v.status));
+        },
+
+        renderDestinationVideosTab(destId) {
+            const videos = this.getDestinationVideos(destId);
+            const tabVideoCount = document.getElementById('tab-video-count');
+            if (tabVideoCount) tabVideoCount.textContent = videos.length;
+
+            const videosGrid = document.getElementById('detail-videos-grid');
+            if (videosGrid) {
+                if (videos.length > 0) {
+                    videosGrid.innerHTML = videos.map(vid => `
+                        <div class="tourist-video-card" data-video-id="${vid.id}" style="cursor: pointer;">
+                            <div class="video-thumb-wrap" style="background-image: url('${vid.thumbnail_url || '../assets/images/thumb-rajgad.jpg'}');">
+                                <div class="video-play-btn" aria-label="Play orientation video">▶</div>
+                                <span class="video-duration-tag">⏱ ${vid.duration || '0:30'}</span>
+                            </div>
+                            <div class="video-card-body">
+                                <h4 class="video-card-title">${vid.title}</h4>
+                                <p class="video-card-desc">${vid.description || ''}</p>
+                                <div class="video-card-meta">
+                                    <span>${vid.publisher || 'Department of Tourism'}</span>
+                                    <span style="color:var(--tourist-forest); font-weight:700;">● Official Media</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    videosGrid.querySelectorAll('.tourist-video-card').forEach(card => {
+                        card.onclick = () => {
+                            const vidId = card.getAttribute('data-video-id');
+                            const video = videos.find(v => String(v.id) === String(vidId));
+                            if (video) this.openVideoModal(video);
+                        };
+                    });
+                } else {
+                    videosGrid.innerHTML = `
+                        <div style="grid-column: 1 / -1; padding: 2.5rem; text-align: center; background: var(--tourist-bg-subtle); border-radius: 12px;">
+                            <span style="font-size: 2.5rem; display: block; margin-bottom: 0.75rem;">🎬</span>
+                            <h4 style="font-size: 1.1rem; color: var(--tourist-text-heading); margin: 0 0 0.5rem 0;">No Official Videos Published Yet</h4>
+                            <p style="font-size: 0.88rem; color: var(--tourist-text-muted); max-width: 480px; margin: 0 auto;">
+                                Short 30-second audiovisual orientation guides for this destination are currently under production or pending Destination Manager review.
+                            </p>
+                        </div>
+                    `;
+                }
+            }
         },
 
         getApprovedStakeholders(destId) {
@@ -3061,7 +3469,7 @@
             // 3. Must not be Deactivated
             // 4. Strip private internal manager_note to prevent leak of administrative data
             return shList
-                .filter(s => s.destination_id === destId && s.status === 'Approved' && s.account_status !== 'Deactivated')
+                .filter(s => matchesDestId(s.destination_id, destId) && s.status === 'Approved' && s.account_status !== 'Deactivated')
                 .map(s => ({
                     id: s.id,
                     destination_id: s.destination_id,
@@ -3084,12 +3492,12 @@
             const events = (this.apiEvents && this.apiEvents.length > 0)
                 ? this.apiEvents
                 : ((window.YatraSetuManagerData && window.YatraSetuManagerData.events) || []);
-            return events.filter(e => e.destination_id === destId);
+            return events.filter(e => matchesDestId(e.destination_id, destId));
         },
 
         getDestinationAnnouncements(destId) {
             const advisories = (window.YatraSetuStakeholderData && window.YatraSetuStakeholderData.announcements) || [];
-            return advisories.filter(a => a.destination_id === destId);
+            return advisories.filter(a => matchesDestId(a.destination_id, destId));
         },
 
         getDestinationFeedback(destId) {
@@ -3103,7 +3511,7 @@
             } catch (e) {}
 
             const defaultFeedback = ((window.YatraSetuManagerData && window.YatraSetuManagerData.feedback) || [])
-                .filter(f => f.destination_id === destId && !deletedIds.has(f.id));
+                .filter(f => matchesDestId(f.destination_id, destId) && !deletedIds.has(f.id));
 
             try {
                 // Single authoritative storage across tabs is localStorage
@@ -3114,7 +3522,7 @@
                         const validUserSubmissions = parsed.filter(f => !deletedIds.has(f.id));
                         // Keep sessionStorage strictly synchronized to avoid stale resurrection
                         sessionStorage.setItem('yatrasetu_tourist_feedback', JSON.stringify(validUserSubmissions));
-                        const userForDest = validUserSubmissions.filter(f => f.destination_id === destId);
+                        const userForDest = validUserSubmissions.filter(f => matchesDestId(f.destination_id, destId));
                         return [...userForDest, ...defaultFeedback];
                     }
                 }
@@ -3126,7 +3534,7 @@
 
         getNearbyDestinations(dest) {
             // Truthful regional circuit: other destinations in same administrative state
-            return this.destinations.filter(d => d.state_id === dest.state_id && d.id !== dest.id);
+            return this.destinations.filter(d => d.state_id === dest.state_id && !matchesDestId(d.id, dest.id));
         },
 
         /**
@@ -3134,10 +3542,45 @@
          * 8. Destination Detail Page Controller (Mockup 3 + Live Integrations)
          * ----------------------------------------------------------------------
          */
-        initDestinationDetailPage() {
+        async initDestinationDetailPage() {
             const urlParams = new URLSearchParams(window.location.search);
-            const destId = urlParams.get('id') || 'raigad-fort';
-            const dest = this.destinations.find(d => d.id === destId) || this.destinations[0];
+            const destId = urlParams.get('id') || 'rajgad-fort';
+            console.log('[DEBUG DETAIL 1] Starting initDestinationDetailPage for:', destId);
+
+            // 1. Authoritative: Fetch latest persisted detail from REST API
+            if (typeof window !== 'undefined' && window.YatraSetuApi && typeof window.YatraSetuApi.getDestination === 'function') {
+                try {
+                    console.log('[DEBUG DETAIL 2] Calling api.getDestination...');
+                    const apiDest = await window.YatraSetuApi.getDestination(destId).catch((err) => {
+                        console.warn('[DEBUG DETAIL 2b] Fetch error:', err);
+                        return null;
+                    });
+                    console.log('[DEBUG DETAIL 3] Got apiDest:', apiDest ? apiDest.id : null);
+                    if (apiDest && apiDest.id) {
+                        const existingList = this.destinations ? [...this.destinations.filter(d => !matchesDestId(d.id, apiDest.id))] : [];
+                        this.enrichDestinations([apiDest, ...existingList]);
+                    }
+                } catch (e) {
+                    console.warn('[tourist.js] Live destination detail fetch note:', e);
+                }
+            }
+
+            console.log('[DEBUG DETAIL 4] Finding destination in list...');
+            let dest = (this.destinations || []).find(d => matchesDestId(d.id, destId));
+            console.log('[DEBUG DETAIL 5] Found dest:', dest ? dest.id : null);
+
+            // 2. Fallback to manager shared data / local storage if API was unreachable
+            if (!dest && window.YatraSetuManagerData && Array.isArray(window.YatraSetuManagerData.destinations)) {
+                const foundRaw = window.YatraSetuManagerData.destinations.find(d => matchesDestId(d.id, destId));
+                if (foundRaw) {
+                    this.enrichDestinations([...(window.YatraSetuManagerData.destinations || [])]);
+                    dest = (this.destinations || []).find(d => matchesDestId(d.id, destId));
+                }
+            }
+
+            if (!dest) {
+                dest = (this.destinations || [])[0];
+            }
 
             if (!dest) {
                 const contentEl = document.getElementById('detail-main-content');
@@ -3157,6 +3600,16 @@
             // Populate Page Title & Meta
             document.title = `${dest.name} — YatraSetu Tourist Discovery`;
 
+            // Apply State Theme Consistency
+            if (dest.state_id) {
+                document.documentElement.setAttribute('data-theme', dest.state_id);
+                document.documentElement.setAttribute('data-state-theme', dest.state_id);
+                if (document.body) {
+                    document.body.setAttribute('data-theme', dest.state_id);
+                    document.body.setAttribute('data-state-theme', dest.state_id);
+                }
+            }
+
             // Populate Breadcrumb
             const breadcrumbState = document.getElementById('detail-breadcrumb-state');
             if (breadcrumbState) {
@@ -3175,7 +3628,10 @@
             if (locEl) locEl.textContent = `📍 ${dest.location}`;
 
             const ratingEl = document.getElementById('detail-dest-rating');
-            if (ratingEl) ratingEl.textContent = `★ ${dest.rating} (${dest.reviewsCount} reviews)`;
+            const destRating = dest.rating || '4.8';
+            const rawRevCount = dest.reviewsCount || '1.2k';
+            const revLabel = String(rawRevCount).toLowerCase().includes('review') ? rawRevCount : `${rawRevCount} reviews`;
+            if (ratingEl) ratingEl.textContent = `★ ${destRating} (${revLabel})`;
 
             const subEl = document.getElementById('detail-dest-subtitle');
             if (subEl) subEl.textContent = dest.subtitle;
@@ -3203,7 +3659,7 @@
                 }
             };
 
-            const isFavInitial = this.favorites.has(dest.id);
+            const isFavInitial = this.favorites ? this.favorites.has(dest.id) : false;
             updateFavUI(isFavInitial);
 
             const handleToggleFav = () => {
@@ -3468,45 +3924,7 @@
             // =================================================================
             // TAB 3: VIDEOS FULL PANE (FR-15 MANDATORY INTEGRATION)
             // =================================================================
-            const videosGrid = document.getElementById('detail-videos-grid');
-            if (videosGrid) {
-                if (videos.length > 0) {
-                    videosGrid.innerHTML = videos.map(vid => `
-                        <div class="tourist-video-card" data-video-id="${vid.id}" style="cursor: pointer;">
-                            <div class="video-thumb-wrap" style="background-image: url('${vid.thumbnail_url}');">
-                                <div class="video-play-btn" aria-label="Play orientation video">▶</div>
-                                <span class="video-duration-tag">⏱ ${vid.duration || '0:30'}</span>
-                            </div>
-                            <div class="video-card-body">
-                                <h4 class="video-card-title">${vid.title}</h4>
-                                <p class="video-card-desc">${vid.description}</p>
-                                <div class="video-card-meta">
-                                    <span>${vid.publisher || 'Department of Tourism'}</span>
-                                    <span style="color:var(--tourist-forest); font-weight:700;">● Official Media</span>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-
-                    videosGrid.querySelectorAll('.tourist-video-card').forEach(card => {
-                        card.onclick = () => {
-                            const vidId = card.getAttribute('data-video-id');
-                            const video = videos.find(v => v.id === vidId);
-                            if (video) this.openVideoModal(video);
-                        };
-                    });
-                } else {
-                    videosGrid.innerHTML = `
-                        <div style="grid-column: 1 / -1; padding: 2.5rem; text-align: center; background: var(--tourist-bg-subtle); border-radius: 12px;">
-                            <span style="font-size: 2.5rem; display: block; margin-bottom: 0.75rem;">🎬</span>
-                            <h4 style="font-size: 1.1rem; color: var(--tourist-text-heading); margin: 0 0 0.5rem 0;">No Official Videos Published Yet</h4>
-                            <p style="font-size: 0.88rem; color: var(--tourist-text-muted); max-width: 480px; margin: 0 auto;">
-                                Short 30-second audiovisual orientation guides for this destination are currently under production or pending Destination Manager review.
-                            </p>
-                        </div>
-                    `;
-                }
-            }
+            this.renderDestinationVideosTab(dest.id);
 
             // =================================================================
             // TAB 4: STAKEHOLDER EXPERIENCES & SERVICES
@@ -3713,8 +4131,32 @@
             // TAB 8: REVIEWS & FEEDBACK
             // =================================================================
             const reviewsContainer = document.getElementById('detail-reviews-container');
-            const renderReviewsList = () => {
+            const renderReviewsList = async () => {
                 feedbackList = this.getDestinationFeedback(dest.id);
+
+                // Asynchronously fetch authoritative reviews from backend if available
+                if (typeof window !== 'undefined' && window.YatraSetuApi && typeof window.YatraSetuApi.getDestinationReviews === 'function') {
+                    try {
+                        const apiReviews = await window.YatraSetuApi.getDestinationReviews(dest.id);
+                        if (Array.isArray(apiReviews) && apiReviews.length > 0) {
+                            const mapped = apiReviews.map(r => ({
+                                id: r.id,
+                                destination_id: r.destination_id,
+                                author: r.author_name,
+                                rating: r.rating,
+                                date: new Date(r.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+                                category: r.category || 'General',
+                                text: r.comment,
+                                status: r.review_status === 'approved' ? 'Approved' : 'Pending Review',
+                                is_user_submission: r.is_own_review
+                            }));
+                            feedbackList = mapped;
+                        }
+                    } catch (e) {
+                        console.warn('Could not fetch live destination reviews:', e);
+                    }
+                }
+
                 if (tabReviewCount) tabReviewCount.textContent = feedbackList.length;
 
                 if (!reviewsContainer) return;
@@ -3735,11 +4177,11 @@
                             <p class="review-text">${item.text}</p>
                             ${item.is_user_submission ? `
                                 <div style="display:inline-block; font-size:0.72rem; background:#D1FAE5; color:#065F46; padding:2px 8px; border-radius:4px; font-weight:700; margin-top:0.5rem;">
-                                    ✓ Submitted by You (Persisted for session)
+                                    ✓ Submitted by You (${item.status || 'Pending Review'})
                                 </div>
                             ` : `
                                 <div style="display:inline-block; font-size:0.72rem; background:var(--tourist-bg-subtle); color:var(--tourist-forest); padding:2px 8px; border-radius:4px; font-weight:700; margin-top:0.5rem;">
-                                    ✓ Verified Destination Manager Review Record
+                                    ✓ Verified Destination Review Record
                                 </div>
                             `}
                         </div>
@@ -3960,7 +4402,7 @@
 
             // Handle Feedback Form Submission
             if (fbForm) {
-                fbForm.onsubmit = (e) => {
+                fbForm.onsubmit = async (e) => {
                     e.preventDefault();
                     const name = (document.getElementById('fb-author-name') || {}).value || 'Guest Traveler';
                     const rating = parseInt((document.getElementById('fb-rating-select') || {}).value || '5', 10);
@@ -3970,6 +4412,26 @@
                     if (comments.trim().length < 10) {
                         alert('Please provide at least 10 characters of descriptive feedback to assist Destination Managers.');
                         return;
+                    }
+
+                    // Try backend API submission if authenticated
+                    if (typeof window !== 'undefined' && window.YatraSetuApi && typeof window.YatraSetuApi.hasToken === 'function' && window.YatraSetuApi.hasToken()) {
+                        try {
+                            await window.YatraSetuApi.submitDestinationReview({
+                                destination_id: dest.id,
+                                rating: rating,
+                                category: category,
+                                comment: comments.trim(),
+                                guest_author_name: name.trim()
+                            });
+                            fbForm.reset();
+                            this.closeFeedbackModal();
+                            if (onFeedbackAdded) await onFeedbackAdded();
+                            this.showToast('Review submitted successfully! Pending destination manager moderation.');
+                            return;
+                        } catch (err) {
+                            console.warn('API review submission error, falling back to local storage:', err);
+                        }
                     }
 
                     const newFeedbackItem = {
@@ -4054,9 +4516,13 @@
     // Expose globally for testing and interactive browser usage
     window.YatraSetuTouristApp = TouristApp;
 
-    document.addEventListener('DOMContentLoaded', () => {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            TouristApp.init();
+        });
+    } else {
         TouristApp.init();
-    });
+    }
 
 })();
 

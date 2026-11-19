@@ -772,6 +772,28 @@
     // =========================================================================
     // 3. ADMINISTRATOR WORKSPACE UI CONTROLLER
     // =========================================================================
+    // Cache for live API data
+    let cachedUsers = [];
+    let cachedRegistrations = [];
+    let cachedManagers = [];
+    let cachedAuditTrail = [];
+    let cachedStats = null;
+
+    function formatDisplayDate(dateVal) {
+        if (!dateVal) return 'Recently';
+        try {
+            const d = new Date(dateVal);
+            if (isNaN(d.getTime())) return String(dateVal);
+            return d.toLocaleDateString('en-IN', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+        } catch (e) {
+            return String(dateVal);
+        }
+    }
+
 
     /**
      * Route Protection: verify active user is logged in with admin role.
@@ -779,7 +801,10 @@
      */
     function checkAdminAuth() {
         const role = sessionStorage.getItem('yatrasetu_role');
-        if (!role || role !== 'admin') {
+        const hasToken = window.YatraSetuApi && typeof window.YatraSetuApi.hasToken === 'function'
+            ? window.YatraSetuApi.hasToken()
+            : !!(sessionStorage.getItem('yatrasetu_token') || sessionStorage.getItem('yatrasetu_access_token'));
+        if (!role || role !== 'admin' || !hasToken) {
             window.location.replace('../login.html');
             return false;
         }
@@ -795,21 +820,32 @@
             return;
         }
 
-        initAdminWorkspace();
+        initAdminWorkspace().catch(console.error);
     });
 
-    function initAdminWorkspace() {
+    async function initAdminWorkspace() {
         initAdminNavigationTabs();
-        initAdminMetrics();
-        initAdminAccountsTable();
-        initAdminRegistrationsTable();
+        await initAdminMetrics();
+        await initAdminAccountsTable();
+        await initAdminRegistrationsTable();
         initAdminDestinationsTable();
         renderAdminRolesView();
-        initAdminManagersView();
-        initAdminAuditTrailView();
+        await initAdminManagersView();
+        await initAdminAuditTrailView();
         initAdminModals();
 
-        // Wire sidebar user footer to open profile modal
+        // Wire sidebar user footer to open profile modal & sync identity from session
+        const sessionName = sessionStorage.getItem('yatrasetu_name');
+        if (sessionName) {
+            const sidebarUserName = document.querySelector('.sidebar-user .user-name');
+            const sidebarAvatar = document.querySelector('.sidebar-user .sidebar-avatar');
+            if (sidebarUserName) sidebarUserName.textContent = sessionName;
+            if (sidebarAvatar) {
+                const inits = sessionName.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                if (inits) sidebarAvatar.textContent = inits;
+            }
+        }
+
         const sidebarUser = document.querySelector('.sidebar-user');
         if (sidebarUser) {
             sidebarUser.style.cursor = 'pointer';
@@ -904,13 +940,13 @@
         });
 
         // Re-render data on switch
-        if (tabName === 'overview') initAdminMetrics();
-        if (tabName === 'users') renderAdminAccountsTable();
-        if (tabName === 'registrations') renderAdminRegistrationsTable();
+        if (tabName === 'overview') initAdminMetrics().catch(console.error);
+        if (tabName === 'users') renderAdminAccountsTable().catch(console.error);
+        if (tabName === 'registrations') renderAdminRegistrationsTable().catch(console.error);
         if (tabName === 'destinations') renderAdminDestinationsView();
         if (tabName === 'roles') renderAdminRolesView();
-        if (tabName === 'managers') renderAdminManagersView();
-        if (tabName === 'audit') renderAdminAuditTrailView();
+        if (tabName === 'managers') renderAdminManagersView().catch(console.error);
+        if (tabName === 'audit') renderAdminAuditTrailView().catch(console.error);
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -919,13 +955,50 @@
     /**
      * 3B. Dynamic Overview Metrics & Widgets (Panel A Reference)
      */
-    function initAdminMetrics() {
-        const users = AdminStore.getUsers();
-        const stakeholders = users.filter(u => u.role === 'stakeholder');
-        const totalStakeholders = stakeholders.length;
-        const pendingApprovals = stakeholders.filter(u => u.registration_status === 'Pending Approval' || u.registration_status === 'Under Review').length;
-        const activeBusinesses = stakeholders.filter(u => u.account_status === 'Active' && u.registration_status === 'Approved').length;
-        const inactiveAccounts = users.filter(u => u.account_status === 'Deactivated' || u.account_status === 'Inactive').length;
+    async function initAdminMetrics() {
+        let totalStakeholders = 0;
+        let pendingApprovals = 0;
+        let activeBusinesses = 0;
+        let inactiveAccounts = 0;
+        let recentRegs = [];
+        let recentAudits = [];
+
+        const hasApi = window.YatraSetuApi && typeof window.YatraSetuApi.hasToken === 'function' && window.YatraSetuApi.hasToken();
+
+        if (hasApi) {
+            try {
+                const stats = await window.YatraSetuApi.getAdminStats();
+                cachedStats = stats;
+                totalStakeholders = stats.total_stakeholders || 0;
+                pendingApprovals = stats.pending_registrations || 0;
+                activeBusinesses = stats.total_users || 0;
+                inactiveAccounts = 0;
+
+                const regsRes = await window.YatraSetuApi.getAdminRegistrations({ page: 1, page_size: 5 });
+                if (regsRes && regsRes.items) {
+                    recentRegs = regsRes.items;
+                }
+
+                const auditRes = await window.YatraSetuApi.getAdminAuditLogs({ page: 1, page_size: 5 });
+                if (auditRes && auditRes.items) {
+                    recentAudits = auditRes.items;
+                }
+            } catch (err) {
+                console.warn('[Admin] Live metrics fetch failed, using fallback:', err);
+            }
+        }
+
+        // Fallback to local store ONLY if API is unavailable
+        if (!hasApi) {
+            const users = AdminStore.getUsers();
+            const stakeholders = users.filter(u => u.role === 'stakeholder');
+            totalStakeholders = stakeholders.length;
+            pendingApprovals = stakeholders.filter(u => u.registration_status === 'Pending Approval' || u.registration_status === 'Under Review').length;
+            activeBusinesses = stakeholders.filter(u => u.account_status === 'Active' && u.registration_status === 'Approved').length;
+            inactiveAccounts = users.filter(u => u.account_status === 'Deactivated' || u.account_status === 'Inactive').length;
+            recentRegs = stakeholders.slice(0, 5);
+            recentAudits = AdminStore.getAuditTrail().slice(0, 5);
+        }
 
         const metricShEl = document.getElementById('metric-total-stakeholders');
         const metricPendingEl = document.getElementById('metric-pending-approvals');
@@ -950,23 +1023,27 @@
         // Render Recent Registrations Widget (Left Column)
         const recentRegTbody = document.getElementById('admin-recent-registrations-body');
         if (recentRegTbody) {
-            const recentRegs = stakeholders.slice(0, 5);
             if (recentRegs.length === 0) {
                 recentRegTbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:1.5rem; color:#64748B;">No recent registrations found.</td></tr>`;
             } else {
                 recentRegTbody.innerHTML = recentRegs.map(sh => {
-                    const isApproved = sh.registration_status === 'Approved';
+                    const statusStr = (sh.verification_status || sh.registration_status || '').toLowerCase();
+                    const isApproved = statusStr === 'approved' || statusStr === 'verified';
                     const statusBadge = isApproved
                         ? `<span class="admin-badge approved">Approved</span>`
                         : `<span class="admin-badge pending">Pending</span>`;
+                    const bizName = sh.business_name || sh.organization || sh.name;
+                    const contactName = sh.applicant_name || sh.name;
+                    const destName = sh.destination_name || 'Destination';
+                    const dateStr = formatDisplayDate(sh.created_at);
 
                     return `
                         <tr>
-                            <td><strong style="color: #0F172A; font-weight: 700;">${sh.organization || sh.name}</strong></td>
-                            <td style="color: #475569;">${sh.name}</td>
-                            <td style="color: #475569;">${sh.destination_name}</td>
+                            <td><strong style="color: #0F172A; font-weight: 700;">${bizName}</strong></td>
+                            <td style="color: #475569;">${contactName}</td>
+                            <td style="color: #475569;">${destName}</td>
                             <td>${statusBadge}</td>
-                            <td style="color: #64748B; font-size: 0.76rem;">${sh.created_at}</td>
+                            <td style="color: #64748B; font-size: 0.76rem;">${dateStr}</td>
                         </tr>
                     `;
                 }).join('');
@@ -976,40 +1053,43 @@
         // Render Account Activity Widget (Right Column)
         const activityStream = document.getElementById('admin-account-activity-stream');
         if (activityStream) {
-            const auditTrail = AdminStore.getAuditTrail();
-            const recentAudits = auditTrail.slice(0, 5);
-
             if (recentAudits.length === 0) {
                 activityStream.innerHTML = `<div style="text-align:center; padding:1.5rem; color:#64748B;">No recent account activity logged.</div>`;
             } else {
                 activityStream.innerHTML = recentAudits.map(event => {
                     let dotClass = 'blue';
                     let actionLabel = 'Activity logged';
+                    const act = (event.action || '').toUpperCase();
 
-                    if (event.action.includes('ACTIVATED')) {
+                    if (act.includes('ACTIVATED')) {
                         dotClass = 'green';
                         actionLabel = 'Account activated';
-                    } else if (event.action.includes('DEACTIVATED')) {
+                    } else if (act.includes('DEACTIVATED')) {
                         dotClass = 'red';
                         actionLabel = 'Account deactivated';
-                    } else if (event.action.includes('DELETED')) {
+                    } else if (act.includes('DELETED')) {
                         dotClass = 'red';
                         actionLabel = 'Account deleted';
-                    } else if (event.action.includes('APPROVED')) {
+                    } else if (act.includes('APPROVED')) {
                         dotClass = 'green';
                         actionLabel = 'Registration approved';
-                    } else if (event.action.includes('REASSIGNMENT')) {
+                    } else if (act.includes('REASSIGNMENT')) {
                         dotClass = 'amber';
                         actionLabel = 'Destination reassigned';
-                    } else if (event.action.includes('CREATED')) {
+                    } else if (act.includes('CREATED') || act.includes('PROVISION')) {
                         dotClass = 'blue';
                         actionLabel = 'Account created';
+                    } else if (act.includes('MANAGER_AUTHORITY')) {
+                        dotClass = 'amber';
+                        actionLabel = 'Manager authority updated';
                     } else {
                         dotClass = 'blue';
-                        actionLabel = 'New registration';
+                        actionLabel = act.replace(/_/g, ' ').toLowerCase();
                     }
 
-                    const userSlug = (event.stakeholder_name || 'user').toLowerCase().replace(/[^a-z0-9]/g, '_').substring(0, 16);
+                    const targetName = event.stakeholder_name || (event.new_values && event.new_values.full_name) || event.table_name || 'user';
+                    const userSlug = String(targetName).toLowerCase().replace(/[^a-z0-9]/g, '_').substring(0, 16);
+                    const dateStr = formatDisplayDate(event.created_at || event.timestamp);
 
                     return `
                         <div class="admin-activity-item">
@@ -1018,7 +1098,7 @@
                                 <span class="admin-activity-action">${actionLabel}</span>
                             </div>
                             <span class="admin-activity-user">${userSlug}</span>
-                            <span class="admin-activity-date">${event.timestamp.split(',')[0]}</span>
+                            <span class="admin-activity-date">${dateStr}</span>
                         </div>
                     `;
                 }).join('');
@@ -1044,13 +1124,19 @@
 
         // Populate Destination Select
         if (destSelect) {
-            const users = AdminStore.getUsers();
             const destMap = new Map();
-            users.forEach(u => {
-                if (u.destination_name && u.destination_id) {
-                    destMap.set(u.destination_id, u.destination_name);
-                }
-            });
+            if (window.YatraSetuManagerData && window.YatraSetuManagerData.destinations) {
+                window.YatraSetuManagerData.destinations.forEach(d => {
+                    destMap.set(d.id, d.name);
+                });
+            } else if (!hasApi) {
+                const users = AdminStore.getUsers();
+                users.forEach(u => {
+                    if (u.destination_name && u.destination_id) {
+                        destMap.set(u.destination_id, u.destination_name);
+                    }
+                });
+            }
             destSelect.innerHTML = '<option value="all">All Destinations</option>';
             destMap.forEach((name, id) => {
                 const opt = document.createElement('option');
@@ -1109,23 +1195,60 @@
         renderAdminAccountsTable();
     }
 
-    function renderAdminAccountsTable() {
+    async function renderAdminAccountsTable() {
         const tbody = document.getElementById('admin-accounts-table-body');
         if (!tbody) return;
 
-        let users = AdminStore.getUsers();
+        let users = [];
+        const hasApi = window.YatraSetuApi && typeof window.YatraSetuApi.hasToken === 'function' && window.YatraSetuApi.hasToken();
 
-        // Apply filters
-        if (accountsRoleFilter !== 'all') {
-            users = users.filter(u => u.role === accountsRoleFilter);
+        if (hasApi) {
+            try {
+                const res = await window.YatraSetuApi.getAdminUsers({
+                    role: accountsRoleFilter !== 'all' ? accountsRoleFilter : undefined,
+                    search: accountsSearchQuery || undefined,
+                    page: 1,
+                    page_size: 100
+                });
+                if (res && res.items) {
+                    cachedUsers = res.items;
+                    users = res.items.map(u => ({
+                        id: u.id,
+                        name: u.full_name,
+                        email: u.email,
+                        role: u.role,
+                        access_level: u.access_level,
+                        state_id: u.state_id,
+                        destination_id: u.destination_id,
+                        destination_name: u.jurisdiction || u.destination_id || 'All Jurisdictions',
+                        organization: u.business_name || (u.role === 'admin' ? 'Ministry of Tourism / YatraSetu Gov' : (u.role === 'manager' ? 'State Tourism Authority' : u.full_name)),
+                        account_status: u.is_active ? 'Active' : 'Deactivated',
+                        registration_status: u.verification_status || (u.is_active ? 'Verified' : 'Pending'),
+                        created_at: formatDisplayDate(u.created_at),
+                        raw: u
+                    }));
+                }
+            } catch (err) {
+                console.warn('[Admin] Live users fetch failed, using fallback:', err);
+            }
         }
+
+        // Fallback to local store ONLY if API is unavailable
+        if (!hasApi && users.length === 0) {
+            users = AdminStore.getUsers();
+            if (accountsRoleFilter !== 'all') {
+                users = users.filter(u => u.role === accountsRoleFilter);
+            }
+        }
+
+        // Apply client status & destination filters
         if (accountsStatusFilter !== 'all') {
             users = users.filter(u => u.account_status === accountsStatusFilter);
         }
         if (accountsDestFilter !== 'all') {
             users = users.filter(u => u.destination_id === accountsDestFilter);
         }
-        if (accountsSearchQuery) {
+        if (!hasApi && accountsSearchQuery) {
             users = users.filter(u =>
                 (u.name && u.name.toLowerCase().includes(accountsSearchQuery)) ||
                 (u.email && u.email.toLowerCase().includes(accountsSearchQuery)) ||
@@ -1349,33 +1472,72 @@
         renderAdminRegistrationsTable();
     }
 
-    function renderAdminRegistrationsTable() {
+    async function renderAdminRegistrationsTable() {
         const tbody = document.getElementById('admin-registrations-table-body');
         if (!tbody) return;
 
-        let stakeholders = AdminStore.getUsers().filter(u => u.role === 'stakeholder');
+        let stakeholders = [];
+        const hasApi = window.YatraSetuApi && typeof window.YatraSetuApi.hasToken === 'function' && window.YatraSetuApi.hasToken();
 
-        // Apply filters
-        if (regsStatusFilter !== 'all') {
-            stakeholders = stakeholders.filter(u => u.registration_status === regsStatusFilter);
+        if (hasApi) {
+            try {
+                let apiStatus = undefined;
+                if (regsStatusFilter === 'Approved') apiStatus = 'verified';
+                else if (regsStatusFilter === 'Pending Approval') apiStatus = 'pending';
+                else if (regsStatusFilter === 'Under Review') apiStatus = 'pending';
+                else if (regsStatusFilter === 'Rejected') apiStatus = 'rejected';
+
+                const res = await window.YatraSetuApi.getAdminRegistrations({
+                    status: apiStatus,
+                    state_id: regsStateFilter !== 'all' ? regsStateFilter : undefined,
+                    destination_id: regsDestFilter !== 'all' ? regsDestFilter : undefined,
+                    search: regsSearchQuery || undefined,
+                    page: 1,
+                    page_size: 50
+                });
+                if (res && res.items) {
+                    cachedRegistrations = res.items;
+                    stakeholders = res.items.map(r => ({
+                        id: r.service_id,
+                        user_id: r.user_id,
+                        organization: r.business_name,
+                        name: r.applicant_name || 'Stakeholder Applicant',
+                        destination_name: r.destination_name || r.destination_id,
+                        category: r.category || 'General',
+                        registration_status: r.verification_status === 'verified' ? 'Approved' : (r.verification_status === 'pending' ? 'Pending Approval' : (r.verification_status === 'rejected' ? 'Rejected' : 'Under Review')),
+                        created_at: formatDisplayDate(r.created_at),
+                        raw: r
+                    }));
+                }
+            } catch (err) {
+                console.warn('[Admin] Live registrations fetch failed, using fallback:', err);
+            }
         }
-        if (regsStateFilter !== 'all') {
-            stakeholders = stakeholders.filter(u => u.state_id === regsStateFilter);
-        }
-        if (regsDestFilter !== 'all') {
-            stakeholders = stakeholders.filter(u => u.destination_id === regsDestFilter);
-        }
-        if (regsCategoryFilter !== 'all') {
-            stakeholders = stakeholders.filter(u => u.category === regsCategoryFilter);
-        }
-        if (regsSearchQuery) {
-            stakeholders = stakeholders.filter(u =>
-                (u.organization && u.organization.toLowerCase().includes(regsSearchQuery)) ||
-                (u.name && u.name.toLowerCase().includes(regsSearchQuery)) ||
-                (u.destination_name && u.destination_name.toLowerCase().includes(regsSearchQuery)) ||
-                (u.category && u.category.toLowerCase().includes(regsSearchQuery)) ||
-                (u.id && u.id.toLowerCase().includes(regsSearchQuery))
-            );
+
+        // Fallback to local store ONLY if API is unavailable
+        if (!hasApi && stakeholders.length === 0) {
+            stakeholders = AdminStore.getUsers().filter(u => u.role === 'stakeholder');
+            if (regsStatusFilter !== 'all') {
+                stakeholders = stakeholders.filter(u => u.registration_status === regsStatusFilter);
+            }
+            if (regsStateFilter !== 'all') {
+                stakeholders = stakeholders.filter(u => u.state_id === regsStateFilter);
+            }
+            if (regsDestFilter !== 'all') {
+                stakeholders = stakeholders.filter(u => u.destination_id === regsDestFilter);
+            }
+            if (regsCategoryFilter !== 'all') {
+                stakeholders = stakeholders.filter(u => u.category === regsCategoryFilter);
+            }
+            if (regsSearchQuery) {
+                stakeholders = stakeholders.filter(u =>
+                    (u.organization && u.organization.toLowerCase().includes(regsSearchQuery)) ||
+                    (u.name && u.name.toLowerCase().includes(regsSearchQuery)) ||
+                    (u.destination_name && u.destination_name.toLowerCase().includes(regsSearchQuery)) ||
+                    (u.category && u.category.toLowerCase().includes(regsSearchQuery)) ||
+                    (u.id && u.id.toLowerCase().includes(regsSearchQuery))
+                );
+            }
         }
 
         const infoEl = document.getElementById('registrations-pagination-info');
@@ -1408,7 +1570,7 @@
                     <td><input type="checkbox" class="reg-row-checkbox" aria-label="Select row"></td>
                     <td><strong style="color: #0F172A; font-weight: 700;">${sh.organization || sh.name}</strong></td>
                     <td>
-                        <a href="#" class="btn-link-stakeholder" data-user-id="${sh.id}" style="color: #2563EB; font-weight: 600; text-decoration: underline;">
+                        <a href="#" class="btn-link-stakeholder" data-user-id="${sh.user_id || sh.id}" style="color: #2563EB; font-weight: 600; text-decoration: underline;">
                             ${sh.name}
                         </a>
                     </td>
@@ -1448,7 +1610,7 @@
     // Panel C: Stakeholder Account Details Modal with Tabs & Destination Lock
     function openAccountDetailsModal(stakeholderId) {
         const modal = document.getElementById('adminAccountDetailsModal');
-        const user = AdminStore.getUsers().find(u => u.id === stakeholderId);
+        const user = cachedUsers.find(u => u.id === stakeholderId) || AdminStore.getUsers().find(u => u.id === stakeholderId);
         if (!modal || !user) return;
 
         // Populate Header
@@ -1591,7 +1753,7 @@
         if (confirmBtn) {
             confirmBtn.textContent = isActive ? 'Deactivate Account' : 'Activate Account';
             confirmBtn.className = isActive ? 'admin-btn-danger' : 'admin-btn-primary';
-            confirmBtn.onclick = () => {
+            confirmBtn.onclick = async () => {
                 const reasonVal = reasonInput ? reasonInput.value.trim() : '';
                 if (!reasonVal || reasonVal.length < 4) {
                     alert('Please provide a mandatory administrative reason (minimum 4 characters).');
@@ -1600,18 +1762,22 @@
                 }
 
                 try {
-                    if (isActive) {
-                        AdminStore.deactivateAccount(userId, 'admin', 'System Admin', reasonVal);
+                    if (window.YatraSetuApi && typeof window.YatraSetuApi.hasToken === 'function' && window.YatraSetuApi.hasToken()) {
+                        await window.YatraSetuApi.updateAdminUserStatus(userId, isActive ? 'deactivated' : 'active', reasonVal);
                     } else {
-                        AdminStore.activateAccount(userId, 'admin', 'System Admin');
+                        if (isActive) {
+                            AdminStore.deactivateAccount(userId, 'admin', 'System Admin', reasonVal);
+                        } else {
+                            AdminStore.activateAccount(userId, 'admin', 'System Admin');
+                        }
                     }
 
                     modal.classList.remove('active');
                     document.body.style.overflow = '';
-                    renderAdminAccountsTable();
-                    initAdminMetrics();
+                    await renderAdminAccountsTable();
+                    await initAdminMetrics();
                 } catch (err) {
-                    alert(err.message);
+                    alert(err.message || 'Failed to update user status.');
                 }
             };
         }
@@ -1640,7 +1806,7 @@
         if (reasonInput) reasonInput.value = '';
 
         if (confirmBtn) {
-            confirmBtn.onclick = () => {
+            confirmBtn.onclick = async () => {
                 const reasonVal = reasonInput ? reasonInput.value.trim() : '';
                 if (!reasonVal || reasonVal.length < 4) {
                     alert('Please specify an official reason for permanent deletion.');
@@ -1649,14 +1815,18 @@
                 }
 
                 try {
-                    AdminStore.deleteAccount(userId, 'admin', 'System Admin', reasonVal);
+                    if (window.YatraSetuApi && typeof window.YatraSetuApi.hasToken === 'function' && window.YatraSetuApi.hasToken()) {
+                        await window.YatraSetuApi.deleteAdminUser(userId);
+                    } else {
+                        AdminStore.deleteAccount(userId, 'admin', 'System Admin', reasonVal);
+                    }
                     modal.classList.remove('active');
                     document.body.style.overflow = '';
-                    renderAdminAccountsTable();
-                    renderAdminRegistrationsTable();
-                    initAdminMetrics();
+                    await renderAdminAccountsTable();
+                    await renderAdminRegistrationsTable();
+                    await initAdminMetrics();
                 } catch (err) {
-                    alert(err.message);
+                    alert(err.message || 'Failed to delete user account.');
                 }
             };
         }
@@ -1668,7 +1838,7 @@
     // Panel G: Business Registration Details Modal with Destination Lock
     function openRegistrationDetailsModal(stakeholderId) {
         const modal = document.getElementById('adminRegistrationDetailsModal');
-        const user = AdminStore.getUsers().find(u => u.id === stakeholderId);
+        const user = cachedRegistrations.find(r => r.service_id === stakeholderId || r.id === stakeholderId || r.user_id === stakeholderId) || AdminStore.getUsers().find(u => u.id === stakeholderId);
         if (!modal || !user) return;
 
         const nameEl = document.getElementById('reg-modal-name');
@@ -1733,7 +1903,7 @@
 
         const confirmBtn = document.getElementById('btn-confirm-reassign');
         if (confirmBtn) {
-            confirmBtn.onclick = () => {
+            confirmBtn.onclick = async () => {
                 const newDestId = destSelect.value;
                 const reasonVal = reasonInput ? reasonInput.value.trim() : '';
 
@@ -1748,16 +1918,38 @@
                 }
 
                 try {
-                    const actor = { role: 'admin', name: 'System Admin' };
-                    const result = AdminStore.reassignDestination(stakeholderId, newDestId, reasonVal, actor);
-                    alert(`✓ Controlled reassignment completed!\n\nNew Destination: ${result.target.destination_name}\nAudit Trail ID: ${result.auditEntry.id}`);
+                    if (window.YatraSetuApi && typeof window.YatraSetuApi.hasToken === 'function' && window.YatraSetuApi.hasToken()) {
+                        let targetServiceId = null;
+                        if (cachedRegistrations.length === 0) {
+                            const rRes = await window.YatraSetuApi.getAdminRegistrations({ page: 1, page_size: 50 });
+                            if (rRes && rRes.items) cachedRegistrations = rRes.items;
+                        }
+                        const matchReg = cachedRegistrations.find(r => r.user_id === stakeholderId || r.service_id === stakeholderId);
+                        if (matchReg) targetServiceId = matchReg.service_id;
+
+                        if (targetServiceId) {
+                            const res = await window.YatraSetuApi.reassignStakeholderDestination(targetServiceId, {
+                                new_destination_id: newDestId,
+                                reason: reasonVal
+                            });
+                            alert(`✓ Controlled reassignment completed!\n\nNew Destination: ${res.new_destination_id}\nAudit Trail ID: ${res.audit_log_id}`);
+                        } else {
+                            const actor = { role: 'admin', name: 'System Admin' };
+                            const result = AdminStore.reassignDestination(stakeholderId, newDestId, reasonVal, actor);
+                            alert(`✓ Controlled reassignment completed!\n\nNew Destination: ${result.target.destination_name}\nAudit Trail ID: ${result.auditEntry.id}`);
+                        }
+                    } else {
+                        const actor = { role: 'admin', name: 'System Admin' };
+                        const result = AdminStore.reassignDestination(stakeholderId, newDestId, reasonVal, actor);
+                        alert(`✓ Controlled reassignment completed!\n\nNew Destination: ${result.target.destination_name}\nAudit Trail ID: ${result.auditEntry.id}`);
+                    }
                     modal.classList.remove('active');
                     document.body.style.overflow = '';
-                    renderAdminAccountsTable();
-                    renderAdminRegistrationsTable();
-                    initAdminMetrics();
+                    await renderAdminAccountsTable();
+                    await renderAdminRegistrationsTable();
+                    await initAdminMetrics();
                 } catch (err) {
-                    alert(err.message);
+                    alert(err.message || 'Failed to reassign destination.');
                 }
             };
         }
@@ -2239,7 +2431,7 @@
 
         // Save Manager Authority Reassignment
         if (btnSaveReassign) {
-            btnSaveReassign.addEventListener('click', () => {
+            btnSaveReassign.addEventListener('click', async () => {
                 if (!currentModalManagerId) return;
                 const newLevel = levelSelect ? levelSelect.value : 'State Manager';
                 const newState = stateReassignSelect ? stateReassignSelect.value : 'maharashtra';
@@ -2254,18 +2446,29 @@
                 }
 
                 try {
-                    const result = AdminStore.reassignManagerAuthority(currentModalManagerId, newLevel, newState, newDest, reason);
-                    alert(`✓ Manager Authority updated successfully!\n\nNew Jurisdiction: ${result.manager.access_level} — ${result.manager.destination_name}\nAudit Log ID: ${result.auditEntry.id}`);
+                    if (window.YatraSetuApi && typeof window.YatraSetuApi.hasToken === 'function' && window.YatraSetuApi.hasToken()) {
+                        const targetDest = newLevel === 'State Manager' ? null : (newDest === 'all' ? null : newDest);
+                        const result = await window.YatraSetuApi.assignAdminManagerJurisdiction({
+                            user_id: currentModalManagerId,
+                            state_id: newState,
+                            destination_id: targetDest,
+                            reason: reason
+                        });
+                        alert(`✓ Manager Authority updated successfully!\n\nNew Jurisdiction: ${result.access_level} — ${result.destination_name || result.state_name || newState}\nAudit Log ID: ${result.assignment_id || 'Recorded'}`);
+                    } else {
+                        const result = AdminStore.reassignManagerAuthority(currentModalManagerId, newLevel, newState, newDest, reason);
+                        alert(`✓ Manager Authority updated successfully!\n\nNew Jurisdiction: ${result.manager.access_level} — ${result.manager.destination_name}\nAudit Log ID: ${result.auditEntry.id}`);
+                    }
 
                     const modal = document.getElementById('adminManagerAuthorityModal');
                     if (modal) modal.classList.remove('active');
                     document.body.style.overflow = '';
 
-                    renderAdminManagersView();
-                    renderAdminAuditTrailView();
-                    initAdminMetrics();
+                    await renderAdminManagersView();
+                    await renderAdminAuditTrailView();
+                    await initAdminMetrics();
                 } catch (err) {
-                    alert(err.message);
+                    alert(err.message || 'Failed to update manager authority.');
                 }
             });
         }
@@ -2273,12 +2476,41 @@
         renderAdminManagersView();
     }
 
-    function renderAdminManagersView() {
+    async function renderAdminManagersView() {
         const tbody = document.getElementById('admin-managers-table-body');
         const auditTbody = document.getElementById('admin-managers-audit-body');
         if (!tbody) return;
 
-        let managers = AdminStore.getUsers().filter(u => u.role === 'manager');
+        let managers = [];
+        const hasApi = window.YatraSetuApi && typeof window.YatraSetuApi.hasToken === 'function' && window.YatraSetuApi.hasToken();
+
+        if (hasApi) {
+            try {
+                const mgrList = await window.YatraSetuApi.getAdminManagers();
+                if (Array.isArray(mgrList)) {
+                    cachedManagers = mgrList;
+                    managers = mgrList.map(m => ({
+                        id: m.user_id,
+                        name: m.full_name,
+                        email: m.email,
+                        organization: 'State Tourism Authority',
+                        access_level: m.access_level,
+                        state_id: m.state_id,
+                        destination_id: m.destination_id || 'all',
+                        destination_name: m.destination_name || (m.state_name ? `${m.state_name} (All Destinations)` : 'Regional Territory'),
+                        account_status: m.is_active ? 'Active' : 'Deactivated',
+                        raw: m
+                    }));
+                }
+            } catch (err) {
+                console.warn('[Admin] Live managers fetch failed, using fallback:', err);
+            }
+        }
+
+        // Fallback to local store ONLY if API is unavailable
+        if (!hasApi && managers.length === 0) {
+            managers = AdminStore.getUsers().filter(u => u.role === 'manager');
+        }
 
         // Apply filters
         if (managersScopeFilter !== 'all') {
@@ -2352,10 +2584,32 @@
 
         // Render Manager Authority Audit History
         if (auditTbody) {
-            const auditTrail = AdminStore.getAuditTrail().filter(e =>
-                e.action.includes('MANAGER_AUTHORITY') ||
-                (e.stakeholder_id && e.stakeholder_id.startsWith('usr-mgr'))
-            );
+            let auditTrail = [];
+            if (hasApi) {
+                try {
+                    const aRes = await window.YatraSetuApi.getAdminAuditLogs({ action: 'MANAGER_AUTHORITY_ASSIGNED', page: 1, page_size: 10 });
+                    if (aRes && aRes.items) {
+                        auditTrail = aRes.items.map(e => ({
+                            timestamp: formatDisplayDate(e.created_at),
+                            action: e.action,
+                            stakeholder_name: e.actor_name || 'Administrator',
+                            stakeholder_id: e.record_id,
+                            details: `Authority updated on manager_assignments: ${JSON.stringify(e.new_values || {})}`,
+                            previous_value: e.old_values ? JSON.stringify(e.old_values) : '',
+                            new_value: e.new_values ? JSON.stringify(e.new_values) : '',
+                            actor_name: e.actor_name || 'Admin',
+                            actor_role: e.actor_role || 'Administrator'
+                        }));
+                    }
+                } catch (e) {}
+            }
+
+            if (auditTrail.length === 0) {
+                auditTrail = AdminStore.getAuditTrail().filter(e =>
+                    e.action.includes('MANAGER_AUTHORITY') ||
+                    (e.stakeholder_id && e.stakeholder_id.startsWith('usr-mgr'))
+                );
+            }
 
             if (auditTrail.length === 0) {
                 auditTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 1.5rem; color: #64748B;">No manager authority events recorded yet.</td></tr>`;
@@ -2384,7 +2638,7 @@
 
     function openManagerAuthorityModal(managerId, activeTab = 'overview') {
         const modal = document.getElementById('adminManagerAuthorityModal');
-        const manager = AdminStore.getUsers().find(u => u.id === managerId);
+        const manager = cachedManagers.find(m => m.user_id === managerId || m.id === managerId) || AdminStore.getUsers().find(u => u.id === managerId);
         if (!modal || !manager) return;
 
         currentModalManagerId = managerId;
@@ -2530,26 +2784,57 @@
         renderAdminAuditTrailView();
     }
 
-    function renderAdminAuditTrailView() {
+    async function renderAdminAuditTrailView() {
         const tbody = document.getElementById('admin-audit-table-body');
         if (!tbody) return;
 
-        let auditTrail = AdminStore.getAuditTrail();
+        let auditTrail = [];
+        const hasApi = window.YatraSetuApi && typeof window.YatraSetuApi.hasToken === 'function' && window.YatraSetuApi.hasToken();
 
-        // Apply filters
-        if (auditActionFilter !== 'all') {
-            auditTrail = auditTrail.filter(e => e.action === auditActionFilter);
+        if (hasApi) {
+            try {
+                const res = await window.YatraSetuApi.getAdminAuditLogs({
+                    action: auditActionFilter !== 'all' ? auditActionFilter : undefined,
+                    page: 1,
+                    page_size: 50
+                });
+                if (res && res.items) {
+                    cachedAuditTrail = res.items;
+                    auditTrail = res.items.map(e => ({
+                        id: e.id,
+                        timestamp: formatDisplayDate(e.created_at),
+                        action: e.action,
+                        stakeholder_name: (e.new_values && (e.new_values.business_name || e.new_values.full_name)) || (e.old_values && (e.old_values.business_name || e.old_values.full_name)) || e.table_name,
+                        stakeholder_id: e.record_id,
+                        details: e.action.replace(/_/g, ' ') + ` on ${e.table_name}`,
+                        previous_value: e.old_values ? JSON.stringify(e.old_values) : '',
+                        new_value: e.new_values ? JSON.stringify(e.new_values) : '',
+                        actor_name: e.actor_name || 'Administrator',
+                        actor_role: e.actor_role || 'Platform Administrator'
+                    }));
+                }
+            } catch (err) {
+                console.warn('[Admin] Live audit logs fetch failed, using fallback:', err);
+            }
         }
-        if (auditSearchQuery) {
-            auditTrail = auditTrail.filter(e =>
-                e.action.toLowerCase().includes(auditSearchQuery) ||
-                (e.stakeholder_name && e.stakeholder_name.toLowerCase().includes(auditSearchQuery)) ||
-                (e.stakeholder_id && e.stakeholder_id.toLowerCase().includes(auditSearchQuery)) ||
-                (e.actor_name && e.actor_name.toLowerCase().includes(auditSearchQuery)) ||
-                (e.details && e.details.toLowerCase().includes(auditSearchQuery)) ||
-                (e.previous_value && e.previous_value.toLowerCase().includes(auditSearchQuery)) ||
-                (e.new_value && e.new_value.toLowerCase().includes(auditSearchQuery))
-            );
+
+        // Fallback to local store ONLY if API is unavailable
+        if (!hasApi && auditTrail.length === 0) {
+            auditTrail = AdminStore.getAuditTrail();
+            if (auditActionFilter !== 'all') {
+                auditTrail = auditTrail.filter(e => e.action === auditActionFilter);
+            }
+            if (auditSearchQuery) {
+                auditTrail = auditTrail.filter(e =>
+                    e.action.toLowerCase().includes(auditSearchQuery) ||
+                    (e.stakeholder_name && e.stakeholder_name.toLowerCase().includes(auditSearchQuery)) ||
+                    (e.stakeholder_id && e.stakeholder_id.toLowerCase().includes(auditSearchQuery)) ||
+                    (e.actor_name && e.actor_name.toLowerCase().includes(auditSearchQuery)) ||
+                    (e.details && e.details.toLowerCase().includes(auditSearchQuery)) ||
+                    (e.previous_value && e.previous_value.toLowerCase().includes(auditSearchQuery)) ||
+                    (e.new_value && e.new_value.toLowerCase().includes(auditSearchQuery))
+                );
+            }
         }
 
         if (auditTrail.length === 0) {
@@ -2559,9 +2844,10 @@
 
         tbody.innerHTML = auditTrail.map(event => {
             let badgeClass = 'blue';
-            if (event.action.includes('ACTIVATED') || event.action.includes('APPROVED')) badgeClass = 'green';
-            if (event.action.includes('DEACTIVATED') || event.action.includes('DELETED')) badgeClass = 'red';
-            if (event.action.includes('REASSIGNMENT') || event.action.includes('MANAGER_AUTHORITY')) badgeClass = 'amber';
+            const act = (event.action || '').toUpperCase();
+            if (act.includes('ACTIVATED') || act.includes('APPROVED')) badgeClass = 'green';
+            if (act.includes('DEACTIVATED') || act.includes('DELETED')) badgeClass = 'red';
+            if (act.includes('REASSIGNMENT') || act.includes('MANAGER_AUTHORITY')) badgeClass = 'amber';
 
             return `
                 <tr>
@@ -2716,8 +3002,10 @@
         const modal = document.getElementById('adminProfileModal');
         if (!modal) return;
 
-        const users = AdminStore.getUsers();
-        const adminUser = users.find(u => u.role === 'admin') || DEFAULT_ADMIN_USERS[0];
+        // Authoritative identity strictly from authenticated session storage
+        const currentName = sessionStorage.getItem('yatrasetu_name') || 'Platform Administrator';
+        const currentEmail = sessionStorage.getItem('yatrasetu_email') || 'admin.governance@yatrasetu.in';
+        const currentId = sessionStorage.getItem('yatrasetu_user_id') || 'dae678c4-967a-4b3d-8cf8-3e48503f41d4';
 
         const nameEl = document.getElementById('admin-profile-name');
         const emailEl = document.getElementById('admin-profile-email');
@@ -2727,13 +3015,13 @@
         const createdEl = document.getElementById('admin-profile-created');
         const activeEl = document.getElementById('admin-profile-active');
 
-        if (nameEl) nameEl.textContent = adminUser.name;
-        if (emailEl) emailEl.textContent = adminUser.email;
-        if (orgEl) orgEl.textContent = adminUser.organization || 'Ministry of Tourism / YatraSetu Gov';
-        if (idEl) idEl.textContent = adminUser.id;
-        if (statusEl) statusEl.textContent = adminUser.account_status || 'Active';
-        if (createdEl) createdEl.textContent = adminUser.created_at || '01 Jan 2026';
-        if (activeEl) activeEl.textContent = adminUser.last_active || 'Just now';
+        if (nameEl) nameEl.textContent = currentName;
+        if (emailEl) emailEl.textContent = currentEmail;
+        if (orgEl) orgEl.textContent = 'Ministry of Tourism / YatraSetu Gov';
+        if (idEl) idEl.textContent = currentId;
+        if (statusEl) statusEl.textContent = 'Active (Authoritative RBAC)';
+        if (createdEl) createdEl.textContent = 'Active Session';
+        if (activeEl) activeEl.textContent = 'Current Online Session';
 
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';

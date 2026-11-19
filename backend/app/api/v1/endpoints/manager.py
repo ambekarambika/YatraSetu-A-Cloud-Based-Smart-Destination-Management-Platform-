@@ -10,6 +10,7 @@ Provides authenticated endpoints for Destination Managers and State Managers:
 Strictly enforces database-derived identity, verified roles, and jurisdiction boundaries.
 """
 
+import re
 import uuid
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -20,23 +21,41 @@ from app.core.auth import require_manager
 from app.core.security import SecurityContext
 from app.core.jurisdiction import JurisdictionAuthorizer
 from app.models.identity import User, ManagerAssignment
-from app.models.destination import Destination, State, Attraction, Event
+from app.models.destination import Destination, State, Attraction, Event, DestinationVideo
 from app.schemas.manager import (
     ManagerContextResponse,
     AttractionCreate,
     AttractionUpdate,
     EventCreate,
     EventUpdate,
+    DestinationCreate,
+    DestinationUpdate,
+    DestinationVideoCreate,
+    DestinationVideoUpdate,
 )
 from app.schemas.catalogue import (
     DestinationSummaryResponse,
     DestinationDetailResponse,
     AttractionResponse,
     EventResponse,
+    DestinationVideoResponse,
 )
 from app.schemas.auth import MessageResponse
 
 router = APIRouter()
+
+DESTINATION_ID_ALIASES = {
+    "raigad-fort": ["raigad-fort", "rajgad-fort"],
+    "rajgad-fort": ["rajgad-fort", "raigad-fort"],
+    "amber-fort": ["amber-fort", "amer-fort"],
+    "amer-fort": ["amer-fort", "amber-fort"],
+}
+
+def resolve_destination_ids(dest_id: str) -> List[str]:
+    """Resolves destination IDs including known historical or naming aliases."""
+    clean_id = dest_id.strip().lower()
+    return DESTINATION_ID_ALIASES.get(clean_id, [clean_id])
+
 
 
 # -----------------------------------------------------------------------------
@@ -160,17 +179,10 @@ def get_managed_destination(
     """
     Retrieves destination details with strict jurisdiction boundary enforcement.
     """
-    # 1. If Destination Manager, verify destination_id matches their assigned destination
-    if context.destination_id is not None and context.destination_id != destination_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied: Destination is outside your assigned jurisdiction.",
-        )
-
-    # 2. Query target destination
+    # 1. Query target destination (handling aliases if necessary)
     destination = (
         db.query(Destination)
-        .filter(Destination.id == destination_id)
+        .filter(Destination.id.in_(resolve_destination_ids(destination_id)))
         .first()
     )
     if not destination:
@@ -179,11 +191,18 @@ def get_managed_destination(
             detail=f"Destination '{destination_id}' not found.",
         )
 
+    # 2. If Destination Manager, verify destination_id matches their assigned destination
+    if context.destination_id is not None and context.destination_id not in resolve_destination_ids(destination.id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: Destination is outside your assigned jurisdiction.",
+        )
+
     # 3. Check jurisdictional authority via JurisdictionAuthorizer
     has_authority = JurisdictionAuthorizer.can_manage_destination(
         session=db,
         context=context,
-        target_destination_id=destination_id,
+        target_destination_id=destination.id,
         target_state_id=destination.state_id,
     )
     if not has_authority:
@@ -193,6 +212,131 @@ def get_managed_destination(
         )
 
     return destination
+
+
+@router.post(
+    "/destinations",
+    response_model=DestinationDetailResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create Managed Destination Profile",
+    description="Creates a new destination within the manager's assigned state jurisdiction.",
+)
+def create_managed_destination(
+    payload: DestinationCreate,
+    context: SecurityContext = Depends(require_manager),
+    db: Session = Depends(get_db),
+) -> DestinationDetailResponse:
+    """
+    Creates a new destination with strict jurisdictional boundary enforcement.
+    """
+    state_id = payload.state_id or context.state_id
+    if not state_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="State ID is required to create a destination.",
+        )
+    if not JurisdictionAuthorizer.can_manage_state(db, context, state_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Access denied: You do not have management authority over state '{state_id}'.",
+        )
+
+    state = db.query(State).filter(State.id == state_id).first()
+    if not state:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"State '{state_id}' does not exist in platform catalog.",
+        )
+
+    dest_id = payload.id
+    if not dest_id:
+        clean_name = re.sub(r"[^a-z0-9]+", "-", payload.name.lower()).strip("-")
+        dest_id = clean_name or f"dest-{uuid.uuid4().hex[:8]}"
+
+    existing = db.query(Destination).filter(Destination.id == dest_id).first()
+    if existing:
+        dest_id = f"{dest_id}-{uuid.uuid4().hex[:4]}"
+
+    dest = Destination(
+        id=dest_id,
+        state_id=state_id,
+        name=payload.name,
+        category=payload.category,
+        subtitle=payload.subtitle or f"A curated destination in {state.name}",
+        location_label=payload.location_label or f"{payload.name}, {state.name}",
+        description=payload.description or f"Welcome to {payload.name}, a premier destination in {state.name}.",
+        hero_image_url=payload.hero_image_url,
+        banner_image=payload.banner_image or payload.hero_image_url,
+        ideal_duration=payload.ideal_duration or "1-2 Days",
+        best_time=payload.best_time or "October to March",
+        max_daily_capacity=payload.max_daily_capacity or 5000,
+        metadata_json=payload.metadata or {},
+    )
+    db.add(dest)
+    db.commit()
+    db.refresh(dest)
+    return dest
+
+
+@router.put(
+    "/destinations/{destination_id}",
+    response_model=DestinationDetailResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Update Managed Destination Profile",
+    description="Updates destination details within the manager's assigned jurisdiction.",
+)
+def update_managed_destination(
+    destination_id: str,
+    payload: DestinationUpdate,
+    context: SecurityContext = Depends(require_manager),
+    db: Session = Depends(get_db),
+) -> DestinationDetailResponse:
+    """
+    Updates an existing destination with jurisdiction boundary validation.
+    """
+    dest = db.query(Destination).filter(Destination.id.in_(resolve_destination_ids(destination_id))).first()
+    if not dest:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Destination '{destination_id}' not found.",
+        )
+
+    if not JurisdictionAuthorizer.can_manage_destination(db, context, dest.id, target_state_id=dest.state_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: Destination is outside your assigned jurisdiction.",
+        )
+
+    if payload.name is not None:
+        dest.name = payload.name
+    if payload.category is not None:
+        dest.category = payload.category
+    if payload.subtitle is not None:
+        dest.subtitle = payload.subtitle
+    if payload.location_label is not None:
+        dest.location_label = payload.location_label
+    if payload.description is not None:
+        dest.description = payload.description
+    if payload.hero_image_url is not None:
+        dest.hero_image_url = payload.hero_image_url
+    if payload.banner_image is not None:
+        dest.banner_image = payload.banner_image
+    if payload.ideal_duration is not None:
+        dest.ideal_duration = payload.ideal_duration
+    if payload.best_time is not None:
+        dest.best_time = payload.best_time
+    if payload.max_daily_capacity is not None:
+        dest.max_daily_capacity = payload.max_daily_capacity
+    if payload.metadata is not None:
+        existing_meta = dict(dest.metadata_json or {})
+        existing_meta.update(payload.metadata)
+        dest.metadata_json = existing_meta
+        from sqlalchemy.orm.attributes import flag_modified
+        flag_modified(dest, "metadata_json")
+
+    db.commit()
+    db.refresh(dest)
+    return dest
 
 
 # -----------------------------------------------------------------------------
@@ -230,13 +374,13 @@ def list_managed_attractions(
     else:
         # State Manager scope
         if destination_id:
-            dest = db.query(Destination).filter(Destination.id == destination_id).first()
+            dest = db.query(Destination).filter(Destination.id.in_(resolve_destination_ids(destination_id))).first()
             if not dest or dest.state_id != context.state_id:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Access denied: Destination is outside your state jurisdiction.",
                 )
-            query = db.query(Attraction).filter(Attraction.destination_id == destination_id)
+            query = db.query(Attraction).filter(Attraction.destination_id.in_(resolve_destination_ids(destination_id)))
         else:
             query = (
                 db.query(Attraction)
@@ -482,13 +626,13 @@ def list_managed_events(
     else:
         # State Manager scope
         if destination_id:
-            dest = db.query(Destination).filter(Destination.id == destination_id).first()
+            dest = db.query(Destination).filter(Destination.id.in_(resolve_destination_ids(destination_id))).first()
             if not dest or dest.state_id != context.state_id:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Access denied: Destination is outside your state jurisdiction.",
                 )
-            query = db.query(Event).filter(Event.destination_id == destination_id)
+            query = db.query(Event).filter(Event.destination_id.in_(resolve_destination_ids(destination_id)))
         else:
             query = (
                 db.query(Event)
@@ -697,3 +841,212 @@ def delete_managed_event(
     db.delete(event)
     db.commit()
     return MessageResponse(message=f"Event '{title}' deleted successfully.")
+
+
+# -----------------------------------------------------------------------------
+# 5. Managed Destination Videos Operations
+# -----------------------------------------------------------------------------
+
+@router.get(
+    "/videos",
+    response_model=List[DestinationVideoResponse],
+    status_code=status.HTTP_200_OK,
+    summary="List Managed Destination Videos",
+    description="Returns videos strictly within the manager's assigned jurisdiction.",
+)
+def list_managed_videos(
+    destination_id: Optional[str] = Query(None, description="Optional destination filter"),
+    category: Optional[str] = Query(None, description="Optional category filter"),
+    limit: int = Query(50, ge=1, le=100, description="Maximum records to return"),
+    offset: int = Query(0, ge=0, description="Records to skip"),
+    context: SecurityContext = Depends(require_manager),
+    db: Session = Depends(get_db),
+) -> List[DestinationVideoResponse]:
+    """
+    Lists videos within manager's jurisdictional boundary.
+    """
+    if context.destination_id is not None:
+        if destination_id and destination_id != context.destination_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: Destination is outside your assigned jurisdiction.",
+            )
+        query = db.query(DestinationVideo).filter(DestinationVideo.destination_id == context.destination_id)
+    else:
+        if destination_id:
+            dest = db.query(Destination).filter(Destination.id == destination_id).first()
+            if not dest or dest.state_id != context.state_id:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Access denied: Destination is outside your state jurisdiction.",
+                )
+            query = db.query(DestinationVideo).filter(DestinationVideo.destination_id == destination_id)
+        else:
+            query = (
+                db.query(DestinationVideo)
+                .join(Destination, DestinationVideo.destination_id == Destination.id)
+                .filter(Destination.state_id == context.state_id)
+            )
+
+    if category:
+        query = query.filter(DestinationVideo.category == category)
+
+    return query.order_by(DestinationVideo.created_at.desc()).offset(offset).limit(limit).all()
+
+
+@router.post(
+    "/videos",
+    response_model=DestinationVideoResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create Managed Destination Video",
+    description="Creates a new destination information/orientation video within manager jurisdiction.",
+)
+def create_managed_video(
+    payload: DestinationVideoCreate,
+    context: SecurityContext = Depends(require_manager),
+    db: Session = Depends(get_db),
+) -> DestinationVideoResponse:
+    """
+    Creates a new video entry with strict target destination jurisdiction validation.
+    """
+    dest = db.query(Destination).filter(Destination.id == payload.destination_id).first()
+    if not dest:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Destination '{payload.destination_id}' not found.",
+        )
+
+    if not JurisdictionAuthorizer.can_manage_destination(db, context, payload.destination_id, target_state_id=dest.state_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: Destination is outside your assigned jurisdiction.",
+        )
+
+    # Extract YouTube ID from video_url if provided and youtube_id is missing
+    yt_id = payload.youtube_id
+    if not yt_id and payload.video_url:
+        yt_match = re.search(r"(?:youtu\.be/|youtube\.com/(?:embed/|v/|watch\?v=|shorts/)|&v=)([\w-]{11})", payload.video_url)
+        if yt_match:
+            yt_id = yt_match.group(1)
+        else:
+            yt_id = "dQw4w9WgXcQ"
+
+    thumb = payload.thumbnail_url
+    if not thumb and yt_id and yt_id != "dQw4w9WgXcQ":
+        thumb = f"https://img.youtube.com/vi/{yt_id}/hqdefault.jpg"
+
+    video = DestinationVideo(
+        id=uuid.uuid4(),
+        destination_id=payload.destination_id,
+        title=payload.title,
+        category=payload.category or "Orientation",
+        description=payload.description or "",
+        duration=payload.duration or "0:30",
+        youtube_id=yt_id or "dQw4w9WgXcQ",
+        video_url=payload.video_url or (f"https://www.youtube.com/watch?v={yt_id}" if yt_id else None),
+        thumbnail_url=thumb,
+        status=payload.status or "Published",
+    )
+    db.add(video)
+    db.commit()
+    db.refresh(video)
+    return video
+
+
+@router.get(
+    "/videos/{video_id}",
+    response_model=DestinationVideoResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get Managed Video Details",
+)
+def get_managed_video(
+    video_id: uuid.UUID,
+    context: SecurityContext = Depends(require_manager),
+    db: Session = Depends(get_db),
+) -> DestinationVideoResponse:
+    """
+    Retrieves video details with jurisdictional authority verification.
+    """
+    video = db.query(DestinationVideo).filter(DestinationVideo.id == video_id).first()
+    if not video:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Video not found.")
+    dest = db.query(Destination).filter(Destination.id == video.destination_id).first()
+    if not JurisdictionAuthorizer.can_manage_destination(db, context, video.destination_id, target_state_id=dest.state_id if dest else None):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied: Video is outside your jurisdiction.")
+    return video
+
+
+@router.put(
+    "/videos/{video_id}",
+    response_model=DestinationVideoResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Update Managed Destination Video",
+)
+def update_managed_video(
+    video_id: uuid.UUID,
+    payload: DestinationVideoUpdate,
+    context: SecurityContext = Depends(require_manager),
+    db: Session = Depends(get_db),
+) -> DestinationVideoResponse:
+    """
+    Updates video details with jurisdictional authority verification.
+    """
+    video = db.query(DestinationVideo).filter(DestinationVideo.id == video_id).first()
+    if not video:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Video not found.")
+    dest = db.query(Destination).filter(Destination.id == video.destination_id).first()
+    if not JurisdictionAuthorizer.can_manage_destination(db, context, video.destination_id, target_state_id=dest.state_id if dest else None):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied: Video is outside your jurisdiction.")
+
+    if payload.title is not None:
+        video.title = payload.title
+    if payload.category is not None:
+        video.category = payload.category
+    if payload.description is not None:
+        video.description = payload.description
+    if payload.duration is not None:
+        video.duration = payload.duration
+    if payload.video_url is not None:
+        video.video_url = payload.video_url
+        yt_match = re.search(r"(?:youtu\.be/|youtube\.com/(?:embed/|v/|watch\?v=|shorts/)|&v=)([\w-]{11})", payload.video_url)
+        if yt_match:
+            video.youtube_id = yt_match.group(1)
+            if not payload.thumbnail_url:
+                video.thumbnail_url = f"https://img.youtube.com/vi/{video.youtube_id}/hqdefault.jpg"
+    if payload.youtube_id is not None:
+        video.youtube_id = payload.youtube_id
+    if payload.thumbnail_url is not None:
+        video.thumbnail_url = payload.thumbnail_url
+    if payload.status is not None:
+        video.status = payload.status
+
+    db.commit()
+    db.refresh(video)
+    return video
+
+
+@router.delete(
+    "/videos/{video_id}",
+    response_model=MessageResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Delete Managed Destination Video",
+)
+def delete_managed_video(
+    video_id: uuid.UUID,
+    context: SecurityContext = Depends(require_manager),
+    db: Session = Depends(get_db),
+) -> MessageResponse:
+    """
+    Deletes video entry with jurisdictional boundary verification.
+    """
+    video = db.query(DestinationVideo).filter(DestinationVideo.id == video_id).first()
+    if not video:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Video not found.")
+    dest = db.query(Destination).filter(Destination.id == video.destination_id).first()
+    if not JurisdictionAuthorizer.can_manage_destination(db, context, video.destination_id, target_state_id=dest.state_id if dest else None):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied: Video is outside your jurisdiction.")
+
+    title = video.title
+    db.delete(video)
+    db.commit()
+    return MessageResponse(message=f"Video '{title}' deleted successfully.")

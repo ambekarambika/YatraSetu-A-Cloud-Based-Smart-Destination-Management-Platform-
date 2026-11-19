@@ -221,15 +221,26 @@ function initAddAttractionForm() {
     const saveBtn = document.getElementById('btn-save-attraction');
 
     if (modalTargetBtn && destSelect) {
-        modalTargetBtn.addEventListener('click', () => {
+        modalTargetBtn.onclick = async () => {
             const activeContext = window.YatraSetuManagerStore ? window.YatraSetuManagerStore.getActiveContext() : { activeStateId: 'maharashtra' };
-            const destinations = window.YatraSetuManagerData ? window.YatraSetuManagerData.destinations.filter(d => d.state_id === activeContext.activeStateId) : [];
-            destSelect.innerHTML = destinations.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
-        });
+            if (activeContext.managerScope === 'destination' && activeContext.assignedDestinationId) {
+                const destName = activeContext.assignedDestinationName || activeContext.assignedDestinationId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                destSelect.innerHTML = `<option value="${activeContext.assignedDestinationId}" selected>${destName}</option>`;
+                destSelect.disabled = true;
+            } else {
+                destSelect.disabled = false;
+                let destinations = (window.YatraSetuManagerData && window.YatraSetuManagerData.destinations) || [];
+                if ((!destinations || !destinations.length) && window.YatraSetuManagerStore) {
+                    destinations = await window.YatraSetuManagerStore.getDestinations(activeContext.activeStateId);
+                }
+                const stateDests = destinations.filter(d => !activeContext.activeStateId || d.state_id === activeContext.activeStateId);
+                destSelect.innerHTML = stateDests.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+            }
+        };
     }
 
     if (saveBtn) {
-        saveBtn.addEventListener('click', async (e) => {
+        saveBtn.onclick = async (e) => {
             e.preventDefault();
             const nameInput = document.getElementById('add-attr-name');
             const destSelect = document.getElementById('add-attr-dest');
@@ -237,7 +248,6 @@ function initAddAttractionForm() {
             const imgInput = document.getElementById('add-attr-img');
 
             const nameVal = nameInput ? nameInput.value.trim() : '';
-            const destVal = destSelect ? destSelect.value : '';
             const catVal = catInput ? catInput.value.trim() : '';
             const imgVal = imgInput ? imgInput.value.trim() : '';
 
@@ -245,39 +255,148 @@ function initAddAttractionForm() {
                 alert('Please enter an attraction name.');
                 return;
             }
+            if (nameVal.length > 180) {
+                alert('Attraction name must not exceed 180 characters.');
+                return;
+            }
+            if (catVal && catVal.length > 64) {
+                alert('Attraction category must not exceed 64 characters.');
+                return;
+            }
+            if (imgVal && imgVal.length > 500) {
+                alert('Image URL must not exceed 500 characters.');
+                return;
+            }
 
             const activeContext = window.YatraSetuManagerStore ? window.YatraSetuManagerStore.getActiveContext() : { activeStateId: 'maharashtra' };
 
-            const newAttr = {
-                id: 'attr-' + Date.now(),
-                state_id: activeContext.activeStateId,
-                destination_id: destVal || (window.YatraSetuManagerData.destinations.find(d => d.state_id === activeContext.activeStateId)?.id || 'raigad-fort'),
-                name: nameVal,
-                category: catVal || 'Attraction',
-                img: imgVal || 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=400&q=80',
-                rating: '5.0',
-                status: 'Open'
-            };
+            // Determine target destination ID with jurisdiction validation
+            let destVal = (activeContext.managerScope === 'destination' && activeContext.assignedDestinationId)
+                ? activeContext.assignedDestinationId
+                : (destSelect ? destSelect.value : '');
 
-            if (window.YatraSetuManagerData && window.YatraSetuManagerData.attractions) {
-                window.YatraSetuManagerData.attractions.push(newAttr);
+            if (!destVal) {
+                destVal = (window.YatraSetuManagerData && window.YatraSetuManagerData.destinations)
+                    ? (window.YatraSetuManagerData.destinations.find(d => d.state_id === activeContext.activeStateId)?.id || '')
+                    : '';
             }
 
-            // Reset inputs
-            if (nameInput) nameInput.value = '';
-            if (catInput) catInput.value = '';
-            if (imgInput) imgInput.value = '';
-
-            // Close modal
-            const modal = document.getElementById('addAttractionModal');
-            if (modal) modal.classList.remove('active');
-            document.body.style.overflow = '';
-
-            // Re-render connected view
-            if (typeof renderConnectedViews === 'function' && window.YatraSetuManagerStore) {
-                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+            if (!destVal) {
+                alert('Please select a valid parent destination.');
+                return;
             }
-        });
+
+            if (activeContext.managerScope === 'destination' && activeContext.assignedDestinationId && destVal !== activeContext.assignedDestinationId) {
+                alert('Permission denied: You can only add attractions to your assigned destination.');
+                return;
+            }
+
+            const token = (typeof sessionStorage !== 'undefined')
+                ? (sessionStorage.getItem('yatrasetu_access_token') || (window.YatraSetuApi && window.YatraSetuApi.getAccessToken()))
+                : null;
+
+            if (token && window.YatraSetuApi && typeof window.YatraSetuApi.createManagedAttraction === 'function') {
+                const payload = {
+                    destination_id: destVal,
+                    name: nameVal,
+                    category: catVal || 'Attraction',
+                    status: 'Open'
+                };
+                if (imgVal) {
+                    payload.image_url = imgVal;
+                }
+
+                saveBtn.disabled = true;
+                const originalBtnText = saveBtn.textContent;
+                saveBtn.textContent = 'Saving...';
+
+                try {
+                    const created = await window.YatraSetuApi.createManagedAttraction(payload);
+
+                    // Reset inputs
+                    if (nameInput) nameInput.value = '';
+                    if (catInput) catInput.value = '';
+                    if (imgInput) imgInput.value = '';
+
+                    // Close modal
+                    const modal = document.getElementById('addAttractionModal');
+                    if (modal) modal.classList.remove('active');
+                    document.body.style.overflow = '';
+
+                    // Invalidate store cache and refresh views from backend
+                    if (window.YatraSetuManagerStore && typeof window.YatraSetuManagerStore.invalidateCache === 'function') {
+                        window.YatraSetuManagerStore.invalidateCache('attractions');
+                    }
+                    if (typeof renderConnectedViews === 'function' && window.YatraSetuManagerStore) {
+                        await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                    }
+
+                    if (window.YatraSetuManagerStore && typeof window.YatraSetuManagerStore.invalidateCache === 'function') {
+                        window.YatraSetuManagerStore.invalidateCache('events');
+                    }
+                    if (typeof showManagerToast === 'function') {
+                        showManagerToast(`Attraction "${nameVal}" created successfully!`);
+                    } else {
+                        alert(`Attraction "${nameVal}" created successfully!`);
+                    }
+                } catch (err) {
+                    console.error('[initAddAttractionForm] Failed to create attraction:', err);
+                    let errMsg = err.message || 'Failed to create attraction.';
+                    if (err.status === 401) {
+                        errMsg = 'Your session has expired. Please log in again.';
+                    } else if (err.status === 403) {
+                        errMsg = 'Permission denied: You cannot create an attraction outside your jurisdiction.';
+                    } else if (err.status === 404) {
+                        errMsg = 'Destination not found: The specified parent destination does not exist.';
+                    } else if (err.status === 422) {
+                        errMsg = `Validation error: ${err.message || 'Please check all required fields.'}`;
+                    } else if (err.status === 0) {
+                        errMsg = 'Network error: Unable to connect to the backend server.';
+                    }
+                    if (window.YatraSetuManagerStore && typeof window.YatraSetuManagerStore.invalidateCache === 'function') {
+                        window.YatraSetuManagerStore.invalidateCache('events');
+                    }
+                    if (typeof showManagerToast === 'function') {
+                        showManagerToast(errMsg, 'error');
+                    }
+                    alert(errMsg);
+                } finally {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = originalBtnText;
+                }
+            } else {
+                // Prototype preview mode ONLY (unauthenticated)
+                const newAttr = {
+                    id: 'attr-' + Date.now(),
+                    state_id: activeContext.activeStateId,
+                    destination_id: destVal,
+                    name: nameVal,
+                    category: catVal || 'Attraction',
+                    img: imgVal || 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=400&q=80',
+                    rating: '5.0',
+                    status: 'Open'
+                };
+
+                if (window.YatraSetuManagerData && window.YatraSetuManagerData.attractions) {
+                    window.YatraSetuManagerData.attractions.push(newAttr);
+                }
+
+                // Reset inputs
+                if (nameInput) nameInput.value = '';
+                if (catInput) catInput.value = '';
+                if (imgInput) imgInput.value = '';
+
+                // Close modal
+                const modal = document.getElementById('addAttractionModal');
+                if (modal) modal.classList.remove('active');
+                document.body.style.overflow = '';
+
+                // Re-render connected view
+                if (typeof renderConnectedViews === 'function' && window.YatraSetuManagerStore) {
+                    await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                }
+            }
+        };
     }
 }
 
@@ -303,18 +422,67 @@ function initAddDestinationForm() {
 
             const activeContext = window.YatraSetuManagerStore ? window.YatraSetuManagerStore.getActiveContext() : { activeStateId: 'maharashtra' };
             const destId = nameVal.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+            const capVal = parseInt(document.getElementById('add-dest-capacity')?.value || '4000', 10);
 
-            const newDest = {
+            const payload = {
                 id: destId || ('dest-' + Date.now()),
                 state_id: activeContext.activeStateId,
                 name: nameVal,
                 category: catVal,
-                rank: (window.YatraSetuManagerData.destinations ? window.YatraSetuManagerData.destinations.filter(d => d.state_id === activeContext.activeStateId).length + 1 : 1),
-                img: imgVal || 'https://images.unsplash.com/photo-1600100397608-f010e423b963?auto=format&fit=crop&w=800&q=80'
+                location_label: regionVal || `${nameVal}, ${activeContext.activeStateId}`,
+                hero_image_url: imgVal || 'https://images.unsplash.com/photo-1600100397608-f010e423b963?auto=format&fit=crop&w=800&q=80',
+                banner_image: imgVal || 'https://images.unsplash.com/photo-1600100397608-f010e423b963?auto=format&fit=crop&w=800&q=80',
+                max_daily_capacity: capVal
             };
 
-            if (window.YatraSetuManagerData && window.YatraSetuManagerData.destinations) {
-                window.YatraSetuManagerData.destinations.push(newDest);
+            const token = window.YatraSetuApi ? window.YatraSetuApi.getAccessToken() : null;
+            if (token && window.YatraSetuApi && typeof window.YatraSetuApi.createManagedDestination === 'function') {
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'Saving...';
+                try {
+                    const created = await window.YatraSetuApi.createManagedDestination(payload);
+                    const newDest = {
+                        id: created.id,
+                        state_id: created.state_id,
+                        name: created.name,
+                        category: created.category,
+                        rank: (window.YatraSetuManagerData.destinations ? window.YatraSetuManagerData.destinations.filter(d => d.state_id === activeContext.activeStateId).length + 1 : 1),
+                        img: created.hero_image_url || payload.hero_image_url
+                    };
+                    if (window.YatraSetuManagerData && window.YatraSetuManagerData.destinations) {
+                        window.YatraSetuManagerData.destinations.push(newDest);
+                    }
+                    if (window.YatraSetuManagerStore && typeof window.YatraSetuManagerStore.invalidateCache === 'function') {
+                        window.YatraSetuManagerStore.invalidateCache('destinations');
+                    }
+                    if (window.YatraSetuManagerStore && typeof window.YatraSetuManagerStore.invalidateCache === 'function') {
+                        window.YatraSetuManagerStore.invalidateCache('events');
+                    }
+                    if (typeof showManagerToast === 'function') {
+                        showManagerToast(`Destination "${created.name}" created and published successfully!`);
+                    }
+                } catch (err) {
+                    console.error('[initAddDestinationForm] Backend save error:', err);
+                    alert(err.message || 'Failed to create destination on server.');
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'Save Destination';
+                    return;
+                } finally {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'Save Destination';
+                }
+            } else {
+                const newDest = {
+                    id: payload.id,
+                    state_id: payload.state_id,
+                    name: payload.name,
+                    category: payload.category,
+                    rank: (window.YatraSetuManagerData.destinations ? window.YatraSetuManagerData.destinations.filter(d => d.state_id === activeContext.activeStateId).length + 1 : 1),
+                    img: payload.hero_image_url
+                };
+                if (window.YatraSetuManagerData && window.YatraSetuManagerData.destinations) {
+                    window.YatraSetuManagerData.destinations.push(newDest);
+                }
             }
 
             // Reset inputs
@@ -341,15 +509,26 @@ function initAddEventForm() {
     const saveBtn = document.getElementById('btn-save-event');
 
     if (modalTargetBtn && destSelect) {
-        modalTargetBtn.addEventListener('click', () => {
+        modalTargetBtn.onclick = async () => {
             const activeContext = window.YatraSetuManagerStore ? window.YatraSetuManagerStore.getActiveContext() : { activeStateId: 'maharashtra' };
-            const destinations = window.YatraSetuManagerData ? window.YatraSetuManagerData.destinations.filter(d => d.state_id === activeContext.activeStateId) : [];
-            destSelect.innerHTML = destinations.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
-        });
+            if (activeContext.managerScope === 'destination' && activeContext.assignedDestinationId) {
+                const destName = activeContext.assignedDestinationName || activeContext.assignedDestinationId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                destSelect.innerHTML = `<option value="${activeContext.assignedDestinationId}" selected>${destName}</option>`;
+                destSelect.disabled = true;
+            } else {
+                destSelect.disabled = false;
+                let destinations = (window.YatraSetuManagerData && window.YatraSetuManagerData.destinations) || [];
+                if ((!destinations || !destinations.length) && window.YatraSetuManagerStore) {
+                    destinations = await window.YatraSetuManagerStore.getDestinations(activeContext.activeStateId);
+                }
+                const stateDests = destinations.filter(d => !activeContext.activeStateId || d.state_id === activeContext.activeStateId);
+                destSelect.innerHTML = stateDests.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+            }
+        };
     }
 
     if (saveBtn) {
-        saveBtn.addEventListener('click', async (e) => {
+        saveBtn.onclick = async (e) => {
             e.preventDefault();
             const titleInput = document.getElementById('add-event-title');
             const destSelect = document.getElementById('add-event-dest');
@@ -358,54 +537,185 @@ function initAddEventForm() {
             const imgInput = document.getElementById('add-event-img');
 
             const titleVal = titleInput ? titleInput.value.trim() : '';
-            const destVal = destSelect ? destSelect.value : '';
             const locVal = locInput ? locInput.value.trim() : '';
-            const dateVal = dateInput ? dateInput.value.trim() : '15 OCT';
+            const dateVal = dateInput ? dateInput.value.trim() : '';
             const imgVal = imgInput ? imgInput.value.trim() : '';
 
             if (!titleVal) {
                 alert('Please enter an event title.');
                 return;
             }
+            if (titleVal.length > 180) {
+                alert('Event title must not exceed 180 characters.');
+                return;
+            }
+            if (!locVal) {
+                alert('Please enter an event location or venue.');
+                return;
+            }
+            if (locVal.length > 150) {
+                alert('Location must not exceed 150 characters.');
+                return;
+            }
+            if (!dateVal) {
+                alert('Please enter an event date (e.g. 15 OCT).');
+                return;
+            }
 
-            const activeContext = window.YatraSetuManagerStore ? window.YatraSetuManagerStore.getActiveContext() : { activeStateId: 'maharashtra' };
-            const dateParts = dateVal.split(' ');
+            const dateParts = dateVal.split(/\s+/);
             const dateNum = dateParts[0] || '15';
             const dateMonth = (dateParts[1] || 'OCT').toUpperCase();
 
-            const newEvent = {
-                id: 'event-' + Date.now(),
-                state_id: activeContext.activeStateId,
-                destination_id: destVal || (window.YatraSetuManagerData.destinations.find(d => d.state_id === activeContext.activeStateId)?.id || 'raigad-fort'),
-                title: titleVal,
-                dateNum: dateNum,
-                dateMonth: dateMonth,
-                location: locVal || 'Local Venue',
-                status: 'Upcoming',
-                statusClass: 'active',
-                img: imgVal || 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=400&q=80'
-            };
-
-            if (window.YatraSetuManagerData && window.YatraSetuManagerData.events) {
-                window.YatraSetuManagerData.events.push(newEvent);
+            if (dateNum.length > 10) {
+                alert('Date day/range must not exceed 10 characters.');
+                return;
+            }
+            if (dateMonth.length > 10) {
+                alert('Date month must not exceed 10 characters.');
+                return;
+            }
+            if (imgVal && imgVal.length > 500) {
+                alert('Image URL must not exceed 500 characters.');
+                return;
             }
 
-            // Reset inputs
-            if (titleInput) titleInput.value = '';
-            if (locInput) locInput.value = '';
-            if (dateInput) dateInput.value = '';
-            if (imgInput) imgInput.value = '';
+            const activeContext = window.YatraSetuManagerStore ? window.YatraSetuManagerStore.getActiveContext() : { activeStateId: 'maharashtra' };
 
-            // Close modal
-            const modal = document.getElementById('addEventModal');
-            if (modal) modal.classList.remove('active');
-            document.body.style.overflow = '';
+            // Determine target destination ID with jurisdiction validation
+            let destVal = (activeContext.managerScope === 'destination' && activeContext.assignedDestinationId)
+                ? activeContext.assignedDestinationId
+                : (destSelect ? destSelect.value : '');
 
-            // Re-render connected view
-            if (typeof renderConnectedViews === 'function' && window.YatraSetuManagerStore) {
-                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+            if (!destVal) {
+                destVal = (window.YatraSetuManagerData && window.YatraSetuManagerData.destinations)
+                    ? (window.YatraSetuManagerData.destinations.find(d => d.state_id === activeContext.activeStateId)?.id || '')
+                    : '';
             }
-        });
+
+            if (!destVal) {
+                alert('Please select a valid parent destination.');
+                return;
+            }
+
+            if (activeContext.managerScope === 'destination' && activeContext.assignedDestinationId && destVal !== activeContext.assignedDestinationId) {
+                alert('Permission denied: You can only schedule events in your assigned destination.');
+                return;
+            }
+
+            const token = (typeof sessionStorage !== 'undefined')
+                ? (sessionStorage.getItem('yatrasetu_access_token') || (window.YatraSetuApi && window.YatraSetuApi.getAccessToken()))
+                : null;
+
+            if (token && window.YatraSetuApi && typeof window.YatraSetuApi.createManagedEvent === 'function') {
+                const payload = {
+                    destination_id: destVal,
+                    title: titleVal,
+                    date_num: dateNum,
+                    date_month: dateMonth,
+                    location_label: locVal,
+                    status: 'Upcoming',
+                    status_class: 'active'
+                };
+                if (imgVal) {
+                    payload.image_url = imgVal;
+                }
+
+                saveBtn.disabled = true;
+                const originalBtnText = saveBtn.textContent;
+                saveBtn.textContent = 'Scheduling...';
+
+                try {
+                    const created = await window.YatraSetuApi.createManagedEvent(payload);
+
+                    // Reset inputs
+                    if (titleInput) titleInput.value = '';
+                    if (locInput) locInput.value = '';
+                    if (dateInput) dateInput.value = '';
+                    if (imgInput) imgInput.value = '';
+
+                    // Close modal
+                    const modal = document.getElementById('addEventModal');
+                    if (modal) modal.classList.remove('active');
+                    document.body.style.overflow = '';
+
+                    // Invalidate store cache and refresh views from backend
+                    if (window.YatraSetuManagerStore && typeof window.YatraSetuManagerStore.invalidateCache === 'function') {
+                        window.YatraSetuManagerStore.invalidateCache('attractions');
+                    }
+                    if (typeof renderConnectedViews === 'function' && window.YatraSetuManagerStore) {
+                        await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                    }
+
+                    if (window.YatraSetuManagerStore && typeof window.YatraSetuManagerStore.invalidateCache === 'function') {
+                        window.YatraSetuManagerStore.invalidateCache('events');
+                    }
+                    if (typeof showManagerToast === 'function') {
+                        showManagerToast(`Event "${titleVal}" scheduled successfully!`);
+                    } else {
+                        alert(`Event "${titleVal}" scheduled successfully!`);
+                    }
+                } catch (err) {
+                    console.error('[initAddEventForm] Failed to schedule event:', err);
+                    let errMsg = err.message || 'Failed to schedule event.';
+                    if (err.status === 401) {
+                        errMsg = 'Your session has expired. Please log in again.';
+                    } else if (err.status === 403) {
+                        errMsg = 'Permission denied: You cannot create an event outside your jurisdiction.';
+                    } else if (err.status === 404) {
+                        errMsg = 'Destination not found: The specified parent destination does not exist.';
+                    } else if (err.status === 422) {
+                        errMsg = `Validation error: ${err.message || 'Please check all required fields.'}`;
+                    } else if (err.status === 0) {
+                        errMsg = 'Network error: Unable to connect to the backend server.';
+                    }
+                    if (window.YatraSetuManagerStore && typeof window.YatraSetuManagerStore.invalidateCache === 'function') {
+                        window.YatraSetuManagerStore.invalidateCache('events');
+                    }
+                    if (typeof showManagerToast === 'function') {
+                        showManagerToast(errMsg, 'error');
+                    }
+                    alert(errMsg);
+                } finally {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = originalBtnText;
+                }
+            } else {
+                // Prototype preview mode ONLY (unauthenticated)
+                const newEvent = {
+                    id: 'event-' + Date.now(),
+                    state_id: activeContext.activeStateId,
+                    destination_id: destVal,
+                    title: titleVal,
+                    dateNum: dateNum,
+                    dateMonth: dateMonth,
+                    location: locVal || 'Local Venue',
+                    loc: locVal || 'Local Venue',
+                    status: 'Upcoming',
+                    statusClass: 'active',
+                    img: imgVal || 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=400&q=80'
+                };
+
+                if (window.YatraSetuManagerData && window.YatraSetuManagerData.events) {
+                    window.YatraSetuManagerData.events.push(newEvent);
+                }
+
+                // Reset inputs
+                if (titleInput) titleInput.value = '';
+                if (locInput) locInput.value = '';
+                if (dateInput) dateInput.value = '';
+                if (imgInput) imgInput.value = '';
+
+                // Close modal
+                const modal = document.getElementById('addEventModal');
+                if (modal) modal.classList.remove('active');
+                document.body.style.overflow = '';
+
+                // Re-render connected view
+                if (typeof renderConnectedViews === 'function' && window.YatraSetuManagerStore) {
+                    await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                }
+            }
+        };
     }
 }
 

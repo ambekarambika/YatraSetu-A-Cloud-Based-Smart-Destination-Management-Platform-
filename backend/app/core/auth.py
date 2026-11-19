@@ -74,7 +74,14 @@ def get_current_user_and_context(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Authoritative User lookup from database
+    # 1. Establish verified transaction-scoped caller identity BEFORE querying protected user table
+    # This satisfies PostgreSQL RLS (p_users_select: id::text = app.current_user_id)
+    from sqlalchemy import text
+    bind = db.get_bind()
+    if hasattr(bind, "dialect") and bind.dialect.name == "postgresql":
+        db.execute(text("SELECT set_config('app.current_user_id', :uid, true)"), {"uid": str(user_uuid)})
+
+    # 2. Authoritative User lookup from database under caller's own RLS boundary
     user = db.query(User).filter(User.id == user_uuid).first()
     if not user:
         raise HTTPException(
@@ -92,14 +99,11 @@ def get_current_user_and_context(
     # Authoritative role from database, NOT client-asserted claim
     authoritative_role = user.role_id
 
-    # 1. Establish verified transaction-scoped caller identity prior to querying protected assignment
-    from sqlalchemy import text
-    bind = db.get_bind()
+    # 3. Establish authoritative database role context
     if hasattr(bind, "dialect") and bind.dialect.name == "postgresql":
-        db.execute(text("SELECT set_config('app.current_user_id', :uid, true)"), {"uid": str(user.id)})
         db.execute(text("SELECT set_config('app.current_role', :role, true)"), {"role": authoritative_role})
 
-    # 2. If manager, resolve authoritative jurisdiction assignment
+    # 4. If manager, resolve authoritative jurisdiction assignment
     state_id: Optional[str] = None
     destination_id: Optional[str] = None
     if authoritative_role == "manager":
@@ -126,6 +130,23 @@ def get_current_user_and_context(
     set_database_security_context(db, context)
 
     return context
+
+
+def get_optional_user_and_context(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(http_bearer),
+    db: Session = Depends(get_db),
+) -> Optional[SecurityContext]:
+    """
+    Optional authentication dependency.
+    Extracts and establishes SecurityContext if valid Bearer token is provided.
+    Returns None for unauthenticated/guest visitors without throwing 401.
+    """
+    if not credentials or not credentials.credentials:
+        return None
+    try:
+        return get_current_user_and_context(credentials, db)
+    except HTTPException:
+        return None
 
 
 def get_current_active_user(

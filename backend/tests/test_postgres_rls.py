@@ -23,8 +23,11 @@ unless actually executed against PostgreSQL.
 import os
 import uuid
 import pytest
+from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
+
+load_dotenv()
 
 POSTGRES_TEST_URL = os.environ.get("POSTGRES_TEST_URL")
 

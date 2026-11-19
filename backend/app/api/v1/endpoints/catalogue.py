@@ -24,6 +24,7 @@ from app.models.destination import (
     Event,
     CuratedCircuit,
     CuratedCircuitItem,
+    DestinationVideo,
 )
 from app.schemas.catalogue import (
     PaginatedResponse,
@@ -35,9 +36,23 @@ from app.schemas.catalogue import (
     EventResponse,
     CuratedCircuitResponse,
     CuratedCircuitItemResponse,
+    DestinationVideoResponse,
 )
 
 router = APIRouter()
+
+DESTINATION_ID_ALIASES = {
+    "raigad-fort": ["raigad-fort", "rajgad-fort"],
+    "rajgad-fort": ["rajgad-fort", "raigad-fort"],
+    "amber-fort": ["amber-fort", "amer-fort"],
+    "amer-fort": ["amer-fort", "amber-fort"],
+}
+
+def resolve_destination_ids(dest_id: str) -> List[str]:
+    """Resolves destination IDs including known historical or naming aliases."""
+    clean_id = dest_id.strip().lower()
+    return DESTINATION_ID_ALIASES.get(clean_id, [clean_id])
+
 
 
 # -----------------------------------------------------------------------------
@@ -137,7 +152,7 @@ def get_destination(
     db: Session = Depends(get_db),
 ) -> DestinationDetailResponse:
     """Retrieve full destination details by ID/slug."""
-    dest = db.query(Destination).filter(Destination.id == destination_id.strip().lower()).first()
+    dest = db.query(Destination).filter(Destination.id.in_(resolve_destination_ids(destination_id))).first()
     if not dest:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -168,7 +183,7 @@ def list_attractions(
     query = db.query(Attraction)
 
     if destination_id:
-        query = query.filter(Attraction.destination_id == destination_id.strip().lower())
+        query = query.filter(Attraction.destination_id.in_(resolve_destination_ids(destination_id)))
 
     if category:
         query = query.filter(func.lower(Attraction.category) == category.strip().lower())
@@ -207,7 +222,7 @@ def list_experiences(
     query = db.query(Experience)
 
     if destination_id:
-        query = query.filter(Experience.destination_id == destination_id.strip().lower())
+        query = query.filter(Experience.destination_id.in_(resolve_destination_ids(destination_id)))
 
     if category:
         query = query.filter(func.lower(Experience.category) == category.strip().lower())
@@ -269,7 +284,7 @@ def list_events(
     query = db.query(Event)
 
     if destination_id:
-        query = query.filter(Event.destination_id == destination_id.strip().lower())
+        query = query.filter(Event.destination_id.in_(resolve_destination_ids(destination_id)))
 
     if status_filter:
         query = query.filter(func.lower(Event.status) == status_filter.strip().lower())
@@ -389,3 +404,57 @@ def get_circuit(
         hero_image_url=circuit.hero_image_url,
         items=c_items,
     )
+
+
+# -----------------------------------------------------------------------------
+# 6. Destination Videos
+# -----------------------------------------------------------------------------
+
+@router.get(
+    "/destinations/{destination_id}/videos",
+    response_model=List[DestinationVideoResponse],
+    status_code=status.HTTP_200_OK,
+    summary="List Published Videos for Destination",
+    description="Returns public orientation and documentary videos for a specific destination.",
+)
+def list_destination_videos(
+    destination_id: str,
+    db: Session = Depends(get_db),
+) -> List[DestinationVideoResponse]:
+    """Retrieve published videos tagged with a specific destination."""
+    videos = (
+        db.query(DestinationVideo)
+        .filter(
+            DestinationVideo.destination_id.in_(resolve_destination_ids(destination_id)),
+            DestinationVideo.status == "Published",
+        )
+        .order_by(DestinationVideo.created_at.desc())
+        .all()
+    )
+    return videos
+
+
+@router.get(
+    "/videos",
+    response_model=List[DestinationVideoResponse],
+    status_code=status.HTTP_200_OK,
+    summary="List Published Destination Videos",
+    description="Returns public orientation and documentary videos with optional state/destination filtering.",
+)
+def list_videos(
+    destination_id: Optional[str] = Query(None, description="Optional destination filter"),
+    state_id: Optional[str] = Query(None, description="Optional state filter"),
+    limit: int = Query(50, ge=1, le=100, description="Items limit"),
+    offset: int = Query(0, ge=0, description="Items offset"),
+    db: Session = Depends(get_db),
+) -> List[DestinationVideoResponse]:
+    """Retrieve public published videos matching filters."""
+    query = db.query(DestinationVideo).filter(DestinationVideo.status == "Published")
+    if destination_id:
+        query = query.filter(DestinationVideo.destination_id.in_(resolve_destination_ids(destination_id)))
+    if state_id:
+        query = query.join(Destination, DestinationVideo.destination_id == Destination.id).filter(
+            Destination.state_id == state_id.strip().lower()
+        )
+    return query.order_by(DestinationVideo.created_at.desc()).offset(offset).limit(limit).all()
+

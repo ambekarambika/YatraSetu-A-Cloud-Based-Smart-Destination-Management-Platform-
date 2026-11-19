@@ -90,3 +90,68 @@ class EventUpdate(BaseModel):
     description: Optional[str] = Field(None, description="Updated event description")
     destination_id: Optional[str] = Field(None, min_length=1, max_length=64, description="Target destination ID reassignment")
 
+
+# -----------------------------------------------------------------------------
+# Destination Management Schemas
+# -----------------------------------------------------------------------------
+
+class DestinationCreate(BaseModel):
+    """Request payload for creating a destination within manager jurisdiction."""
+    name: str = Field(..., min_length=1, max_length=150, description="Destination name")
+    category: str = Field(..., min_length=1, max_length=64, description="Destination category")
+    state_id: Optional[str] = Field(None, min_length=1, max_length=32, description="Target state ID")
+    id: Optional[str] = Field(None, min_length=1, max_length=64, description="Optional custom slug / identifier")
+    subtitle: Optional[str] = Field(None, max_length=255)
+    location_label: Optional[str] = Field(None, max_length=150)
+    description: Optional[str] = Field(None)
+    hero_image_url: Optional[str] = Field(None, max_length=500)
+    banner_image: Optional[str] = Field(None, max_length=500)
+    ideal_duration: Optional[str] = Field(None, max_length=64)
+    best_time: Optional[str] = Field(None, max_length=100)
+    max_daily_capacity: Optional[int] = Field(None, ge=1)
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
+
+
+class DestinationUpdate(BaseModel):
+    """Request payload for updating an existing destination."""
+    name: Optional[str] = Field(None, min_length=1, max_length=150)
+    category: Optional[str] = Field(None, min_length=1, max_length=64)
+    subtitle: Optional[str] = Field(None, max_length=255)
+    location_label: Optional[str] = Field(None, max_length=150)
+    description: Optional[str] = Field(None)
+    hero_image_url: Optional[str] = Field(None, max_length=500)
+    banner_image: Optional[str] = Field(None, max_length=500)
+    ideal_duration: Optional[str] = Field(None, max_length=64)
+    best_time: Optional[str] = Field(None, max_length=100)
+    max_daily_capacity: Optional[int] = Field(None, ge=1)
+    metadata: Optional[Dict[str, Any]] = None
+
+
+# -----------------------------------------------------------------------------
+# Video Management Schemas
+# -----------------------------------------------------------------------------
+
+class DestinationVideoCreate(BaseModel):
+    """Request payload for creating a destination video entry."""
+    destination_id: str = Field(..., min_length=1, max_length=64, description="Target destination ID")
+    title: str = Field(..., min_length=1, max_length=180, description="Video title")
+    category: Optional[str] = Field("Orientation", max_length=64)
+    description: Optional[str] = Field(None)
+    duration: Optional[str] = Field("0:30", max_length=32)
+    youtube_id: Optional[str] = Field(None, max_length=64)
+    video_url: Optional[str] = Field(None, max_length=500)
+    thumbnail_url: Optional[str] = Field(None, max_length=500)
+    status: Optional[str] = Field("Published", max_length=32)
+
+
+class DestinationVideoUpdate(BaseModel):
+    """Request payload for updating an existing destination video entry."""
+    title: Optional[str] = Field(None, min_length=1, max_length=180)
+    category: Optional[str] = Field(None, max_length=64)
+    description: Optional[str] = Field(None)
+    duration: Optional[str] = Field(None, max_length=32)
+    youtube_id: Optional[str] = Field(None, max_length=64)
+    video_url: Optional[str] = Field(None, max_length=500)
+    thumbnail_url: Optional[str] = Field(None, max_length=500)
+    status: Optional[str] = Field(None, max_length=32)
+    destination_id: Optional[str] = Field(None, min_length=1, max_length=64)

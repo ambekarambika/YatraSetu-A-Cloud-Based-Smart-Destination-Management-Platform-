@@ -16,8 +16,9 @@ async function renderConnectedViews(context) {
     const formattedStateName = config.badge.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
     const destLabel = activeDestinationId !== 'all' ? activeDestinationId.replace(/-/g, ' ').toUpperCase() : formattedStateName;
 
-    // Populate destination filter dropdowns dynamically if present on active page
-    const destinationsForState = await window.YatraSetuManagerStore.getDestinations(activeStateId);
+    // Populate destination filter dropdowns dynamically if present on active page (Fetch destinations ONCE)
+    const destinations = await window.YatraSetuManagerStore.getDestinations(activeStateId);
+    const destinationsForState = destinations;
     const destFilterSelects = document.querySelectorAll('#destination-filter-select, .destination-context-dropdown');
     destFilterSelects.forEach(select => {
         if (select) {
@@ -45,7 +46,6 @@ async function renderConnectedViews(context) {
     // 0. DASHBOARD OVERVIEW VIEW (dashboard.html)
     const dashboardDestGrid = document.querySelector('.destinations-directory-grid');
     if (dashboardDestGrid) {
-        const destinations = await window.YatraSetuManagerStore.getDestinations(activeStateId);
         if (destinations && destinations.length > 0) {
             dashboardDestGrid.innerHTML = destinations.slice(0, 4).map((dest) => `
                 <div class="dest-directory-card" data-destination-id="${dest.id}" data-state-id="${activeStateId}" style="cursor: pointer;">
@@ -61,7 +61,6 @@ async function renderConnectedViews(context) {
 
     const metricCards = document.querySelectorAll('.metrics-grid-4 .metric-card');
     if (metricCards && metricCards.length >= 4) {
-        const destinations = await window.YatraSetuManagerStore.getDestinations(activeStateId);
         const events = await window.YatraSetuManagerStore.getEvents(activeStateId, activeDestinationId);
         const activeDestVal = metricCards[2].querySelector('.metric-value');
         if (activeDestVal) activeDestVal.textContent = destinations.length;
@@ -70,7 +69,6 @@ async function renderConnectedViews(context) {
     }
 
     // 1. DESTINATIONS VIEW (destinations.html)
-    const destinations = await window.YatraSetuManagerStore.getDestinations(activeStateId);
     const activeDest = (activeDestinationId !== 'all')
         ? (destinations.find(d => d.id === activeDestinationId) || destinations[0])
         : (destinations[0] || null);
@@ -235,11 +233,58 @@ async function renderConnectedViews(context) {
                     e.preventDefault();
                     e.stopPropagation();
                     const attrId = btn.getAttribute('data-attr-id');
-                    const attrItem = (window.YatraSetuManagerData.attractions || []).find(a => a.id === attrId);
-                    if (attrItem && confirm(`Are you sure you want to delete attraction "${attrItem.name}"?`)) {
-                        const idx = window.YatraSetuManagerData.attractions.findIndex(a => a.id === attrId);
-                        if (idx !== -1) window.YatraSetuManagerData.attractions.splice(idx, 1);
-                        await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                    const attrItem = (window.YatraSetuManagerData.attractions || []).find(a => String(a.id) === String(attrId));
+                    const attrName = attrItem ? attrItem.name : 'this attraction';
+                    if (confirm(`Are you sure you want to delete attraction "${attrName}"?`)) {
+                        const token = (typeof sessionStorage !== 'undefined')
+                            ? (sessionStorage.getItem('yatrasetu_access_token') || (window.YatraSetuApi && window.YatraSetuApi.getAccessToken()))
+                            : null;
+
+                        if (token && window.YatraSetuApi && typeof window.YatraSetuApi.deleteManagedAttraction === 'function') {
+                            btn.disabled = true;
+                            try {
+                                await window.YatraSetuApi.deleteManagedAttraction(attrId);
+
+                                if (window.YatraSetuManagerData && window.YatraSetuManagerData.attractions) {
+                                    const idx = window.YatraSetuManagerData.attractions.findIndex(a => String(a.id) === String(attrId));
+                                    if (idx !== -1) window.YatraSetuManagerData.attractions.splice(idx, 1);
+                                }
+
+                                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+
+                                if (typeof showManagerToast === 'function') {
+                                    showManagerToast(`Attraction "${attrName}" deleted successfully.`);
+                                }
+                            } catch (err) {
+                                console.error('[attractionsTableBody] Failed to delete attraction:', err);
+                                let errMsg = err.message || 'Failed to delete attraction.';
+                                if (err.status === 401) {
+                                    errMsg = 'Your session has expired. Please log in again.';
+                                } else if (err.status === 403) {
+                                    errMsg = 'Permission denied: You do not have permission to delete this attraction.';
+                                } else if (err.status === 404) {
+                                    errMsg = 'Attraction not found: This attraction no longer exists.';
+                                    if (window.YatraSetuManagerData && window.YatraSetuManagerData.attractions) {
+                                        const idx = window.YatraSetuManagerData.attractions.findIndex(a => String(a.id) === String(attrId));
+                                        if (idx !== -1) window.YatraSetuManagerData.attractions.splice(idx, 1);
+                                    }
+                                    await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                                } else if (err.status === 0) {
+                                    errMsg = 'Network error: Unable to connect to the backend server.';
+                                }
+                                if (typeof showManagerToast === 'function') {
+                                    showManagerToast(errMsg, 'error');
+                                }
+                                alert(errMsg);
+                            } finally {
+                                btn.disabled = false;
+                            }
+                        } else {
+                            // Prototype preview fallback ONLY
+                            const idx = window.YatraSetuManagerData.attractions.findIndex(a => String(a.id) === String(attrId));
+                            if (idx !== -1) window.YatraSetuManagerData.attractions.splice(idx, 1);
+                            await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                        }
                     }
                 };
             });
@@ -254,76 +299,125 @@ async function renderConnectedViews(context) {
     const featuredEventP = document.querySelector('.event-featured-card p');
     const featuredEventMedia = document.querySelector('.event-featured-media');
     const featuredEventBtn = document.querySelector('.event-featured-card button');
-
-    const events = await window.YatraSetuManagerStore.getEvents(activeStateId, activeDestinationId);
-
-    if (featuredEventTitle && events && events.length > 0) {
-        const ev0 = events[0];
-        featuredEventTitle.textContent = ev0.title;
-        if (featuredEventP) featuredEventP.innerHTML = `📍 <strong>${ev0.dateNum || '28'} ${ev0.dateMonth || 'SEP'}</strong> • ${ev0.location || ev0.loc}`;
-        if (featuredEventMedia && ev0.img) featuredEventMedia.style.backgroundImage = `url('${ev0.img}')`;
-        if (featuredEventBtn) {
-            featuredEventBtn.onclick = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                openEventDetailModal(ev0.id, 'view');
-            };
-        }
-    }
-
     const upcomingEventsContainer = document.querySelector('#upcoming-events-container');
-    if (upcomingEventsContainer) {
-        if (events && events.length > 0) {
-            upcomingEventsContainer.innerHTML = events.map(ev => `
-                <div class="event-timeline-card" data-category="${(ev.category || 'cultural').toLowerCase()}" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border: 1px solid var(--card-border); border-radius: 10px; margin-bottom: 0.75rem; background: #fff;">
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div class="event-date-box" style="text-align: center; background: var(--state-accent-light); padding: 0.5rem 0.75rem; border-radius: 8px;">
-                            <span class="event-date-num" style="display: block; font-weight: 800; font-size: 1.1rem; color: var(--state-accent);">${ev.dateNum}</span>
-                            <span class="event-date-month" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">${ev.dateMonth}</span>
-                        </div>
-                        <div>
-                            <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.2rem;">${ev.title}</h4>
-                            <span style="font-size: 0.78rem; color: var(--text-muted);">📍 ${ev.location}</span>
-                        </div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                        <span class="status-pill ${ev.statusClass}">${ev.status}</span>
-                        <button type="button" class="btn-secondary btn-event-view" data-event-id="${ev.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600;">View Details</button>
-                        <button type="button" class="btn-secondary btn-event-edit" data-event-id="${ev.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600;">Edit</button>
-                        <button type="button" class="btn-secondary btn-event-delete" data-event-id="${ev.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; color: #DC2626; border-color: #FECACA;">Delete</button>
-                    </div>
-                </div>
-            `).join('');
 
-            upcomingEventsContainer.querySelectorAll('.btn-event-view').forEach(btn => {
-                btn.onclick = (e) => {
+    if (featuredEventTitle || upcomingEventsContainer) {
+        const events = await window.YatraSetuManagerStore.getEvents(activeStateId, activeDestinationId);
+
+        if (featuredEventTitle && events && events.length > 0) {
+            const ev0 = events[0];
+            featuredEventTitle.textContent = ev0.title;
+            if (featuredEventP) featuredEventP.innerHTML = `📍 <strong>${ev0.dateNum || '28'} ${ev0.dateMonth || 'SEP'}</strong> • ${ev0.location || ev0.loc}`;
+            if (featuredEventMedia && ev0.img) featuredEventMedia.style.backgroundImage = `url('${ev0.img}')`;
+            if (featuredEventBtn) {
+                featuredEventBtn.onclick = (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    openEventDetailModal(btn.getAttribute('data-event-id'), 'view');
+                    openEventDetailModal(ev0.id, 'view');
                 };
-            });
-            upcomingEventsContainer.querySelectorAll('.btn-event-edit').forEach(btn => {
-                btn.onclick = (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    openEventDetailModal(btn.getAttribute('data-event-id'), 'edit');
-                };
-            });
-            upcomingEventsContainer.querySelectorAll('.btn-event-delete').forEach(btn => {
-                btn.onclick = async (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const eventId = btn.getAttribute('data-event-id');
-                    const evItem = (window.YatraSetuManagerData.events || []).find(e => e.id === eventId);
-                    if (evItem && confirm(`Are you sure you want to delete event "${evItem.title}"?`)) {
-                        const idx = window.YatraSetuManagerData.events.findIndex(e => e.id === eventId);
-                        if (idx !== -1) window.YatraSetuManagerData.events.splice(idx, 1);
-                        await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
-                    }
-                };
-            });
-        } else {
-            upcomingEventsContainer.innerHTML = `<div style="padding: 2.5rem; text-align: center; color: #64748b; font-weight: 500;">No event records available for ${activeDestinationId !== 'all' ? activeDestinationId : formattedStateName}.</div>`;
+            }
+        }
+
+        if (upcomingEventsContainer) {
+            if (events && events.length > 0) {
+                upcomingEventsContainer.innerHTML = events.map(ev => `
+                    <div class="event-timeline-card" data-category="${(ev.category || 'cultural').toLowerCase()}" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border: 1px solid var(--card-border); border-radius: 10px; margin-bottom: 0.75rem; background: #fff;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div class="event-date-box" style="text-align: center; background: var(--state-accent-light); padding: 0.5rem 0.75rem; border-radius: 8px;">
+                                <span class="event-date-num" style="display: block; font-weight: 800; font-size: 1.1rem; color: var(--state-accent);">${ev.dateNum}</span>
+                                <span class="event-date-month" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">${ev.dateMonth}</span>
+                            </div>
+                            <div>
+                                <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.2rem;">${ev.title}</h4>
+                                <span style="font-size: 0.78rem; color: var(--text-muted);">📍 ${ev.location}</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                            <span class="status-pill ${ev.statusClass}">${ev.status}</span>
+                            <button type="button" class="btn-secondary btn-event-view" data-event-id="${ev.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600;">View Details</button>
+                            <button type="button" class="btn-secondary btn-event-edit" data-event-id="${ev.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600;">Edit</button>
+                            <button type="button" class="btn-secondary btn-event-delete" data-event-id="${ev.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; color: #DC2626; border-color: #FECACA;">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                upcomingEventsContainer.querySelectorAll('.btn-event-view').forEach(btn => {
+                    btn.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openEventDetailModal(btn.getAttribute('data-event-id'), 'view');
+                    };
+                });
+                upcomingEventsContainer.querySelectorAll('.btn-event-edit').forEach(btn => {
+                    btn.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openEventDetailModal(btn.getAttribute('data-event-id'), 'edit');
+                    };
+                });
+                upcomingEventsContainer.querySelectorAll('.btn-event-delete').forEach(btn => {
+                    btn.onclick = async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const eventId = btn.getAttribute('data-event-id');
+                        const evItem = (window.YatraSetuManagerData.events || []).find(e => String(e.id) === String(eventId));
+                        const evTitle = evItem ? evItem.title : 'this event';
+                        if (confirm(`Are you sure you want to delete event "${evTitle}"?`)) {
+                            const token = (typeof sessionStorage !== 'undefined')
+                                ? (sessionStorage.getItem('yatrasetu_access_token') || (window.YatraSetuApi && window.YatraSetuApi.getAccessToken()))
+                                : null;
+
+                            if (token && window.YatraSetuApi && typeof window.YatraSetuApi.deleteManagedEvent === 'function') {
+                                btn.disabled = true;
+                                try {
+                                    await window.YatraSetuApi.deleteManagedEvent(eventId);
+
+                                    if (window.YatraSetuManagerData && window.YatraSetuManagerData.events) {
+                                        const idx = window.YatraSetuManagerData.events.findIndex(e => String(e.id) === String(eventId));
+                                        if (idx !== -1) window.YatraSetuManagerData.events.splice(idx, 1);
+                                    }
+
+                                    await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+
+                                    if (typeof showManagerToast === 'function') {
+                                        showManagerToast(`Event "${evTitle}" deleted successfully.`);
+                                    }
+                                } catch (err) {
+                                    console.error('[upcomingEventsContainer] Failed to delete event:', err);
+                                    let errMsg = err.message || 'Failed to delete event.';
+                                    if (err.status === 401) {
+                                        errMsg = 'Your session has expired. Please log in again.';
+                                    } else if (err.status === 403) {
+                                        errMsg = 'Permission denied: You do not have permission to delete this event.';
+                                    } else if (err.status === 404) {
+                                        errMsg = 'Event not found: This event no longer exists.';
+                                        if (window.YatraSetuManagerData && window.YatraSetuManagerData.events) {
+                                            const idx = window.YatraSetuManagerData.events.findIndex(e => String(e.id) === String(eventId));
+                                            if (idx !== -1) window.YatraSetuManagerData.events.splice(idx, 1);
+                                        }
+                                        await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                                    } else if (err.status === 0) {
+                                        errMsg = 'Network error: Unable to connect to the backend server.';
+                                    }
+                                    if (typeof showManagerToast === 'function') {
+                                        showManagerToast(errMsg, 'error');
+                                    }
+                                    alert(errMsg);
+                                } finally {
+                                    btn.disabled = false;
+                                }
+                            } else {
+                                // Prototype preview fallback ONLY
+                                const idx = window.YatraSetuManagerData.events.findIndex(e => String(e.id) === String(eventId));
+                                if (idx !== -1) window.YatraSetuManagerData.events.splice(idx, 1);
+                                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                            }
+                        }
+                    };
+                });
+            } else {
+                upcomingEventsContainer.innerHTML = `<div style="padding: 2.5rem; text-align: center; color: #64748b; font-weight: 500;">No event records available for ${activeDestinationId !== 'all' ? activeDestinationId : formattedStateName}.</div>`;
+            }
         }
     }
 
@@ -763,7 +857,8 @@ async function renderConnectedViews(context) {
     // 9. DECISION SUPPORT VIEW (decision-support.html)
     const signalsContainer = document.querySelector('#decision-support-signals-container');
     if (signalsContainer) {
-        const firstEvent = (events && events.length > 0) ? events[0] : (config.events && config.events[0]) ? config.events[0] : { title: `${formattedStateName} Cultural Festival`, location: formattedStateName };
+        const eventsList = (typeof events !== 'undefined' && events) ? events : (window.YatraSetuManagerData && window.YatraSetuManagerData.events) || [];
+        const firstEvent = (eventsList && eventsList.length > 0) ? eventsList[0] : (config.events && config.events[0]) ? config.events[0] : { title: `${formattedStateName} Cultural Festival`, location: formattedStateName };
         const dest1 = (config.topDestinations && config.topDestinations[0]) ? config.topDestinations[0].name : formattedStateName;
         const dest2 = (config.topDestinations && config.topDestinations[1]) ? config.topDestinations[1].name : dest1;
 
@@ -1049,7 +1144,14 @@ function initManagerProfilePage() {
  */
 function openDestinationDetailModal(destId, mode = 'view') {
     if (!destId || !window.YatraSetuManagerData || !window.YatraSetuManagerData.destinations) return;
-    const dest = window.YatraSetuManagerData.destinations.find(d => d.id === destId);
+    const destAliases = {
+        'raigad-fort': ['raigad-fort', 'rajgad-fort'],
+        'rajgad-fort': ['rajgad-fort', 'raigad-fort'],
+        'amber-fort': ['amber-fort', 'amer-fort'],
+        'amer-fort': ['amer-fort', 'amber-fort']
+    };
+    const destVariants = destAliases[destId] || [destId];
+    const dest = window.YatraSetuManagerData.destinations.find(d => destVariants.includes(d.id));
     if (!dest) return;
 
     const modal = document.getElementById('destinationDetailModal');
@@ -1070,20 +1172,42 @@ function openDestinationDetailModal(destId, mode = 'view') {
     if (mode === 'view') {
         if (titleEl) titleEl.textContent = `${dest.name} — Destination Profile`;
 
+        const galleryImgs = (dest.metadata && Array.isArray(dest.metadata.gallery_images)) ? dest.metadata.gallery_images : [];
+        const galleryPreviewHtml = galleryImgs.length > 0 ? `
+            <div style="margin-top: 0.75rem;">
+                <strong style="font-size: 0.82rem; color: #475569;">Gallery Perspectives (${galleryImgs.length}):</strong>
+                <div style="display: flex; gap: 0.5rem; overflow-x: auto; padding-top: 0.35rem;">
+                    ${galleryImgs.map(g => {
+                        const url = typeof g === 'string' ? g : (g && g.url);
+                        return `<img src="${url}" alt="Gallery perspective" style="width: 60px; height: 45px; object-fit: cover; border-radius: 4px; border: 1px solid #E2E8F0;">`;
+                    }).join('')}
+                </div>
+            </div>
+        ` : '';
+
         bodyEl.innerHTML = `
             <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
-                <img src="${dest.img}" alt="${dest.name}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px;">
+                <img src="${dest.hero_image_url || dest.img || '../assets/images/thumb-rajgad.jpg'}" alt="${dest.name}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px;">
             </div>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; font-size: 0.88rem;">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-bottom: 1rem; font-size: 0.85rem;">
                 <div><strong>Destination Name:</strong> <span id="detail-dest-name">${dest.name}</span></div>
                 <div><strong>ID:</strong> <span id="detail-dest-id">${dest.id}</span></div>
                 <div><strong>Category:</strong> <span>${dest.category || 'Heritage & Tourism'}</span></div>
                 <div><strong>State:</strong> <span>${formattedState}</span></div>
-                <div><strong>Rank:</strong> <span>#${dest.rank}</span></div>
+                <div><strong>Location / District:</strong> <span>${dest.location_label || dest.location || 'Pune District'}</span></div>
                 <div><strong>Status:</strong> <span class="badge badge-success">Active Destination</span></div>
+                <div><strong>Ideal Duration:</strong> <span>${dest.ideal_duration || '1-2 Days'}</span></div>
+                <div><strong>Best Season:</strong> <span>${dest.best_time || 'October to March'}</span></div>
+                <div style="grid-column: 1 / -1;"><strong>Daily Capacity Limit:</strong> <span>${dest.max_daily_capacity ? dest.max_daily_capacity.toLocaleString() + ' visitors' : 'Unrestricted'}</span></div>
             </div>
-            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 0.85rem; font-size: 0.85rem; margin-bottom: 1rem;">
-                <h4 style="font-size: 0.8rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.5rem;">Associated Ecosystem Records</h4>
+            ${dest.subtitle ? `<div style="margin-bottom: 0.75rem; font-size: 0.85rem;"><strong>Tagline:</strong> <em>${dest.subtitle}</em></div>` : ''}
+            <div style="margin-bottom: 0.75rem; font-size: 0.85rem; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 0.65rem;">
+                <strong>Overview & Description:</strong>
+                <p style="margin: 0.35rem 0 0 0; color: #475569; line-height: 1.45;">${dest.description || 'Comprehensive destination overview maintained by Destination Manager.'}</p>
+            </div>
+            ${galleryPreviewHtml}
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 0.75rem; font-size: 0.82rem; margin-top: 0.85rem;">
+                <h4 style="font-size: 0.78rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.4rem;">Associated Ecosystem Records</h4>
                 <div style="display: flex; gap: 1.25rem;">
                     <span>🏛️ <strong>${attrCount}</strong> Attractions</span>
                     <span>📅 <strong>${evCount}</strong> Events</span>
@@ -1156,25 +1280,85 @@ function openDestinationDetailModal(destId, mode = 'view') {
     } else if (mode === 'edit') {
         if (titleEl) titleEl.textContent = `Edit Destination — ${dest.name}`;
 
+        const existingGalleryUrls = (dest.metadata && Array.isArray(dest.metadata.gallery_images))
+            ? dest.metadata.gallery_images.map(g => typeof g === 'string' ? g : (g && g.url)).filter(Boolean).join('\n')
+            : '';
+
         bodyEl.innerHTML = `
-            <div class="form-group" style="margin-bottom: 0.75rem;">
-                <label style="font-weight: 600; font-size: 0.85rem;">Destination Name</label>
-                <input type="text" id="edit-dest-name-input" class="form-control" value="${dest.name}">
-            </div>
-            <div class="form-group" style="margin-bottom: 0.75rem;">
-                <label style="font-weight: 600; font-size: 0.85rem;">Category</label>
-                <select id="edit-dest-cat-select" class="form-control">
-                    <option value="Heritage Fort" ${dest.category === 'Heritage Fort' ? 'selected' : ''}>Heritage Fort</option>
-                    <option value="UNESCO World Heritage Site" ${dest.category === 'UNESCO World Heritage Site' ? 'selected' : ''}>UNESCO World Heritage Site</option>
-                    <option value="Hill Station" ${dest.category === 'Hill Station' ? 'selected' : ''}>Hill Station</option>
-                    <option value="Pilgrimage Site" ${dest.category === 'Pilgrimage Site' ? 'selected' : ''}>Pilgrimage Site</option>
-                    <option value="Eco & Wildlife Reserve" ${dest.category === 'Eco & Wildlife Reserve' ? 'selected' : ''}>Eco & Wildlife Reserve</option>
-                    <option value="Coastal Beach" ${dest.category === 'Coastal Beach' ? 'selected' : ''}>Coastal Beach</option>
-                </select>
-            </div>
-            <div class="form-group" style="margin-bottom: 0.75rem;">
-                <label style="font-weight: 600; font-size: 0.85rem;">Image URL</label>
-                <input type="text" id="edit-dest-img-input" class="form-control" value="${dest.img || ''}">
+            <div style="max-height: 65vh; overflow-y: auto; padding-right: 0.5rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <div class="form-group">
+                        <label style="font-weight: 600; font-size: 0.82rem;">Destination Name *</label>
+                        <input type="text" id="edit-dest-name-input" class="form-control" value="${dest.name || ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label style="font-weight: 600; font-size: 0.82rem;">Category *</label>
+                        <select id="edit-dest-cat-select" class="form-control">
+                            <option value="Heritage Fort" ${dest.category === 'Heritage Fort' ? 'selected' : ''}>Heritage Fort</option>
+                            <option value="UNESCO World Heritage Site" ${dest.category === 'UNESCO World Heritage Site' ? 'selected' : ''}>UNESCO World Heritage Site</option>
+                            <option value="Hill Station" ${dest.category === 'Hill Station' ? 'selected' : ''}>Hill Station</option>
+                            <option value="Pilgrimage Site" ${dest.category === 'Pilgrimage Site' ? 'selected' : ''}>Pilgrimage Site</option>
+                            <option value="Eco & Wildlife Reserve" ${dest.category === 'Eco & Wildlife Reserve' ? 'selected' : ''}>Eco & Wildlife Reserve</option>
+                            <option value="Coastal Beach" ${dest.category === 'Coastal Beach' ? 'selected' : ''}>Coastal Beach</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                    <label style="font-weight: 600; font-size: 0.82rem;">Overview Tagline / Subtitle</label>
+                    <input type="text" id="edit-dest-subtitle-input" class="form-control" value="${dest.subtitle || ''}" placeholder="e.g. The King of Forts and Sovereign Capital">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                    <label style="font-weight: 600; font-size: 0.82rem;">Region / District Label</label>
+                    <input type="text" id="edit-dest-loc-input" class="form-control" value="${dest.location_label || dest.location || ''}" placeholder="e.g. Pune District, Maharashtra">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <div class="form-group">
+                        <label style="font-weight: 600; font-size: 0.82rem;">Main / Hero Image URL</label>
+                        <input type="text" id="edit-dest-hero-input" class="form-control" value="${dest.hero_image_url || dest.img || ''}" placeholder="../assets/images/thumb-rajgad.jpg or https://...">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-weight: 600; font-size: 0.82rem;">Banner Image URL</label>
+                        <input type="text" id="edit-dest-banner-input" class="form-control" value="${dest.banner_image || dest.hero_image_url || dest.img || ''}" placeholder="../assets/images/hero-maharashtra.jpg or https://...">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                    <label style="font-weight: 600; font-size: 0.82rem;">Comprehensive Description / Overview *</label>
+                    <textarea id="edit-dest-desc-input" class="form-control" rows="3" placeholder="Detailed architectural, historical, and travel description...">${dest.description || ''}</textarea>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <div class="form-group">
+                        <label style="font-weight: 600; font-size: 0.82rem;">Ideal Duration</label>
+                        <input type="text" id="edit-dest-dur-input" class="form-control" value="${dest.ideal_duration || '1-2 Days'}" placeholder="1-2 Days">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-weight: 600; font-size: 0.82rem;">Best Time to Visit</label>
+                        <input type="text" id="edit-dest-season-input" class="form-control" value="${dest.best_time || 'October to March'}" placeholder="October to March">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-weight: 600; font-size: 0.82rem;">Daily Capacity Limit</label>
+                        <input type="number" id="edit-dest-cap-input" class="form-control" value="${dest.max_daily_capacity || 2500}" placeholder="2500">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                    <label style="font-weight: 600; font-size: 0.82rem;">Additional Gallery Image URLs (One URL per line)</label>
+                    <textarea id="edit-dest-gallery-input" class="form-control" rows="2" placeholder="https://...&#10;https://...">${existingGalleryUrls}</textarea>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                    <label style="font-weight: 600; font-size: 0.82rem;">Historical Background & Cultural Chronicles</label>
+                    <textarea id="edit-dest-history-input" class="form-control" rows="2" placeholder="Detailed chronicle of sovereign history, royal patronage...">${(dest.metadata && dest.metadata.history_background) || dest.history_background || ''}</textarea>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                    <label style="font-weight: 600; font-size: 0.82rem;">Heritage Architecture & Construction</label>
+                    <textarea id="edit-dest-arch-input" class="form-control" rows="2" placeholder="Masonry, fortification, indigenous civil engineering...">${(dest.metadata && dest.metadata.heritage_architecture) || dest.heritage_architecture || ''}</textarea>
+                </div>
             </div>
         `;
 
@@ -1191,16 +1375,112 @@ function openDestinationDetailModal(destId, mode = 'view') {
             saveEditBtn.onclick = async () => {
                 const nameVal = document.getElementById('edit-dest-name-input').value.trim();
                 const catVal = document.getElementById('edit-dest-cat-select').value;
-                const imgVal = document.getElementById('edit-dest-img-input').value.trim();
+                const subtitleVal = document.getElementById('edit-dest-subtitle-input').value.trim();
+                const locVal = document.getElementById('edit-dest-loc-input').value.trim();
+                const heroVal = document.getElementById('edit-dest-hero-input').value.trim();
+                const bannerVal = document.getElementById('edit-dest-banner-input').value.trim();
+                const descVal = document.getElementById('edit-dest-desc-input').value.trim();
+                const durVal = document.getElementById('edit-dest-dur-input').value.trim();
+                const seasonVal = document.getElementById('edit-dest-season-input').value.trim();
+                const capVal = document.getElementById('edit-dest-cap-input').value.trim();
+                const galleryVal = document.getElementById('edit-dest-gallery-input').value.trim();
+                const historyVal = document.getElementById('edit-dest-history-input').value.trim();
+                const archVal = document.getElementById('edit-dest-arch-input').value.trim();
 
                 if (!nameVal) {
                     alert('Please enter a destination name.');
                     return;
                 }
 
-                dest.name = nameVal;
-                dest.category = catVal;
-                if (imgVal) dest.img = imgVal;
+                const galleryUrls = galleryVal.split('\n').map(s => s.trim()).filter(Boolean);
+                const metadataPayload = {
+                    ...(dest.metadata || {}),
+                    gallery_images: galleryUrls,
+                    history_background: historyVal,
+                    heritage_architecture: archVal
+                };
+
+                const payload = {
+                    name: nameVal,
+                    category: catVal,
+                    subtitle: subtitleVal,
+                    location_label: locVal,
+                    description: descVal,
+                    hero_image_url: heroVal || dest.img,
+                    banner_image: bannerVal || heroVal || dest.img,
+                    ideal_duration: durVal,
+                    best_time: seasonVal,
+                    max_daily_capacity: capVal ? parseInt(capVal, 10) : undefined,
+                    metadata: metadataPayload
+                };
+
+                const token = window.YatraSetuApi ? window.YatraSetuApi.getAccessToken() : null;
+                if (token && window.YatraSetuApi && typeof window.YatraSetuApi.updateManagedDestination === 'function') {
+                    saveEditBtn.disabled = true;
+                    saveEditBtn.textContent = 'Saving...';
+                    try {
+                        const updated = await window.YatraSetuApi.updateManagedDestination(destId, payload);
+                        dest.name = updated.name || nameVal;
+                        dest.category = updated.category || catVal;
+                        dest.subtitle = updated.subtitle || subtitleVal;
+                        dest.location_label = updated.location_label || locVal;
+                        dest.description = updated.description || descVal;
+                        dest.hero_image_url = updated.hero_image_url || payload.hero_image_url;
+                        dest.banner_image = updated.banner_image || payload.banner_image;
+                        dest.img = dest.hero_image_url;
+                        dest.ideal_duration = updated.ideal_duration || durVal;
+                        dest.best_time = updated.best_time || seasonVal;
+                        dest.max_daily_capacity = updated.max_daily_capacity || payload.max_daily_capacity;
+                        dest.metadata = updated.metadata || metadataPayload;
+                        dest.history_background = historyVal;
+                        dest.heritage_architecture = archVal;
+
+                        // Synchronize to localStorage for instant cross-tab access
+                        try {
+                            const storedDests = JSON.parse(localStorage.getItem('yatrasetu_manager_destinations') || '[]');
+                            const idx = storedDests.findIndex(d => d.id === destId);
+                            if (idx !== -1) {
+                                Object.assign(storedDests[idx], dest);
+                            } else {
+                                storedDests.push(dest);
+                            }
+                            localStorage.setItem('yatrasetu_manager_destinations', JSON.stringify(storedDests));
+                        } catch (e) {}
+
+                        if (window.YatraSetuManagerStore && typeof window.YatraSetuManagerStore.invalidateCache === 'function') {
+                            window.YatraSetuManagerStore.invalidateCache('destinations');
+                        }
+
+                        if (typeof showManagerToast === 'function') {
+                            showManagerToast(`Destination "${dest.name}" updated successfully!`);
+                        }
+                    } catch (err) {
+                        console.error('[openDestinationDetailModal] Failed to update destination:', err);
+                        alert(err.message || 'Failed to update destination on server.');
+                        saveEditBtn.disabled = false;
+                        saveEditBtn.textContent = 'Save Changes';
+                        return;
+                    } finally {
+                        saveEditBtn.disabled = false;
+                        saveEditBtn.textContent = 'Save Changes';
+                    }
+                } else {
+                    dest.name = nameVal;
+                    dest.category = catVal;
+                    dest.subtitle = subtitleVal;
+                    dest.location_label = locVal;
+                    dest.description = descVal;
+                    if (heroVal) {
+                        dest.hero_image_url = heroVal;
+                        dest.img = heroVal;
+                    }
+                    dest.ideal_duration = durVal;
+                    dest.best_time = seasonVal;
+                    if (capVal) dest.max_daily_capacity = parseInt(capVal, 10);
+                    dest.metadata = metadataPayload;
+                    dest.history_background = historyVal;
+                    dest.heritage_architecture = archVal;
+                }
 
                 await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
                 openDestinationDetailModal(destId, 'view');
@@ -1224,7 +1504,7 @@ function openDestinationDetailModal(destId, mode = 'view') {
  */
 function openAttractionDetailModal(attrId, mode = 'view') {
     if (!attrId || !window.YatraSetuManagerData || !window.YatraSetuManagerData.attractions) return;
-    const attr = window.YatraSetuManagerData.attractions.find(a => a.id === attrId);
+    const attr = window.YatraSetuManagerData.attractions.find(a => a.id === attrId || String(a.id) === String(attrId));
     if (!attr) return;
 
     const modal = document.getElementById('attractionDetailModal');
@@ -1271,11 +1551,67 @@ function openAttractionDetailModal(attrId, mode = 'view') {
         if (deleteBtn) {
             deleteBtn.onclick = async () => {
                 if (confirm(`Are you sure you want to delete attraction "${attr.name}"?`)) {
-                    const idx = window.YatraSetuManagerData.attractions.findIndex(a => a.id === attrId);
-                    if (idx !== -1) window.YatraSetuManagerData.attractions.splice(idx, 1);
-                    modal.classList.remove('active');
-                    document.body.style.overflow = '';
-                    await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                    const token = (typeof sessionStorage !== 'undefined')
+                        ? (sessionStorage.getItem('yatrasetu_access_token') || (window.YatraSetuApi && window.YatraSetuApi.getAccessToken()))
+                        : null;
+
+                    if (token && window.YatraSetuApi && typeof window.YatraSetuApi.deleteManagedAttraction === 'function') {
+                        deleteBtn.disabled = true;
+                        const origText = deleteBtn.textContent;
+                        deleteBtn.textContent = 'Deleting...';
+                        try {
+                            await window.YatraSetuApi.deleteManagedAttraction(attrId);
+
+                            if (window.YatraSetuManagerData && window.YatraSetuManagerData.attractions) {
+                                const idx = window.YatraSetuManagerData.attractions.findIndex(a => String(a.id) === String(attrId));
+                                if (idx !== -1) window.YatraSetuManagerData.attractions.splice(idx, 1);
+                            }
+
+                            modal.classList.remove('active');
+                            document.body.style.overflow = '';
+
+                            await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+
+                            if (typeof showManagerToast === 'function') {
+                                showManagerToast(`Attraction "${attr.name}" deleted successfully.`);
+                            } else {
+                                alert(`Attraction "${attr.name}" deleted successfully.`);
+                            }
+                        } catch (err) {
+                            console.error('[openAttractionDetailModal] Failed to delete attraction:', err);
+                            let errMsg = err.message || 'Failed to delete attraction.';
+                            if (err.status === 401) {
+                                errMsg = 'Your session has expired. Please log in again.';
+                            } else if (err.status === 403) {
+                                errMsg = 'Permission denied: You do not have permission to delete this attraction.';
+                            } else if (err.status === 404) {
+                                errMsg = 'Attraction not found: This attraction no longer exists or was already removed.';
+                                if (window.YatraSetuManagerData && window.YatraSetuManagerData.attractions) {
+                                    const idx = window.YatraSetuManagerData.attractions.findIndex(a => String(a.id) === String(attrId));
+                                    if (idx !== -1) window.YatraSetuManagerData.attractions.splice(idx, 1);
+                                }
+                                modal.classList.remove('active');
+                                document.body.style.overflow = '';
+                                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                            } else if (err.status === 0) {
+                                errMsg = 'Network error: Unable to connect to the backend server.';
+                            }
+                            if (typeof showManagerToast === 'function') {
+                                showManagerToast(errMsg, 'error');
+                            }
+                            alert(errMsg);
+                        } finally {
+                            deleteBtn.disabled = false;
+                            deleteBtn.textContent = origText;
+                        }
+                    } else {
+                        // Prototype preview fallback ONLY
+                        const idx = window.YatraSetuManagerData.attractions.findIndex(a => String(a.id) === String(attrId));
+                        if (idx !== -1) window.YatraSetuManagerData.attractions.splice(idx, 1);
+                        modal.classList.remove('active');
+                        document.body.style.overflow = '';
+                        await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                    }
                 }
             };
         }
@@ -1326,13 +1662,76 @@ function openAttractionDetailModal(attrId, mode = 'view') {
                 const imgVal = document.getElementById('edit-attr-img-input').value.trim();
 
                 if (!nameVal) { alert('Please enter attraction name.'); return; }
-                attr.name = nameVal;
-                attr.category = catVal || 'Attraction';
-                attr.status = statusVal;
-                if (imgVal) attr.img = imgVal;
+                if (nameVal.length > 180) { alert('Attraction name must not exceed 180 characters.'); return; }
+                if (catVal && catVal.length > 64) { alert('Category must not exceed 64 characters.'); return; }
+                if (imgVal && imgVal.length > 500) { alert('Image URL must not exceed 500 characters.'); return; }
 
-                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
-                openAttractionDetailModal(attrId, 'view');
+                const token = (typeof sessionStorage !== 'undefined')
+                    ? (sessionStorage.getItem('yatrasetu_access_token') || (window.YatraSetuApi && window.YatraSetuApi.getAccessToken()))
+                    : null;
+
+                if (token && window.YatraSetuApi && typeof window.YatraSetuApi.updateManagedAttraction === 'function') {
+                    const updatePayload = {
+                        name: nameVal,
+                        category: catVal || 'Attraction',
+                        status: statusVal
+                    };
+                    if (imgVal) {
+                        updatePayload.image_url = imgVal;
+                    }
+
+                    saveBtn.disabled = true;
+                    const originalBtnText = saveBtn.textContent;
+                    saveBtn.textContent = 'Saving...';
+
+                    try {
+                        const updated = await window.YatraSetuApi.updateManagedAttraction(attrId, updatePayload);
+
+                        attr.name = updated.name || nameVal;
+                        attr.category = updated.category || catVal || 'Attraction';
+                        attr.status = updated.status || statusVal;
+                        if (updated.image_url || imgVal) {
+                            attr.img = updated.image_url || imgVal;
+                        }
+
+                        await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                        openAttractionDetailModal(attrId, 'view');
+
+                        if (typeof showManagerToast === 'function') {
+                            showManagerToast(`Attraction "${attr.name}" updated successfully!`);
+                        }
+                    } catch (err) {
+                        console.error('[openAttractionDetailModal] Failed to update attraction:', err);
+                        let errMsg = err.message || 'Failed to update attraction.';
+                        if (err.status === 401) {
+                            errMsg = 'Your session has expired. Please log in again.';
+                        } else if (err.status === 403) {
+                            errMsg = 'Permission denied: You do not have permission to modify this attraction.';
+                        } else if (err.status === 404) {
+                            errMsg = 'Attraction not found: This attraction no longer exists.';
+                        } else if (err.status === 422) {
+                            errMsg = `Validation error: ${err.message || 'Please check all required fields.'}`;
+                        } else if (err.status === 0) {
+                            errMsg = 'Network error: Unable to connect to the backend server.';
+                        }
+                        if (typeof showManagerToast === 'function') {
+                            showManagerToast(errMsg, 'error');
+                        }
+                        alert(errMsg);
+                    } finally {
+                        saveBtn.disabled = false;
+                        saveBtn.textContent = originalBtnText;
+                    }
+                } else {
+                    // Prototype preview fallback ONLY
+                    attr.name = nameVal;
+                    attr.category = catVal || 'Attraction';
+                    attr.status = statusVal;
+                    if (imgVal) attr.img = imgVal;
+
+                    await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                    openAttractionDetailModal(attrId, 'view');
+                }
             };
         }
     }
@@ -1350,7 +1749,7 @@ function openAttractionDetailModal(attrId, mode = 'view') {
  */
 function openEventDetailModal(eventId, mode = 'view') {
     if (!eventId || !window.YatraSetuManagerData || !window.YatraSetuManagerData.events) return;
-    const ev = window.YatraSetuManagerData.events.find(e => e.id === eventId);
+    const ev = window.YatraSetuManagerData.events.find(e => e.id === eventId || String(e.id) === String(eventId));
     if (!ev) return;
 
     const modal = document.getElementById('eventDetailModal');
@@ -1397,11 +1796,67 @@ function openEventDetailModal(eventId, mode = 'view') {
         if (deleteBtn) {
             deleteBtn.onclick = async () => {
                 if (confirm(`Are you sure you want to delete event "${ev.title}"?`)) {
-                    const idx = window.YatraSetuManagerData.events.findIndex(e => e.id === eventId);
-                    if (idx !== -1) window.YatraSetuManagerData.events.splice(idx, 1);
-                    modal.classList.remove('active');
-                    document.body.style.overflow = '';
-                    await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                    const token = (typeof sessionStorage !== 'undefined')
+                        ? (sessionStorage.getItem('yatrasetu_access_token') || (window.YatraSetuApi && window.YatraSetuApi.getAccessToken()))
+                        : null;
+
+                    if (token && window.YatraSetuApi && typeof window.YatraSetuApi.deleteManagedEvent === 'function') {
+                        deleteBtn.disabled = true;
+                        const origText = deleteBtn.textContent;
+                        deleteBtn.textContent = 'Deleting...';
+                        try {
+                            await window.YatraSetuApi.deleteManagedEvent(eventId);
+
+                            if (window.YatraSetuManagerData && window.YatraSetuManagerData.events) {
+                                const idx = window.YatraSetuManagerData.events.findIndex(e => String(e.id) === String(eventId));
+                                if (idx !== -1) window.YatraSetuManagerData.events.splice(idx, 1);
+                            }
+
+                            modal.classList.remove('active');
+                            document.body.style.overflow = '';
+
+                            await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+
+                            if (typeof showManagerToast === 'function') {
+                                showManagerToast(`Event "${ev.title}" deleted successfully.`);
+                            } else {
+                                alert(`Event "${ev.title}" deleted successfully.`);
+                            }
+                        } catch (err) {
+                            console.error('[openEventDetailModal] Failed to delete event:', err);
+                            let errMsg = err.message || 'Failed to delete event.';
+                            if (err.status === 401) {
+                                errMsg = 'Your session has expired. Please log in again.';
+                            } else if (err.status === 403) {
+                                errMsg = 'Permission denied: You do not have permission to delete this event.';
+                            } else if (err.status === 404) {
+                                errMsg = 'Event not found: This event no longer exists or was already removed.';
+                                if (window.YatraSetuManagerData && window.YatraSetuManagerData.events) {
+                                    const idx = window.YatraSetuManagerData.events.findIndex(e => String(e.id) === String(eventId));
+                                    if (idx !== -1) window.YatraSetuManagerData.events.splice(idx, 1);
+                                }
+                                modal.classList.remove('active');
+                                document.body.style.overflow = '';
+                                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                            } else if (err.status === 0) {
+                                errMsg = 'Network error: Unable to connect to the backend server.';
+                            }
+                            if (typeof showManagerToast === 'function') {
+                                showManagerToast(errMsg, 'error');
+                            }
+                            alert(errMsg);
+                        } finally {
+                            deleteBtn.disabled = false;
+                            deleteBtn.textContent = origText;
+                        }
+                    } else {
+                        // Prototype preview fallback ONLY
+                        const idx = window.YatraSetuManagerData.events.findIndex(e => String(e.id) === String(eventId));
+                        if (idx !== -1) window.YatraSetuManagerData.events.splice(idx, 1);
+                        modal.classList.remove('active');
+                        document.body.style.overflow = '';
+                        await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                    }
                 }
             };
         }
@@ -1457,19 +1912,100 @@ function openEventDetailModal(eventId, mode = 'view') {
                 const imgVal = document.getElementById('edit-event-img-input').value.trim();
 
                 if (!titleVal) { alert('Please enter event title.'); return; }
-                ev.title = titleVal;
-                if (dateVal) {
-                    const parts = dateVal.split(' ');
-                    ev.dateNum = parts[0] || '15';
-                    ev.dateMonth = (parts[1] || 'OCT').toUpperCase();
-                }
-                ev.location = locVal || ev.location;
-                ev.status = statusVal;
-                ev.statusClass = statusVal === 'Upcoming' ? 'active' : (statusVal === 'Ongoing' ? 'warning' : 'neutral');
-                if (imgVal) ev.img = imgVal;
+                if (titleVal.length > 180) { alert('Event title must not exceed 180 characters.'); return; }
+                if (!locVal) { alert('Please enter an event location.'); return; }
+                if (locVal.length > 150) { alert('Location must not exceed 150 characters.'); return; }
+                if (imgVal && imgVal.length > 500) { alert('Image URL must not exceed 500 characters.'); return; }
 
-                await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
-                openEventDetailModal(eventId, 'view');
+                let dateNum = ev.dateNum || '15';
+                let dateMonth = ev.dateMonth || 'OCT';
+                if (dateVal) {
+                    const parts = dateVal.split(/\s+/);
+                    dateNum = parts[0] || dateNum;
+                    dateMonth = (parts[1] || dateMonth).toUpperCase();
+                }
+                if (dateNum.length > 10) { alert('Date day/range must not exceed 10 characters.'); return; }
+                if (dateMonth.length > 10) { alert('Date month must not exceed 10 characters.'); return; }
+
+                const statusClass = statusVal === 'Upcoming' ? 'active' : (statusVal === 'Ongoing' ? 'warning' : 'neutral');
+
+                const token = (typeof sessionStorage !== 'undefined')
+                    ? (sessionStorage.getItem('yatrasetu_access_token') || (window.YatraSetuApi && window.YatraSetuApi.getAccessToken()))
+                    : null;
+
+                if (token && window.YatraSetuApi && typeof window.YatraSetuApi.updateManagedEvent === 'function') {
+                    const updatePayload = {
+                        title: titleVal,
+                        date_num: dateNum,
+                        date_month: dateMonth,
+                        location_label: locVal,
+                        status: statusVal,
+                        status_class: statusClass
+                    };
+                    if (imgVal) {
+                        updatePayload.image_url = imgVal;
+                    }
+
+                    saveBtn.disabled = true;
+                    const originalBtnText = saveBtn.textContent;
+                    saveBtn.textContent = 'Saving...';
+
+                    try {
+                        const updated = await window.YatraSetuApi.updateManagedEvent(eventId, updatePayload);
+
+                        ev.title = updated.title || titleVal;
+                        ev.dateNum = updated.date_num || dateNum;
+                        ev.dateMonth = updated.date_month || dateMonth;
+                        ev.location = updated.location_label || locVal;
+                        ev.loc = ev.location;
+                        ev.status = updated.status || statusVal;
+                        ev.statusClass = updated.status_class || statusClass;
+                        if (updated.image_url || imgVal) {
+                            ev.img = updated.image_url || imgVal;
+                        }
+
+                        await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                        openEventDetailModal(eventId, 'view');
+
+                        if (typeof showManagerToast === 'function') {
+                            showManagerToast(`Event "${ev.title}" updated successfully!`);
+                        }
+                    } catch (err) {
+                        console.error('[openEventDetailModal] Failed to update event:', err);
+                        let errMsg = err.message || 'Failed to update event.';
+                        if (err.status === 401) {
+                            errMsg = 'Your session has expired. Please log in again.';
+                        } else if (err.status === 403) {
+                            errMsg = 'Permission denied: You do not have permission to modify this event.';
+                        } else if (err.status === 404) {
+                            errMsg = 'Event not found: This event no longer exists.';
+                        } else if (err.status === 422) {
+                            errMsg = `Validation error: ${err.message || 'Please check all required fields.'}`;
+                        } else if (err.status === 0) {
+                            errMsg = 'Network error: Unable to connect to the backend server.';
+                        }
+                        if (typeof showManagerToast === 'function') {
+                            showManagerToast(errMsg, 'error');
+                        }
+                        alert(errMsg);
+                    } finally {
+                        saveBtn.disabled = false;
+                        saveBtn.textContent = originalBtnText;
+                    }
+                } else {
+                    // Prototype preview fallback ONLY
+                    ev.title = titleVal;
+                    ev.dateNum = dateNum;
+                    ev.dateMonth = dateMonth;
+                    ev.location = locVal;
+                    ev.loc = locVal;
+                    ev.status = statusVal;
+                    ev.statusClass = statusClass;
+                    if (imgVal) ev.img = imgVal;
+
+                    await renderConnectedViews(window.YatraSetuManagerStore.getActiveContext());
+                    openEventDetailModal(eventId, 'view');
+                }
             };
         }
     }

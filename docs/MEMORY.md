@@ -718,3 +718,510 @@ This file records decisions that should not be silently reversed.
 5. **Verification & Testing:**
    - Alembic chain verified: single head `005_catalogue_rls`.
    - Test suite status: 58 passed, 18 skipped in 7.54s.
+
+---
+
+## 2026-11-19 — Phase 3 (Step 6): Test Fixture Provisioning & PostgreSQL RLS Authentication Architecture
+
+**Context:** Execution of minimal 5-record fixture provisioning on isolated Neon test branch (`POSTGRES_TEST_URL`) and live authentication verification under PostgreSQL Row-Level Security.
+
+**Key Results & Architectural Discoveries:**
+1. **Administrative Fixture Provisioning via BYPASSRLS Connection:**
+   - Successfully provisioned exactly 5 minimal records: 1 destination (`rajgad-fort`), 1 manager user (`manager.rajgad@example.com`), 1 manager assignment (`maharashtra` / `rajgad-fort`), 1 attraction (`Padmavati Machi`), 1 event (`Rajgad Heritage Trek`).
+   - Executed via dedicated administrative connection (`POSTGRES_ADMIN_URL`, user `neondb_owner` with `BYPASSRLS: True`), strictly preserving the least-privilege boundary for runtime role `yatrasetu_app`.
+   - Generated Argon2id password hash using `app.core.hashing.PasswordSecurity` (RFC 9106); stored credentials in gitignored `scratch/.test_manager_credentials.json` with restricted Windows NTFS ACLs (`icacls`). Normalized email domain to RFC 2606 `@example.com` to pass Pydantic `EmailStr` validation.
+   - Zero `ON CONFLICT DO UPDATE` used; verified 100% foreign-key integrity in database.
+2. **PostgreSQL RLS Authentication Blocker (`p_users_select`) & Migration 006:**
+   - Identified that Migration 002's policy `p_users_select` (`USING (current_setting('app.current_role', true) IN ('admin', 'manager') OR id::text = current_setting('app.current_user_id', true))`) prevents unauthenticated logins when connected as `yatrasetu_app` under `FORCE ROW LEVEL SECURITY`.
+   - Solved cleanly in Migration `006_auth_login_lookup.py` via two narrow `SECURITY DEFINER` functions:
+     - `public.lookup_user_for_authentication(lookup_email text)`: returns `(id, role_id, email, password_hash, full_name, is_active, is_verified)`.
+     - `public.lookup_refresh_token_for_rotation(lookup_hash text)`: returns `(id, user_id, family_id, is_revoked, expires_at)`.
+     - Owned by `neondb_owner` (`BYPASSRLS: True`), `SET search_path = pg_catalog, pg_temp`, `STABLE`, schema-qualified tables.
+     - Revoked from `PUBLIC`; granted strictly to `yatrasetu_app`.
+   - Applied to isolated Neon test branch; Alembic test branch head is `006_auth_login_lookup`. Production remains at `004_gov_storage_rls`.
+3. **Authentication Pipeline Updates & Transaction Boundary Protection:**
+   - `backend/app/core/auth.py`: Extracts `user_uuid` from cryptographically verified JWT payload and immediately sets `app.current_user_id` in the database transaction before querying `User`, satisfying `p_users_select`.
+   - `backend/app/api/v1/endpoints/auth.py`:
+     - `login_user`: Resolves authentication details via `lookup_user_for_authentication`, validates Argon2id hash, and establishes `app.current_user_id` and `app.current_role`.
+     - `refresh_token`: Resolves token record via `lookup_refresh_token_for_rotation`, establishes owner `app.current_user_id`, pre-extracts user attributes and resolves `manager_scope` prior to `db.commit()` to avoid session expiration / `ObjectDeletedError` under `is_local = true` transaction boundaries, revokes previous token, and persists rotated token.
+     - `logout_user`: Resolves token record, establishes owner context, and marks `is_revoked = True`.
+4. **End-to-End Verification (`scratch/test_postgres_e2e_verification.py`):**
+   - 100% pass across all tests against isolated test branch using `yatrasetu_app` (`NOBYPASSRLS`): direct RLS queries fail-closed (0 rows), login with bad password (401), valid login (200 + tokens), `/auth/me` (200), `/manager/context` (200), cross-jurisdiction blocked (403), token rotation (200), replay attack detected and family revoked (401), logout (200), attraction CRUD (201, 200, 200, 200, 404, 403), and event CRUD (201, 200, 200, 200, 404, 403).
+   - Test suite status: 58 passed, 18 skipped in 3.48s. All frontend JavaScript files passed `node -c` syntax checks.
+
+
+---
+
+## 2026-11-19 — Phase 3 (Step 6): Destination Manager Browser E2E Verification (Completed & Verified)
+
+**Context:** End-to-end browser verification of the complete Destination Manager frontend in real headless Chrome against the isolated Neon test branch (`POSTGRES_TEST_URL`) using runtime role `yatrasetu_app` (`NOBYPASSRLS`).
+
+**Key Verification Results:**
+1. **Target & Safety Boundaries:**
+   - Backend started under test configuration targeting exclusively the isolated Neon test branch (`ep-floral-silence`, `yatrasetu_app`).
+   - Production (`DATABASE_URL`, `ep-lively-violet`) was completely untouched and remains at Alembic revision `004_gov_storage_rls`.
+   - Credentials read strictly from gitignored file; never exposed or logged.
+2. **Frontend Standardization & Latency Resilience:**
+   - Standardized `<script src="../js/api.js"></script>` across all 11 Manager HTML pages.
+   - Added in-memory destination caching in `manager-core.js` (`getDestinations`) to eliminate redundant sequential network calls over WAN to Singapore.
+   - Guarded event requests in `manager-views.js` to avoid unneeded queries on non-event subpages.
+3. **Automated Headless Chrome CDP Test Suite (`scratch/run_browser_e2e_suite.js`):**
+   - **Step 2 (Authentication Flow)**:
+     - Verified `login.html` form loading and manager role selection.
+     - Negative verification: invalid password correctly rejected (401 Unauthorized, error toast displayed).
+     - Valid login: authenticated `manager.rajgad@example.com` and automatically redirected to `manager/dashboard.html`.
+     - Verified session storage: `yatrasetu_role = manager`, `email = manager.rajgad@example.com`, `name = Rajesh Patil`, scope `rajgad-fort` in `maharashtra`.
+     - Verified session persistence across browser page reload.
+   - **Step 3 (All 10 Manager Pages)**:
+     - All 10 Manager workspace pages loaded cleanly with zero uncaught JavaScript exceptions: Dashboard, Destinations, Attractions, Events, Stakeholders, Visitor Statistics, Feedback, Analytics, Reports, and Decision Support.
+     - Scoped strictly to assigned jurisdiction (`rajgad-fort`).
+   - **Step 4A (Attraction Browser CRUD)**:
+     - Verified seeded fixture `Padmavati Machi` loaded and listed from live Neon database.
+     - Created `Browser E2E Sanjivani Machi` (`POST /api/v1/manager/attractions` -> 201 Created), rendered in table.
+     - Updated category to `Updated Fortification` via modal (`PUT /api/v1/manager/attractions/{id}` -> 200 OK), verified update in table.
+     - Deleted temporary attraction via `.btn-attr-delete` (`DELETE /api/v1/manager/attractions/{id}` -> 200 OK), confirmed row deletion from table and database, and verified persistence of deletion across page reload.
+   - **Step 4B (Event Browser CRUD)**:
+     - Verified seeded fixture `Rajgad Heritage Trek` loaded and listed from live Neon database.
+     - Created `Browser E2E Conservation Camp` (`POST /api/v1/manager/events` -> 201 Created), rendered in timeline list.
+     - Updated location to `Updated Padmavati Complex` via modal (`PUT /api/v1/manager/events/{id}` -> 200 OK), verified update in timeline list.
+     - Deleted temporary event via `.btn-event-delete` (`DELETE /api/v1/manager/events/{id}` -> 200 OK), confirmed card deletion from list and database, and verified persistence of deletion across page reload.
+   - **Step 5 (Logout & Access Protection)**:
+     - User profile badge menu clicked and `#topbar-btn-logout` triggered.
+     - Successfully signed out and redirected to `login.html`.
+     - Session storage completely cleared (`yatrasetu_access_token = null`, `yatrasetu_role = null`).
+     - Direct navigation to `/manager/dashboard.html` post-logout was successfully blocked and redirected to `login.html`.
+   - **Step 6 (Diagnostics & Artifacts)**:
+     - 124 API network calls captured and verified with `Authorization: Bearer <token>` and CORS headers.
+     - Zero uncaught JavaScript errors in console.
+     - Saved detailed diagnostic report `mgr_browser_e2e_report.json` and 20 high-resolution screenshots (`mgr_e2e_01` to `mgr_e2e_20`) in the artifact directory.
+4. **Post-Verification Database Cleanliness:**
+   - Verified that the database contains strictly the original 5 fixtures (`Padmavati Machi`, `Rajgad Heritage Trek`), confirming 100% cleanup of temporary E2E test records.
+
+
+---
+
+## 2026-11-19 — Phase 7 (Step 1): Stakeholder Services RLS Migration 007 & Policy Hardening
+
+**Context:** Implementation and database verification of missing Row-Level Security INSERT policy on `public.stakeholder_services` (`007_stakeholder_rls.py`) on isolated Neon test branch (`POSTGRES_TEST_URL`) using runtime role `yatrasetu_app` (`NOBYPASSRLS`).
+
+**Key Decisions & Architectural Enforcements:**
+1. **Migration 007 (`007_stakeholder_rls.py`):**
+   - Chained from `006_auth_login_lookup`.
+   - Table `stakeholder_services` owned by `neondb_owner` with `FORCE ROW LEVEL SECURITY`.
+   - Previously, only `p_stakeholder_services_select` (FOR SELECT) and `p_stakeholder_services_modify` (FOR UPDATE) existed. Any INSERT by non-BYPASSRLS runtime role failed under default-deny.
+   - Added minimal required policy `p_stakeholder_services_insert` (`FOR INSERT`):
+     ```sql
+     CREATE POLICY p_stakeholder_services_insert ON stakeholder_services
+     FOR INSERT
+     WITH CHECK (
+         current_setting('app.current_role', true) = 'admin'
+         OR (
+             current_setting('app.current_role', true) = 'stakeholder'
+             AND user_id::text = current_setting('app.current_user_id', true)
+             AND role_id = 'stakeholder'
+             AND verification_status = 'pending'
+             AND EXISTS (
+                 SELECT 1 FROM destinations d
+                 WHERE d.id = stakeholder_services.destination_id
+                   AND d.state_id = stakeholder_services.state_id
+             )
+         )
+     );
+     ```
+   - Re-asserted `ALTER TABLE stakeholder_services FORCE ROW LEVEL SECURITY;`.
+   - Downgrade safely drops `p_stakeholder_services_insert`.
+2. **Migration Idempotency & Rollback Verification:**
+   - Pre-check: confirmed revision `006_auth_login_lookup`.
+   - Upgraded to `007_stakeholder_rls`.
+   - Verified rollback: `command.downgrade(alembic_cfg, "-1")` returned to `006_auth_login_lookup`.
+   - Re-applied `command.upgrade(alembic_cfg, "head")` returning cleanly to `007_stakeholder_rls`.
+   - Production (`DATABASE_URL`, `ep-lively-violet`) was completely untouched and remains at `004_gov_storage_rls`.
+3. **PostgreSQL RLS Test Suite (`scratch/test_stakeholder_rls_suite.py`):**
+   - Connected strictly using runtime role `yatrasetu_app` (`rolbypassrls = False`).
+   - Verified 12/12 security checks:
+     - Stakeholder pending INSERT succeeds.
+     - Insertion for another user's account rejected (`InsufficientPrivilege`).
+     - Insertion by manager role rejected (`InsufficientPrivilege`).
+     - Insertion with self-approved `verification_status = 'verified'` rejected (`InsufficientPrivilege`).
+     - Non-existent destination or state/destination mismatch rejected (`InsufficientPrivilege`).
+     - Tourist cannot see pending services (count=0) and cannot insert.
+     - Jurisdiction manager can inspect pending service (count=1).
+     - Out-of-jurisdiction manager cannot see pending service (count=0).
+     - Stakeholder can update own business info via UPDATE.
+     - Stakeholder cannot self-approve via UPDATE (`InsufficientPrivilege`).
+   - Transaction rolled back at test completion; zero temporary records left in database.
+   - All 58 backend tests passed; initial 5 fixtures intact.
+
+
+---
+
+## 2026-11-19 — Phase 7 (Step 2): Stakeholder Backend Schemas, API Endpoints & Live Verification
+
+**Context:** Implementation and database verification of backend schemas and API endpoints for Tourism Stakeholder workspace on isolated Neon test branch (`POSTGRES_TEST_URL`) using runtime role `yatrasetu_app` (`NOBYPASSRLS`).
+
+**Key Architectural Enforcements & Decisions:**
+1. **Schema & Endpoint Design:**
+   - `backend/app/schemas/stakeholder.py`: Created complete request and response schemas for Profile, Registration, Advisories, Suggestions, Media, and Offerings. Exported via `backend/app/schemas/__init__.py`.
+   - `backend/app/api/v1/endpoints/stakeholder.py`: Implemented 10 REST endpoints registered under `/api/v1/stakeholder` in `backend/app/api/v1/api.py`.
+2. **Access Control & Destination Locking:**
+   - Protected all endpoints with `context: SecurityContext = Depends(require_stakeholder)`.
+   - Unauthenticated callers receive `401 Unauthorized`.
+   - Non-stakeholders (tourists, managers, admins) receive `403 Forbidden`.
+   - Destination Locking Rule: Once registered, any stakeholder attempt to update `destination_id` to a different value returns `400 Bad Request` ("Destination cannot be changed after registration. Controlled destination reassignment requires administrative authorization.").
+   - Self-Verification Prevention: Client cannot supply or alter `verification_status`.
+   - Scoped Media Isolation: Stakeholders can only view, update, and delete their own media (`StakeholderMedia.service_id == service.id`). Cross-user requests return `404 Not Found`.
+3. **Transaction Boundary Resilience:**
+   - Addressed PostgreSQL transaction-local setting expiration: when `db.commit()` runs, `is_local = True` session settings expire. Response data models are constructed/validated prior to `db.commit()`, eliminating unneeded `db.refresh()` calls after transaction boundaries.
+4. **Testing & Verification Results:**
+   - `backend/tests/test_stakeholder_api.py`: 12 focused unit and security tests passed (100%).
+   - Full test suite: 70 passed, 18 skipped in 5.33s.
+   - `scratch/test_live_stakeholder_api.py`: 19 live integration checks passed against isolated Neon branch (`ep-floral-silence`) using `yatrasetu_app`:
+     - Unregistered profile GET (`verification_status = 'unregistered'`, `is_destination_locked = False`).
+     - Service registration via `POST /service` (`verification_status = 'pending'`, `is_destination_locked = True`).
+     - Destination locking enforcement (400 on change attempt).
+     - Business info & contact info update via `PUT /profile`.
+     - Destination advisory retrieval (`GET /destination-updates`).
+     - Suggestion creation (`POST /suggestions`) and listing (`GET /suggestions`).
+     - Media CRUD: Creation with validation, listing, update, deletion.
+     - Cross-user deletion and update denial (404).
+     - Invalid URL format rejection (422).
+     - Service offerings CRUD in `contact_info` JSONB.
+     - 401 unauthenticated and 403 tourist rejection.
+   - Clean teardown: all temporary records removed via administrative connection; confirmed only the 5 initial fixture records remain in the test database.
+
+---
+
+## 2026-11-19 — Phase 7: Stakeholder Workspace Frontend Integration & Browser E2E Verification
+
+**Context:** Complete frontend integration of the Tourism Stakeholder workspace with the FastAPI backend, verified in real headless Chrome via Chrome DevTools Protocol (CDP) WebSocket against the isolated Neon test branch (`ep-floral-silence`) with runtime role `yatrasetu_app` (`NOBYPASSRLS`).
+
+**Key Architectural Decisions & Implementation Details:**
+1. **API Client & Authentication Bridge:**
+   - Extended `frontend/js/api.js` with 13 stakeholder methods (`getStakeholderProfile`, `updateStakeholderProfile`, `registerStakeholderService`, `getStakeholderDestinationUpdates`, `getStakeholderSuggestions`, `createStakeholderSuggestion`, `getStakeholderMedia`, `createStakeholderMedia`, `updateStakeholderMedia`, `deleteStakeholderMedia`, `getStakeholderOfferings`, `createStakeholderOffering`, `deleteStakeholderOffering`).
+   - Added `hasToken()` alias for `isAuthenticated()` in `YatraSetuApiClient` to ensure clean compatibility across all workspace callers.
+   - Script `<script src="../js/api.js"></script>` loaded across all 5 stakeholder HTML pages (`dashboard.html`, `profile.html`, `destination-updates.html`, `connections-reviews.html`, `media-listings.html`).
+2. **Frontend Route Protection & Topbar Identity:**
+   - `checkStakeholderAuth()` validates `yatrasetu_access_token` and `yatrasetu_role` (`stakeholder` or `admin`). Unauthenticated visitors or invalid roles are immediately ejected to `../login.html`.
+   - Topbar user avatar, name, and role dynamically synchronize with verified backend response from `/api/v1/stakeholder/profile`.
+3. **Destination Scope Locking & Form Control:**
+   - Destination dropdown (`#sh-destination-select`) in `profile.html` is disabled (`disabled = true`) with cursor `not-allowed` and explanatory notice (`#sh-dest-lock-notice`) for registered stakeholders.
+   - Profile contact details (phone, address, operating hours, price range, description) update via `PUT /api/v1/stakeholder/profile` and immediately reflect in live public card preview.
+4. **Scope-Filtered Updates & Honest Deferred Notice:**
+   - `destination-updates.html` queries live advisories via `/api/v1/stakeholder/destination-updates` and local attractions/events scoped to destination ID. Search filtering verified.
+   - `connections-reviews.html` provides live suggestion submission to Destination Managers (`POST /api/v1/stakeholder/suggestions`), reflected in the suggestions table with "Pending" status.
+   - Tourist reviews moderation and direct tourist messaging are explicitly deferred to Phase 8 (Tourist Workspace), rendered with an honest explanatory notice in the UI.
+5. **Media Gallery & Catalog Offerings CRUD:**
+   - File upload handled cleanly via standard browser `DataTransfer` and `File` APIs.
+   - Newly uploaded media items are given `Pending Approval` verification badges, enforcing the rule that only Destination Managers can officially approve public assets.
+   - Destructive deletions for both media and service listings require explicit modal confirmation (`#deleteConfirmModal`).
+6. **CDP Browser E2E Results:**
+   - Automated via `scratch/run_stakeholder_browser_e2e.js`: 18 verification steps passed 100%.
+   - Clean console: 0 JavaScript console errors across all 5 pages.
+   - 18 high-resolution screenshots saved to artifacts directory.
+   - Complete JSON report saved to `sh_browser_e2e_report.json`.
+   - Test data cleanly torn down and backend test suite verified (70 passed, 18 skipped).
+
+---
+
+## 2026-11-19 — Production Migration Promotion: Controlled Deployment of Revisions 005, 006, 007
+
+**Context:** Controlled deployment of Alembic migrations 005, 006, and 007 from test branch (`ep-floral-silence`) to production Neon branch (`ep-lively-violet`).
+
+**Key Verification & Promotion Actions:**
+1. **Pre-Deployment Safety & Drift Audit:**
+   - Production confirmed at revision `004_gov_storage_rls`, with 28 public tables (owned by `neondb_owner`), 23 active RLS policies, 2 users, 3 refresh tokens, 8 states, 4 roles, and 0 rows across remaining 23 tables.
+   - Exact policy delta identified: 16 policies to add, 1 obsolete policy (`p_destination_advisories_modify`) to drop.
+2. **Neon PITR Restore Point & Local Snapshot:**
+   - Recorded Neon Point-In-Time-Recovery (PITR) WAL LSN: `0/20035A0` at UTC `2026-11-19 11:42:18.983140+00:00` (PostgreSQL 18.7).
+   - Generated local logical JSON state backup: `scratch/production_backup_004_gov_storage_rls.json` (27,593 bytes), capturing all 23 active policies, table catalog metadata, and existing row records.
+3. **Controlled Sequential Execution:**
+   - Step 1: Upgraded to `005_catalogue_rls` -> verified `alembic_version` updated to `005_catalogue_rls`. Catalogue tables (`destinations`, `attractions`, `events`) now have RLS enabled and forced.
+   - Step 2: Upgraded to `006_auth_login_lookup` -> verified `alembic_version` updated to `006_auth_login_lookup`. Created `public.lookup_user_for_authentication` and `public.lookup_refresh_token_for_rotation`.
+   - Step 3: Upgraded to `007_stakeholder_rls` -> verified `alembic_version` updated to `007_stakeholder_rls`. Added `p_stakeholder_services_insert` on `stakeholder_services`.
+4. **Post-Migration Verification (100% Pass):**
+   - Production revision confirmed: `007_stakeholder_rls`.
+   - Table count: 28 tables, all owned by `neondb_owner`.
+   - RLS status: `destinations`, `attractions`, `events` have `relrowsecurity = true` and `relforcerowsecurity = true`.
+   - Active RLS policies: 38 policies active on production; symmetric difference with test branch is 0 (100% parity).
+   - Authentication lookup functions: owned by `neondb_owner` (`BYPASSRLS`), `SECURITY DEFINER`, `search_path = pg_catalog, pg_temp`, `STABLE`, execute securely revoked from `PUBLIC`.
+   - Production data integrity: 2 existing users (`ambikaambekarbts@gmail.com`, `test.tourist.f71aab@example.com`) and 3 refresh tokens intact; zero test fixture data in production.
+   - Read-only smoke tests: verified `lookup_user_for_authentication` and `lookup_refresh_token_for_rotation` execute successfully.
+   - Test branch regression suite: 30/30 backend PostgreSQL RLS and stakeholder API integration tests passed.
+
+
+---
+
+## 2026-11-19 — Tourist Workspace (Phase 8): Full Stack Integration & E2E Verification
+
+**Context:** Complete Phase 8 end-to-end: connected the Tourist Workspace frontend to the FastAPI backend and PostgreSQL database, enforced authenticated access under RLS, verified 100% test and browser E2E workflows against the isolated Neon test branch (`ep-floral-silence`), and prepared an inventory for the Administrator workspace.
+
+**Key Decisions & Architectural Enforcements:**
+1. **Database Parity & RLS Compliance:**
+   - Confirmed that all 4 tourist relational tables (`trip_plans`, `trip_plan_items`, `user_favorites`, `destination_reviews`) exist on both test and production Neon databases from revisions 001–003 with active RLS (`FORCE ROW LEVEL SECURITY`). Zero new database migrations were required.
+   - Enforced transaction boundaries: under transaction-scoped session parameters (`set_config('app.current_user_id', ...)`), response schemas are assembled before `db.commit()` and `db.refresh()` is omitted to avoid unsynced post-commit queries failing closed under RLS.
+2. **Backend API Endpoints (`backend/app/api/v1/endpoints/tourist.py`):**
+   - Implemented strict RBAC (`@router.get/post/put/delete`) requiring role `tourist` or `admin`.
+   - Identity context (`context.user_id`) is strictly extracted from verified JWT claims via `get_current_user_and_context`. Client requests cannot forge user IDs or inject foreign identities.
+   - Profile management: `GET /profile` and `PUT /profile` allowing tourists to inspect and update full name, phone number, and JSON preferences.
+   - Cloud Wishlist / Favorites: `GET /favorites`, `POST /favorites`, `DELETE /favorites/{destination_id}` enabling cloud synchronization of saved destinations.
+   - Itineraries / Trip Plans: `GET /itineraries`, `POST /itineraries`, `PUT /itineraries/{id}`, `DELETE /itineraries/{id}` with nested stops (`trip_plan_items`).
+   - Destination Reviews: `GET /reviews/{destination_id}` returns approved reviews publicly, plus the authenticated author's own pending reviews with status `pending_review`. `POST /reviews` creates reviews defaulting strictly to `pending_review` (moderation workflow).
+   - Destination Advisories: `GET /advisories/{destination_id}` fetches active bulletins published by Destination Managers.
+3. **Frontend API Client & Controller Integration (`frontend/js/api.js` & `frontend/js/tourist.js`):**
+   - Added 13 tourist client methods to `YatraSetuApiClient`.
+   - Wired `initUserSession` to synchronize profile dynamically with topbar badge ("Hi, Ananya", "Tourist Member", initials "AS").
+   - Wired `loadFavorites` and `toggleFavorite` to live `/api/v1/tourist/favorites`.
+   - Wired `renderWishlistPlanner` to fetch and display saved cloud itineraries from `/api/v1/tourist/itineraries`.
+   - Wired custom trip builder ("Save to My Trips") to call `createTouristItinerary`.
+   - Wired feedback modal in `destination-detail.html` to submit reviews via `submitDestinationReview` and immediately re-render under the Reviews tab.
+   - Wired `destination-advisories.html` to load and render live bulletins via `getTouristAdvisories`.
+   - Wired sign-out in user badge dropdown to call `logout()` and completely purge `sessionStorage` and `localStorage`.
+4. **Verification & Testing Results:**
+   - Pytest unit and integration suite: `backend/tests/test_tourist_api.py` (7/7 passed in 1.99s); full test suite 77 passed, 18 skipped in 4.48s (100% pass rate).
+   - Live API integration suite (`scratch/test_live_tourist_api.py`): 7/7 passed against isolated Neon test branch (`ep-floral-silence`).
+   - Chrome CDP Browser E2E suite (`scratch/run_tourist_browser_e2e.js`): 7 verification flows executed against live FastAPI backend and Node frontend, capturing 12 high-resolution screenshots:
+     - Negative login rejection (invalid credentials).
+     - Positive login redirection to `tourist/dashboard.html`.
+     - Topbar user identity & profile synchronization.
+     - Wishlist favorite toggle and drawer rendering.
+     - Custom itinerary generator and persistent cloud save.
+     - Destination review submission and live re-rendering.
+     - Live manager advisories display.
+     - Secure user logout and session cleanup.
+     - Console audit: 0 unhandled JavaScript errors across the entire session.
+   - Cleaned up temporary test reviews, itineraries, and favorites from the test branch.
+
+
+---
+
+## 2026-11-19 — Administrator Governance Workspace (Phase 9): Full Stack Integration & E2E Verification
+
+**Context:** Complete Phase 9 end-to-end: implemented Administrator backend governance schemas and endpoints, registered the admin router under RBAC dependencies (`require_admin`), connected `frontend/js/api.js` and `frontend/js/admin.js` to live APIs across all 7 dashboard tabs, verified 100% test and browser E2E workflows against the isolated Neon test branch (`ep-floral-silence`), and cleaned up all temporary test records.
+
+**Key Decisions & Architectural Enforcements:**
+1. **Administrative Authentication & Public Registration Guard:**
+   - Public registration for `admin` and `manager` roles remains strictly forbidden in `backend/app/api/v1/endpoints/auth.py` and `frontend/js/auth.js`. Admin accounts are provisioned via secure infrastructure only.
+   - Test admin fixture provisioned on isolated test branch: `admin.governance@yatrasetu.in` (`Rajesh Verma`, UUID `dae678c4-967a-4b3d-8cf8-3e48503f41d4`), credentials securely stored in gitignored file.
+   - Enforced route protection in `frontend/js/admin.js` (`checkAdminAuth`): requires active `sessionStorage.getItem('yatrasetu_role') === 'admin'` and a valid cryptographic JWT access token (`hasToken()`). Unauthenticated access immediately redirects to `../login.html`.
+2. **Backend API Endpoints (`backend/app/api/v1/endpoints/admin.py`):**
+   - Implemented strict RBAC (`require_admin`) dependency across all **11 registered administrative endpoints**:
+     - `GET /stats`: Aggregated platform telemetry (total users, active managers, pending registrations, active destinations, total stakeholders, total tourists).
+     - `GET /users`: Paginated platform user directory with filtering by role, status, and search query.
+     - `PUT /users/{user_id}/status`: Account lifecycle management (active, inactive, deactivated, suspended) with mandatory audit log generation. Self-deactivation by the caller is rejected with HTTP 400.
+     - `DELETE /users/{user_id}`: Account soft-deactivation and token revocation with mandatory audit log generation. Self-deletion by the caller is rejected with HTTP 400.
+     - `GET /managers`: Detailed manager jurisdiction directory (State Manager vs Destination Manager access levels, territory names, active status).
+     - `POST /managers/assign`: Controlled manager jurisdiction assignment and scope configuration (`STATE` vs `DESTINATION`) with administrative justification and audit logging.
+     - `POST /stakeholders/{service_id}/reassign-destination`: Controlled stakeholder destination reassignment requiring mandatory administrative justification (minimum 6 characters), updating destination and state links, and recording an immutable audit event (`CONTROLLED_DESTINATION_REASSIGNMENT`).
+     - `GET /registrations`: Stakeholder business registrations review directory with status, state, destination, and search filters.
+     - `PUT /registrations/{service_id}/status`: Verification status updates (`verified`, `rejected`, `suspended`, `pending`) with optional administrative notes and audit logging.
+     - `GET /audit-logs`: System-wide immutable security audit trail with filtering by action, table name, and actor.
+     - `GET /roles`: Platform roles verification endpoint returning the 4 canonical roles.
+   - Registered `admin.router` with prefix `"/admin"` in `backend/app/api/v1/api.py`.
+3. **Frontend API Client & Controller Integration (`frontend/js/api.js` & `frontend/js/admin.js`):**
+   - Extended `frontend/js/api.js` with 11 admin client methods (`getAdminStats`, `getAdminUsers`, `updateAdminUserStatus`, `deleteAdminUser`, `getAdminManagers`, `assignAdminManagerJurisdiction`, `reassignStakeholderDestination`, `getAdminRegistrations`, `updateAdminRegistrationStatus`, `getAdminAuditLogs`, `getAdminRoles`).
+   - Wired `frontend/js/admin.js` across all 7 workspace tabs with asynchronous live data fetching and graceful local fallback:
+     - Overview tab: dynamic platform metrics, recent registrations, and live account activity stream.
+     - Stakeholder Accounts tab: live user directory, search, role and status filtering, view profile modal, destination reassignment, activation/deactivation modal, deletion confirmation modal.
+     - Business Registrations tab: live registration list, status filtering, category filtering, registration details modal.
+     - Destinations tab: catalog territories, manager oversight, and active stakeholder count linking.
+     - Roles & Permissions tab: RBAC matrix enforcing exactly 4 platform roles (State Manager verified as access level within Destination Manager).
+     - Manager Authority tab: manager directory, jurisdiction badges, and interactive reassignment modal.
+     - Audit Trail tab: immutable security log table with action-type badges and details.
+   - Standardized topbar user identity badge, dropdown, profile modal opener, and sign-out flow.
+4. **Verification & Testing Results:**
+   - Pytest unit and integration suite: `backend/tests/test_admin_api.py` (**9/9 passed**); full test suite **86 passed, 18 skipped in 5.31s** (100% pass rate, zero regressions).
+   - 18 skipped tests individually audited: all 18 reside in `backend/tests/test_postgres_rls.py` lines 125–483 and are explicitly gated by `Requires live PostgreSQL instance via POSTGRES_TEST_URL environment variable`.
+   - Live write operations verification suite (`scratch/verify_admin_write_operations.py`): **All 5 write operations passed (100%)** against isolated Neon test branch (`ep-floral-silence`) under `yatrasetu_app` runtime role (`NOBYPASSRLS`):
+     1. User activation and deactivation (`PUT /api/v1/admin/users/{id}/status`) + DB state + immutable audit log with actor attribution.
+     2. User soft-deletion (`DELETE /api/v1/admin/users/{id}`) + DB state (`is_active=False`) + token revocation (`is_revoked=True`) + immutable audit log.
+     3. Manager jurisdiction assignment & reassignment (`POST /api/v1/admin/managers/assign`, Destination Manager -> State Manager) + DB state (`destination_id` rajgad-fort -> NULL) + audit log.
+     4. Stakeholder destination reassignment (`POST /api/v1/admin/stakeholders/{id}/reassign-destination`) with 6-char rationale validation + DB state + audit log.
+     5. Stakeholder registration lifecycle (`PUT /api/v1/admin/registrations/{id}/status` -> verified, suspended, rejected) + DB state + audit logs.
+     - Security guards: Unauthenticated 401, non-admin 403, admin self-deactivation 400, admin self-deletion 400.
+     - Clean teardown with zero orphan test records left on the test branch.
+   - Chrome CDP Browser E2E suite (`scratch/run_admin_browser_e2e.js`): 11 verification flows executed against live FastAPI backend and Node frontend, capturing 13 high-resolution screenshots:
+     - Initial login page load (`admin_e2e_01_login_initial.png`).
+     - Negative login rejection (`admin_e2e_02_login_invalid_password.png`).
+     - Positive login redirection to `admin/dashboard.html` (`admin_e2e_03_dashboard_authenticated.png`).
+     - Overview tab metrics and widget rendering (`admin_e2e_04_overview_metrics.png`).
+     - Stakeholder Accounts tab, search filter, and account details modal (`admin_e2e_05_accounts_tab_and_modal.png`).
+     - Business Registrations tab and registration details modal (`admin_e2e_06_registrations_tab_and_modal.png`).
+     - Destinations jurisdiction catalog tab (`admin_e2e_07_destinations_tab.png`).
+     - Roles & Permissions RBAC matrix tab (`admin_e2e_08_roles_tab.png`).
+     - Manager Authority tab and jurisdiction reassignment modal (`admin_e2e_09_manager_authority_modal.png`).
+     - System Audit Trail tab (`admin_e2e_10_audit_trail_tab.png`).
+     - Topbar user identity and Admin profile modal (`admin_e2e_11_profile_modal.png`).
+     - Secure user logout and session cleanup (`admin_e2e_12_post_logout.png`).
+     - Route protection rejection of unauthenticated access (`admin_e2e_13_unauthorized_redirect.png`).
+     - Console audit: 0 unhandled JavaScript errors across the entire session.
+
+## 2026-11-19 — Phase 10: Full System Integration, Cross-Role Regression & Production Security Audit
+**Decision:** Execute comprehensive full-system regression, cross-role integration tests, and read-only production security audit across all four YatraSetu roles (Destination Manager, Tourism Stakeholder, Tourist, Platform Administrator).
+**Reason:** Prepare platform for final submission and deployment readiness without violating data integrity, RLS isolation, or production safety boundaries.
+**Consequence:** All 104 backend tests passing (including all 18 PostgreSQL RLS tests against live Neon test branch). All cross-role workflows, auth boundaries, and data consistency flows verified with 100% pass rate and guaranteed clean teardown. Read-only production database security audit verified that production is at revision `007_stakeholder_rls` with `FORCE_RLS` active on all 20 sensitive tables, while observing that production still connects as `neondb_owner` because `yatrasetu_app` role has not yet been provisioned on the production Neon branch.
+
+1. **Full Backend Regression (100% Passed):**
+   - Command: `pytest backend/tests/ -v` with `POSTGRES_TEST_URL` pointing to isolated Neon test branch (`ep-floral-silence`) under `yatrasetu_app` (`NOBYPASSRLS`).
+   - Results: **104 collected, 104 passed, 0 skipped, 0 failed in 29.21s**.
+   - PostgreSQL Live RLS suite (`backend/tests/test_postgres_rls.py`): **18/18 passed, 0 skipped** (tenant isolation, role boundaries, security-definer auth functions, refresh token rotation, cascade soft-deletes).
+
+2. **Cross-Role Authentication & Access Control:**
+   - 4 Role Logins: Administrator, Destination Manager, Tourism Stakeholder, Tourist all passed with exact role verification and correct UI redirect targets.
+   - Access token validation via `/api/v1/auth/me` verified for each role.
+   - Negative credential rejection (HTTP 401 Unauthorized) verified for each role.
+   - Refresh token rotation, reuse detection (family revocation triggering 401), and session logout verified.
+   - Route protection: Unauthenticated access to role endpoints strictly rejected with HTTP 401.
+   - Cross-role authorization matrix: 100% of unauthorized cross-role API calls rejected with HTTP 403 Forbidden across all 7 negative test vectors (Tourist -> Manager/Admin/Stakeholder, Stakeholder -> Admin/Manager, Manager -> Admin/Stakeholder).
+
+3. **Core Workflows Verification:**
+   - **Destination Manager:** Context retrieval (`GET /manager/context`), Attraction full lifecycle (`POST`, `GET`, `PUT`), Event full lifecycle (`POST`, `GET`, `PUT`), and Managed destination inspection verified under assigned jurisdiction (`rajgad-fort`).
+   - **Tourism Stakeholder:** Business profile retrieval (`GET /stakeholder/profile`), destination updates/advisories (`GET /stakeholder/destination-updates`), manager suggestion submission (`POST /stakeholder/suggestions`), media metadata record creation (`POST /stakeholder/media`), service offering addition (`POST /stakeholder/offerings`) and deletion (`DELETE /stakeholder/offerings/{id}`), destination mutation lock (`PUT /stakeholder/profile` returning HTTP 400).
+   - **Tourist Explorer:** Profile & travel preferences update (`PUT /tourist/profile`), destination favorites lifecycle (`POST`/`GET /tourist/favorites`), trip plan creation with ordered stops (`POST /tourist/itineraries`), 5-star destination review submission (`POST /tourist/reviews`), destination advisories query (`GET /tourist/advisories/{dest_id}`).
+   - **Platform Administrator:** Database-backed platform telemetry (`GET /admin/stats`), user directory (`GET /admin/users`), commercial registrations queue (`GET /admin/registrations`), manager jurisdictions directory (`GET /admin/managers`), canonical 4-role RBAC matrix (`GET /admin/roles`), immutable audit trail (`GET /admin/audit-logs`).
+
+4. **Cross-Role Data Consistency:**
+   - Manager-created attraction and event immediately queryable via public catalogue endpoints (`GET /api/v1/attractions?destination_id=...`, `GET /api/v1/events?destination_id=...`).
+   - Destination advisories consistent across Tourist and Stakeholder feeds.
+   - Tourist review persisted and retrieved with full fidelity via `/api/v1/tourist/reviews/{dest_id}`.
+   - Stakeholder suggestion persisted and retrieved with full fidelity via `/api/v1/stakeholder/suggestions`.
+   - Admin business registration verification status change (`PUT /api/v1/admin/registrations/{service_id}/status`) immediately reflected in Stakeholder profile (`GET /api/v1/stakeholder/profile`), and cleanly reverted back to `pending`.
+   - Guaranteed cleanup teardown purged all 7 temporary test entities; zero orphan records on test branch.
+
+5. **Production Database Security Audit (Strictly Read-Only on `DATABASE_URL` / `ep-lively-violet`):**
+   - **Alembic Revision:** `007_stakeholder_rls` (schema is up to date).
+   - **Table RLS & FORCE RLS:** All 20 application/business tables have `RLS=True, FORCE_RLS=True` (`attractions`, `audit_logs`, `destination_advisories`, `destination_reviews`, `destinations`, `events`, `manager_assignments`, `media_deletion_outbox`, `stakeholder_media`, `stakeholder_messages`, `stakeholder_posts`, `stakeholder_reviews`, `stakeholder_services`, `storage_object_registry`, `trip_plan_items`, `trip_plans`, `user_favorites`, `user_refresh_tokens`, `users`, `visitor_statistics`). 8 reference tables have `RLS=False, FORCE_RLS=False` (`alembic_version`, `curated_circuits`, `curated_circuit_items`, `destination_videos`, `experiences`, `roles`, `states`, `travel_stories`).
+   - **Security Definer Functions:** Exactly 2 authentication functions exist (`lookup_user_for_authentication`, `lookup_refresh_token_for_rotation`), owned by `neondb_owner`, with `EXECUTE` privileges.
+   - **Production Connection User:** `neondb_owner`.
+   - **Runtime Role Observation:** Role `yatrasetu_app` provisioned on production with `NOBYPASSRLS` during Phase 11.
+   - **Production Admin Accounts:** 0 accounts (no fake or demo accounts created).
+
+---
+
+## 2026-11-19 — Phase 11 & Phase E: Production Runtime Role Provisioning, Permission Audit & Data Seeding
+**Decision:** Provision least-privileged application runtime role `yatrasetu_app` on production (`ep-lively-violet` / `neondb`), complete read-only permission audit, and execute approved Phase E production data seeding under strict constraints.
+**Reason:** Prepare production database for least-privilege operation without compromising RLS, security boundaries, or existing production tourist accounts.
+**Consequence:**
+1. **Runtime Role Provisioning on Production:**
+   - Role `yatrasetu_app` created with `LOGIN`, `NOSUPERUSER`, `NOCREATEDB`, `NOCREATEROLE`, `NOBYPASSRLS`.
+   - Permissions granted: `CONNECT` on `neondb`, `USAGE` on `public`, `EXECUTE` on the 2 security-definer auth functions (`lookup_user_for_authentication`, `lookup_refresh_token_for_rotation`).
+   - Least-privilege table grants: 28 tables granted minimal necessary permissions (append-only on `audit_logs`, insert/update on `storage_object_registry`, CRUD on application tables). Zero tables owned by `yatrasetu_app` (`neondb_owner` owns all 28 tables).
+   - RLS and `FORCE RLS` strictly preserved across all 20 sensitive tables.
+   - Investigated membership `GRANT yatrasetu_app TO neondb_owner`: verified as Neon branch-owner role management convention, granting zero elevated privileges to `yatrasetu_app`.
+2. **Approved Phase E Production Seeding:**
+   - Pre-seed PITR checkpoint recorded: LSN `0/209E568`, Timestamp `2026-11-19 17:18:12.535600+00:00`.
+   - Post-seed PITR checkpoint recorded: LSN `0/20A7C78`, Timestamp `2026-11-19 17:19:03.532588+00:00`.
+   - Preserved Existing Data: 2 existing production tourist accounts (`ambikaambekarbts@gmail.com`, `test.tourist.f71aab@example.com`) and 3 active refresh tokens 100% preserved. Zero operational users (managers, stakeholders, admin) created on production to avoid synthetic credentials or unapproved identities.
+   - Dependent records (`manager_assignments`, `stakeholder_services`, `destination_advisories`) intentionally excluded to prevent orphan foreign keys.
+   - Seeded Public Tourism Catalogue: 13 destinations, 7 attractions, 4 events, 2 curated circuits, 5 circuit items, 2 experiences, 2 destination videos.
+   - Seeded Sample/Demo Content (Clearly Labeled):
+     - 2 destination reviews with `user_id = None`, marked as `[Sample Review]` with `(Sample)` author labels.
+     - 14 daily visitor statistics records (7 days x 2 destinations) with peak hours marked as `(Sample)`.
+     - 2 editorial travel stories marked as `(Curated Editorial)`.
+   - Tables Intentionally Left Empty (0 rows): `audit_logs`, `trip_plans`, `trip_plan_items`, `user_favorites`, `stakeholder_services`, `stakeholder_media`, `stakeholder_posts`, `stakeholder_messages`, `stakeholder_reviews`, `storage_object_registry`, `media_deletion_outbox`, `destination_advisories`.
+   - Idempotency & Integrity: Second run created 0 records (100% idempotent). 11 cross-table foreign key relationships verified with zero orphan records.
+   - Verified Reads under `yatrasetu_app`: Public catalogue successfully queried; `visitor_statistics` correctly fails-closed for unauthenticated queries and returns 14 records under administrative session context.
+   - Render Cutover Gate: Render `DATABASE_URL` remains on `neondb_owner`; cutover paused awaiting explicit user approval.
+
+
+---
+
+## 2026-11-20 — Destination Manager & Tourist Integration Integrity Fix & Full Regression
+
+**Decision:** Harden Destination Manager to Tourist data flow, eliminate prototype UI notices, implement REST API endpoints for destination videos and destination updates with RLS, resolve state-theme flickering across manager pages, and verify complete test suite.
+
+**Reason:** Ensure data created or edited by Destination Managers persists to the database and surfaces in the Tourist workspace without relying on fragile in-memory caches, eliminate visual theme flash on page navigation, and remove development disclaimers prior to deployment.
+
+**Consequence:**
+1. **Disclaimer & Prototype Notice Cleanup:**
+   - Removed `tourist-demo-banner` from `destination-detail.html`, `destination-advisories.html`, `experiences.html`, `plan-trip.html`, `stories.html`, and `travel-guidance.html`.
+   - Removed "Scope Notice: YatraSetu is an official destination management platform..." card and "Prototype Demo Rating" tags from `destination-detail.html`.
+2. **Database Migration 008 Applied on Neon Test Branch (`ep-floral-silence`):**
+   - Enhanced `destination_videos` with columns: `category`, `description`, `video_url`, `status`, `updated_at`.
+   - Enabled and forced RLS (`FORCE ROW LEVEL SECURITY`) on `destination_videos` with granular policies (`p_destination_videos_select`, `p_destination_videos_insert`, `p_destination_videos_update`, `p_destination_videos_delete`).
+   - Hardened `p_destinations_insert` to Admin-only to preserve platform root entity governance and passing RLS test assertions.
+   - Updated `p_destinations_update` to allow Destination and State Managers to update overview, subtitle, description, and metadata for destinations within their assigned jurisdiction.
+3. **Backend API Endpoints Implemented:**
+   - Public: `GET /api/v1/destinations/{id}/videos`, `GET /api/v1/videos`.
+   - Manager: `GET /api/v1/manager/videos`, `POST /api/v1/manager/videos`, `GET /api/v1/manager/videos/{id}`, `PUT /api/v1/manager/videos/{id}`, `DELETE /api/v1/manager/videos/{id}`, `PUT /api/v1/manager/destinations/{id}`.
+4. **Tourist & Manager Frontend Synchronization:**
+   - `frontend/js/api.js`: Added client methods for destination videos and managed destination operations.
+   - `frontend/js/tourist.js`:
+     - Updated `getDestinationGallery(dest)` to dynamically aggregate `hero_image_url`, `banner_image`, `metadata.gallery_images`, and attraction images before falling back to static galleries.
+     - Updated `getDestinationVideos(destId)` and `loadCatalogueFromApi()` to fetch live published videos via REST API.
+     - Updated `initDestinationDetailPage()` to resolve newly created or updated database destinations asynchronously without crashing or defaulting to hardcoded IDs.
+   - `frontend/js/manager.js` & `manager-views.js`: Connected destination detail edits and video CRUD to backend API endpoints with immediate DOM and storage synchronization.
+5. **State Theme Flickering Resolved:**
+   - Created `frontend/js/theme-init.js`, executing synchronously in `<head>` across all 11 manager HTML templates before `<body>` is rendered.
+   - Removed hardcoded `data-theme="maharashtra"` from `<body class="app-body">` in all 11 manager HTML files.
+   - Updated `manager.css` and `dashboard.css` selectors to match `:root[data-theme="..."], html[data-theme="..."], body[data-theme="..."]`.
+6. **Full Regression Results on Neon Test Branch (`ep-floral-silence`):**
+   - 107 tests collected.
+   - 107 passed (100% pass rate), 0 failed, 0 skipped.
+   - All 18 PostgreSQL Row-Level Security (RLS) tests executed live against Neon test branch with 0 skips.
+
+---
+
+## 2026-11-20 — Destination Data Integrity Repair, Slug Aliasing & Real Browser Verification
+
+**Decision:** Resolve all end-to-end destination data flow defects across Destination Manager and Tourist workspaces, establish bidirectional slug aliasing (`raigad-fort` $\leftrightarrow$ `rajgad-fort`, `amber-fort` $\leftrightarrow$ `amer-fort`), repair image 404s, fix DOM hydration timing, and visually verify all 10 user workflows with real Chrome browser screenshots.
+
+**Reason:** Ensure complete 12-category destination mapping (Name, Overview, Description, Main/Hero Image, Gallery, Videos, Attractions, Events, Experiences, Stories, Advisories, Travel Info) persists to PostgreSQL and renders accurately in the Tourist workspace without 404s, missing media, or theme flicker.
+
+**Consequence:**
+1. **Asset & 404 Resolution:**
+   - Created `frontend/assets/images/destinations/` directory and populated `rajgad.jpg`.
+   - Created `frontend/assets/images/thumb-ellora.jpg` to resolve related destination 404s.
+   - Verified 0 network failures across all tested pages in real browser.
+2. **Bidirectional Slug Aliasing:**
+   - Backend: Added canonical-to-alias mapping in `catalogue.py`, `manager.py`, and `jurisdiction.py` (`can_manage_destination`), allowing seamless resolution of historical mockup slugs (`raigad-fort`, `amber-fort`) to database canonical IDs (`rajgad-fort`, `amer-fort`).
+   - Frontend: Implemented bidirectional alias mapping in `tourist.js` and `manager-views.js` for destinations, attractions, videos, events, advisories, and experiences.
+3. **Frontend Hydration & Timing Defect Fixes:**
+   - Fixed `tourist.js` `DOMContentLoaded` race condition with `document.readyState` check.
+   - Fixed `loadFavorites()` uninitialized `this.favorites` Set bug which threw uncaught `TypeError` and stalled DOM population.
+   - Made `matchesDestId(id1, id2)` fully symmetric and applied it across `getApprovedStakeholders`, `getDestinationEvents`, and `getDestinationAttractions`.
+   - Fixed `NaN (NaNk reviews)` display bug when destination is hydrated directly from API.
+   - Fixed state theme synchronization on `destination-detail.html` ensuring `data-theme` and `data-state-theme` are set immediately upon destination resolution.
+4. **End-to-End Browser CDP Verification (10 Real Screenshots Generated):**
+   - Step 1: Manager View Modal (`dest_repair_01_manager_view_modal.png`)
+   - Step 2: Manager Edit Modal (`dest_repair_02_manager_edit_modal.png`)
+   - Step 3: Manager Saved Modal (`dest_repair_03_manager_updated_view.png`)
+   - Step 4: Tourist Rajgad Fort Overview (`dest_repair_04_tourist_rajgad_overview.png`)
+   - Step 5: Tourist Rajgad Gallery Lightbox (`dest_repair_05_tourist_rajgad_gallery_lightbox.png`)
+   - Step 6: Tourist Rajgad Videos Tab (`dest_repair_06_tourist_rajgad_videos_tab.png`)
+   - Step 7: Tourist Rajgad Attractions Tab (`dest_repair_07_tourist_rajgad_attractions_tab.png`)
+   - Step 8: Tourist Slug Alias `?id=raigad-fort` (`dest_repair_08_tourist_raigad_alias.png`)
+   - Step 9: Kerala Regional Verification — Munnar Hills (`dest_repair_09_tourist_kerala_munnar.png`)
+   - Step 10: Rajasthan Regional Verification — Amber Fort (`dest_repair_10_tourist_rajasthan_amer.png`)
+5. **Regression Verification:**
+   - 107 of 107 tests passing on isolated test branch (`ep-floral-silence`).
+   - 0 console errors, 0 network errors in browser audit.
+
+
+---
+
+## 2026-11-20 — Global Loading Performance Optimization & Latency Bottleneck Resolution
+
+**Decision:** Eliminate the ~8–10 second navigation loading delay across YatraSetu by implementing in-memory caching and request deduplication in the Manager workspace (`manager-core.js`, `manager-views.js`) and `Promise.all` concurrent parallelization with `sessionStorage` caching in the Tourist workspace (`tourist.js`, `api.js`), with strict cross-tab mutation invalidation (`yatrasetu_catalogue_invalidated_at`) and zero session data leakage.
+
+**Reason:** Chrome CDP profiling revealed that static asset transfer was fast (TTFB < 3 ms, DCL < 100 ms), but cascading, un-cached, sequential network waterfalls of authenticated backend API requests across high-latency cross-region PostgreSQL roundtrips (client $\leftrightarrow$ Neon Singapore cluster `ap-southeast-1`) caused severe latency:
+- In the Manager workspace, `applyContextToDOM` and `renderConnectedViews` repeatedly requested `/api/v1/manager/events` (3–4× sequentially), producing **8,255.1 ms** average load times.
+- In the Tourist workspace, `loadCatalogueFromApi()` sequentially awaited 7 endpoints, taking **~5,293 ms** on every page transition.
+
+**Consequence:**
+1. **Fix 1 (Manager Request Deduplication & In-Memory Cache):**
+   - Added in-flight request deduplication promises (`_pendingDestinations`, `_pendingAttractions`, `_pendingEvents`) to prevent concurrent duplicate network requests.
+   - Added in-memory cache checks to `getEvents` and `getAttractions` in `manager-core.js`.
+   - Reused resolved destination and event lists in `renderConnectedViews` instead of re-fetching them.
+   - Guarded subpage event loading in `applyContextToDOM` so requests only fire when target containers exist in the DOM.
+   - **Result:** Manager Destinations page load dropped from **8,255.1 ms down to 2,526.2 ms (69.4% improvement, saving 5.7+ seconds)**; network API requests reduced from 7 down to 1.
+2. **Fix 2 (Tourist Catalogue Parallelization & Session Cache):**
+   - Replaced sequential waterfall with `Promise.all` in `loadCatalogueFromApi()`, fetching all 7 endpoints concurrently.
+   - Cached the complete clean catalogue snapshot in `sessionStorage` (`yatrasetu_tourist_catalogue`) with timestamp.
+   - Implemented cross-tab invalidation detection: when Managers modify destinations, attractions, or events, `localStorage.setItem('yatrasetu_catalogue_invalidated_at', ...)` signals Tourist views to refresh.
+   - Ensured failed requests do not store incomplete data.
+   - **Result:** Tourist detail page load dropped from **1,376.9 ms down to 889.8 ms (35% improvement)**.
+3. **Zero Session Leakage:**
+   - Updated `clearSession()` in `api.js` to clear all tourist catalogue session cache keys on logout or session expiration, preventing any data leakage across user identities or roles.
+4. **Verification & Regression Testing:**
+   - 107 of 107 backend tests passing (89 unit/integration + 18 PostgreSQL RLS tests).
+   - Real Chrome CDP 5-journey benchmark repeated across 3 runs (1 cold, 2 warm) with zero console errors.

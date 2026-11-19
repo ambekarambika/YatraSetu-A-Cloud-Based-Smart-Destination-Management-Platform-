@@ -37,14 +37,14 @@
     --radius-lg: 14px;
 }
 
-body[data-theme="maharashtra"] { --state-accent: #E67E22; --state-accent-hover: #D35400; --state-accent-light: rgba(230, 126, 34, 0.1); }
-body[data-theme="kerala"]     { --state-accent: #0D9488; --state-accent-hover: #0F766E; --state-accent-light: rgba(13, 148, 136, 0.1); }
-body[data-theme="kashmir"]    { --state-accent: #0284C7; --state-accent-hover: #0369A1; --state-accent-light: rgba(2, 132, 199, 0.1); }
-body[data-theme="rajasthan"]  { --state-accent: #D97706; --state-accent-hover: #B45309; --state-accent-light: rgba(217, 119, 6, 0.1); }
-body[data-theme="goa"]        { --state-accent: #0891B2; --state-accent-hover: #0E7490; --state-accent-light: rgba(8, 145, 178, 0.1); }
-body[data-theme="tamilnadu"]  { --state-accent: #C026D3; --state-accent-hover: #A21CAF; --state-accent-light: rgba(192, 38, 211, 0.1); }
-body[data-theme="uttarakhand"]{ --state-accent: #16A34A; --state-accent-hover: #15803D; --state-accent-light: rgba(22, 163, 74, 0.1); }
-body[data-theme="assam"]      { --state-accent: #059669; --state-accent-hover: #047857; --state-accent-light: rgba(5, 150, 105, 0.1); }
+:root[data-theme="maharashtra"], html[data-theme="maharashtra"], body[data-theme="maharashtra"], [data-state-theme="maharashtra"] { --state-accent: #E67E22; --state-accent-hover: #D35400; --state-accent-light: rgba(230, 126, 34, 0.1); }
+:root[data-theme="kerala"], html[data-theme="kerala"], body[data-theme="kerala"], [data-state-theme="kerala"]         { --state-accent: #0D9488; --state-accent-hover: #0F766E; --state-accent-light: rgba(13, 148, 136, 0.1); }
+:root[data-theme="kashmir"], html[data-theme="kashmir"], body[data-theme="kashmir"], [data-state-theme="kashmir"]       { --state-accent: #0284C7; --state-accent-hover: #0369A1; --state-accent-light: rgba(2, 132, 199, 0.1); }
+:root[data-theme="rajasthan"], html[data-theme="rajasthan"], body[data-theme="rajasthan"], [data-state-theme="rajasthan"]   { --state-accent: #D97706; --state-accent-hover: #B45309; --state-accent-light: rgba(217, 119, 6, 0.1); }
+:root[data-theme="goa"], html[data-theme="goa"], body[data-theme="goa"], [data-state-theme="goa"]               { --state-accent: #0891B2; --state-accent-hover: #0E7490; --state-accent-light: rgba(8, 145, 178, 0.1); }
+:root[data-theme="tamilnadu"], html[data-theme="tamilnadu"], body[data-theme="tamilnadu"], [data-state-theme="tamilnadu"]   { --state-accent: #C026D3; --state-accent-hover: #A21CAF; --state-accent-light: rgba(192, 38, 211, 0.1); }
+:root[data-theme="uttarakhand"], html[data-theme="uttarakhand"], body[data-theme="uttarakhand"], [data-state-theme="uttarakhand"]{ --state-accent: #16A34A; --state-accent-hover: #15803D; --state-accent-light: rgba(22, 163, 74, 0.1); }
+:root[data-theme="assam"], html[data-theme="assam"], body[data-theme="assam"], [data-state-theme="assam"]             { --state-accent: #059669; --state-accent-hover: #047857; --state-accent-light: rgba(5, 150, 105, 0.1); }
 
 * {
     box-sizing: border-box;

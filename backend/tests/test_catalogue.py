@@ -265,3 +265,37 @@ def test_no_mutation_endpoints_exposed(client: TestClient):
     # PUT to /attractions
     res_put_attr = client.put("/api/v1/attractions", json={"name": "Hacked Attraction"})
     assert res_put_attr.status_code == 405
+
+
+def test_list_destination_videos(client: TestClient, db_session: Session, catalogue_test_data):
+    """Test listing curated destination videos via public catalogue endpoints."""
+    from app.models.destination import DestinationVideo
+    vid = DestinationVideo(
+        id=uuid.uuid4(),
+        destination_id="rajgad-fort",
+        title="Padmavati Machi Orientation",
+        category="Orientation",
+        description="Orientation guide to the Machi.",
+        duration="0:30",
+        youtube_id="abc123xyz",
+        video_url="https://www.youtube.com/watch?v=abc123xyz",
+        thumbnail_url="https://example.com/thumb.jpg",
+        status="Published",
+    )
+    db_session.add(vid)
+    db_session.commit()
+
+    # 1. GET /destinations/{destination_id}/videos
+    res_dest_vids = client.get("/api/v1/destinations/rajgad-fort/videos")
+    assert res_dest_vids.status_code == 200
+    vids = res_dest_vids.json()
+    assert len(vids) >= 1
+    assert vids[0]["youtube_id"] == "abc123xyz"
+
+    # 2. GET /videos
+    res_all_vids = client.get("/api/v1/videos?destination_id=rajgad-fort")
+    assert res_all_vids.status_code == 200
+    all_vids = res_all_vids.json()
+    assert len(all_vids) >= 1
+    assert all_vids[0]["title"] == "Padmavati Machi Orientation"
+
