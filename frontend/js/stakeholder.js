@@ -178,7 +178,7 @@ async function initStakeholderContext() {
     let targetDestId = profile.destinationId || sessionStorage.getItem('yatrasetu_destination_id');
 
     if (targetDestId && targetDestId !== 'unassigned' && targetDestId !== '') {
-        const foundDest = (managerData.destinations || []).find(d => d.id === targetDestId);
+        const foundDest = (managerData.destinations || []).find(d => d.id === targetDestId || (targetDestId === 'rajgad-fort' && d.id === 'raigad-fort') || (targetDestId === 'raigad-fort' && d.id === 'rajgad-fort'));
         if (foundDest) {
             profile.destinationId = foundDest.id;
             profile.destinationName = foundDest.name;
@@ -212,6 +212,7 @@ async function initStakeholderContext() {
     if (topbarUserName) {
         topbarUserName.textContent = profile.userName || 'Profile not configured';
     }
+    const sessionRole = (typeof sessionStorage !== 'undefined') ? sessionStorage.getItem('yatrasetu_role') : (profile.role || 'stakeholder');
     if (topbarUserRole) {
         if (sessionRole === 'stakeholder') {
             topbarUserRole.textContent = 'Tourism Stakeholder';
