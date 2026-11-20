@@ -463,6 +463,8 @@ function initAddDestinationForm() {
                         else custom.push(newDest);
                         localStorage.setItem('yatrasetu_manager_custom_destinations', JSON.stringify(custom));
                         sessionStorage.setItem('yatrasetu_manager_custom_destinations', JSON.stringify(custom));
+                        localStorage.setItem('yatrasetu_catalogue_invalidated_at', Date.now().toString());
+                        sessionStorage.removeItem('yatrasetu_tourist_catalogue');
                     } catch (e) {}
                     if (window.YatraSetuManagerStore && typeof window.YatraSetuManagerStore.invalidateCache === 'function') {
                         window.YatraSetuManagerStore.invalidateCache('destinations');
@@ -506,6 +508,8 @@ function initAddDestinationForm() {
                     else custom.push(newDest);
                     localStorage.setItem('yatrasetu_manager_custom_destinations', JSON.stringify(custom));
                     sessionStorage.setItem('yatrasetu_manager_custom_destinations', JSON.stringify(custom));
+                    localStorage.setItem('yatrasetu_catalogue_invalidated_at', Date.now().toString());
+                    sessionStorage.removeItem('yatrasetu_tourist_catalogue');
                 } catch (e) {}
             }
 

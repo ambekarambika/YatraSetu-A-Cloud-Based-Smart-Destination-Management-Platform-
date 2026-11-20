@@ -1779,6 +1779,8 @@
                                     this.initDestinationDetailPage();
                                 } else if (path.includes('experiences.html')) {
                                     this.initExperiencesPage();
+                                } else if (path.includes('dashboard.html') || path.endsWith('/tourist/') || path.endsWith('/tourist/index.html')) {
+                                    this.renderDashboardFeaturedDestinations();
                                 }
                                 return;
                             }
@@ -1819,6 +1821,8 @@
                         this.renderFilteredDestinations();
                     } else if (path.includes('destination-detail.html')) {
                         this.initDestinationDetailPage();
+                    } else if (path.includes('dashboard.html') || path.endsWith('/tourist/') || path.endsWith('/tourist/index.html')) {
+                        this.renderDashboardFeaturedDestinations();
                     }
                 }
 
@@ -1936,7 +1940,38 @@
          * 1. Enrich Destinations Single Source of Truth
          */
         enrichDestinations(customRawDestinations = null, customStates = null) {
-            const rawDestinations = customRawDestinations || (window.YatraSetuManagerData && window.YatraSetuManagerData.destinations) || [];
+            let combined = [];
+            if (window.YatraSetuManagerData && Array.isArray(window.YatraSetuManagerData.destinations)) {
+                combined = window.YatraSetuManagerData.destinations.map(d => ({ ...d }));
+            }
+
+            // Seamlessly merge custom destinations saved in LocalStorage by Manager workspace
+            try {
+                const storedCustom = localStorage.getItem('yatrasetu_manager_custom_destinations') || sessionStorage.getItem('yatrasetu_manager_custom_destinations');
+                if (storedCustom) {
+                    const parsed = JSON.parse(storedCustom);
+                    if (Array.isArray(parsed)) {
+                        parsed.forEach(c => {
+                            if (!c || !c.id) return;
+                            const idx = combined.findIndex(d => (d.id || '').toLowerCase() === (c.id || '').toLowerCase());
+                            if (idx >= 0) combined[idx] = { ...combined[idx], ...c };
+                            else combined.unshift(c); // Newly added custom destination appears prominently
+                        });
+                    }
+                }
+            } catch (e) {}
+
+            // Seamlessly merge live API destinations if provided
+            if (customRawDestinations && Array.isArray(customRawDestinations)) {
+                customRawDestinations.forEach(apiDest => {
+                    if (!apiDest || !apiDest.id) return;
+                    const idx = combined.findIndex(d => (d.id || '').toLowerCase() === (apiDest.id || '').toLowerCase());
+                    if (idx >= 0) combined[idx] = { ...combined[idx], ...apiDest };
+                    else combined.unshift(apiDest);
+                });
+            }
+
+            const rawDestinations = combined;
             const states = customStates || (this.apiStates && this.apiStates.length > 0 ? this.apiStates : (window.YatraSetuManagerData && window.YatraSetuManagerData.states)) || [];
 
             this.destinations = rawDestinations.map(d => {
@@ -2453,6 +2488,70 @@
                     e.preventDefault();
                     const stateId = card.getAttribute('data-state-id');
                     window.location.href = `destinations.html?state=${encodeURIComponent(stateId)}`;
+                };
+            });
+
+            // Initial render of Trending & Featured Destinations on Dashboard
+            this.renderDashboardFeaturedDestinations();
+        },
+
+        /**
+         * Render Trending & Featured Destinations Grid on Tourist Dashboard
+         */
+        renderDashboardFeaturedDestinations() {
+            const grid = document.getElementById('dashboard-destinations-grid');
+            if (!grid) return;
+
+            const destsToShow = (this.destinations || []).slice(0, 8);
+            if (!destsToShow.length) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:2rem; color:var(--tourist-text-muted);">No destinations currently registered.</div>';
+                return;
+            }
+
+            grid.innerHTML = destsToShow.map(dest => {
+                const isFav = this.favorites && this.favorites.has(dest.id);
+                return `
+                    <div class="dest-card" data-dest-id="${dest.id}">
+                        <div class="dest-card-media">
+                            <img src="${dest.img}" alt="${dest.name}" class="dest-card-media-img" loading="lazy" onerror="this.onerror=null; this.src='../assets/images/hero-india.jpg';">
+                            <button type="button" class="dest-card-fav-btn ${isFav ? 'favorited' : ''}" 
+                                    data-dest-id="${dest.id}" 
+                                    title="${isFav ? 'Remove from Saved' : 'Save to Favorites'}"
+                                    aria-label="${isFav ? 'Remove from Saved' : 'Save to Favorites'}">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="${isFav ? '#EF4444' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="dest-card-body">
+                            <div class="dest-card-title-row">
+                                <h3 class="dest-card-name">${dest.name}</h3>
+                            </div>
+                            <div class="dest-card-loc">📍 ${dest.location || dest.state_name || ''}</div>
+                            <div class="dest-card-tags">
+                                ${(dest.tags || []).slice(0, 3).map(tag => `<span class="dest-card-tag">${tag}</span>`).join('')}
+                            </div>
+                            <div class="dest-card-footer">
+                                <div class="dest-card-rating">
+                                    <span>★ ${dest.rating || '4.8'}</span>
+                                    <span class="dest-card-reviews">(${dest.reviewsCount || '1.2k'})</span>
+                                </div>
+                                <a href="destination-detail.html?id=${dest.id}" class="dest-card-link">
+                                    Explore <span>→</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Wire up favorite clicks
+            grid.querySelectorAll('.dest-card-fav-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const id = btn.getAttribute('data-dest-id');
+                    this.toggleFavorite(id);
                 };
             });
         },
