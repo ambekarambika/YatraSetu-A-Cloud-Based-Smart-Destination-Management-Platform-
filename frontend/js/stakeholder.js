@@ -714,6 +714,7 @@ function initStakeholderProfilePage() {
 
     const handleProfileSave = async (e) => {
         if (e) e.preventDefault();
+        const catalogData = window.YatraSetuManagerData || managerData || {};
 
         if (profile.account_status === 'Deactivated') {
             alert('ACCOUNT SUSPENDED: Your stakeholder account has been deactivated by the Platform Administrator. Profile changes cannot be submitted.');
@@ -767,7 +768,7 @@ function initStakeholderProfilePage() {
                         if (selectDest) selectDest.focus();
                         return;
                     }
-                    const destObj = (managerData.destinations || []).find(d => d.id === chosenDestId);
+                    const destObj = (catalogData.destinations || []).find(d => d.id === chosenDestId || (chosenDestId === 'rajgad-fort' && d.id === 'raigad-fort') || (chosenDestId === 'raigad-fort' && d.id === 'rajgad-fort'));
                     const stateId = destObj ? destObj.state_id : 'maharashtra';
 
                     await window.YatraSetuApi.registerStakeholderService({
@@ -832,13 +833,12 @@ function initStakeholderProfilePage() {
         sessionStorage.setItem('yatrasetu_organization', profile.organizationName);
 
         // Cross-sync: update/insert in window.YatraSetuManagerData.stakeholders
-        const managerData = window.YatraSetuManagerData || {};
-        if (managerData.stakeholders) {
-            const destObj = (managerData.destinations || []).find(d => d.id === profile.destinationId);
+        if (catalogData.stakeholders) {
+            const destObj = (catalogData.destinations || []).find(d => d.id === profile.destinationId || (profile.destinationId === 'rajgad-fort' && d.id === 'raigad-fort') || (profile.destinationId === 'raigad-fort' && d.id === 'rajgad-fort'));
             const stateId = destObj ? destObj.state_id : 'maharashtra';
             const destName = destObj ? destObj.name : 'Unassigned';
             profile.destinationName = destName;
-            const existingSh = managerData.stakeholders.find(s => s.id === profile.id || (s.email && s.email.toLowerCase() === profile.email.toLowerCase()));
+            const existingSh = catalogData.stakeholders.find(s => s.id === profile.id || (s.email && s.email.toLowerCase() === profile.email.toLowerCase()));
 
             if (existingSh) {
                 existingSh.name = profile.organizationName;
@@ -856,7 +856,7 @@ function initStakeholderProfilePage() {
                     existingSh.state_id = stateId;
                 }
             } else {
-                managerData.stakeholders.push({
+                catalogData.stakeholders.push({
                     id: profile.id || `sh-${Date.now().toString(36)}`,
                     state_id: stateId,
                     destination_id: profile.destinationId,
@@ -881,11 +881,11 @@ function initStakeholderProfilePage() {
             }
 
             if (window.YatraSetuManagerStore && typeof window.YatraSetuManagerStore.saveStakeholders === 'function') {
-                window.YatraSetuManagerStore.saveStakeholders(managerData.stakeholders);
+                window.YatraSetuManagerStore.saveStakeholders(catalogData.stakeholders);
             } else {
                 try {
-                    localStorage.setItem('yatrasetu_manager_stakeholders', JSON.stringify(managerData.stakeholders));
-                    sessionStorage.setItem('yatrasetu_manager_stakeholders', JSON.stringify(managerData.stakeholders));
+                    localStorage.setItem('yatrasetu_manager_stakeholders', JSON.stringify(catalogData.stakeholders));
+                    sessionStorage.setItem('yatrasetu_manager_stakeholders', JSON.stringify(catalogData.stakeholders));
                 } catch (e) { }
             }
         }
