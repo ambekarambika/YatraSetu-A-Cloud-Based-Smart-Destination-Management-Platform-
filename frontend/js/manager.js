@@ -450,8 +450,20 @@ function initAddDestinationForm() {
                         img: created.hero_image_url || payload.hero_image_url
                     };
                     if (window.YatraSetuManagerData && window.YatraSetuManagerData.destinations) {
-                        window.YatraSetuManagerData.destinations.push(newDest);
+                        const exists = window.YatraSetuManagerData.destinations.some(d => d.id === newDest.id);
+                        if (!exists) window.YatraSetuManagerData.destinations.push(newDest);
                     }
+                    try {
+                        let custom = [];
+                        const raw = localStorage.getItem('yatrasetu_manager_custom_destinations') || sessionStorage.getItem('yatrasetu_manager_custom_destinations');
+                        if (raw) custom = JSON.parse(raw);
+                        if (!Array.isArray(custom)) custom = [];
+                        const existingIdx = custom.findIndex(d => d.id === newDest.id);
+                        if (existingIdx >= 0) custom[existingIdx] = newDest;
+                        else custom.push(newDest);
+                        localStorage.setItem('yatrasetu_manager_custom_destinations', JSON.stringify(custom));
+                        sessionStorage.setItem('yatrasetu_manager_custom_destinations', JSON.stringify(custom));
+                    } catch (e) {}
                     if (window.YatraSetuManagerStore && typeof window.YatraSetuManagerStore.invalidateCache === 'function') {
                         window.YatraSetuManagerStore.invalidateCache('destinations');
                     }
@@ -481,8 +493,20 @@ function initAddDestinationForm() {
                     img: payload.hero_image_url
                 };
                 if (window.YatraSetuManagerData && window.YatraSetuManagerData.destinations) {
-                    window.YatraSetuManagerData.destinations.push(newDest);
+                    const exists = window.YatraSetuManagerData.destinations.some(d => d.id === newDest.id);
+                    if (!exists) window.YatraSetuManagerData.destinations.push(newDest);
                 }
+                try {
+                    let custom = [];
+                    const raw = localStorage.getItem('yatrasetu_manager_custom_destinations') || sessionStorage.getItem('yatrasetu_manager_custom_destinations');
+                    if (raw) custom = JSON.parse(raw);
+                    if (!Array.isArray(custom)) custom = [];
+                    const existingIdx = custom.findIndex(d => d.id === newDest.id);
+                    if (existingIdx >= 0) custom[existingIdx] = newDest;
+                    else custom.push(newDest);
+                    localStorage.setItem('yatrasetu_manager_custom_destinations', JSON.stringify(custom));
+                    sessionStorage.setItem('yatrasetu_manager_custom_destinations', JSON.stringify(custom));
+                } catch (e) {}
             }
 
             // Reset inputs

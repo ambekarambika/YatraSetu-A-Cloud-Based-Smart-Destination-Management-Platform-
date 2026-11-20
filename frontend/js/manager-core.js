@@ -169,15 +169,12 @@ window.YatraSetuManagerStore = {
     invalidateCache(entity = null) {
         if (!entity || entity === 'destinations') {
             this._pendingDestinations = null;
-            if (window.YatraSetuManagerData) window.YatraSetuManagerData.destinations = null;
         }
         if (!entity || entity === 'attractions') {
             this._pendingAttractions = null;
-            if (window.YatraSetuManagerData) window.YatraSetuManagerData.attractions = null;
         }
         if (!entity || entity === 'events') {
             this._pendingEvents = null;
-            if (window.YatraSetuManagerData) window.YatraSetuManagerData.events = null;
         }
         // Signal cross-tab and Tourist workspace catalogue invalidation
         try {
@@ -192,6 +189,24 @@ window.YatraSetuManagerStore = {
     },
 
     async getDestinations(stateId, forceRefresh = false) {
+        // Synchronize persisted custom destinations into catalogue
+        try {
+            const rawCustom = (typeof localStorage !== 'undefined' ? localStorage.getItem('yatrasetu_manager_custom_destinations') : null) ||
+                              (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('yatrasetu_manager_custom_destinations') : null);
+            if (rawCustom && window.YatraSetuManagerData && Array.isArray(window.YatraSetuManagerData.destinations)) {
+                const customList = JSON.parse(rawCustom);
+                if (Array.isArray(customList)) {
+                    customList.forEach(cd => {
+                        const exists = window.YatraSetuManagerData.destinations.some(d => d.id === cd.id);
+                        if (!exists) {
+                            window.YatraSetuManagerData.destinations.push(cd);
+                        }
+                    });
+                }
+            }
+        } catch (e) {
+            console.warn('[getDestinations] Custom destinations sync error:', e);
+        }
         const token = (typeof sessionStorage !== 'undefined')
             ? (sessionStorage.getItem('yatrasetu_access_token') || (window.YatraSetuApi && window.YatraSetuApi.getAccessToken()))
             : null;
