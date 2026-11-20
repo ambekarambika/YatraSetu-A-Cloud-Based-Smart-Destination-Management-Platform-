@@ -66,14 +66,14 @@ def test_unique_user_email_constraint(db_session):
     user1 = User(
         id=uuid.uuid4(),
         role_id="tourist",
-        email="duplicate@yatrasetu.in",
+        email="duplicate@gmail.com",
         password_hash="hash1",
         full_name="User One",
     )
     user2 = User(
         id=uuid.uuid4(),
         role_id="tourist",
-        email="duplicate@yatrasetu.in",
+        email="duplicate@gmail.com",
         password_hash="hash2",
         full_name="User Two",
     )
@@ -126,7 +126,7 @@ def test_manager_assignment_scopes(db_session):
     state_mgr_user = User(
         id=uuid.uuid4(),
         role_id="manager",
-        email="state.mgr@yatrasetu.in",
+        email="state.mgr@gmail.com",
         password_hash="hash_mgr",
         full_name="State Tourism Director",
     )
@@ -154,7 +154,7 @@ def test_trip_plan_cascade_deletion(db_session):
     user = User(
         id=uuid.uuid4(),
         role_id="tourist",
-        email="plan.traveler@yatrasetu.in",
+        email="plan.traveler@gmail.com",
         password_hash="hash_plan",
         full_name="Plan Traveler",
     )
@@ -204,7 +204,7 @@ def test_user_favorite_unique_constraint(db_session):
     user = User(
         id=uuid.uuid4(),
         role_id="tourist",
-        email="fav.user@yatrasetu.in",
+        email="fav.user@gmail.com",
         password_hash="hash_fav",
         full_name="Fav User",
     )

@@ -677,36 +677,36 @@ REPRESENTATIVE_STORIES: List[Dict[str, Any]] = [
 REPRESENTATIVE_USERS: List[Dict[str, Any]] = [
     # Destination Manager for Rajgad Fort
     {
-        "id": make_uuid("user", "manager.rajgad@yatrasetu.in"),
-        "email": "manager.rajgad@yatrasetu.in",
+        "id": make_uuid("user", "manager.rajgad@gmail.com"),
+        "email": "manager.rajgad@gmail.com",
         "full_name": "Rajesh Patil",
         "role_id": "manager",
         "is_active": True,
         "is_verified": True,
         "manager_assignment": {
-            "id": make_uuid("assignment", "manager.rajgad@yatrasetu.in"),
+            "id": make_uuid("assignment", "manager.rajgad@gmail.com"),
             "state_id": "maharashtra",
             "destination_id": "rajgad-fort",
         }
     },
     # State Manager for Kerala
     {
-        "id": make_uuid("user", "manager.kerala@yatrasetu.in"),
-        "email": "manager.kerala@yatrasetu.in",
+        "id": make_uuid("user", "manager.kerala@gmail.com"),
+        "email": "manager.kerala@gmail.com",
         "full_name": "Sunita Nair",
         "role_id": "manager",
         "is_active": True,
         "is_verified": True,
         "manager_assignment": {
-            "id": make_uuid("assignment", "manager.kerala@yatrasetu.in"),
+            "id": make_uuid("assignment", "manager.kerala@gmail.com"),
             "state_id": "kerala",
             "destination_id": None,  # State Manager scope (all destinations within state)
         }
     },
     # Verified Stakeholder under Rajgad Fort
     {
-        "id": make_uuid("user", "stakeholder.rajgad@yatrasetu.in"),
-        "email": "stakeholder.rajgad@yatrasetu.in",
+        "id": make_uuid("user", "stakeholder.rajgad@gmail.com"),
+        "email": "stakeholder.rajgad@gmail.com",
         "full_name": "Suresh Deshmukh",
         "role_id": "stakeholder",
         "is_active": True,
@@ -749,8 +749,8 @@ REPRESENTATIVE_USERS: List[Dict[str, Any]] = [
     },
     # Pending Registration Stakeholder under Alappuzha (Populates Admin/Manager Review Queue)
     {
-        "id": make_uuid("user", "stakeholder.alleppey@yatrasetu.in"),
-        "email": "stakeholder.alleppey@yatrasetu.in",
+        "id": make_uuid("user", "stakeholder.alleppey@gmail.com"),
+        "email": "stakeholder.alleppey@gmail.com",
         "full_name": "K. V. Raman",
         "role_id": "stakeholder",
         "is_active": True,
@@ -796,7 +796,7 @@ REPRESENTATIVE_ADVISORIES: List[Dict[str, Any]] = [
         "title": "Monsoon Stone Step Guidance & Escarpment Precaution",
         "description": "Steep stone steps near Suvela Machi and Pali Darwaza become slippery during monsoon showers. Sturdy trekking footwear with good grip is required.",
         "is_active": True,
-        "created_by_key": "manager.rajgad@yatrasetu.in",
+        "created_by_key": "manager.rajgad@gmail.com",
     },
     {
         "id": make_uuid("advisory", "munnar.fog-precaution"),
@@ -805,7 +805,7 @@ REPRESENTATIVE_ADVISORIES: List[Dict[str, Any]] = [
         "title": "High-Altitude Ghat Road Fog & Precaution Notice",
         "description": "Dense evening fog observed on the Kochi-Dhanushkodi National Highway near Gap Road. Drive with fog lamps active between 17:00 and 08:00.",
         "is_active": True,
-        "created_by_key": "manager.kerala@yatrasetu.in",
+        "created_by_key": "manager.kerala@gmail.com",
     },
 ]
 
@@ -1320,10 +1320,10 @@ def seed_all_data(
             tourist_u = db.query(User).filter(User.role_id == "tourist", User.email == "test.tourist.f71aab@example.com").first()
             if not tourist_u:
                 tourist_u = db.query(User).filter(User.role_id == "tourist").first()
-            manager_u = db.query(User).filter(User.role_id == "manager", User.email == "manager.rajgad@yatrasetu.in").first()
+            manager_u = db.query(User).filter(User.role_id == "manager", User.email == "manager.rajgad@gmail.com").first()
             if not manager_u:
                 manager_u = db.query(User).filter(User.role_id == "manager").first()
-            stakeholder_u = db.query(User).filter(User.role_id == "stakeholder", User.email == "stakeholder.rajgad@yatrasetu.in").first()
+            stakeholder_u = db.query(User).filter(User.role_id == "stakeholder", User.email == "stakeholder.rajgad@gmail.com").first()
             if not stakeholder_u and sh_service:
                 stakeholder_u = db.query(User).filter(User.id == sh_service.user_id).first()
 
@@ -1450,7 +1450,7 @@ def seed_reference_data(db: Session = None) -> Dict[str, Any]:
 
 def provision_admin_account(
     db: Session = None,
-    email: str = "admin.governance@yatrasetu.in",
+    email: str = "admin.governance@gmail.com",
     full_name: str = "Rajesh Verma",
     phone_number: str = "+91 98200 12345",
 ) -> Dict[str, Any]:
@@ -1561,7 +1561,7 @@ def seed_local_testing_dataset(db: Session = None) -> Dict[str, Any]:
             return seed_result
 
         # 2. Provision controlled admin account
-        admin_result = provision_admin_account(db, email="admin.governance@yatrasetu.in")
+        admin_result = provision_admin_account(db, email="admin.governance@gmail.com")
 
         return {
             "success": True,

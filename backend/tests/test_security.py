@@ -69,7 +69,7 @@ def sample_hierarchy(db_session: Session):
     u_admin = User(
         id=uuid.uuid4(),
         role_id="admin",
-        email="admin@yatrasetu.in",
+        email="admin@gmail.com",
         password_hash="argon2_fake_hash",
         full_name="Rajesh Verma",
         is_active=True,
@@ -77,7 +77,7 @@ def sample_hierarchy(db_session: Session):
     u_state_mgr = User(
         id=uuid.uuid4(),
         role_id="manager",
-        email="statemgr@yatrasetu.in",
+        email="statemgr@gmail.com",
         password_hash="argon2_fake_hash",
         full_name="Maharashtra State Director",
         is_active=True,
@@ -85,7 +85,7 @@ def sample_hierarchy(db_session: Session):
     u_dest_mgr = User(
         id=uuid.uuid4(),
         role_id="manager",
-        email="destmgr@yatrasetu.in",
+        email="destmgr@gmail.com",
         password_hash="argon2_fake_hash",
         full_name="Rajgad Fort Officer",
         is_active=True,
@@ -93,7 +93,7 @@ def sample_hierarchy(db_session: Session):
     u_tourist = User(
         id=uuid.uuid4(),
         role_id="tourist",
-        email="tourist@yatrasetu.in",
+        email="tourist@gmail.com",
         password_hash="argon2_fake_hash",
         full_name="Aarav Sharma",
         is_active=True,

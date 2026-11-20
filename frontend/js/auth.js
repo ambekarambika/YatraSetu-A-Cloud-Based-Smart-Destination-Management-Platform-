@@ -108,16 +108,16 @@ function fillDemoCredentialsForRole(role) {
     if (!emailInput || !passwordInput) return;
 
     const demoAccounts = {
-        tourist: { email: 'tourist.demo@yatrasetu.in', pass: 'Tourist@123' },
-        manager: { email: 'manager.maharashtra@yatrasetu.in', pass: 'Manager@123' },
+        tourist: { email: 'tourist.demo@gmail.com', pass: 'Tourist@123' },
+        manager: { email: 'manager.maharashtra@gmail.com', pass: 'Manager@123' },
         stakeholder: { email: 'sahyadri.guides@gmail.com', pass: 'Stakeholder@123' },
-        admin: { email: 'admin.governance@yatrasetu.in', pass: 'Admin@123' }
+        admin: { email: 'admin.governance@gmail.com', pass: 'Admin@123' }
     };
 
     if (demoAccounts[role]) {
         emailInput.value = demoAccounts[role].email;
         passwordInput.value = demoAccounts[role].pass;
-        showGlassAlert('info', `Demo credentials loaded for <strong>${role.toUpperCase()}</strong>.`);
+        showGlassAlert('info', `Educational demo credentials loaded for <strong>${role.toUpperCase()}</strong>.`);
     }
 }
 

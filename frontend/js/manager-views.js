@@ -950,7 +950,7 @@ function initManagerProfilePage() {
     const profile = (typeof syncActiveManagerProfile === 'function' ? syncActiveManagerProfile() : null) || window.YatraSetuManagerData.profile || {
         id: 'usr-mgr-01',
         name: 'Rajesh Patil',
-        email: 'manager.maharashtra@yatrasetu.in',
+        email: 'manager.maharashtra@gmail.com',
         phone: '+91 98230 41092',
         manager_type: 'State Manager',
         access_level: 'State Manager',
@@ -2863,7 +2863,7 @@ async function openVideoModal(videoId = null) {
         if (formCat) formCat.selectedIndex = 0;
         if (formTitle) formTitle.value = '';
         if (formDesc) formDesc.value = '';
-        if (formUrl) formUrl.value = 'https://assets.yatrasetu.org/media/videos/prototype/' + activeStateId + '-clip.mp4';
+        if (formUrl) formUrl.value = 'https://example.com/media/videos/prototype/' + activeStateId + '-clip.mp4';
         if (formDuration) formDuration.value = '0:30';
         if (formThumb) formThumb.value = NEUTRAL_VIDEO_PLACEHOLDER;
         if (formStatus) formStatus.value = 'Draft';
@@ -2958,7 +2958,7 @@ async function openVideoPlayerModal(videoId) {
     if (infoDest) infoDest.textContent = v.destination_name || v.destination_id;
     if (infoCat) infoCat.textContent = v.category;
     if (infoDuration) infoDuration.textContent = `${v.duration || '0:30'} (${v.is_verified_asset ? 'actual duration' : '~30s prototype'})`;
-    if (infoPublisher) infoPublisher.textContent = v.publisher || 'Official Tourism Source';
+    if (infoPublisher) infoPublisher.textContent = v.publisher || 'Verified Tourism Media';
     if (infoPermissions) infoPermissions.textContent = v.embed_permission || (v.is_verified_asset ? 'YouTube Standard Player Embedding' : 'Prototype Media Record');
 
     if (infoLink) {
@@ -2973,7 +2973,7 @@ async function openVideoPlayerModal(videoId) {
 
     if (infoAssetFlag) {
         if (v.verification_state === 'official_source') {
-            infoAssetFlag.innerHTML = '🏛️ <strong>Official Tourism Source</strong> (Verified Authority Asset)';
+            infoAssetFlag.innerHTML = '🏛️ <strong>Verified Tourism Media</strong> (Verified Authority Asset)';
         } else if (v.verification_state === 'verified_media') {
             infoAssetFlag.innerHTML = '✓ <strong>Verified Media Asset</strong> (Confirmed Playable Creator Stream)';
         } else {

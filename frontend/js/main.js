@@ -82,6 +82,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalBody = document.getElementById('modalBody');
     const modalClose = document.getElementById('modalClose');
 
+    // Legal / Privacy Modal Dialog Handlers
+    const footerPrivacyLink = document.getElementById('footer-privacy-link');
+    const footerTermsLink = document.getElementById('footer-terms-link');
+
+    if (footerPrivacyLink) {
+        footerPrivacyLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!modalOverlay || !modalTitle || !modalSubtitle || !modalBody) return;
+            modalTitle.textContent = 'Privacy Policy & Data Practices';
+            modalSubtitle.textContent = 'YatraSetu Academic Demonstration Platform';
+            modalBody.innerHTML = `
+                <p style="margin-bottom: 0.75rem;">YatraSetu is an independent academic engineering prototype developed solely for educational and research demonstration in smart destination management.</p>
+                <p style="margin-bottom: 0.75rem;"><strong>Data Collection:</strong> The platform does not collect financial data, national identity documents (Aadhaar/PAN/passports), or sensitive personal records. Form submissions in demonstration mode are stored locally or in demonstration test environments.</p>
+                <p style="margin-bottom: 0.75rem;"><strong>No Commercial Sharing:</strong> No user data is sold, monetized, or shared with external third-party advertisers. All demonstration records are subject to research review and academic auditing.</p>
+            `;
+            modalOverlay.classList.add('active');
+        });
+    }
+
+    if (footerTermsLink) {
+        footerTermsLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!modalOverlay || !modalTitle || !modalSubtitle || !modalBody) return;
+            modalTitle.textContent = 'Platform Terms of Service';
+            modalSubtitle.textContent = 'Academic Project • Educational Prototype';
+            modalBody.innerHTML = `
+                <p style="margin-bottom: 0.75rem;"><strong>Academic Prototype:</strong> YatraSetu is an educational demonstration developed as a student project. It is not an official government portal, government-authorized platform, or commercial travel agency.</p>
+                <p style="margin-bottom: 0.75rem;"><strong>Simulated Functionality:</strong> Role workspaces, partner listings, and destination metrics are provided for educational system modeling and architectural demonstration.</p>
+                <p style="margin-bottom: 0.75rem;"><strong>Intellectual Property & Content:</strong> Destination photographs and media previews are curated from open creative licenses and educational sources with attribution.</p>
+            `;
+            modalOverlay.classList.add('active');
+        });
+    }
+
     const destinationDetails = {
         rajgad: {
             title: "Sahyadri Forts & Rajgad Citadel",

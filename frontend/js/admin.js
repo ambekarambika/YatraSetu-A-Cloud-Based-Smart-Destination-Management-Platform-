@@ -25,7 +25,7 @@
         {
             id: 'usr-adm-01',
             name: 'Rajesh Verma',
-            email: 'admin.governance@yatrasetu.in',
+            email: 'admin.governance@gmail.com',
             role: 'admin',
             access_level: 'Platform Administrator',
             state_id: 'all',
@@ -41,30 +41,30 @@
         {
             id: 'usr-mgr-01',
             name: 'Rajesh Patil',
-            email: 'manager.maharashtra@yatrasetu.in',
+            email: 'manager.maharashtra@gmail.com',
             role: 'manager',
             access_level: 'State Manager', // Access level within Destination Manager
             state_id: 'maharashtra',
             destination_id: 'all',
             destination_name: 'Maharashtra (All Destinations)',
-            organization: 'Maharashtra Tourism Development Corporation (MTDC)',
+            organization: 'Maharashtra Regional Destination Desk',
             account_status: 'Active',
-            registration_status: 'Approved Official',
+            registration_status: 'Approved Manager',
             created_at: '15 Jan 2026',
             last_active: 'Today, 10:15 AM'
         },
         {
             id: 'usr-mgr-02',
             name: 'Sunita Nair',
-            email: 'manager.kerala@yatrasetu.in',
+            email: 'manager.kerala@gmail.com',
             role: 'manager',
             access_level: 'State Manager',
             state_id: 'kerala',
             destination_id: 'all',
             destination_name: 'Kerala (All Destinations)',
-            organization: 'Kerala Tourism Department',
+            organization: 'Kerala Regional Destination Desk',
             account_status: 'Active',
-            registration_status: 'Approved Official',
+            registration_status: 'Approved Manager',
             created_at: '18 Jan 2026',
             last_active: 'Yesterday, 16:30 PM'
         },
@@ -72,30 +72,30 @@
         {
             id: 'usr-mgr-03',
             name: 'Amit Saxena',
-            email: 'manager.rajgad@yatrasetu.in',
+            email: 'manager.rajgad@gmail.com',
             role: 'manager',
             access_level: 'Destination Manager', // Destination-specific access level
             state_id: 'maharashtra',
             destination_id: 'raigad-fort',
             destination_name: 'Rajgad Fort',
-            organization: 'Archaeological Survey of India (ASI) Pune Circle',
+            organization: 'Pune Regional Heritage Desk',
             account_status: 'Active',
-            registration_status: 'Approved Official',
+            registration_status: 'Approved Manager',
             created_at: '01 Feb 2026',
             last_active: 'Yesterday, 14:15 PM'
         },
         {
             id: 'usr-mgr-04',
             name: 'Priya Menon',
-            email: 'manager.munnar@yatrasetu.in',
+            email: 'manager.munnar@gmail.com',
             role: 'manager',
             access_level: 'Destination Manager', // Destination-specific access level
             state_id: 'kerala',
             destination_id: 'munnar-hills',
             destination_name: 'Munnar',
-            organization: 'DTPC Idukki / Munnar Tourism Council',
+            organization: 'Munnar Destination Curation Desk',
             account_status: 'Active',
-            registration_status: 'Approved Official',
+            registration_status: 'Approved Manager',
             created_at: '05 Feb 2026',
             last_active: 'Today, 11:45 AM'
         },
@@ -264,7 +264,7 @@
         {
             id: 'usr-tourist-01',
             name: 'Ananya Sharma',
-            email: 'tourist.demo@yatrasetu.in',
+            email: 'tourist.demo@gmail.com',
             role: 'tourist',
             access_level: 'Registered Tourist',
             state_id: 'all',
@@ -605,7 +605,7 @@
          */
         reassignDestination(stakeholderId, newDestId, reason, actor) {
             if (!reason || reason.trim().length < 6) {
-                throw new Error('VALIDATION_ERROR: A clear, official justification (min 6 chars) is mandatory for destination reassignment.');
+                throw new Error('VALIDATION_ERROR: A clear, administrative justification (min 6 chars) is mandatory for destination reassignment.');
             }
 
             const validRoles = ['admin', 'manager'];
@@ -618,7 +618,7 @@
             const destinations = managerData.destinations || [];
             const destObj = destinations.find(d => d.id === newDestId);
             if (!destObj) {
-                throw new Error(`VALIDATION_ERROR: Destination "${newDestId}" does not exist in the official catalog.`);
+                throw new Error(`VALIDATION_ERROR: Destination "${newDestId}" does not exist in the platform catalogue.`);
             }
 
             // Jurisdiction check for Destination Manager
@@ -653,7 +653,7 @@
                 stakeholder_name: target.organization || target.name,
                 actor_name: actor.name || 'System Admin',
                 actor_role: actor.role === 'admin' ? 'Administrator' : 'Destination Manager',
-                details: `Controlled reassignment from "${oldDestName}" to "${destObj.name}". Official Reason: ${reason}`,
+                details: `Controlled reassignment from "${oldDestName}" to "${destObj.name}". Administrative Reason: ${reason}`,
                 previous_value: `${oldDestName} (${oldDestId})`,
                 new_value: `${destObj.name} (${destObj.id})`
             });
@@ -670,7 +670,7 @@
                 throw new Error('ACCESS_DENIED: Only Platform Administrators hold permission to reassign manager authority or scopes.');
             }
             if (!reason || reason.trim().length < 6) {
-                throw new Error('VALIDATION_ERROR: A clear, official administrative justification (min 6 chars) is mandatory.');
+                throw new Error('VALIDATION_ERROR: A clear, administrative justification (min 6 chars) is mandatory.');
             }
 
             const users = this.getUsers();
@@ -1809,7 +1809,7 @@
             confirmBtn.onclick = async () => {
                 const reasonVal = reasonInput ? reasonInput.value.trim() : '';
                 if (!reasonVal || reasonVal.length < 4) {
-                    alert('Please specify an official reason for permanent deletion.');
+                    alert('Please specify an administrative reason for permanent deletion.');
                     if (reasonInput) reasonInput.focus();
                     return;
                 }
@@ -1912,7 +1912,7 @@
                     return;
                 }
                 if (!reasonVal || reasonVal.length < 6) {
-                    alert('Please provide a detailed official justification for this reassignment (minimum 6 characters).');
+                    alert('Please provide a detailed administrative justification for this reassignment (minimum 6 characters).');
                     if (reasonInput) reasonInput.focus();
                     return;
                 }
@@ -2010,7 +2010,7 @@
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
                     <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 1rem;">
-                        <div style="font-weight: 700; color: #0F172A; margin-bottom: 0.35rem;">📹 Official Destination Videos</div>
+                        <div style="font-weight: 700; color: #0F172A; margin-bottom: 0.35rem;">📹 Verified Destination Videos</div>
                         <div style="font-size: 0.78rem; color: #475569; margin-bottom: 0.75rem;">Verified educational and documentary streams published by Destination Managers.</div>
                         <span class="admin-badge approved">8 Verified Streams</span>
                     </div>
@@ -2310,7 +2310,7 @@
                             </td>
                             <td style="font-size: 0.8rem; color: #334155;">
                                 • Explore destinations, attractions, and verified services<br>
-                                • Watch official destination information videos<br>
+                                • Watch verified destination information videos<br>
                                 • Submit destination feedback and reviews<br>
                                 • Trip planning and itinerary exploration
                             </td>
@@ -2547,7 +2547,7 @@
                             <div class="admin-user-cell">
                                 <span class="admin-user-name">${m.name}</span>
                                 <span class="admin-user-email">${m.email}</span>
-                                <span style="font-size: 0.72rem; color: #64748B;">${m.organization || 'Official'} • ID: <code>${m.id}</code></span>
+                                <span style="font-size: 0.72rem; color: #64748B;">${m.organization || 'Project Manager'} • ID: <code>${m.id}</code></span>
                             </div>
                         </td>
                         <td>${scopeBadge}</td>
@@ -2672,7 +2672,7 @@
                 capEl.innerHTML = `
                     <div style="margin-bottom: 0.35rem; color: #15803D;">✓ <strong>State-wide Jurisdiction:</strong> Full operational and review visibility across all destinations in ${(manager.state_id || 'Maharashtra').toUpperCase()}.</div>
                     <div style="margin-bottom: 0.35rem; color: #15803D;">✓ <strong>Stakeholder Registration Review:</strong> Authorized to review and approve/reject business submissions across any destination in the state.</div>
-                    <div style="margin-bottom: 0.35rem; color: #15803D;">✓ <strong>Destination Content Management:</strong> Manage official media, video listings, attractions, and seasonal events state-wide.</div>
+                    <div style="margin-bottom: 0.35rem; color: #15803D;">✓ <strong>Destination Content Management:</strong> Manage verified media, video listings, attractions, and seasonal events state-wide.</div>
                     <div style="color: #B45309;">⚠️ <strong>Scope Boundary:</strong> State visibility does NOT grant authority outside ${(manager.state_id || 'Maharashtra').toUpperCase()}, nor does it grant user account activation/deactivation/deletion privileges.</div>
                 `;
             } else {
@@ -2961,7 +2961,7 @@
                     destination_name: destObj ? destObj.name : 'Lonavala',
                     organization: org || (role === 'stakeholder' ? `${name} Enterprise` : 'Tourism Authority'),
                     account_status: 'Active',
-                    registration_status: role === 'stakeholder' ? 'Pending Approval' : 'Approved Official',
+                    registration_status: role === 'stakeholder' ? 'Pending Approval' : 'Approved Manager',
                     created_at: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
                     last_active: 'Just now'
                 };
@@ -3004,7 +3004,7 @@
 
         // Authoritative identity strictly from authenticated session storage
         const currentName = sessionStorage.getItem('yatrasetu_name') || 'Platform Administrator';
-        const currentEmail = sessionStorage.getItem('yatrasetu_email') || 'admin.governance@yatrasetu.in';
+        const currentEmail = sessionStorage.getItem('yatrasetu_email') || 'admin.governance@gmail.com';
         const currentId = sessionStorage.getItem('yatrasetu_user_id') || 'dae678c4-967a-4b3d-8cf8-3e48503f41d4';
 
         const nameEl = document.getElementById('admin-profile-name');

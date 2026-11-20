@@ -452,7 +452,7 @@
             timings: '07:30 AM – 04:00 PM (Closed Feb–Mar for calving season)',
             duration: '2.5 – 3.5 Hours',
             bestTime: '08:00 AM – 10:30 AM for active Nilgiri Tahr sightings',
-            guidelines: 'Book official forest department bus entry online in advance. Plastic-free zone.',
+            guidelines: 'Book forest department safari bus entry online in advance. Plastic-free zone.',
             description: 'Kerala’s first national park, set across rolling high-altitude shola grasslands. It is home to the largest surviving population of the endangered Nilgiri Tahr (mountain goat) and blooms with the rare purple Neelakurinji flowers once every twelve years.'
         },
         'attr-char-chinar': {
@@ -861,7 +861,7 @@
                     loc: 'Munnar, Kerala',
                     time: '07:00 AM – 03:00 PM',
                     highlight: 'High-altitude shola grasslands, Nilgiri Tahr sightings, and Anamudi peak views.',
-                    desc: 'Board the official safari bus to the high-altitude plateau of Eravikulam. Observe the endangered Nilgiri Tahr grazing on steep grassy slopes beneath South India’s highest mountain.'
+                    desc: 'Board the national park safari bus to the high-altitude plateau of Eravikulam. Observe the endangered Nilgiri Tahr grazing on steep grassy slopes beneath South India’s highest mountain.'
                 },
                 {
                     day: 4,
@@ -1106,7 +1106,7 @@
 
             // 1. Authoritative Hero & Banner Images
             if (dest.hero_image_url) {
-                addImg(dest.hero_image_url, `${dest.name} Panoramic Landscape`, 'Primary Vista', `Official curated perspective highlighting the geography and monument of ${dest.name}.`);
+                addImg(dest.hero_image_url, `${dest.name} Panoramic Landscape`, 'Primary Vista', `Curated perspective highlighting the geography and monument of ${dest.name}.`);
             }
             if (dest.banner_image && dest.banner_image !== dest.hero_image_url) {
                 addImg(dest.banner_image, `${dest.name} Topographical View`, 'Landscape Panorama', `Topographical perspective highlighting the regional landscape of ${dest.name}.`);
@@ -1376,7 +1376,7 @@
             }
             if (titleEl) titleEl.textContent = ev.title;
             if (locEl) locEl.textContent = `📍 ${ev.location || ev.loc || 'Destination'}`;
-            if (descEl) descEl.textContent = ev.description || `An official tourism festivity organized under Destination Manager supervision. Bringing together certified eco-guides, local cultural performers, and visitors for sustainable heritage exploration and regional community celebration.`;
+            if (descEl) descEl.textContent = ev.description || `A curated tourism festivity organized under Destination Manager supervision. Bringing together certified eco-guides, local cultural performers, and visitors for sustainable heritage exploration and regional community celebration.`;
             if (timingEl) timingEl.textContent = ev.timing || '08:00 AM – 06:00 PM (Scheduled Program)';
             if (orgEl) orgEl.textContent = ev.organizer || 'State Department of Tourism & Village Committee';
             if (entryEl) entryEl.textContent = ev.entry || 'Open to All Verified Visitors (Free Entry)';
@@ -2213,7 +2213,7 @@
                 if (demoBtn) {
                     demoBtn.onclick = () => {
                         sessionStorage.setItem('yatrasetu_role', 'tourist');
-                        sessionStorage.setItem('yatrasetu_email', 'tourist.demo@yatrasetu.in');
+                        sessionStorage.setItem('yatrasetu_email', 'tourist.demo@gmail.com');
                         sessionStorage.setItem('yatrasetu_name', 'Ananya Sharma');
                         window.location.reload();
                     };
@@ -2846,7 +2846,7 @@
             const basecampEl = document.getElementById('adv-basecamp-name');
             const listEl = document.getElementById('adv-bulletins-list');
 
-            if (nameEl) nameEl.textContent = `${dest.name} — Official Advisories & Guidelines`;
+            if (nameEl) nameEl.textContent = `${dest.name} — Destination Advisories & Guidelines`;
             if (locEl) locEl.textContent = `📍 ${dest.location} • ${dest.state_name || 'India'}`;
             if (backLink) backLink.href = `destination-detail.html?id=${encodeURIComponent(dest.id)}`;
             if (sidebarDestBtn) sidebarDestBtn.href = `destination-detail.html?id=${encodeURIComponent(dest.id)}`;
@@ -2862,7 +2862,7 @@
                                 <span class="advisory-icon">${b.icon || '🚨'}</span>
                                 <div>
                                     <h4 class="advisory-title">${b.title}</h4>
-                                    <div class="advisory-date">Published: ${b.date} • ${b.category || 'Official Safety Directive'}</div>
+                                    <div class="advisory-date">Published: ${b.date} • ${b.category || 'Safety Advisory Directive'}</div>
                                 </div>
                             </div>
                             <p class="advisory-content">${b.content}</p>
@@ -3313,7 +3313,7 @@
          */
         validateCoordinates(coords) {
             if (!coords || typeof coords.lat !== 'number' || typeof coords.lng !== 'number') {
-                return { valid: false, reason: 'Official GPS survey pending Destination Manager verification' };
+                return { valid: false, reason: 'GPS survey pending Destination Manager verification' };
             }
             let lat = coords.lat;
             let lng = coords.lng;
@@ -3412,7 +3412,7 @@
                                 <p class="video-card-desc">${vid.description || ''}</p>
                                 <div class="video-card-meta">
                                     <span>${vid.publisher || 'Department of Tourism'}</span>
-                                    <span style="color:var(--tourist-forest); font-weight:700;">● Official Media</span>
+                                    <span style="color:var(--tourist-forest); font-weight:700;">● Verified Media</span>
                                 </div>
                             </div>
                         </div>
@@ -3429,7 +3429,7 @@
                     videosGrid.innerHTML = `
                         <div style="grid-column: 1 / -1; padding: 2.5rem; text-align: center; background: var(--tourist-bg-subtle); border-radius: 12px;">
                             <span style="font-size: 2.5rem; display: block; margin-bottom: 0.75rem;">🎬</span>
-                            <h4 style="font-size: 1.1rem; color: var(--tourist-text-heading); margin: 0 0 0.5rem 0;">No Official Videos Published Yet</h4>
+                            <h4 style="font-size: 1.1rem; color: var(--tourist-text-heading); margin: 0 0 0.5rem 0;">No Verified Videos Published Yet</h4>
                             <p style="font-size: 0.88rem; color: var(--tourist-text-muted); max-width: 480px; margin: 0 auto;">
                                 Short 30-second audiovisual orientation guides for this destination are currently under production or pending Destination Manager review.
                             </p>
@@ -3865,7 +3865,7 @@
                         <div style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:1.5rem; background:var(--tourist-bg-subtle); color:var(--tourist-text-muted);">
                             <span style="font-size:2rem; margin-bottom:0.5rem;">🗺️</span>
                             <strong style="color:var(--tourist-text-heading); font-size:0.9rem;">Map Location Pending Survey</strong>
-                            <p style="font-size:0.8rem; margin:0.35rem 0 0 0;">Official GPS coordinates are being surveyed by the Destination Management Team.</p>
+                            <p style="font-size:0.8rem; margin:0.35rem 0 0 0;">GPS coordinates are being verified by the Destination Management Team.</p>
                         </div>
                     `;
                 }
@@ -3969,7 +3969,7 @@
                             <span style="font-size: 2.5rem; display: block; margin-bottom: 0.75rem;">🤝</span>
                             <h4 style="font-size: 1.1rem; color: var(--tourist-text-heading); margin: 0 0 0.5rem 0;">No Active Local Services Listed</h4>
                             <p style="font-size: 0.88rem; color: var(--tourist-text-muted); max-width: 480px; margin: 0 auto;">
-                                Local tourism operators and guides in this destination are currently undergoing official registration and verification by the regional Destination Manager.
+                                Local tourism operators and guides in this destination are currently undergoing platform verification and community onboarding by the regional Destination Manager.
                             </p>
                         </div>
                     `;
@@ -4053,7 +4053,7 @@
                                 </div>
                                 <h4 class="event-title">${ev.title}</h4>
                                 <div class="event-loc">📍 ${ev.location || ev.loc || dest.name}</div>
-                                <p class="event-desc">${ev.description || 'Official scheduled regional festival organized under local tourism governance.'}</p>
+                                <p class="event-desc">${ev.description || 'Scheduled regional festival organized under local tourism coordination.'}</p>
                                 <div class="event-meta-row">
                                     <span>🕒 ${ev.timings || 'Scheduled Program'}</span>
                                     <button type="button" class="tourist-btn-primary btn-view-event-detail" data-event-idx="${i}" style="font-size:0.75rem; padding:0.35rem 0.85rem;">
