@@ -62,7 +62,7 @@ async function initStakeholderContext() {
                 profile.contactPerson = apiRes.full_name;
                 profile.email = apiRes.email;
                 profile.phone = apiRes.phone_number || '';
-                profile.account_status = apiRes.is_active ? 'Active' : 'Deactivated';
+                profile.account_status = (apiRes.is_active === false) ? 'Deactivated' : 'Active';
 
                 if (apiRes.service_id || apiRes.business_name) {
                     profile.serviceId = apiRes.service_id;

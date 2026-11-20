@@ -22,6 +22,7 @@ class StakeholderProfileResponse(BaseModel):
     full_name: str = Field(..., description="Stakeholder full name")
     role: str = Field("stakeholder", description="Platform role ('stakeholder')")
     phone_number: Optional[str] = Field(None, description="Contact phone number")
+    is_active: bool = Field(True, description="Account active status")
     
     # Service details (None if not yet registered)
     service_id: Optional[uuid.UUID] = Field(None, description="Registered service record ID")
