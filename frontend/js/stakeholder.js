@@ -790,6 +790,38 @@ function initStakeholderProfilePage() {
                     alert('Profile updated successfully!');
                 }
 
+                // Synchronize locally for immediate manager visibility
+                try {
+                    const rawSt = localStorage.getItem('yatrasetu_manager_stakeholders') || sessionStorage.getItem('yatrasetu_manager_stakeholders');
+                    let shList = rawSt ? JSON.parse(rawSt) : [];
+                    if (!Array.isArray(shList)) shList = [];
+                    const destObj = (catalogData.destinations || []).find(d => d.id === chosenDestId);
+                    const destName = destObj ? destObj.name : (chosenDestId || 'Ajanta Caves');
+                    const shItem = {
+                        id: profile.id || `sh-${Date.now()}`,
+                        state_id: stateId || 'maharashtra',
+                        destination_id: chosenDestId || 'ajanta-caves',
+                        destination: destName,
+                        name: nameVal,
+                        category: profile.category || 'Local Services',
+                        type: profile.type || 'visitor-facing',
+                        contact: profile.phone || '',
+                        email: profile.email || '',
+                        contact_person: profile.contactPerson || profile.userName || '',
+                        address: profile.address || '',
+                        hours: profile.hours || 'Standard Hours',
+                        price_range: profile.priceRange || '',
+                        description: profile.description || 'Verified local tourism service listing.',
+                        status: isApproved ? 'Approved' : 'Pending Approval',
+                        registered_date: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                    };
+                    const existingIdx = shList.findIndex(s => s.id === shItem.id || (s.email && s.email.toLowerCase() === shItem.email.toLowerCase()));
+                    if (existingIdx >= 0) shList[existingIdx] = { ...shList[existingIdx], ...shItem };
+                    else shList.unshift(shItem);
+                    localStorage.setItem('yatrasetu_manager_stakeholders', JSON.stringify(shList));
+                    sessionStorage.setItem('yatrasetu_manager_stakeholders', JSON.stringify(shList));
+                } catch (e) {}
+
                 await initStakeholderContext();
                 renderLivePreview(radioVisitor ? radioVisitor.checked : true);
                 return;

@@ -2239,6 +2239,19 @@ function openStakeholderDetailModal(shId) {
             // Persist changes in prototype store & sync
             window.YatraSetuManagerStore.saveStakeholders(window.YatraSetuManagerData.stakeholders);
 
+            // Live API update if authenticated
+            if (window.YatraSetuApi && typeof window.YatraSetuApi.updateManagedStakeholderStatus === 'function') {
+                try {
+                    const token = window.YatraSetuApi.getAccessToken ? window.YatraSetuApi.getAccessToken() : null;
+                    if (token && sh.id && sh.id.length > 20) {
+                        const targetBackendStatus = newStatus === 'Approved' ? 'verified' : (newStatus === 'Rejected' ? 'rejected' : 'pending');
+                        await window.YatraSetuApi.updateManagedStakeholderStatus(sh.id, targetBackendStatus, sh.manager_note);
+                    }
+                } catch (apiErr) {
+                    console.warn('[updateStatus] Backend stakeholder status update note:', apiErr);
+                }
+            }
+
             // Audit Trail Logging
             if (window.YatraSetuAdminStore && typeof window.YatraSetuAdminStore.logAuditEvent === 'function') {
                 window.YatraSetuAdminStore.logAuditEvent({

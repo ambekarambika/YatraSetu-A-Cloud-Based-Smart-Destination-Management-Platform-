@@ -469,7 +469,52 @@ window.YatraSetuManagerStore = {
     async getStakeholders(stateId, destinationId = 'all') {
         if (!window.YatraSetuManagerData) return [];
 
-        // Restore from storage if present (sessionStorage / localStorage)
+        // 1. Live API fetch if authenticated as Manager
+        if (window.YatraSetuApi && typeof window.YatraSetuApi.getManagedStakeholders === 'function') {
+            try {
+                const token = window.YatraSetuApi.getAccessToken ? window.YatraSetuApi.getAccessToken() : null;
+                if (token) {
+                    const params = {};
+                    if (stateId && stateId !== 'all') params.state_id = stateId;
+                    if (destinationId && destinationId !== 'all') params.destination_id = destinationId;
+                    const live = await window.YatraSetuApi.getManagedStakeholders(params);
+                    const items = Array.isArray(live) ? live : (live && Array.isArray(live.items) ? live.items : []);
+                    if (items.length > 0) {
+                        const baseMap = new Map((window.YatraSetuManagerData.stakeholders || []).map(s => [s.id, s]));
+                        items.forEach(item => {
+                            const cInfo = item.contact_info || {};
+                            const mapped = {
+                                id: String(item.id),
+                                state_id: item.state_id,
+                                destination_id: item.destination_id,
+                                destination: item.destination_name || item.destination_id,
+                                name: item.business_name,
+                                category: item.category || 'Local Services',
+                                type: 'visitor-facing',
+                                contact: cInfo.phone || item.phone || '',
+                                email: cInfo.email || item.applicant_email || '',
+                                contact_person: cInfo.contact_person || item.applicant_name || 'Stakeholder Applicant',
+                                address: cInfo.address || 'Local Destination Hub',
+                                hours: cInfo.operating_hours || 'Standard Hours',
+                                price_range: cInfo.price_range || '',
+                                description: cInfo.description || `Registered ${item.category || 'service'} in ${item.destination_name || item.destination_id}.`,
+                                status: item.verification_status === 'verified' ? 'Approved' : (item.verification_status === 'pending' ? 'Pending Approval' : (item.verification_status === 'rejected' ? 'Rejected' : 'Pending Approval')),
+                                registered_date: item.created_at ? new Date(item.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Recently',
+                                reviewed_by: '',
+                                reviewed_date: '',
+                                manager_note: ''
+                            };
+                            baseMap.set(mapped.id, mapped);
+                        });
+                        window.YatraSetuManagerData.stakeholders = Array.from(baseMap.values());
+                    }
+                }
+            } catch (apiErr) {
+                console.warn('[YatraSetuManagerStore] Live stakeholders sync note:', apiErr);
+            }
+        }
+
+        // 2. Restore from storage if present (sessionStorage / localStorage)
         try {
             const saved = sessionStorage.getItem('yatrasetu_manager_stakeholders') || localStorage.getItem('yatrasetu_manager_stakeholders');
             if (saved) {
@@ -533,7 +578,10 @@ window.YatraSetuManagerStore = {
             list = list.filter(s => s.state_id === stateId);
         }
         if (destinationId && destinationId !== 'all') {
-            list = list.filter(s => s.destination_id === destinationId || (typeof s.destination_id === 'string' && s.destination_id.includes(destinationId)) || (!s.destination_id && s.status === 'Pending Approval'));
+            const aliases = [destinationId];
+            if (destinationId === 'rajgad-fort' || destinationId === 'raigad-fort') aliases.push('rajgad-fort', 'raigad-fort');
+            if (destinationId === 'amber-fort' || destinationId === 'amer-fort') aliases.push('amber-fort', 'amer-fort');
+            list = list.filter(s => aliases.includes(s.destination_id) || (typeof s.destination_id === 'string' && aliases.some(a => s.destination_id.includes(a))) || (!s.destination_id && s.status === 'Pending Approval'));
         }
         return list;
     },

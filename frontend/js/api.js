@@ -668,6 +668,28 @@
             });
         }
 
+        /**
+         * Fetch registered stakeholders within manager jurisdiction (GET /api/v1/manager/stakeholders)
+         * @param {Object} params - { destination_id, state_id, status, search, limit, offset }
+         */
+        async getManagedStakeholders(params = {}) {
+            const qs = this._buildQuery(params);
+            return await this.request(`/manager/stakeholders${qs}`, { method: 'GET' });
+        }
+
+        /**
+         * Update stakeholder verification status by manager (PUT /api/v1/manager/stakeholders/{service_id}/status)
+         * @param {string} serviceId - UUID string
+         * @param {string} status - 'verified', 'rejected', 'pending'
+         * @param {string} [reason]
+         */
+        async updateManagedStakeholderStatus(serviceId, status, reason = '') {
+            return await this.request(`/manager/stakeholders/${encodeURIComponent(serviceId)}/status`, {
+                method: 'PUT',
+                body: JSON.stringify({ status, reason })
+            });
+        }
+
         // =====================================================================
         // TOURISM STAKEHOLDER WORKSPACE API METHODS (PHASE 7)
         // =====================================================================

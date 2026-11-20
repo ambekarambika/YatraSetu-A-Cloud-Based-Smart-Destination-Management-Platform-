@@ -22,6 +22,7 @@ from app.core.security import SecurityContext
 from app.core.jurisdiction import JurisdictionAuthorizer
 from app.models.identity import User, ManagerAssignment
 from app.models.destination import Destination, State, Attraction, Event, DestinationVideo
+from app.models.stakeholder import StakeholderService
 from app.schemas.manager import (
     ManagerContextResponse,
     AttractionCreate,
@@ -32,7 +33,9 @@ from app.schemas.manager import (
     DestinationUpdate,
     DestinationVideoCreate,
     DestinationVideoUpdate,
+    ManagerStakeholderItem,
 )
+from app.schemas.admin import RegistrationStatusUpdate
 from app.schemas.catalogue import (
     DestinationSummaryResponse,
     DestinationDetailResponse,
@@ -1050,3 +1053,124 @@ def delete_managed_video(
     db.delete(video)
     db.commit()
     return MessageResponse(message=f"Video '{title}' deleted successfully.")
+
+
+# -----------------------------------------------------------------------------
+# 6. Scoped Stakeholder Management Endpoints
+# -----------------------------------------------------------------------------
+
+@router.get(
+    "/stakeholders",
+    response_model=List[ManagerStakeholderItem],
+    status_code=status.HTTP_200_OK,
+    summary="List Managed Destination Stakeholders",
+    description="Returns registered commercial stakeholders within the manager's assigned jurisdiction.",
+)
+def list_managed_stakeholders(
+    destination_id: Optional[str] = Query(None, description="Filter by destination ID"),
+    state_id: Optional[str] = Query(None, description="Filter by state ID"),
+    status: Optional[str] = Query(None, description="Filter ('pending', 'verified', 'rejected', 'suspended')"),
+    search: Optional[str] = Query(None, description="Search matching business name or contact"),
+    limit: int = Query(100, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    context: SecurityContext = Depends(require_manager),
+    db: Session = Depends(get_db),
+) -> List[ManagerStakeholderItem]:
+    """
+    Returns stakeholders scoped strictly to the manager's assigned territory.
+    """
+    query = db.query(StakeholderService)
+
+    # Jurisdiction scoping
+    if context.destination_id is not None:
+        dest_aliases = resolve_destination_ids(context.destination_id)
+        query = query.filter(StakeholderService.destination_id.in_(dest_aliases))
+    elif context.state_id is not None:
+        query = query.filter(StakeholderService.state_id == context.state_id)
+        if destination_id and destination_id.lower() != "all":
+            dest_aliases = resolve_destination_ids(destination_id)
+            query = query.filter(StakeholderService.destination_id.in_(dest_aliases))
+    else:
+        if state_id and state_id.lower() != "all":
+            query = query.filter(StakeholderService.state_id == state_id.strip().lower())
+        if destination_id and destination_id.lower() != "all":
+            dest_aliases = resolve_destination_ids(destination_id)
+            query = query.filter(StakeholderService.destination_id.in_(dest_aliases))
+
+    if status and status.lower() != "all":
+        query = query.filter(StakeholderService.verification_status == status.strip().lower())
+
+    if search:
+        s_term = f"%{search.strip()}%"
+        query = query.filter(StakeholderService.business_name.ilike(s_term))
+
+    services = query.order_by(StakeholderService.created_at.desc()).offset(offset).limit(limit).all()
+
+    # Preload lookups
+    user_ids = [s.user_id for s in services]
+    users_dict = {u.id: u for u in db.query(User).filter(User.id.in_(user_ids)).all()} if user_ids else {}
+    dest_dict = {d.id: d.name for d in db.query(Destination).all()}
+    state_dict = {s.id: s.name for s in db.query(State).all()}
+
+    items = []
+    for s in services:
+        u = users_dict.get(s.user_id)
+        c_info = s.contact_info or {}
+        items.append(
+            ManagerStakeholderItem(
+                id=s.id,
+                user_id=s.user_id,
+                business_name=s.business_name,
+                category=s.category,
+                license_number=s.license_number,
+                destination_id=s.destination_id,
+                destination_name=dest_dict.get(s.destination_id, s.destination_id),
+                state_id=s.state_id,
+                state_name=state_dict.get(s.state_id, s.state_id),
+                verification_status=s.verification_status,
+                applicant_name=u.full_name if u else c_info.get("contact_person"),
+                applicant_email=u.email if u else c_info.get("email"),
+                phone=u.phone_number if (u and u.phone_number) else c_info.get("phone"),
+                contact_info=c_info,
+                created_at=s.created_at,
+                updated_at=s.updated_at,
+            )
+        )
+    return items
+
+
+@router.put(
+    "/stakeholders/{service_id}/status",
+    status_code=status.HTTP_200_OK,
+    summary="Update Stakeholder Verification Status",
+    description="Updates verification status ('verified', 'rejected', 'pending') for a stakeholder in manager jurisdiction.",
+)
+def update_managed_stakeholder_status(
+    service_id: uuid.UUID,
+    payload: RegistrationStatusUpdate,
+    context: SecurityContext = Depends(require_manager),
+    db: Session = Depends(get_db),
+):
+    """
+    Allows Destination and State Managers to approve or reject stakeholder registrations in their jurisdiction.
+    """
+    service = db.query(StakeholderService).filter(StakeholderService.id == service_id).first()
+    if not service:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Stakeholder service record not found.")
+
+    if not JurisdictionAuthorizer.can_manage_destination(
+        db, context, service.destination_id, target_state_id=service.state_id
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: Stakeholder operates outside your assigned jurisdiction.",
+        )
+
+    service.verification_status = payload.status
+    db.commit()
+    db.refresh(service)
+    return {
+        "message": f"Stakeholder status updated to '{payload.status}' successfully.",
+        "service_id": str(service.id),
+        "status": service.verification_status,
+    }

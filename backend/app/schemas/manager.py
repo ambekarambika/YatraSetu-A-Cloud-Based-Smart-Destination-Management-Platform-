@@ -155,3 +155,29 @@ class DestinationVideoUpdate(BaseModel):
     thumbnail_url: Optional[str] = Field(None, max_length=500)
     status: Optional[str] = Field(None, max_length=32)
     destination_id: Optional[str] = Field(None, min_length=1, max_length=64)
+
+
+# -----------------------------------------------------------------------------
+# Stakeholder Service Management Schemas
+# -----------------------------------------------------------------------------
+
+class ManagerStakeholderItem(BaseModel):
+    """Registered commercial tourism stakeholder within manager jurisdiction."""
+    id: uuid.UUID = Field(..., description="Stakeholder service record UUID")
+    user_id: uuid.UUID = Field(..., description="Account user UUID")
+    business_name: str = Field(..., description="Commercial business / provider name")
+    category: str = Field(..., description="Service category")
+    license_number: Optional[str] = Field(None, description="Trade license or registration number")
+    destination_id: str = Field(..., description="Operating destination ID")
+    destination_name: Optional[str] = Field(None, description="Operating destination label")
+    state_id: str = Field(..., description="Operating state ID")
+    state_name: Optional[str] = Field(None, description="Operating state label")
+    verification_status: str = Field(..., description="'pending', 'verified', 'rejected', 'suspended'")
+    applicant_name: Optional[str] = Field(None, description="Applicant contact person name")
+    applicant_email: Optional[str] = Field(None, description="Applicant login email")
+    phone: Optional[str] = Field(None, description="Contact phone")
+    contact_info: Dict[str, Any] = Field(default_factory=dict, description="Structured contact details")
+    created_at: datetime = Field(..., description="Registration timestamp")
+    updated_at: Optional[datetime] = Field(None, description="Last update timestamp")
+
+    model_config = {"from_attributes": True}
