@@ -1779,10 +1779,9 @@
                                     this.initDestinationDetailPage();
                                 } else if (path.includes('experiences.html')) {
                                     this.initExperiencesPage();
-                                } else if (path.includes('dashboard.html') || path.endsWith('/tourist/') || path.endsWith('/tourist/index.html')) {
-                                    this.renderDashboardFeaturedDestinations();
                                 }
-                                return;
+                                this.renderDashboardFeaturedDestinations();
+                                // Stale-While-Revalidate: do NOT return; proceed to fetch live API data to refresh!
                             }
                         }
                     } catch (cacheErr) {
@@ -1953,6 +1952,8 @@
                     if (Array.isArray(parsed)) {
                         parsed.forEach(c => {
                             if (!c || !c.id) return;
+                            c.is_custom = true;
+                            c.rank = 0;
                             const idx = combined.findIndex(d => (d.id || '').toLowerCase() === (c.id || '').toLowerCase());
                             if (idx >= 0) combined[idx] = { ...combined[idx], ...c };
                             else combined.unshift(c); // Newly added custom destination appears prominently
@@ -1966,8 +1967,13 @@
                 customRawDestinations.forEach(apiDest => {
                     if (!apiDest || !apiDest.id) return;
                     const idx = combined.findIndex(d => (d.id || '').toLowerCase() === (apiDest.id || '').toLowerCase());
-                    if (idx >= 0) combined[idx] = { ...combined[idx], ...apiDest };
-                    else combined.unshift(apiDest);
+                    if (idx >= 0) {
+                        combined[idx] = { ...combined[idx], ...apiDest };
+                    } else {
+                        apiDest.is_custom = true;
+                        apiDest.rank = 0;
+                        combined.unshift(apiDest);
+                    }
                 });
             }
 
@@ -2017,6 +2023,7 @@
                 const baseRating = d.rank ? (4.5 + ((d.rank % 5) * 0.1)).toFixed(1) : '4.8';
                 const rating = d.rating || editorial.rating || baseRating;
                 const reviewsCount = editorial.reviews_count || (d.rank ? `${(1.2 - (d.rank * 0.1)).toFixed(1)}k` : '1.2k');
+                const isCustom = Boolean(d.is_custom || d.rank === 0 || (d.id && d.id.startsWith('dest-')) || d.id === 'ausa-fort' || d.id === 'new');
 
                 return {
                     id: d.id,
@@ -2024,7 +2031,8 @@
                     state_id: d.state_id,
                     state_name: stateObj.name,
                     category: d.category,
-                    rank: d.rank || 99,
+                    rank: (d.rank !== undefined ? d.rank : (isCustom ? 0 : 99)),
+                    is_custom: isCustom,
                     img: this.resolveDestinationImage(d),
                     hero_image_url: d.hero_image_url,
                     banner_image: d.banner_image,
@@ -2502,7 +2510,11 @@
             const grid = document.getElementById('dashboard-destinations-grid');
             if (!grid) return;
 
-            const destsToShow = (this.destinations || []).slice(0, 8);
+            // Prioritize custom and newly added destinations at the very front
+            const customList = (this.destinations || []).filter(d => d.is_custom || d.rank === 0 || (d.id && d.id.startsWith('dest-')) || d.id === 'ausa-fort' || d.id === 'new');
+            const standardList = (this.destinations || []).filter(d => !customList.includes(d));
+            const destsToShow = [...customList, ...standardList].slice(0, 8);
+
             if (!destsToShow.length) {
                 grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:2rem; color:var(--tourist-text-muted);">No destinations currently registered.</div>';
                 return;
@@ -2510,10 +2522,12 @@
 
             grid.innerHTML = destsToShow.map(dest => {
                 const isFav = this.favorites && this.favorites.has(dest.id);
+                const isCustom = dest.is_custom || dest.rank === 0 || (dest.id && dest.id.startsWith('dest-')) || dest.id === 'ausa-fort' || dest.id === 'new';
                 return `
                     <div class="dest-card" data-dest-id="${dest.id}">
                         <div class="dest-card-media">
                             <img src="${dest.img}" alt="${dest.name}" class="dest-card-media-img" loading="lazy" onerror="this.onerror=null; this.src='../assets/images/hero-india.jpg';">
+                            ${isCustom ? '<span style="position:absolute; top:12px; left:12px; background:#0F766E; color:#FFFFFF; font-size:0.72rem; font-weight:800; padding:0.25rem 0.65rem; border-radius:999px; box-shadow:0 2px 6px rgba(0,0,0,0.25); z-index:4;">✨ Newly Added</span>' : ''}
                             <button type="button" class="dest-card-fav-btn ${isFav ? 'favorited' : ''}" 
                                     data-dest-id="${dest.id}" 
                                     title="${isFav ? 'Remove from Saved' : 'Save to Favorites'}"
@@ -2527,13 +2541,13 @@
                             <div class="dest-card-title-row">
                                 <h3 class="dest-card-name">${dest.name}</h3>
                             </div>
-                            <div class="dest-card-loc">📍 ${dest.location || dest.state_name || ''}</div>
+                            <div class="dest-card-loc">📍 ${dest.location || dest.state_name || 'Maharashtra'}</div>
                             <div class="dest-card-tags">
                                 ${(dest.tags || []).slice(0, 3).map(tag => `<span class="dest-card-tag">${tag}</span>`).join('')}
                             </div>
-                            <div class="dest-card-footer">
+                            <div class="dest-card-footer" style="display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:0.75rem; border-top:1px solid var(--tourist-border);">
                                 <div class="dest-card-rating">
-                                    <span>★ ${dest.rating || '4.8'}</span>
+                                    <span style="color:#EAB308;">★</span> <span>${dest.rating || '4.8'}</span>
                                     <span class="dest-card-reviews">(${dest.reviewsCount || '1.2k'})</span>
                                 </div>
                                 <a href="destination-detail.html?id=${dest.id}" class="dest-card-link">
