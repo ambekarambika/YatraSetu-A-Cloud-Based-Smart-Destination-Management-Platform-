@@ -2,38 +2,40 @@
 
 ## 1. Architecture Status
 
-This document distinguishes implemented frontend architecture from planned backend/database architecture.
+This document details the implemented frontend and backend architecture of YatraSetu, distinguishing verified database and API integrations from client-side simulation layers and planned post-MVP enhancements.
 
-### Confirmed
-- HTML5
-- CSS3
-- Vanilla JavaScript
-- FastAPI as planned backend
-- PostgreSQL as planned database
-- REST API approach
-- Git/GitHub
-- Render deployment target
-- Selected GCP services/APIs where genuinely useful
-- JWT + RBAC as planned security model
+### Confirmed Core Stack
+- HTML5, CSS3, Vanilla JavaScript (Frontend)
+- Python 3.13 & FastAPI (REST API Backend)
+- PostgreSQL (Relational Database)
+- Git/GitHub (Version Control & CI/CD)
+- Render (Backend Web Service) & Vercel (Frontend Static Hosting)
+- Argon2id & Cryptographic JWT + Server-Side RBAC (Security Model)
 
-### Implemented
-- Public frontend pages
-- Shared dashboard UI system
-- Destination Manager frontend workspace
-- Eight-state manager theme engine
-- Client-side UI interactions and page navigation
+### Implemented Components
+- Public frontend pages (Landing, Login, Registration)
+- Shared dashboard UI system across all 4 roles
+- Role-specific frontend workspaces (Tourist, Destination Manager, Tourism Stakeholder, Administrator)
+- Eight-state regional theme engine
+- Client-side UI interactions, modals, and responsive workflows
+- FastAPI backend application (`backend/app/main.py`, `backend/app/api/v1/api.py`)
+- PostgreSQL database schemas with Alembic migrations (`001` through `008`)
+- Row Level Security (RLS) policies for tenant, role, and storage isolation
+- Argon2id password hashing and cryptographic JWT authentication with token rotation
+- Role-Based Access Control (RBAC) and hierarchical manager jurisdiction enforcement
+- REST API endpoints for Auth, Tourist, Manager, Stakeholder, Administrator, Catalogue, and Health
+- Persistent destination, attraction, event, feedback, and visitor statistics data models
+- Destination video playback and metadata management (YouTube privacy-enhanced embeds and prototype drafts)
+- Production deployment on Render (FastAPI + Neon PostgreSQL) and Vercel (Frontend)
 
-### Not Yet Implemented
-- FastAPI application
-- PostgreSQL schema
-- Real JWT authentication
-- Real RBAC enforcement
-- Real REST API integration
-- Persistent destination/attraction/event data
-- Real analytics calculations
-- Real report generation from database data
-- Destination-information video management & playback (planned: hosted video URLs, ~30-sec duration, minimum 80 videos total across 8 destinations)
-- Production cloud/backend integration
+### Client-Side Logic & Simulation Layers
+- Report generation (`manager/reports.html`): Operates with client-side simulated preview and export engines.
+- Decision support metrics (`manager/decision-support.html`): Utilizes client-side scoring algorithms and recommendations based on loaded catalogue data.
+
+### Planned / Post-MVP Enhancements
+- Automated multi-region database replication and edge caching optimization
+- Real-time IoT sensor telemetry integrations (explicitly out-of-scope for core MVP)
+- Advanced offline PWA caching service worker
 
 
 ## 2. High-Level Architecture
@@ -88,15 +90,27 @@ frontend/
 ├── app-preview.html
 ├── css/
 │   ├── style.css
-│   └── dashboard.css
+│   ├── dashboard.css
+│   ├── auth.css
+│   ├── admin.css
+│   ├── stakeholder.css
+│   ├── tourist.css
+│   └── tourist-pages.css
 ├── js/
-│   ├── main.js
+│   ├── api.js
 │   ├── auth.js
+│   ├── main.js
 │   ├── dashboard.js
-│   ├── manager-data.js
+│   ├── admin.js
+│   ├── stakeholder.js
+│   ├── stakeholder-data.js
+│   ├── tourist.js
+│   ├── manager.js
 │   ├── manager-core.js
-│   ├── manager-views.js
-│   └── manager.js
+│   ├── manager-data.js
+│   └── manager-views.js
+├── admin/
+│   └── dashboard.html
 ├── manager/
 │   ├── dashboard.html
 │   ├── destinations.html
@@ -107,10 +121,23 @@ frontend/
 │   ├── feedback.html
 │   ├── analytics.html
 │   ├── reports.html
+│   ├── profile.html
 │   └── decision-support.html
-├── stakeholder/       # planned
-├── tourist/           # planned
-└── admin/             # planned
+├── stakeholder/
+│   ├── dashboard.html
+│   ├── connections-reviews.html
+│   ├── destination-updates.html
+│   ├── media-listings.html
+│   └── profile.html
+└── tourist/
+    ├── dashboard.html
+    ├── destinations.html
+    ├── destination-detail.html
+    ├── destination-advisories.html
+    ├── experiences.html
+    ├── plan-trip.html
+    ├── stories.html
+    └── travel-guidance.html
 ```
 
 The frontend deliberately does not use React, Angular, Bootstrap, Tailwind, or another frontend framework.
@@ -130,12 +157,13 @@ The frontend deliberately does not use React, Angular, Bootstrap, Tailwind, or a
 
 `dashboard.js` provides shared shell/navigation behavior.
 
-`manager.js` currently provides:
+`manager.js`, `manager-core.js`, and `manager-views.js` provide:
 - eight-state destination context switching,
 - state-specific visual/content changes,
 - manager modals,
 - filters/interactions,
-- report-preview simulation.
+- client-side report-preview simulation (`reports.html`),
+- client-side decision-support scoring logic (`decision-support.html`).
 
 ## 5. Current Manager Theme Engine
 
@@ -151,88 +179,95 @@ The manager workspace supports:
 
 State selection dynamically changes relevant context such as accent color, hero photography, title/tagline, weather/location information, destination examples, and event feeds.
 
-## 6. Backend Architecture — Planned
+## 6. Backend Architecture — Implemented Endpoints
 
-FastAPI will expose REST endpoints.
-
-Expected groups:
+FastAPI exposes modular REST endpoints partitioned under `/api/v1`:
 
 ```text
-/api/auth
-/api/users
-/api/destinations
-/api/attractions
-/api/events
-/api/stakeholders
-/api/feedback
-/api/trips
-/api/analytics
-/api/reports
+/api/v1/health       - System liveness and PostgreSQL database connectivity health probes
+/api/v1/auth         - Registration, login, token refresh, logout, session profile (/me)
+/api/v1/catalogue    - Public read-only tourism catalogue (states, destinations, attractions, stories)
+/api/v1/manager      - Destination Manager scoped operations (destination updates, video moderation)
+/api/v1/stakeholder  - Stakeholder services, social posts, media uploads, reviews, community messages
+/api/v1/tourist      - Tourist itineraries (trip plans), bookmarked favorites, reviews & feedback
+/api/v1/admin        - Platform governance, user account administration, audit logs, metrics
 ```
 
-Exact routes and schemas should be finalized during backend implementation rather than invented prematurely.
+*Note on Simulated & Client-Side Functionality*:
+While core identity, catalogue, scoped manager actions, stakeholder operations, tourist itineraries, and platform governance are backed by PostgreSQL and FastAPI, analytics report exports and real-time decision-support scoring currently execute via client-side JavaScript logic and simulated computation engines in the frontend workspaces.
 
-## 7. Database — Planned
+## 7. Database Architecture — Implemented
 
-PostgreSQL is the planned relational database.
+PostgreSQL serves as the relational database managed via SQLAlchemy 2.0 ORM and Alembic schema migrations (revisions 001 through 008).
 
-Expected core entities:
-- users
-- roles
-- destinations
-- attractions
-- events
-- stakeholders
-- feedback
-- trip_plans
-- visitor_statistics
+Implemented core models (`backend/app/models/`):
+- **Identity & Access**: `users`, `roles`, `user_refresh_tokens`, `manager_assignments`
+- **Destination Ecosystem**: `states`, `destinations`, `attractions`, `experiences`, `events`, `curated_circuits`, `curated_circuit_items`, `destination_videos`, `destination_advisories`, `travel_stories`
+- **Stakeholder Ecosystem**: `stakeholder_services`, `stakeholder_media`, `stakeholder_posts`, `stakeholder_messages`, `stakeholder_reviews`
+- **Tourist Functionality**: `trip_plans`, `trip_plan_items`, `user_favorites`, `destination_reviews`
+- **Governance & Integrity**: `visitor_statistics`, `audit_logs`, `storage_object_registries`, `media_deletion_outbox`
+- **Row-Level Security (RLS)**: Enforced via PostgreSQL policies for multi-tenant manager destination scoping (`008_mgr_dest_video_rls`).
 
-Supporting tables may be introduced only when justified by actual requirements.
-
-## 8. Authentication Flow — Planned
+## 8. Authentication Flow — Implemented
 
 ```text
-Login Form
+Client (Login Form)
+   |  Submits credentials (email, password)
+   v
+POST /api/v1/auth/login
    |
    v
-POST /api/auth/login
+FastAPI / SQLAlchemy queries User by normalized email
    |
    v
-FastAPI validates credentials
+Password verification via Argon2id (app.core.hashing)
    |
    v
-Password hash verification
+TokenService generates JWT Access Token (HS256) & Refresh Token
+   |  Persists refresh token record in user_refresh_tokens
+   v
+Returns TokenResponse (access_token, refresh_token, token_type, expires_in)
    |
    v
-JWT generated
-   |
-   v
-Frontend uses token for protected requests
+Frontend stores session state and attaches Bearer token to API requests
 ```
 
-## 9. Authorization Flow — Planned
+## 9. Authorization Flow — Implemented
 
 ```text
-Request
-  -> JWT validation
-  -> identify user + role
-  -> RBAC check
-  -> business logic
-  -> database operation
-  -> response
+Incoming API Request (Bearer <JWT>)
+   |
+   v
+JWT Validation & Decode (app.core.tokens / app.core.auth)
+   |  Verifies signature, expiration, and extracts subject (user ID)
+   v
+Identify User & Active Role (get_current_active_user)
+   |
+   v
+RBAC Permission Check (e.g., require_admin, require_manager, require_stakeholder)
+   |
+   v
+Jurisdiction / Scope Check (app.core.jurisdiction.JurisdictionAuthorizer)
+   |  Verifies destination/state assignment for destination managers
+   v
+PostgreSQL Session Context (set_config for RLS enforcement where applicable)
+   |
+   v
+Business Logic & Database Execution
+   |
+   v
+Standardized JSON Response / Audit Log entry (for sensitive operations)
 ```
 
 ## 10. Deployment
 
-Current target:
-- frontend web deployment,
-- FastAPI backend on Render,
-- PostgreSQL database,
-- selected GCP service/API where required.
+Current architecture deployment targets:
+- Frontend: Static web deployment hosted on Vercel (`frontend/` tree).
+- Backend: FastAPI ASGI application running on Render web services.
+- Database: Managed PostgreSQL database instance (Neon Serverless PostgreSQL).
+- Version Control: GitHub repository (`origin/main`) serving as deployment trigger.
 
-GitHub is the version-control/deployment source.
-
-Do not state that production backend/database integration is complete until verified in the repository.
+Integration with the production backend is active for core API health, catalogue, authentication, and workspace endpoints, while client-side fallback/simulated engines remain available for offline and viva demonstration environments.
 
 ## 11. Security Boundary
 

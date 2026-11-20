@@ -18,7 +18,7 @@
 
 ### 3. 🤝 Tourism Stakeholders
 * Share and update tourism service & local facility information.
-* Coordinate directly with destination management authorities.
+* Coordinate directly with local destination managers.
 
 ### 4. ⚙️ Administrators
 * Role-Based Access Control (RBAC) & User Management.
@@ -31,7 +31,7 @@
 * **Frontend**: HTML5, CSS3, Vanilla JavaScript
 * **Backend**: Python, FastAPI, REST APIs
 * **Database**: PostgreSQL
-* **Cloud & DevOps**: Render, Google Cloud Platform, Git/GitHub
+* **Cloud & DevOps**: Render, Vercel, Git/GitHub
 
 ---
 
@@ -40,20 +40,30 @@
 ```text
 YatraSetu/
 ├── AGENTS.md
+├── README.md
 ├── docs/
-│   └── YatraSetu_Project_Context.md
+│   ├── PRD.md
+│   ├── ARCHITECTURE.md
+│   ├── DESIGN.md
+│   ├── RULES.md
+│   ├── TASKS.md
+│   └── MEMORY.md
 ├── frontend/
 │   ├── index.html
+│   ├── login.html
+│   ├── register.html
+│   ├── admin/
+│   ├── manager/
+│   ├── stakeholder/
+│   ├── tourist/
 │   ├── css/
-│   │   └── style.css
 │   ├── js/
-│   │   └── main.js
 │   └── assets/
-│       ├── images/
-│       └── icons/
-├── backend/
-├── database/
-└── README.md
+└── backend/
+    ├── app/
+    ├── alembic/
+    ├── tests/
+    └── requirements.txt
 ```
 
 ---

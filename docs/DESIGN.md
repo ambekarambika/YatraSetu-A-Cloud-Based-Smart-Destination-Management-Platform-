@@ -36,7 +36,7 @@ The landing page uses:
 
 ### Registration — Frozen/Approved
 - matching visual language,
-- Tourist / Destination Manager / Stakeholder role selection,
+- Tourist / Tourism Stakeholder self-registration role selection (Destination Manager and Administrator accounts require administrative provisioning),
 - password strength meter,
 - validation.
 

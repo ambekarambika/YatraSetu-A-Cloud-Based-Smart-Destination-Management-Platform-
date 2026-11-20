@@ -170,7 +170,7 @@ This file records decisions that should not be silently reversed.
 
 **Implementation Details:**
 1. **Quantity & Coverage:** Exactly 80 authentic destination information videos seeded (10 entries per destination for all 8 supported destinations: Maharashtra, Kerala, Kashmir, Rajasthan, Goa, Tamil Nadu, Uttarakhand, and Assam). Each record adheres to the ~30-second duration standard.
-2. **Prototype Transparency & Media Honesty:** Records are explicitly tagged with `is_verified_asset: false` and rendered with a `Prototype Metadata (~30s)` badge alongside a top disclaimer banner. Simulated streaming references (`https://assets.yatrasetu.org/media/videos/prototype/...`) are used without fabricated asset claims.
+2. **Prototype Transparency & Media Honesty:** Records are explicitly tagged with `is_verified_asset: false` and rendered with a `Prototype Metadata (~30s)` badge alongside a top disclaimer banner. Simulated streaming references (`https://example.com/media/videos/prototype/...`) are used without fabricated asset claims.
 3. **Manager Role Authorization & Jurisdiction:** Destination Managers have exclusive management permissions (Browse, Add, Edit, Publish/Unpublish toggle, Delete with confirmation). Territorial jurisdiction is enforced: Maharashtra Destination Manager (`Rajesh Patil`) holds full management rights within Maharashtra; records outside jurisdiction are view-only.
 4. **Video Preview Player:** A dedicated modal (`#videoPlayerModal`) provides a 16:9 simulated player canvas, metadata overview, and rapid edit actions for authorized managers.
 5. **Form Validation:** The Add/Edit modal (`#videoModal`) validates title length (>= 3 chars), description length (>= 10 chars), and hosted URL format before allowing entries to be saved.
@@ -204,7 +204,7 @@ This file records decisions that should not be silently reversed.
 **Key Decisions & Architectural Enforcements:**
 1. **Catalog Mapping Integrity:** Videos are strictly mapped to the actual destination covered by their content (e.g. Tadoba videos are assigned to `tadoba`, Mumbai videos to `mumbai`, state-level overviews to `maharashtra-state`, and Raigad videos to `raigad-fort`). No video is assigned to Rajgad, Ajanta, or Ellora merely because that slot existed.
 2. **Three-Tier Verification Data Model:**
-   - `official_source`: Verified external video accessible from an official government tourism authority (e.g. Maharashtra Tourism, Incredible India, Kerala Tourism, UTDB, ATDC).
+   - `official_source` (external regional media): Verified external promotional video published by regional tourism departments or tourism promotion campaigns (e.g. Maharashtra Tourism, Incredible India, Kerala Tourism, UTDB, ATDC).
    - `verified_media`: Confirmed accessible video from an identified independent guide or creator channel (e.g. Traveller Rishabh, Harsh kharole, Travel Blessings).
    - `prototype_metadata`: Illustrative record without confirmed playable media, strictly maintained as `Draft`.
 3. **Strict Publication Integrity:**
@@ -288,7 +288,7 @@ This file records decisions that should not be silently reversed.
 
 **Key Decisions & Architectural Enforcements:**
 1. **Canonical Manager Seed & Storage Harmonization:**
-   - Unified default seed profile across `manager-data.js`, `admin.js`, and `auth.js` to `usr-mgr-01` (Rajesh Patil, `manager.maharashtra@yatrasetu.in`, `State Manager`, `Maharashtra (All Destinations)`).
+   - Unified default seed profile across `manager-data.js`, `admin.js`, and `auth.js` to `usr-mgr-01` (Rajesh Patil, `manager.maharashtra@yatrasetu.in` [subsequently updated to `manager.maharashtra@gmail.com` during academic cleanup], `State Manager`, `Maharashtra (All Destinations)`).
    - In `AdminStore.syncWithManagerData` and `AdminStore.reassignManagerAuthority`, any manager jurisdiction reassignment dynamically synchronizes `yatrasetu_manager_profile` (in both `localStorage` and `sessionStorage`) as well as the active session keys (`yatrasetu_active_state_id`, `yatrasetu_state_theme`, `yatrasetu_active_dest_id`, `yatrasetu_manager_scope`, `yatrasetu_manager_access_level`).
 2. **Manager Workspace Context Integration (`manager-core.js` & `manager-views.js`):**
    - Implemented `syncActiveManagerProfile()` to retrieve the live manager identity from storage and synchronize `YatraSetuManagerContext` without requiring manual logout/login.
@@ -387,9 +387,9 @@ This file records decisions that should not be silently reversed.
    - In `frontend/js/manager-views.js` (`openVideoPlayerModal`), replaced non-existent `window.YatraSetuManagerCore.syncActiveManagerProfile` with standard global `syncActiveManagerProfile()` and store fallback `window.YatraSetuManagerStore.syncActiveManagerProfile`.
    - Ensures video player modals correctly evaluate real-time authority scope across reassigned or state-level managers without relying on stale static fallback seeds.
 3. **Demo Credentials Alignment (SUSP-01):**
-   - Confirmed genuine mismatch: `auth.js` demo helper filled `stakeholder.local@yatrasetu.in`, whereas `admin.js`, `manager-data.js`, and `stakeholder-data.js` seed Suresh Deshmukh (`sh-101`) with `sahyadri.guides@gmail.com`.
+   - Confirmed genuine mismatch: `auth.js` demo helper filled legacy address `stakeholder.local@yatrasetu.in`, whereas `admin.js`, `manager-data.js`, and `stakeholder-data.js` seed Suresh Deshmukh (`sh-101`) with `sahyadri.guides@gmail.com`.
    - Aligned `demoAccounts.stakeholder.email` to `sahyadri.guides@gmail.com` in `auth.js`.
-   - Preserved backward-compatible alias in `initLoginForm` so `stakeholder.local@yatrasetu.in` maps to `sh-101`.
+   - Preserved backward-compatible alias in `initLoginForm` so `stakeholder.local@yatrasetu.in` maps to `sh-101`. *(Migration Note: All legacy `@yatrasetu.in` demo addresses across active files were subsequently replaced with Gmail-format demo addresses during the 2026-11 academic trust and safety cleanup).*
    - Verified that clicking "⚡ Fill Demo Credentials" on `login.html` logs in as Suresh Deshmukh (`sh-101`), properly synchronizing name, user ID, and destination context.
 4. **Tourist Filter Concurrency Debouncing Deferral (SUSP-02):**
    - Deferred per explicit instruction: 40 static destination cards filter synchronously in <4ms without measurable UI frame drops.
@@ -1001,7 +1001,7 @@ This file records decisions that should not be silently reversed.
 **Key Decisions & Architectural Enforcements:**
 1. **Administrative Authentication & Public Registration Guard:**
    - Public registration for `admin` and `manager` roles remains strictly forbidden in `backend/app/api/v1/endpoints/auth.py` and `frontend/js/auth.js`. Admin accounts are provisioned via secure infrastructure only.
-   - Test admin fixture provisioned on isolated test branch: `admin.governance@yatrasetu.in` (`Rajesh Verma`, UUID `dae678c4-967a-4b3d-8cf8-3e48503f41d4`), credentials securely stored in gitignored file.
+   - Test admin fixture provisioned on isolated test branch: `admin.governance@yatrasetu.in` [subsequently updated to `admin.governance@gmail.com` in academic cleanup] (`Rajesh Verma`, UUID `dae678c4-967a-4b3d-8cf8-3e48503f41d4`), credentials securely stored in gitignored file.
    - Enforced route protection in `frontend/js/admin.js` (`checkAdminAuth`): requires active `sessionStorage.getItem('yatrasetu_role') === 'admin'` and a valid cryptographic JWT access token (`hasToken()`). Unauthenticated access immediately redirects to `../login.html`.
 2. **Backend API Endpoints (`backend/app/api/v1/endpoints/admin.py`):**
    - Implemented strict RBAC (`require_admin`) dependency across all **11 registered administrative endpoints**:

@@ -57,7 +57,7 @@ State
 Destination
 ```
 
-Main/Government Manager:
+State Destination Manager:
 - State-wide access
 - Can manage destinations within the assigned state
 
