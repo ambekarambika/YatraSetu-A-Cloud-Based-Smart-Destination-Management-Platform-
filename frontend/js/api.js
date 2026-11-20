@@ -97,6 +97,13 @@
         }
 
         /**
+         * Alias for session token check used across role controllers
+         */
+        hasToken() {
+            return !!this.getAccessToken();
+        }
+
+        /**
          * Synchronize backend user model with frontend session state
          */
         saveUserSession(user) {

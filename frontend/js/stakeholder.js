@@ -26,6 +26,13 @@ function checkStakeholderAuth() {
     return true;
 }
 
+function hasLiveApiToken() {
+    if (typeof window === 'undefined' || !window.YatraSetuApi) return false;
+    if (typeof window.YatraSetuApi.hasToken === 'function') return window.YatraSetuApi.hasToken();
+    if (typeof window.YatraSetuApi.isAuthenticated === 'function') return window.YatraSetuApi.isAuthenticated();
+    return !!(sessionStorage.getItem('yatrasetu_access_token') || sessionStorage.getItem('yatrasetu_token'));
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     if (!checkStakeholderAuth()) return;
     await initStakeholderContext();
@@ -46,7 +53,7 @@ async function initStakeholderContext() {
     const managerData = window.YatraSetuManagerData || {};
 
     // Live Backend Profile Integration
-    if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+    if (hasLiveApiToken()) {
         try {
             const apiRes = await window.YatraSetuApi.getStakeholderProfile();
             if (apiRes) {
@@ -424,7 +431,7 @@ async function initStakeholderOverview() {
     let events = [];
     let suggestions = [];
 
-    if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+    if (hasLiveApiToken()) {
         try {
             const updates = await window.YatraSetuApi.getStakeholderDestinationUpdates();
             const advisoriesList = Array.isArray(updates) ? updates : (updates?.advisories || []);
@@ -744,7 +751,7 @@ function initStakeholderProfilePage() {
         profile.description = inputDesc ? inputDesc.value.trim() : '';
 
         // Live Backend Profile Integration
-        if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+        if (hasLiveApiToken()) {
             try {
                 const contactInfo = {
                     phone: profile.phone,
@@ -1030,7 +1037,7 @@ async function initStakeholderDestinationUpdates() {
     let rawAttractions = [];
     let rawEvents = [];
 
-    if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+    if (hasLiveApiToken()) {
         try {
             const updates = await window.YatraSetuApi.getStakeholderDestinationUpdates();
             const advisoriesList = Array.isArray(updates) ? updates : (updates?.advisories || []);
@@ -1556,7 +1563,7 @@ async function initStakeholderConnectionsReviews() {
 
         let suggestions = [];
 
-        if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+        if (hasLiveApiToken()) {
             try {
                 const res = await window.YatraSetuApi.getStakeholderSuggestions();
                 if (Array.isArray(res)) suggestions = res;
@@ -1662,7 +1669,7 @@ async function initStakeholderConnectionsReviews() {
     function renderReviewsFeed() {
         if (!touristReviewsFeed) return;
 
-        if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+        if (hasLiveApiToken()) {
             touristReviewsFeed.innerHTML = `
                 <div style="padding: 2.5rem 1.5rem; text-align: center; color: var(--sh-text-muted); background: var(--sh-card-bg); border: 1px solid var(--sh-card-border); border-radius: 12px;">
                     <div style="font-size: 2rem; margin-bottom: 0.5rem;">ℹ️</div>
@@ -1768,7 +1775,7 @@ async function initStakeholderConnectionsReviews() {
                 return;
             }
 
-            if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+            if (hasLiveApiToken()) {
                 try {
                     await window.YatraSetuApi.createStakeholderSuggestion({
                         topic: topicInput.value.trim(),
@@ -1902,7 +1909,7 @@ async function initStakeholderMediaListings() {
         if (!mediaGrid) return;
 
         let allMedia = [];
-        if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+        if (hasLiveApiToken()) {
             try {
                 const res = await window.YatraSetuApi.getStakeholderMedia();
                 if (Array.isArray(res)) {
@@ -2200,7 +2207,7 @@ async function initStakeholderMediaListings() {
             const fileSizeStr = `${(currentSelectedFile.size / (1024 * 1024)).toFixed(1)} MB`;
 
             // Live Backend Media Integration
-            if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+            if (hasLiveApiToken()) {
                 const persistentMediaUrl = (currentPreviewUrl && !currentPreviewUrl.startsWith('blob:'))
                     ? currentPreviewUrl
                     : 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&auto=format&fit=crop&q=80';
@@ -2384,7 +2391,7 @@ async function initStakeholderMediaListings() {
             const id = deleteMediaBtn.getAttribute('data-id');
 
             // Live Backend Delete
-            if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+            if (hasLiveApiToken()) {
                 openDeleteConfirmation(
                     `Are you sure you want to remove this media item? This action will permanently remove it from your media catalog.`,
                     async () => {
@@ -2544,7 +2551,7 @@ async function initStakeholderMediaListings() {
         if (!listingsGrid) return;
 
         let listings = [];
-        if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+        if (hasLiveApiToken()) {
             try {
                 const res = await window.YatraSetuApi.getStakeholderOfferings();
                 if (Array.isArray(res)) {
@@ -2653,7 +2660,7 @@ async function initStakeholderMediaListings() {
                 const lst = (listings || []).find(l => l.id === id);
                 if (!lst) return;
 
-                if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+                if (hasLiveApiToken()) {
                     openDeleteConfirmation(`Are you sure you want to remove listing "${lst.name}"?`, async () => {
                         try {
                             await window.YatraSetuApi.deleteStakeholderOffering(id);
@@ -2749,7 +2756,7 @@ async function initStakeholderMediaListings() {
             }
 
             // Live Backend Offering Creation
-            if (window.YatraSetuApi && window.YatraSetuApi.hasToken()) {
+            if (hasLiveApiToken()) {
                 try {
                     const priceRaw = listingFormPrice ? listingFormPrice.value.replace(/[^0-9.]/g, '') : '';
                     const numericPrice = parseFloat(priceRaw);
